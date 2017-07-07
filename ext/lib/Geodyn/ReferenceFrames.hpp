@@ -310,6 +310,7 @@ namespace gpstk
       static const double DJC;
 
          /// Arcseconds to radians 
+
       static const double DAS2R;
 
          /// seconds to radians

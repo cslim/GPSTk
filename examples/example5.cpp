@@ -278,7 +278,7 @@ void example5::process()
             // enough data (4 SV at least) is available
          if( obsC1.getData(rData, indexC1) < 4 )
          {
-               // The former position will not be valid next time
+            // The former position will not be valid next time
             useFormerPos = false;
             continue;
          }

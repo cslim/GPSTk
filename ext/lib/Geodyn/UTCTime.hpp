@@ -81,14 +81,12 @@ namespace gpstk
 
       UTCTime(CommonTime& utc) : CommonTime(utc)
       {TimeSystem(UTC); }
+      UTCTime::UTCTime(int year, int month, int day, int hour, int minute, double second)
+          : CommonTime(static_cast<CommonTime>(CivilTime(year, month, day, hour, minute, second, TimeSystem::UTC))){};
 
-      UTCTime(int year,int month,int day,int hour,int minute,double second)
-          {CivilTime(year, month, day, hour, minute, second);}
-      
-
-      UTCTime(int year,int doy,double sod)
-          {YDSTime(year, doy, sod);}
-      
+      UTCTime::UTCTime(int year, int doy, double sod)
+          : CommonTime( static_cast<CommonTime>( YDSTime(year, doy, sod, TimeSystem::UTC)))
+      { };
 
       UTCTime(double mjdUTC)
          {set(mjdUTC, 0,TimeSystem::UTC);}

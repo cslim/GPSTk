@@ -397,27 +397,24 @@ namespace gpstk
 
       Vector<double> oldState = y;
 
-      double dt = stepSize;
+      double dt =( tf<t )?-stepSize:stepSize;
 
       double tt = t;
-      while(t <= tf)
+
+      while (std::abs(tf - tt) > DBL_EPSILON)
       {
-         if((tt + dt) >= tf)
-         {
-            dt = tf - tt;
-            break;
-         }
-            
-         rkfs78(tt,oldState,dt,peom,yout,yerr);
-         
-         oldState = yout;
 
-         tt += dt;
+          if (std::abs(tf - tt) < std::abs(dt))
+          {
+              dt = tf - tt;
+          }
+
+          rkfs78(tt, oldState, dt, peom, yout, yerr);
+
+          oldState = yout;
+
+          tt += dt;
       }
-
-      dt=tf-tt;
-
-      rkfs78(tt,oldState,dt,peom,yout,yerr);
 
       return yout;
 

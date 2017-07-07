@@ -42,7 +42,7 @@
 
 #include "SolverPPP.hpp"
 #include "MatrixFunctors.hpp"
-
+#include<iostream>
 
 namespace gpstk
 {
@@ -82,10 +82,11 @@ namespace gpstk
       // Initializing method.
    void SolverPPP::Init(void)
    {
-
+       //default 6e-10
+       double Qpr(6e-10);
          // Set qdot value for default random walk stochastic model
-      rwalkModel.setQprime(3e-8);
-
+      rwalkModel.setQprime(Qpr);
+      std::cout << Qpr<<" " <<rwalkModel.getQ() << "\n";
          // Pointer to default stochastic model for troposphere (random walk)
       pTropoStoModel = &rwalkModel;
 
@@ -98,7 +99,7 @@ namespace gpstk
 
          // Pointer to default receiver clock stochastic model (white noise)
       pClockStoModel = &whitenoiseModel;
-
+      
          // Pointer to stochastic model for phase biases
       pBiasStoModel  = &biasModel;
 

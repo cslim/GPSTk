@@ -106,7 +106,7 @@ namespace gpstk
 
 
          /// this is the real one to do computation
-      virtual void doCompute(UTCTime t, EarthBody& bRef, Spacecraft& sc)
+      virtual void doCompute(Epoch t, EarthBody& bRef, Spacecraft& sc)
       {
          a.resize(3,0.0);
          da_dr.resize(3,3,0.0);
@@ -180,11 +180,11 @@ namespace gpstk
       {
             /* A Matrix
             |                        |
-            | 0         I      0      |
+            | 0         I      0     |
             |                        |
-         A =| da_dr      da_dv   da_dp  |
+         A =| da_dr    da_dv   da_dp |
             |                        |
-            | 0         0      0      |
+            | 0         0      0     |
             |                        |
             */
 

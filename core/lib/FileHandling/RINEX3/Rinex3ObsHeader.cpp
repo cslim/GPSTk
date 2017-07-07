@@ -1659,7 +1659,14 @@ namespace gpstk
 
          // is the header valid?
       unsigned long allValid;
-      if     (version <  3  )  allValid = allValid2;
+
+      if (version < 3)
+      {
+          if (version == 2.20)
+              allValid = allValid220;
+          else
+              allValid = allValid2;
+      }
       else if(version == 3.0)  allValid = allValid30;
       else if(version == 3.01) allValid = allValid301;
       else if(version == 3.02) allValid = allValid302;
@@ -1669,8 +1676,8 @@ namespace gpstk
                          asString(version));
          GPSTK_THROW(e);
       }
-
-      if((valid & allValid) != allValid)
+      auto val = (valid & allValid);
+      if((val) != allValid)
       {
          FFStreamError e("Incomplete or invalid header");
          GPSTK_THROW(e);

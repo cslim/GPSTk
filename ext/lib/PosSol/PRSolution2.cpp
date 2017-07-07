@@ -226,6 +226,9 @@ using namespace gpstk;
 
 namespace gpstk
 {
+    bool PRSolution2::isERCorr = true;
+
+
    int PRSolution2::RAIMCompute(const CommonTime& Tr,
                                vector<SatID>& Satellite,
                                const vector<double>& Pseudorange,
@@ -515,7 +518,7 @@ namespace gpstk
                                              const vector<double>& Pseudorange,
                                              const XvtStore<SatID>& Eph,
                                              Matrix<double>& SVP,
-                                             ostream *pDebugStream)
+                                             ostream *pDebugStream )
       throw()
    {
       int i,j,nsvs,N=Satellite.size();
@@ -772,13 +775,14 @@ namespace gpstk
                else
                   rho = RSS(SVP(i,0)-Sol(0), SVP(i,1)-Sol(1), SVP(i,2)-Sol(2))
                             / ell.c();
-                            
-                  // correct for earth rotation
-               wt = ell.angVelocity()*rho;             // radians
-               svxyz[0] =  ::cos(wt)*SVP(i,0) + ::sin(wt)*SVP(i,1);
-               svxyz[1] = -::sin(wt)*SVP(i,0) + ::cos(wt)*SVP(i,1);
-               svxyz[2] = SVP(i,2);
-               
+
+                   // correct for earth rotation
+               wt = isERCorr ? ell.angVelocity()*rho : 0;             // radians
+
+                   svxyz[0] = ::cos(wt)*SVP(i, 0) + ::sin(wt)*SVP(i, 1);
+                   svxyz[1] = -::sin(wt)*SVP(i, 0) + ::cos(wt)*SVP(i, 1);
+                   svxyz[2] = SVP(i, 2);
+
                   // corrected pseudorange (m)
                CRange(n) = SVP(i,3);
 

@@ -50,7 +50,7 @@ namespace gpstk
    void ConfDataReader::loadData(void)
       throw(ConfigurationException)
    {
-
+       
          // By default, section name is "DEFAULT"
       std::string sectionName("DEFAULT");
 
@@ -253,7 +253,6 @@ namespace gpstk
          }
 
       } // End of 'while(1)'
-
    }  // End of method 'ConfDataReader::loadData()'
 
 
@@ -841,6 +840,7 @@ namespace gpstk
       // Method to get the name of each section in order.
    string ConfDataReader::getEachSection(void)
    {
+     // itCurrentSection = confData.begin();
 
       if ( itCurrentSection != confData.end() )
       {

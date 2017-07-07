@@ -36,7 +36,7 @@
 
 /**
  * @file CNavGGTO.hpp
- * Designed to support loading CNAV GGTO data
+ * Designed to support loading CNAV GGTO data+
  * (Message Type 35)
  */
 

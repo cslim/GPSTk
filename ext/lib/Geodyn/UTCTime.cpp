@@ -49,8 +49,9 @@ namespace gpstk
 
    using namespace std;
 
+
       // Seconds per day.
-   const double UTCTime::DAY_TO_SECOND = 86400.0; 
+   const double UTCTime::DAY_TO_SECOND = 86400.0;
       
       // Constant used for conversion to Terrestrial Time.
    const double UTCTime::TT_TAI = 32.184;  

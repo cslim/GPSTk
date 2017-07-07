@@ -335,7 +335,13 @@ namespace gpstk
          useSP3clock = false;
          clearClock();
       }
-
+      /** Provide the information about source of clock data in 
+      * innternal storage
+      */
+      bool isUseSP3ClockData(void) const throw()
+      {
+          return useSP3clock;
+      }
          /** Choose to load the clock data tables from SP3 files (this
          * is the default).  This will clear the clock store; if the
          * position store has already been loaded it should also be
@@ -433,7 +439,7 @@ namespace gpstk
 
 
          /// Get current interpolation order for the position table
-      unsigned int getPositionInterpOrder(void) throw()
+      unsigned int getPositionInterpOrder(void) const throw()
       { return posStore.getInterpolationOrder(); }
 
          /** Set the interpolation order for the position table; it is

@@ -125,6 +125,7 @@ namespace gpstk
 
          /// @name RINEX Observation Header Formatting Strings
          //@{
+
       static const std::string versionString;         ///< "RINEX VERSION / TYPE"
       static const std::string runByString;           ///< "PGM / RUN BY / DATE"
       static const std::string commentString;         ///< "COMMENT"

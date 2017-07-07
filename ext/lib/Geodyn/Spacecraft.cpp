@@ -278,7 +278,7 @@ namespace gpstk
          /* Transition Matrix
             |                  |
             | dr_dr0   dr_dv0  |
-            phi=|                  |
+        phi=|                  |
             | dv_dr0   dv_dv0  |
             |                  |
          */
@@ -336,7 +336,7 @@ namespace gpstk
          /* Transition Matrix
             |        |
             | dr_dp0 |
-            s = |        |
+        s = |        |
             | dv_dp0 |
             |        |
          */

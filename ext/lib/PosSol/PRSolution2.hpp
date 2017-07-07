@@ -106,6 +106,8 @@ namespace gpstk
       bool isValid()
          const throw() { return Valid; }
 
+      //Is Apply coorection for Earth rotation 
+      static bool isERCorr ;
       // input:
 
       /// RMS limit - either residual of fit or distance (see ResidualCriterion).

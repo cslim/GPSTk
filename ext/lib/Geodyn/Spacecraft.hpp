@@ -47,8 +47,7 @@
 #include <string>
 #include "Vector.hpp"
 #include "Matrix.hpp"
-#include "UTCTime.hpp"
-
+#include"Epoch.hpp"
 namespace gpstk
 {
 
@@ -165,7 +164,7 @@ namespace gpstk
       std::string scName;
       
          /// Object to hold epoch in UTC
-      UTCTime utc;
+      Epoch utc;
 
          /// state vector     6*n + 42
       Vector<double> r;         // 3 Position

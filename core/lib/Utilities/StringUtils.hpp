@@ -2122,7 +2122,7 @@ namespace gpstk
 		        mac = StringUtils::replaceAll(mac, rep.substr(0,1), rep.substr(1));
 
 		        char buffer[1024];
-		        sprintf(buffer, mac.c_str(), to);
+		        sprintf_s(buffer, mac.c_str(), to);
 
 		        rv.replace(m.position(), m.length(), std::string(buffer));
 	        }
@@ -2812,6 +2812,7 @@ namespace gpstk
             std::string rv;
             size_t len = aStr.length();
             rv.reserve(len);
+
 
             for (int i = 0; i < len; i++)
             {

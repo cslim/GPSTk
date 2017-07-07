@@ -195,7 +195,7 @@ namespace gpstk
           * keep ordered as strings above */
       enum validBits
       {
-         validVersion           =        0x1, ///< RINEX VERSION / TYPE
+         validVersion           =        0x1, ///< RINEX VERSION / TYPE   
          validRunBy             =        0x2, ///< PGM / RUN BY / DATE
          validComment           =        0x4, ///< COMMENT
          validMarkerName        =        0x8, ///< MARKER NAME
@@ -232,7 +232,8 @@ namespace gpstk
    
             /// This mask is for all required valid fields - RINEX 2
          allValid2              = 0x001207CB,
-
+         /// This mask is for all required valid fields - RINEX 2.20
+         allValid220            = 0x001209CB,
             /// RINEX 3.0 for moving receivers -- make default
          allValid30             = 0x001205CB,
 

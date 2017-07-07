@@ -73,7 +73,7 @@ namespace gpstk
       {
          (*it)->doCompute(utc,bref,sc);
 
-         a      += (*it)->getAccel();
+         a       += (*it)->getAccel();
          da_dr   += (*it)->partialR();
          da_dv   += (*it)->partialV();
             //da_dp   += (*it)->partialP();
@@ -114,24 +114,24 @@ namespace gpstk
       }  
 
          /* Transition Matrix (6+np)*(6+np)
-            |                          |
+            |                           |
             | dr_dr0   dr_dv0   dr_dp0  |
-            |                          |
-            phi= | dv_dr0   dv_dv0   dv_dp0  |
-            |                          |
-            | 0         0          I      |
-            |                          |
+            |                           |
+       phi= | dv_dr0   dv_dv0   dv_dp0  |
+            |                           |
+            | 0         0          I    |
+            |                           |
          */
       Matrix<double> phi = sc.getTransitionMatrix();
 
          /* A Matrix (6+np)*(6+np)
-            |                       |
-            | 0         I      0      |
-            |                       |
-            A = | da_dr      da_dv   da_dp  |
-            |                       |
-            | 0         0      0      |
-            |                       |
+            |                           |
+            | 0         I      0        |
+            |                           |
+        A = | da_dr      da_dv   da_dp  |
+            |                           |
+            | 0         0      0        |
+            |                           |
          */
       Matrix<double> A = getAMatrix();
       
@@ -139,7 +139,7 @@ namespace gpstk
             |                          |
             | dv_dr0   dv_dv0   dv_dp0 |
             |                          |
-            dphi = | da_dr0   da_dv0   da_dp0 |
+     dphi = | da_dr0   da_dv0   da_dp0 |
             |                          |
             | 0         0         0    |
             |                          |

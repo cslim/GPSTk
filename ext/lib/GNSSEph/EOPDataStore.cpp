@@ -56,7 +56,7 @@ namespace gpstk
    {
       if(!(utc.getTimeSystem()==TimeSystem::UTC)) throw Exception();
 
-      std::vector<double> data(5,0.0);
+      std::vector<double> data(7,0.0);
       
       data[0] = d.xp;
       data[1] = d.yp;
@@ -64,6 +64,9 @@ namespace gpstk
       
       data[3] = d.dPsi;
       data[4] = d.dEps;
+
+	  data[5] = d.dX;
+	  data[6] = d.dY;
 
       addData(utc, data);
 
@@ -77,7 +80,7 @@ namespace gpstk
 	  
       std::vector<double> data = getData(utc);
 
-      return EOPData(data[0],data[1],data[2],data[3],data[4]);
+	  return EOPData(data[0], data[1], data[2], data[3], data[4], data[5], data[6]);
    
    }  // End of method 'EOPDataStore::getEOPData()'
 
@@ -109,17 +112,20 @@ namespace gpstk
          double mjd = StringUtils::asDouble(line.substr(7,8));      
          double xp = StringUtils::asDouble(line.substr(18,9));      // arcseconds
          double yp = StringUtils::asDouble(line.substr(37,9));      // arcseconds
-         double UT1mUTC = StringUtils::asDouble(line.substr(58,10));// arcseconds
+         double UT1mUTC = StringUtils::asDouble(line.substr(58,10));// time seconds
          
-         double dPsi(0.0);
-         double dEps(0.0);    
-         if(line.size()>=185)
-         {
-            dPsi = StringUtils::asDouble(line.substr(165,10))/1000.0;   //
-            dEps = StringUtils::asDouble(line.substr(175,10))/1000.0;   // 
-         }
+         double dPsi(0.0), dEps(0.0),dX(0.0), dY(0.0);
+            
+		 if (line.size() >= 185)
+		 {
+			 dX = StringUtils::asDouble(line.substr(97, 9)) / 1000.0;   //
+			 dY = StringUtils::asDouble(line.substr(116, 9)) / 1000.0;   //
+			 dPsi = StringUtils::asDouble(line.substr(165, 10)) / 1000.0;   //
+			 dEps = StringUtils::asDouble(line.substr(175, 10)) / 1000.0;   // 
+
+		 }
          
-         addEOPData(MJD(mjd,TimeSystem::UTC), EOPData(xp,yp,UT1mUTC,dPsi,dEps));
+         addEOPData(MJD(mjd,TimeSystem::UTC), EOPData(xp,yp,UT1mUTC,dPsi,dEps,dX,dY));
       };
       inpf.close();
 
@@ -255,15 +261,34 @@ namespace gpstk
 
       fstk.close();
    }
+   /** Add EOPs to the store via EOPSouces format provider file.
+
+   */
+   void EOPDataStore:: loadFile(const std::string & file, EOPSource source)
+       throw(FileMissingException, InvalidRequest)
+   {
+       switch (source)
+       {
+       case EOPSource::IERS: loadIERSFile(file);
+           break;
+       case EOPSource::IGS: loadIGSFile(file);
+           break;
+       case EOPSource::STK: loadSTKFile(file);
+           break;
+       default:
+           throw InvalidRequest("Unknowh EOP file format");
+       }
+   }
 
    ostream& operator<<(std::ostream& os, const EOPDataStore::EOPData& d)
    {
-      os << " " << setw(18) << setprecision(8) << d.xp
-         << " " << setw(18) << setprecision(8) << d.yp
-         << " " << setw(18) << setprecision(8) << d.UT1mUTC
-         << " " << setw(18) << setprecision(8) << d.dPsi
-         << " " << setw(18) << setprecision(8) << d.dEps;
-
+	   os << " " << setw(18) << setprecision(8) << d.xp
+		   << " " << setw(18) << setprecision(8) << d.yp
+		   << " " << setw(18) << setprecision(8) << d.UT1mUTC
+		   << " " << setw(18) << setprecision(8) << d.dPsi
+		   << " " << setw(18) << setprecision(8) << d.dEps
+		   << " " << setw(18) << setprecision(8) << d.dX
+		   << " " << setw(18) << setprecision(8) << d.dY;
 
       return os;
    }

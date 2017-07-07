@@ -150,7 +150,7 @@ int main(void)
 
 
       // Create the input observation file stream
-   RinexObsStream rin("onsa2240.05o");
+   RinexObsStream rin("197-1360.16o");
 
 
       // Declare a "SP3EphemerisStore" object to handle precise ephemeris
@@ -169,18 +169,18 @@ int main(void)
 //   SP3EphList.enableIntervalCheck();
 
       // Load all the SP3 ephemerides files
-   SP3EphList.loadFile("igs13354.sp3");
-   SP3EphList.loadFile("igs13355.sp3");
-   SP3EphList.loadFile("igs13356.sp3");
+   SP3EphList.loadFile("COD18966.EPH");
+   SP3EphList.loadFile("COD18970.EPH");
+   SP3EphList.loadFile("COD18971.EPH");
 
 
       // ONSA station nominal position
-   Position nominalPos(3370658.5419, 711877.1496, 5349786.9542);
+   Position nominalPos(2850708.3554,  2199442.6310,  5247201.4250);
 
 
       // Declare a NeillTropModel object, setting the defaults
    NeillTropModel neillTM( nominalPos.getAltitude(),
-                           nominalPos.getGeodeticLatitude(), 224);
+                           nominalPos.getGeodeticLatitude(), 136);
 
 
       // This is the GNSS data structure that will hold all the
@@ -217,20 +217,20 @@ int main(void)
    SolidTides  solid;
 
       // Ocean loading model
-   OceanLoading ocean("OCEAN-GOT00.dat");
+   OceanLoading ocean("JUN2016.BLQ");
 
       // Numerical values are x,y pole displacements for Aug/12/2005 (arcsec).
    PoleTides   pole(0.02094, 0.42728);
 
 
       // Vector from ONSA antenna ARP to L1 phase center [UEN] (AOAD/M_B)
-   Triple offsetL1(0.0780, 0.000, 0.000);   // Units in meters
+   Triple offsetL1(216.65 / 1000.0, 0.000, 0.000);   // Units in meters
 
       // Vector from ONSA antenna ARP to L2 phase center [UEN] (AOAD/M_B)
-   Triple offsetL2(0.096, 0.0000, 0.000);    // Units in meters
+   Triple offsetL2(226.05 / 1000.0, 0.0000, 0.000);  // Units in meters
 
       // Vector from monument to antenna ARP [UEN] for ONSA station
-   Triple offsetARP(0.9950, 0.0, 0.0);    // Units in meters
+   Triple offsetARP(0.0, 0.0, 0.0);    // Units in meters
 
 
       // Declare an object to correct observables to monument
