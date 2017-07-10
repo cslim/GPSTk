@@ -49,7 +49,7 @@ namespace gpstk
    std::map< TypeID::ValueType, std::string > TypeID::tStrings;
 
 
-   TypeID::Initializer TypeIDsingleton;
+   TypeID::Initializer  TypeID::TypeIDsingleton;
 
       // It should be initialize by false, NEVER CHANGE IT!!!
    bool TypeID::bUserTypeIDRegistered = false;
