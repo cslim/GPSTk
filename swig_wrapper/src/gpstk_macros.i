@@ -19,7 +19,7 @@
 }
 %enddef
 
-EQUALS_DUMMY(SatID)
+//EQUALS_DUMMY(SatID)
 EQUALS_DUMMY(RinexDatum)
 EQUALS_DUMMY(RinexObsType)
 EQUALS_DUMMY(RinexObsID)

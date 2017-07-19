@@ -5,5 +5,10 @@
       gpstk::SatID helper;
       return new gpstk::SatID(p, gpstk::SatID::systemGPS);
    }
+
+   gpstk::SatID::operator==(const gpstk::SatID& right) const
+   {
+    return (((*($self)).system == right.system) && (((*($self)).id == right.id)); 
+   }
 };
 

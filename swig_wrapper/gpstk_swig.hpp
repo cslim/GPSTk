@@ -42,7 +42,6 @@
 #include "ReferenceFrame.hpp"
 #include "EllipsoidModel.hpp"
 #include "Xvt.hpp"
-#include "StringUtils.hpp"
 #include "Position.hpp"
 #include "Xv.hpp"
 #include "convhelp.hpp"

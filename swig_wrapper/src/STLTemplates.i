@@ -61,6 +61,7 @@ SWIG_STD_VECTOR_ENHANCED(Rinex3ObsData)
 // AKA ObsEpochMap
 %template(ObsEpochMap) std::map<gpstk::CommonTime, gpstk::ObsEpoch>;
 
+
 // These are needed to properly interpret an ObsID instance
 %template(map_ObservationType_string) std::map<enum gpstk::ObsID::ObservationType, std::string>;
 %template(map_CarrierBand_string) std::map<enum gpstk::ObsID::CarrierBand, std::string>;

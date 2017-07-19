@@ -16,30 +16,36 @@ using namespace POD;
 int main(int argc, char* argv[])
 {
     // Create the input file stream
-    Rinex3ObsStream rin("drbn083f0.15o");
+    Rinex3ObsStream rin("cng2182a.17o");
 
     // Create the output file stream
-    ofstream rout("drbn083f_.15o", ios::out);
+    ofstream rout("cng2182a_.17o", ios::out);
     gnssRinex  gRin;
     // Read the RINEX header
     Rinex3ObsHeader head;    //RINEX header object
     rin >> head;
    // rout.header = head;
-
+    
    //   rout << head;
-
+    auto obsT = head.obsTypeList;
     // Loop over all data epochs
     Rinex3ObsData data;   //RINEX data object
     while (rin >> data)
     {
-        
-        for (auto &it : data.obs)
+        rout << data.time<<endl;
+        for (auto &ot : obsT)
         {
-            cout << it.first << endl;
-            for (auto &it1 : it.second)
-                cout << it1.asString();
-            cout << endl;
+            for (auto &it : data.obs)
+            {
+                auto val =  data.getObs(it.first, ot, head);
+
+                rout << it.first << " " << it.first.id << " ";
+                //for (auto &it1 : it.second)
+                //    cout << it1.;
+                //cout << endl;
+            }
         }
+        rout << endl;
         /*for (auto &it : gRin.getTypeID())
         {
             cout << it << " ";

@@ -1,4 +1,4 @@
-%module gpstk
+%module swig_wrapper
 %{
    #include "gpstk_swig.hpp"
 	
@@ -335,6 +335,7 @@ RELATIONAL_OPERATORS(SP3SatID)
 RELATIONAL_OPERATORS(TypeID)
 %rename (TypeID_Initializer) gpstk::TypeID::Initializer;
 %include"TypeID.hpp"
+%include"TypeID.i"
 RELATIONAL_OPERATORS(SourceID)
 %include"SourceID.hpp"
 %include"DataHeaders.hpp"
