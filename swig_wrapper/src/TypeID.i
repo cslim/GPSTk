@@ -24,6 +24,21 @@
         return gpstk::TypeID::tStrings.at(gpstk::TypeID::ValueType::Unknown);
       }
     }
+	static gpstk::TypeID::ValueType gpstk::TypeID::Parse(std::string name)
+	{
+	      auto it = gpstk::TypeID::fStrings.find(name);
+
+      if(it != gpstk::TypeID::fStrings.end())
+      {
+         return it->second;
+      }
+      else
+      {
+         InvalidRequest e("There are no  TypeID name as '"
+            + name + "'.");
+         GPSTK_THROW(e);
+      }
+	}
 
 };
 

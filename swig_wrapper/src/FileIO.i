@@ -86,67 +86,6 @@
 }
 %enddef
 
-/*
-%pythoncode {
-def read ## FORMATNAME(fileName, strict=False, filterfunction=lambda x: True):
-    """
-    This reads from a FORMATNAME file and returns a two-element tuple
-    of the header and the sequence of data objects.
-
-    Parameters:
-    -----------
-
-    strict:  if the data object sequence should be strictly evaluated.
-           If it is, it will be a list, otherwise, it will be a generator.
-
-    filterfunction: a function that takes a FORMATNAME Data object
-                    and returns whether it should be included in the
-                    data output. This is similar to using the filter()
-                    function on the output list, but eliminates the extra step.
-    """
-    import os.path
-    if not os.path.isfile(fileName):
-        raise IOError(fileName + ' does not exist.')
-    stream = FORMATNAME ## Stream .in ##FORMATNAME ## Stream (fileName)
-    header = stream.readHeader()
-    def read ## FORMATNAME ## Data (fileName):
-        while True:
-            try:
-               x = stream.readData()
-               if filterfunction(x):
-                  yield x
-            except EndOfFile:
-               FORMATNAME ## Stream._remove(stream)
-               break
-
-    data = read ##FORMATNAME ## Data (fileName)
-    if strict:
-        return (header, list(data))
-    else:
-        return (header, data)
-
-
-def write ## FORMATNAME(fileName, header, data):
-    """
-    Writes a FORMATNAME Header and sequence of FORMATNAME Data objects to a file.
-    Note that this overwrites the file if it already exists.
-
-    Parameters:
-    -----------
-
-    fileName:  the name of the file to write to.
-
-    header:  the FORMATNAME Header object
-
-    data:  the sequence of FORMATNAME Data objects
-    """
-    s = FORMATNAME ## Stream .out ##FORMATNAME ## Stream (fileName)
-    s.writeHeader(header)
-    for d in data:
-        s.writeData(d)
-    FORMATNAME ## Stream ._remove(s)
-*/
-
 STREAM_HELPER(Rinex3Clock)
 STREAM_HELPER(Rinex3Nav)
 STREAM_HELPER(Rinex3Obs)

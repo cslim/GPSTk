@@ -474,7 +474,8 @@ namespace gpstk
 
          /// Map holding type descriptions
       static std::map< ValueType, std::string > tStrings;
-
+         /// Mapping descriptions to ValueType
+      static std::map< std::string, TypeID::ValueType > fStrings;
 
    public:
       class Initializer

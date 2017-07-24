@@ -47,7 +47,7 @@ namespace gpstk
 {
 
    std::map< TypeID::ValueType, std::string > TypeID::tStrings;
-
+   std::map< std::string, TypeID::ValueType > TypeID::fStrings;
 
    TypeID::Initializer  TypeID::TypeIDsingleton;
 
@@ -357,6 +357,11 @@ namespace gpstk
       tStrings[dummy9]     = "dummy9";
       tStrings[Last]       = "Last";
       tStrings[Placeholder]= "Placeholder";
+      
+      fStrings.clear();
+      for (auto &it : tStrings)
+          fStrings[it.second] = it.first;
+
    }
 
 
@@ -608,7 +613,7 @@ namespace gpstk
          else if(roi.band==ObsID::cbL2)
          {
             if(roi.type == ObsID::otRange)
-               return (roi.code == ObsID::tcCA) ? TypeID::C2 : TypeID::P2;
+               return (roi.code == ObsID::tcCA || roi.code == ObsID::tcC2LM) ? TypeID::C2 : TypeID::P2;
 
             if(roi.type == ObsID::otPhase) return TypeID::L2;
             if(roi.type == ObsID::otDoppler) return TypeID::D2;
@@ -639,7 +644,7 @@ namespace gpstk
             if(roi.type == ObsID::otSNR) return TypeID::S1;
          }
          // For L2: C2 P2 L2 D2 S2
-         else if(roi.band == ObsID::cbG1)
+         else if(roi.band == ObsID::cbG2)
          {
             if(roi.type == ObsID::otRange)   // tcGCA or tcGP
                return (roi.code == ObsID::tcGCA) ? TypeID::C2 : TypeID::P2;
