@@ -8,7 +8,7 @@
 #include "Force.h"
 #include"ForceModelData.h"
 
-namespace POD
+namespace pod
 {
 
       /// @ingroup GeoDynamics 

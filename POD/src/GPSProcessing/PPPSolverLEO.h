@@ -17,7 +17,7 @@ using namespace std;
 *
 * This class is based on gpstk::SolverPPP class
 */
-namespace POD
+namespace pod
 {
 
     class PPPSolverLEO : public CodeKalmanSolver

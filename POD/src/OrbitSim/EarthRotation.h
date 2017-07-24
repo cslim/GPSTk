@@ -8,7 +8,7 @@
 using namespace gpstk;
 using namespace std;
 
-namespace POD
+namespace pod
 {
     class EarthRotation
 	{

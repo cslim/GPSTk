@@ -1,7 +1,7 @@
 #include"SphericalHarmonicsModel.h"
 #include"EarthRotation.h"
 
-namespace POD
+namespace pod
 {
     SphericalHarmonicsModel::SphericalHarmonicsModel(const GravityModelData & gData)
         : GravityModel(gData)

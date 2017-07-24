@@ -72,10 +72,10 @@
 
 #include"BasicModel.hpp"
 
-namespace POD
+namespace pod
 {
-    PPPSolution::PPPSolution(ConfDataReader & confReader)
-        :PPPSolutionBase(confReader)
+    PPPSolution::PPPSolution(ConfDataReader & confReader, string dir)
+        :PPPSolutionBase(confReader, dir)
     {
         double xapp(confReader.fetchListValueAsDouble("nominalPosition"));
         double yapp(confReader.fetchListValueAsDouble("nominalPosition"));
@@ -363,7 +363,7 @@ namespace POD
         int precision(4);
 
         ofstream outfile;
-        outfile.open("PPP_sol.out", ios::out);
+        outfile.open(workingDir + "\\" + "PPP_sol.out", ios::out);
 
         // Let's check if we are going to print the model
         bool printmodel(confReader->getValueAsBoolean("printModel"));
@@ -375,7 +375,7 @@ namespace POD
         if (printmodel)
         {
             modelName = confReader->getValue("modelFile");
-            modelfile.open(modelName.c_str(), ios::out);
+            modelfile.open(workingDir + "\\" + modelName.c_str(), ios::out);
         }
 #pragma endregion
 

@@ -16,9 +16,9 @@
 %define SWIG_STD_LIST_MINIMUM(CSTYPE, CTYPE...)
 %typemap(csinterfaces) std::list<CTYPE > "IDisposable, System.Collections.IEnumerable";
 %typemap(cscode) std::list<CTYPE > %{
-  public $csclassname(System.Collections.ICollection c) : this() {
+  public $csclassname(global::System.Collections.ICollection c) : this() {
     if (c == null)
-      throw new ArgumentNullException("c");
+      throw new global::System.ArgumentNullException("c");
     foreach (CSTYPE element in c) {
       this.Add(element);
     }
@@ -64,17 +64,17 @@
 
   public void CopyTo(int index, System.Array array, int arrayIndex, int count) {
     if (array == null)
-      throw new ArgumentNullException("array");
+      throw new global::System.ArgumentNullException("array");
     if (index < 0)
-      throw new ArgumentOutOfRangeException("index", "Value is less than zero");
+      throw new global::System.ArgumentOutOfRangeException("index", "Value is less than zero");
     if (arrayIndex < 0)
-      throw new ArgumentOutOfRangeException("arrayIndex", "Value is less than zero");
+      throw new global::System.ArgumentOutOfRangeException("arrayIndex", "Value is less than zero");
     if (count < 0)
-      throw new ArgumentOutOfRangeException("count", "Value is less than zero");
+      throw new global::System.ArgumentOutOfRangeException("count", "Value is less than zero");
     if (array.Rank > 1)
-      throw new ArgumentException("Multi dimensional array.");
+      throw new global::System.ArgumentException("Multi dimensional array.");
     if (index+count > this.Count || arrayIndex+count > array.Length)
-      throw new ArgumentException("Number of elements to copy is too large.");
+      throw new global::System.ArgumentException("Number of elements to copy is too large.");
     for (int i=0; i<count; i++)
       array.SetValue(getitemcopy(index+i), arrayIndex+i);
   }
@@ -110,11 +110,11 @@
     public CSTYPE Current {
       get {
         if (currentIndex == -1)
-          throw new InvalidOperationException("Enumeration not started.");
+          throw new global::System.InvalidOperationException("Enumeration not started.");
         if (currentIndex > currentSize - 1)
-          throw new InvalidOperationException("Enumeration finished.");
+          throw new global::System.InvalidOperationException("Enumeration finished.");
         if (currentObject == null)
-          throw new InvalidOperationException("Collection modified.");
+          throw new global::System.InvalidOperationException("Collection modified.");
         return (CSTYPE)currentObject;
       }
     }
@@ -142,7 +142,7 @@
       currentIndex = -1;
       currentObject = null;
       if (collectionRef.Count != currentSize) {
-        throw new InvalidOperationException("Collection modified.");
+        throw new global::System.InvalidOperationException("Collection modified.");
       }
     }
   }

@@ -5,7 +5,7 @@
 #include"ConfDataReader.hpp"
 #include"PPPSolutionBase.h"
 using namespace gpstk;
-namespace POD
+namespace pod
 {
     class Solution : public BasicFramework
     {
@@ -19,7 +19,7 @@ namespace POD
         virtual void process();
 
     protected:
-
+     
         bool loadConfig(char* path);
 
         CommandOptionWithArg confFile;

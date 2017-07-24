@@ -10,7 +10,7 @@
 
 using namespace std;
 using namespace gpstk;
-namespace POD
+namespace pod
 {
     typedef unsigned char uchar;
     enum PRIonoCorrType { NONE = 0, Klobuchar, IF };

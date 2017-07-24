@@ -51,7 +51,7 @@
 
 using namespace gpstk;
 
-namespace POD
+namespace pod
 {
       /// @ingroup GeoDynamics 
       //@{
@@ -195,7 +195,7 @@ namespace POD
        * @return reference to \c s.
        */
    inline std::ostream& operator<<( std::ostream& s,
-                                    const POD::Force& fm )
+                                    const pod::Force& fm )
    {
       Vector<double> a = fm.getAccel();
       Matrix<double> da_dr = fm.partialR();

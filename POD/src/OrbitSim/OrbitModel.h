@@ -8,7 +8,7 @@
 
 
 using namespace gpstk;
-namespace POD
+namespace pod
 {
     class OrbitModel : public EquationOfMotion
     {

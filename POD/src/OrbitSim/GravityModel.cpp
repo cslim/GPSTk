@@ -5,7 +5,7 @@
 */
 #include "GravityModel.h"
 
-namespace POD
+namespace pod
 {
     /* Constructor.
      * @param n Desired degree.

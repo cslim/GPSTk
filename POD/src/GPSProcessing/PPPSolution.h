@@ -6,12 +6,12 @@
 #include"TropModel.hpp"
 
 using namespace gpstk;
-namespace POD
+namespace pod
 {
     class PPPSolution : public PPPSolutionBase
     {
     public:
-        PPPSolution(ConfDataReader & confReader);
+        PPPSolution(ConfDataReader & confReader, string dir);
         virtual ~PPPSolution(){};
 
     protected:

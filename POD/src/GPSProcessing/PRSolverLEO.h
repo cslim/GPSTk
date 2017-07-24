@@ -5,7 +5,7 @@
 #include"IonoModelStore.hpp"
 using namespace gpstk;
 
-namespace POD
+namespace pod
 {
 
     class PRSolverLEO : public PRSolverBase

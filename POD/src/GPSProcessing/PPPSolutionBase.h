@@ -9,15 +9,15 @@
 #include"ConfDataReader.hpp"
 
 using namespace gpstk;
-namespace POD
+namespace pod
 {
     class PPPSolutionBase 
     {
 
     public:
-        static PPPSolutionBase * Factory(bool isSpaceborne, ConfDataReader & confReader);
+        static PPPSolutionBase * Factory(bool isSpaceborne, ConfDataReader & confReader, string dir);
 
-        PPPSolutionBase(ConfDataReader & confReader);
+        PPPSolutionBase(ConfDataReader & confReader,string workingDir);
 
         virtual ~PPPSolutionBase();
 
@@ -31,7 +31,7 @@ namespace POD
         void process();
 
     protected:
-        virtual void PRProcess()= 0;
+        virtual void PRProcess() = 0;
         virtual bool PPPprocess() = 0;
 
         bool loadApprPos(std::string path);
@@ -53,8 +53,9 @@ namespace POD
             const Position &nomXYZ);
 
         void printStats(ofstream& outfile, const vector<PowerSum> &stats);
-
+        
         string genFilesDir;
+        string workingDir;
 
         uchar maskSNR;
         double maskEl;
@@ -63,6 +64,7 @@ namespace POD
         const char * L1PCodeID = "C1W";
         const char * L2CodeID  = "C2W";
         const char * L1CNo     = "S1C";
+        
         //
         int DoY = 0;
         //

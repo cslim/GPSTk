@@ -3,7 +3,7 @@
 
 using namespace std;
 
-namespace POD
+namespace pod
 {
     ForceModelData::ForceModelData()
     {

@@ -43,7 +43,7 @@
 
 #include "PPPSolverLEO.h"
 
-namespace POD
+namespace pod
 {
     // Returns a string identifying this object.
     std::string PPPSolverLEO::getClassName() const

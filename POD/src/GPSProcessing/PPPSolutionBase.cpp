@@ -14,16 +14,16 @@
 #include "Rinex3NavStream.hpp"
 
 #define DBG
-namespace POD
+namespace pod
 {
-    PPPSolutionBase* PPPSolutionBase::Factory(bool isSpaceborne, ConfDataReader & reader)
+    PPPSolutionBase* PPPSolutionBase::Factory(bool isSpaceborne, ConfDataReader & reader, string  dir)
     {
         if (isSpaceborne)
-            return new PODSolution(reader);
+            return new PODSolution(reader, dir);
         else
-            return new PPPSolution(reader);
+            return new PPPSolution(reader, dir);
     }
-    PPPSolutionBase::PPPSolutionBase(ConfDataReader & cReader) : confReader(&cReader)
+    PPPSolutionBase::PPPSolutionBase(ConfDataReader & cReader,string dir ) : confReader(&cReader), workingDir(dir)
     {
         maskEl = confReader->fetchListValueAsDouble("ElMask");
         maskSNR = confReader->fetchListValueAsInt("SNRmask");
@@ -40,16 +40,12 @@ namespace POD
     {
         try
         {
-            //get application dir
-            char current_work_dir[_MAX_FNAME];
-            _getcwd(current_work_dir, sizeof(current_work_dir));
-            string s_dir(current_work_dir);
             //set generic files direcory 
             string subdir = confReader->fetchListValue("GenericFilesDir");
-            genFilesDir = s_dir + "\\" + subdir + "\\";
+            genFilesDir = workingDir + "\\" + subdir + "\\";
 
             subdir = confReader->fetchListValue("RinesObsDir");
-            auxiliary::getAllFiles(subdir, rinexObsFiles);
+            auxiliary::getAllFiles(workingDir, subdir, rinexObsFiles);
 
             cout << "Ephemeris Loading... ";
             cout << loadEphemeris() << endl;
@@ -78,7 +74,7 @@ namespace POD
 
         list<string> files;
         string subdir = confReader->fetchListValue("EphemerisDir");
-        auxiliary::getAllFiles(subdir, files);
+        auxiliary::getAllFiles(workingDir, subdir, files);
 
         for (auto file : files)
         {
@@ -104,7 +100,7 @@ namespace POD
     {
         list<string> files;
         string subdir = confReader->fetchListValue("RinexClockDir");
-        auxiliary::getAllFiles(subdir, files);
+        auxiliary::getAllFiles(workingDir, subdir, files);
 
         for (auto file : files)
         {
@@ -128,7 +124,7 @@ namespace POD
     {
         list<string> files;
         string subdir = confReader->fetchListValue("RinexNavFilesDir");
-        auxiliary::getAllFiles(subdir, files);
+        auxiliary::getAllFiles(workingDir, subdir, files);
 
         for (auto file : files)
         {
@@ -141,7 +137,7 @@ namespace POD
                 rNavFile.open(file.c_str(), std::ios::in);
                 rNavFile >> rNavHeader;
 
-#pragma region try get the date
+                #pragma region try get the date
 
                 CommonTime refTime = CommonTime::BEGINNING_OF_TIME;
                 if (rNavHeader.fileAgency == "AIUB")
@@ -181,7 +177,7 @@ namespace POD
                         refTime = gpsws.convertToCommonTime();
                     }
                 }
-#pragma endregion
+                #pragma endregion
 
                 if (rNavHeader.valid & Rinex3NavHeader::validIonoCorrGPS)
                 {

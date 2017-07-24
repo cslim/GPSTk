@@ -3,7 +3,7 @@
 
 #include "PPPSolverLEO.h"
 using namespace gpstk;
-namespace POD
+namespace pod
 {
     class PPPSolverLEOFwBw : public PPPSolverLEO
     {

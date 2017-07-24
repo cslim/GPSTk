@@ -2,7 +2,7 @@
 
 using namespace std; 
 
-namespace POD
+namespace pod
 {
 
     CentralMassModel::CentralMassModel(const GravityModelData &gData)

@@ -5,7 +5,7 @@
 
 using namespace gpstk;
 
-namespace POD
+namespace pod
 {
     class CentralMassModel : public GravityModel
     {

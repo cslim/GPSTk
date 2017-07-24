@@ -110,6 +110,9 @@ SWIG_STD_VECTOR_ENHANCED(Rinex3ObsData)
 
 // Set containing SourceID objects.
 %template(set_SourceID) std::set<gpstk::SourceID>;
+//////////////////////////////////////////////////
+//             std::list wraps
+//////////////////////////////////////////////////
 
 
 

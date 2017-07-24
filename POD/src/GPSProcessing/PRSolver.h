@@ -5,47 +5,40 @@
 #include"PRSolverBase.h"
 #include"IonoModelStore.hpp"
 
-using namespace std;
-using namespace gpstk;
-
-namespace POD
+namespace pod
 {
     class PRSolver : public PRSolverBase
     {
     public:
 
-        PRSolver(TropModel &tropo) :PRSolverBase(), tropo(&tropo)
+        PRSolver(gpstk::TropModel &tropo) :PRSolverBase(), tropo(&tropo)
         {};
         virtual ~PRSolver()
         {
         };
-        TropModel *tropo;
+        gpstk::TropModel *tropo;
 
-        string virtual getName() override
+        std::string virtual getName() override
         {
             return "PRSolver";
         };
 
         virtual int  solve(
-            const CommonTime &t,
-            const Matrix<double> &SVP,
-            vector<bool> &useSat,
-            Matrix<double>& Cov,
-            Vector<double>& Resid,
-            IonoModelStore &iono
+            const gpstk::CommonTime &t,
+            const gpstk::Matrix<double> &SVP,
+            std::vector<bool> &useSat,
+            gpstk::Matrix<double>& Cov,
+            gpstk::Vector<double>& Resid,
+            gpstk::IonoModelStore &iono
         ) override;
 
     protected:
 
         virtual int catchSatByResid(
-            const CommonTime &t,
-            const Matrix<double> &SVP,
-            vector<bool> &useSat,
-            IonoModelStore &iono) override;
-
-
-
-    private:
+            const gpstk::CommonTime &t,
+            const gpstk::Matrix<double> &SVP,
+            std::vector<bool> &useSat,
+            gpstk::IonoModelStore &iono) override;
 
     };
 

@@ -9,7 +9,7 @@
 
 using namespace gpstk;
 
-namespace POD
+namespace pod
 {
     class SphericalHarmonicsModel : public GravityModel
     {

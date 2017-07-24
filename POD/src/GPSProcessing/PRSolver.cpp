@@ -1,6 +1,6 @@
 
 #include"PRSolver.h"
-namespace POD
+namespace pod
 {
     int PRSolver::solve(
         const CommonTime & t,

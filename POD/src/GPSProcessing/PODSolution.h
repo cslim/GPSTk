@@ -4,12 +4,12 @@
 #include "ConfDataReader.hpp"
 #include"PPPSolutionBase.h"
 using namespace gpstk;
-namespace POD
+namespace pod
 {
     class PODSolution : public PPPSolutionBase
     {
     public:
-        PODSolution(ConfDataReader & confReader);
+        PODSolution(ConfDataReader & confReader, string dir);
         virtual ~PODSolution(){};
 
     protected:

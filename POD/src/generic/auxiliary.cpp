@@ -1,18 +1,14 @@
 #include"auxiliary.h"
 #include<windows.h>
 #include <direct.h>
-namespace POD
+namespace pod
 {
-    int  auxiliary::getAllFiles(string &subDir, list<string> &files)
+    int  auxiliary::getAllFiles(const string &dir, const string &subDir, list<string> &files)
     {
         files.clear();
 
-        //get application dir
-        char current_work_dir[_MAX_FNAME];
-        _getcwd(current_work_dir, sizeof(current_work_dir));
-        string s_dir(current_work_dir);
         //dir of interest
-        string path = s_dir + "\\" + subDir + "\\*";
+        string path = dir + "\\" + subDir + "\\*";
 
         WIN32_FIND_DATA FindFileData;
         HANDLE hf;
@@ -22,7 +18,7 @@ namespace POD
         {
             do
             {
-                string fpath = s_dir + "\\" + subDir + "\\" + FindFileData.cFileName;
+                string fpath = dir + "\\" + subDir + "\\" + FindFileData.cFileName;
                 files.push_back(fpath);
             } while (FindNextFile(hf, &FindFileData) != 0);
             FindClose(hf);
@@ -33,5 +29,14 @@ namespace POD
         files.pop_front();
         files.pop_front();
         return 1;
+    }
+    
+    bool auxiliary::getDirectory(const string& path, string& directory )
+    {
+        size_t found = path.find_last_of("/\\");
+        if (found == string::npos) return false;
+        if (found == path.size() - 1) return false;
+        directory = path.substr(0, found);
+        return true;
     }
 }

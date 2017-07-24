@@ -52,7 +52,7 @@
 #include <list>
 #include <memory>
 
-namespace POD
+namespace pod
 {
     typedef std::unique_ptr<Force> ForceUniquePtr;
       /// @ingroup GeoDynamics 

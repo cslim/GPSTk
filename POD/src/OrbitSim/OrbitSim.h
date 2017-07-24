@@ -9,11 +9,10 @@
 
 using namespace gpstk;
 using namespace std;
-
-namespace POD
+typedef unique_ptr<Integrator> IntegratorUniquePtr;
+typedef unique_ptr<pod::OrbitModel> OrbitModelUniquePtr;
+namespace pod
 {
-    typedef unique_ptr<Integrator> IntegratorUniquePtr;
-    typedef unique_ptr<OrbitModel> OrbitModelUniquePtr;
     class OrbitSim
     {
 
@@ -51,7 +50,6 @@ namespace POD
             return (*this);
         }
 
-        /// set the orbit to the default one
         OrbitModel& getOrbit()
         {
             return (*pOrbit);

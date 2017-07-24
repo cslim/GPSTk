@@ -1,7 +1,7 @@
 
 #include "ForceList.h"
 
-namespace POD
+namespace pod
 {
 
    ForceList::ForceList()
@@ -133,4 +133,4 @@ namespace POD
    {
 	   forceList.clear();
    }
-}  // End of namespace 'POD'
+}  // End of namespace 'pod'

@@ -1,11 +1,13 @@
 #include"Solution.h"
 #include <direct.h>
 #include<windows.h>
-namespace POD
+#include "Shlwapi.h"
+#include"auxiliary.h"
+namespace pod
 {
 
     Solution::Solution(char* path) :
-        BasicFramework("POD",
+        BasicFramework("pod",
                        "discr"),
         // Option initialization. "true" means a mandatory option
         confFile(CommandOption::stdType,
@@ -16,59 +18,36 @@ namespace POD
     {
 
         loadConfig(path);
+        std::string  workigDir = "";
+        auxiliary::getDirectory(path, workigDir);
         bool isSpace = confReader.fetchListValueAsBoolean("IsSpaceborneRcv");
-        this->solver = PPPSolutionBase::Factory(isSpace, confReader);
+        this->solver = PPPSolutionBase::Factory(isSpace, confReader, workigDir);
 
     }
 
     bool Solution::loadConfig(char* path)
     {
-        // Check if the user provided a configuration file name
-        if (confFile.getCount() > 0)
+
+        // Enable exceptions
+        //confReader.exceptions(ios::failbit);
+
+        try
         {
-            // Enable exceptions
-            confReader.exceptions(ios::failbit);
-
-            try
-            {
-                // Try to open the provided configuration file
-                confReader.open(path);
-            }
-            catch (...)
-            {
-                cerr << "Problem opening file "
-                    << confFile.getValue()[0]
-                    << endl;
-                cerr << "Maybe it doesn't exist or you don't have proper "
-                    << "read permissions." << endl;
-
-                exit(-1);
-
-            }  // End of 'try-catch' block
-
+            // Try to open the provided configuration file
+            confReader.open(path);
+            
         }
-        else
+        catch (...)
         {
-            try
-            {
-                // Try to open default configuration file
-                confReader.open("config.txt");
-            }
-            catch (...)
-            {
+            cerr << "Problem opening file "
+                << confFile.getValue()[0]
+                << endl;
+            cerr << "Maybe it doesn't exist or you don't have proper "
+                << "read permissions." << endl;
 
-                cerr << "Problem opening default configuration file 'pppconf_my.txt'"
-                    << endl;
-                cerr << "Maybe it doesn't exist or you don't have proper read "
-                    << "permissions. Try providing a configuration file with "
-                    << "option '-c'."
-                    << endl;
+            exit(-1);
 
-                exit(-1);
-
-            }  // End of 'try-catch' block
-
-        }  // End of 'if ( confFile.getCount() > 0 )'
+        }  // End of 'try-catch' block
 
         // If a given variable is not found in the provided section, then
         // 'confReader' will look for it in the 'DEFAULT' section.
@@ -81,4 +60,6 @@ namespace POD
         solver->LoadData();
         solver->process();
     }
+
+   
 }

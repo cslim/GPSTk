@@ -4,7 +4,7 @@
 #include<string>
 #include"Matrix.hpp"
 
-namespace POD
+namespace pod
 {
 	struct GravityModelData
 	{

@@ -1,7 +1,7 @@
 #include"PRSolverBase.h"
 #include<math.h>
 #include"Matrix.hpp"
-namespace POD
+namespace pod
 {
     double PRSolverBase::eps = 1e-4;
     GPSEllipsoid PRSolverBase::ellGPS;

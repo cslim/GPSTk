@@ -8,12 +8,13 @@
 #include"Rinex3ObsData.hpp"
 #include"Exception.hpp"
 #include"DataStructures.hpp"
+#include"Solution.h"
 
 using namespace std;
 using namespace gpstk;
-using namespace POD;
+using namespace pod;
 
-int main(int argc, char* argv[])
+void testgpstk()
 {
     // Create the input file stream
     Rinex3ObsStream rin("cng2182a.17o");
@@ -24,20 +25,20 @@ int main(int argc, char* argv[])
     // Read the RINEX header
     Rinex3ObsHeader head;    //RINEX header object
     rin >> head;
-   // rout.header = head;
-    
-   //   rout << head;
+    // rout.header = head;
+
+    //   rout << head;
     auto obsT = head.obsTypeList;
     // Loop over all data epochs
     Rinex3ObsData data;   //RINEX data object
     while (rin >> data)
     {
-        rout << data.time<<endl;
+        rout << data.time << endl;
         for (auto &ot : obsT)
         {
             for (auto &it : data.obs)
             {
-                auto val =  data.getObs(it.first, ot, head);
+                auto val = data.getObs(it.first, ot, head);
 
                 rout << it.first << " " << it.first.id << " ";
                 //for (auto &it1 : it.second)
@@ -48,12 +49,21 @@ int main(int argc, char* argv[])
         rout << endl;
         /*for (auto &it : gRin.getTypeID())
         {
-            cout << it << " ";
+        cout << it << " ";
         }
         cout << endl;*/
 
         //gRin.body.dump(cout);
     }
     rout.close();
+}
+
+
+int main(int argc, char* argv[])
+{
+
+    pod::Solution sol(argv[1]);
+    sol.process();
+
     return 0;
 }

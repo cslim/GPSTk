@@ -5,7 +5,7 @@
 #include"SphericalHarmonicsModel.h"
 #include"ForceList.h"
 
-namespace POD
+namespace pod
 {
     OrbitModel:: OrbitModel()
     {

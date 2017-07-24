@@ -1,10 +1,10 @@
 #include "Solution.h"
 #include "EarthRotation.h"
 #include"OrbitSim.h"
-using namespace POD;
+using namespace pod;
 int main(int argc, char *argv[])
 {
-    //POD:: Solution sol(argv[1]);
+    //pod:: Solution sol(argv[1]);
     //sol.process();
 
 

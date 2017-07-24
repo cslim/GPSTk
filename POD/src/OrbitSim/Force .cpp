@@ -1,7 +1,7 @@
 
 #include "Force.h"
 
-namespace POD
+namespace pod
 {
 
 

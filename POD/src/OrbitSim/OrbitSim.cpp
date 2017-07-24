@@ -3,7 +3,7 @@
 #include"KeplerOrbit.hpp"
 //using namespace gpstk;
 
-namespace POD
+namespace pod
 {
 
     // Constructor

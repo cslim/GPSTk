@@ -1,7 +1,7 @@
 
 #include"Matrix.hpp"
 #include"PRSolverLEO.h"
-namespace POD
+namespace pod
 {
     int  PRSolverLEO::solve(
         const CommonTime &t,

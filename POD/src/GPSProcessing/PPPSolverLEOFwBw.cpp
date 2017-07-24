@@ -1,5 +1,5 @@
 #include "PPPSolverLEOFwBw.h"
-namespace POD
+namespace pod
 {
     // Returns a string identifying this object.
     std::string PPPSolverLEOFwBw::getClassName() const

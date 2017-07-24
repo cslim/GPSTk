@@ -64,10 +64,10 @@
 
 #include"BasicModel.hpp"
 using namespace gpstk;
-namespace POD
+namespace pod
 {
-    PODSolution::PODSolution(ConfDataReader & confReader):
-        PPPSolutionBase (confReader)
+    PODSolution::PODSolution(ConfDataReader & confReader,string dir):
+        PPPSolutionBase (confReader,dir)
     {
         solverPR = new PRSolverLEO();
     }
@@ -255,7 +255,7 @@ namespace POD
         int precision(4);
 
         ofstream outfile;
-        outfile.open("PPP_sol.out", ios::out);
+        outfile.open(workingDir +"\\PPP_sol.out", ios::out);
 
         // Let's check if we are going to print the model
         bool printmodel(confReader->getValueAsBoolean("printModel"));
@@ -267,7 +267,7 @@ namespace POD
         if (printmodel)
         {
             modelName = confReader->getValue("modelFile");
-            modelfile.open(modelName.c_str(), ios::out);
+            modelfile.open(workingDir + "\\"+modelName.c_str(), ios::out);
         }
 #pragma endregion
 
@@ -483,7 +483,7 @@ namespace POD
         solverPR->ionoType = (PRIonoCorrType)confReader->fetchListValueAsInt("PRionoCorrType");
 
         ofstream os;
-        os.open("solutionPR.out");
+        os.open(workingDir + "\\"+"solutionPR.out");
         //decimation
         int sampl(10);
         double tol(0.1);
