@@ -21,6 +21,7 @@ SWIG_STD_VECTOR_ENHANCED(RinexObsType)
 SWIG_STD_VECTOR_ENHANCED(Rinex3ObsData)
 %template(vector_Rinex3ObsData) std::vector<gpstk::Rinex3ObsData>;
 
+%template(vector_gnssRinex) std::vector< gpstk::gnssRinex >;
 
 /////////////////////////////////////////////////////////////////
 //             std::map wraps

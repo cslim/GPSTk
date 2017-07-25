@@ -345,7 +345,7 @@ RELATIONAL_OPERATORS(SourceID)
 %template(GnssDataSatTypeValue)    gpstk::gnssData<gpstk::sourceEpochHeader, std::map<gpstk::SatID, std::map<gpstk::TypeID, double>>>;
 
 %include"Action.h"
-%template(vector_gnssRinex) std::vector<std::gnssRinex>;
+
 
 // Geomatics:
 %include "Geomatics.i"

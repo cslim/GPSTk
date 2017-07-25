@@ -7,11 +7,12 @@ namespace pod
     class Action
     {
     public :
-        Action() {}
+        Action(std::string pathToConfig):path(pathToConfig) {}
         std::vector<gpstk::gnssRinex> process();
 
         //std::vector<gpstk::gnssRinex> getData();
-        
+    protected:
+        std::string path;
 
     };
 }
