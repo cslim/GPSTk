@@ -345,10 +345,12 @@ namespace pod
                         >> cDOP;
 
                     if (cycles < 1)
+                    {
                         gRin >> pppSolver;
+                    }
                     else
                         gRin >> fbpppSolver;
-
+                    
                     //   cout /*<<  " " << gRin.numSats()*/ << endl;
                 }
                 catch (DecimateEpoch& d)
@@ -391,6 +393,7 @@ namespace pod
                    // Ask if we are going to print the model
                 if (printmodel)
                 {
+                    processData.push_back(gRin);
                     printModel(modelfile, gRin, 4);
                 }
             }  // End of 'while(rin >> gRin)'
@@ -441,6 +444,7 @@ namespace pod
 
         // Reprocess is over. Let's finish with the last processing		
         // Loop over all data epochs, again, and print results
+        processData.clear();
         while (fbpppSolver.LastProcess(gRin))
         {
             CommonTime time(gRin.header.epoch);
@@ -450,6 +454,8 @@ namespace pod
                 time0 = time;
                 b = false;
             }
+            processData.push_back(gRin);
+            printModel(modelfile, gRin, 4);
 
             nominalPos = apprPos.at(time);
             double fm = fmod(((GPSWeekSecond)time).getSOW(), outInt);
@@ -483,7 +489,7 @@ namespace pod
         solverPR->ionoType = (PRIonoCorrType)confReader->fetchListValueAsInt("PRionoCorrType");
 
         ofstream os;
-        os.open(workingDir + "\\"+"solutionPR.out");
+        os.open(workingDir + "\\solutionPR.out");
         //decimation
         int sampl(10);
         double tol(0.1);

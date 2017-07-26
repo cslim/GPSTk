@@ -496,6 +496,7 @@ namespace pod
                    // Ask if we are going to print the model
                 if (printmodel)
                 {
+                    processData.push_back(gRin);
                     printModel(modelfile, gRin, 4);
                 }
             }  // End of 'while(rin >> gRin)'
@@ -553,7 +554,7 @@ namespace pod
            // Loop over all data epochs, again, and print results
         while (fbpppSolver.LastProcess(gRin))
         {
-
+            processData.push_back(gRin);
             CommonTime time(gRin.header.epoch);
             if (b)
             {

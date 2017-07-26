@@ -30,6 +30,11 @@ namespace pod
 
         void process();
 
+        std::list<gpstk::gnssRinex> & getData()
+        {
+            return processData;
+        };
+
     protected:
         virtual void PRProcess() = 0;
         virtual bool PPPprocess() = 0;
@@ -80,6 +85,9 @@ namespace pod
         IonoModelStore ionoStore;
         list<string> rinexObsFiles;
         map<CommonTime, Xvt, std::less<CommonTime>> apprPos;
+
+        std::list<gpstk::gnssRinex> processData;
+
     };
 }
 #endif // !POD_PPP_SOLUTION_BASE_H

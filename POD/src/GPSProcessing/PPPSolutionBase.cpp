@@ -23,6 +23,7 @@ namespace pod
         else
             return new PPPSolution(reader, dir);
     }
+
     PPPSolutionBase::PPPSolutionBase(ConfDataReader & cReader,string dir ) : confReader(&cReader), workingDir(dir)
     {
         maskEl = confReader->fetchListValueAsDouble("ElMask");

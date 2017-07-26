@@ -6,7 +6,7 @@
 namespace pod
 {
 
-    Solution::Solution(char* path) :
+    Solution::Solution(const char* path) :
         BasicFramework("pod",
                        "discr"),
         // Option initialization. "true" means a mandatory option
@@ -16,16 +16,14 @@ namespace pod
                  " [-c|--conffile]    Name of configuration file ('config.txt' by default).",
                  false)
     {
-
         loadConfig(path);
         std::string  workigDir = "";
         auxiliary::getDirectory(path, workigDir);
         bool isSpace = confReader.fetchListValueAsBoolean("IsSpaceborneRcv");
         this->solver = PPPSolutionBase::Factory(isSpace, confReader, workigDir);
-
     }
 
-    bool Solution::loadConfig(char* path)
+    bool Solution::loadConfig(const char* path)
     {
 
         // Enable exceptions
@@ -35,7 +33,6 @@ namespace pod
         {
             // Try to open the provided configuration file
             confReader.open(path);
-            
         }
         catch (...)
         {

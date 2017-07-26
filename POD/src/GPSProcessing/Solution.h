@@ -11,16 +11,21 @@ namespace pod
     {
        
     public:
-        Solution(char* path);
+        Solution(const char* path);
        virtual ~Solution()
         {
             delete solver;
         }
         virtual void process();
+        
+        std::list<gpstk::gnssRinex> & getData()
+        {
+            return solver->getData();
+        };
 
     protected:
      
-        bool loadConfig(char* path);
+        bool loadConfig(const char* path);
 
         CommandOptionWithArg confFile;
 

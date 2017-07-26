@@ -3,6 +3,7 @@
    #include "gpstk_swig.hpp"
 	
 	using namespace gpstk;
+	using namespace pod;
 %}
 %include<stl.i>
 %include "std_set.i"

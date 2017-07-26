@@ -9,7 +9,7 @@
 #include"Exception.hpp"
 #include"DataStructures.hpp"
 #include"Solution.h"
-
+#include"Action.h"
 using namespace std;
 using namespace gpstk;
 using namespace pod;
@@ -62,8 +62,12 @@ void testgpstk()
 int main(int argc, char* argv[])
 {
 
-    pod::Solution sol(argv[1]);
-    sol.process();
-
+    Action a("D:\\projects\\GPSTk_bin2\\POD\\Release\\config.txt");
+    auto grin = a.process();
+    cout << "process complete" << endl;
+    for (auto &it : grin)
+    {
+        cout << CivilTime(it.header.epoch).asString() << endl;
+    }
     return 0;
 }
