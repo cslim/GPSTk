@@ -257,18 +257,6 @@ namespace pod
         ofstream outfile;
         outfile.open(workingDir +"\\PPP_sol.out", ios::out);
 
-        // Let's check if we are going to print the model
-        bool printmodel(confReader->getValueAsBoolean("printModel"));
-
-        string modelName;
-        ofstream modelfile;
-
-        // Prepare for model printing
-        if (printmodel)
-        {
-            modelName = confReader->getValue("modelFile");
-            modelfile.open(workingDir + "\\"+modelName.c_str(), ios::out);
-        }
 #pragma endregion
 
         //statistics for coorinates and tropo delay
@@ -387,25 +375,11 @@ namespace pod
                         pppSolver.printSolution(outfile, time0, time, cDOP, gRin, 0.0, 0.0, stats, nominalPos);
 
                 }  // End of 'if ( cycles < 1 )'
-
-                   // The given epoch hass been processed. Let's get the next one
-
-                   // Ask if we are going to print the model
-                if (printmodel)
-                {
-                    processData.push_back(gRin);
-                    printModel(modelfile, gRin, 4);
-                }
+                //store the process data
+                processData.push_back(gRin);
             }  // End of 'while(rin >> gRin)'
 
             rin.close();
-        }
-
-        // If we printed the model, we must close the file
-        if (printmodel)
-        {
-            // Close model file for this station
-            modelfile.close();
         }
 
         //// *** Forwards processing part is over *** ////
@@ -455,8 +429,7 @@ namespace pod
                 b = false;
             }
             processData.push_back(gRin);
-            printModel(modelfile, gRin, 4);
-
+         
             nominalPos = apprPos.at(time);
             double fm = fmod(((GPSWeekSecond)time).getSOW(), outInt);
             if (fm < 0.1)

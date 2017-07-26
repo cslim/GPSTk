@@ -365,18 +365,6 @@ namespace pod
         ofstream outfile;
         outfile.open(workingDir + "\\" + "PPP_sol.out", ios::out);
 
-        // Let's check if we are going to print the model
-        bool printmodel(confReader->getValueAsBoolean("printModel"));
-
-        string modelName;
-        ofstream modelfile;
-
-        // Prepare for model printing
-        if (printmodel)
-        {
-            modelName = confReader->getValue("modelFile");
-            modelfile.open(workingDir + "\\" + modelName.c_str(), ios::out);
-        }
 #pragma endregion
 
         //statistics for coorinates and tropo delay
@@ -492,23 +480,10 @@ namespace pod
                         nominalPos);
 
                 }  // End of 'if ( cycles < 1 )'
-
-                   // Ask if we are going to print the model
-                if (printmodel)
-                {
-                    processData.push_back(gRin);
-                    printModel(modelfile, gRin, 4);
-                }
+                processData.push_back(gRin);
             }  // End of 'while(rin >> gRin)'
 
             rin.close();
-        }
-
-        // If we printed the model, we must close the file
-        if (printmodel)
-        {
-            // Close model file for this station
-            modelfile.close();
         }
 
         //// *** Forwards processing part is over *** ////

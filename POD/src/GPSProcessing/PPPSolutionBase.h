@@ -16,6 +16,7 @@ namespace pod
 
     public:
         static PPPSolutionBase * Factory(bool isSpaceborne, ConfDataReader & confReader, string dir);
+        static void printModel(ofstream& modelfile, const gnssRinex& gData, int   precision);
 
         PPPSolutionBase(ConfDataReader & confReader,string workingDir);
 
@@ -41,9 +42,7 @@ namespace pod
 
         bool loadApprPos(std::string path);
 
-        void printModel(ofstream& modelfile,
-            const gnssRinex& gData,
-            int   precision);
+      
 
         void printSolution(ofstream& outfile,
             const SolverLMS& solver,

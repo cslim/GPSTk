@@ -373,9 +373,7 @@ namespace pod
         CommonTime time(gData.header.epoch);
 
         // Iterate through the GNSS Data Structure
-        for (satTypeValueMap::const_iterator it = gData.body.begin();
-            it != gData.body.end();
-            it++)
+        for (auto &it : gData.body)
         {
             // Print epoch
             modelfile << static_cast<YDSTime>(time).year << "  ";    // Year          #1
@@ -383,17 +381,14 @@ namespace pod
             modelfile << static_cast<YDSTime>(time).sod << "  ";    // SecondsOfDay   #3
 
             // Print satellite information (Satellite system and ID number)
-            modelfile << (*it).first << " ";             // System         #4
-                                                         // ID number      #5
+            modelfile << (it).first << " ";
 
-                                                         // Print model values
-            for (typeValueMap::const_iterator itObs = (*it).second.begin();
-                itObs != (*it).second.end();
-                itObs++)
+            // Print model values
+            for (auto itObs : (it).second)
             {
                 // Print type names and values
-                modelfile << (*itObs).first << " ";
-                modelfile << (*itObs).second << " ";
+                modelfile << (itObs).first << " ";
+                modelfile << (itObs).second << " ";
 
             }  // End of 'for( typeValueMap::const_iterator itObs = ...'
 

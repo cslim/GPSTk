@@ -65,9 +65,11 @@ int main(int argc, char* argv[])
     Action a("D:\\projects\\GPSTk_bin2\\POD\\Release\\config.txt");
     auto grin = a.process();
     cout << "process complete" << endl;
+    ofstream f("dump.txt");
     for (auto &it : grin)
     {
-        cout << CivilTime(it.header.epoch).asString() << endl;
+       PPPSolutionBase::printModel(f,it,4);
     }
+    f.close();
     return 0;
 }
