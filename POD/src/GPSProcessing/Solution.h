@@ -4,6 +4,8 @@
 #include"BasicFramework.hpp"
 #include"ConfDataReader.hpp"
 #include"PPPSolutionBase.h"
+
+#include"GnssEpochMap.h"
 using namespace gpstk;
 namespace pod
 {
@@ -18,7 +20,7 @@ namespace pod
         }
         virtual void process();
         
-        std::list<gpstk::gnssRinex> & getData()
+        GnssEpochMap  getData()
         {
             return solver->getData();
         };

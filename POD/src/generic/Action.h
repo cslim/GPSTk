@@ -2,13 +2,15 @@
 #define POD_ACTION_H
 #include"DataStructures.hpp"
 
+#include"GnssEpochMap.h"
+
 namespace pod
 {
     class Action
     {
     public :
         Action(std::string pathToConfig):path(pathToConfig) {}
-        std::vector<gpstk::gnssRinex> process();
+        pod::GnssEpochMap process();
 
         //std::vector<gpstk::gnssRinex> getData();
     protected:

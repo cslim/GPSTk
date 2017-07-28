@@ -1,7 +1,5 @@
-#include "PPPSolution.h"
 
-#include"PRSolver.h"
-
+#pragma region gpstk includes
 //ephemerides store
 #include"SP3EphemerisStore.hpp"
 //
@@ -72,6 +70,13 @@
 
 #include"BasicModel.hpp"
 
+#pragma endregion
+
+//pod includes
+#include "PPPSolution.h"
+#include"PRSolver.h"
+#include"GnssEpochMap.h"
+
 namespace pod
 {
     PPPSolution::PPPSolution(ConfDataReader & confReader, string dir)
@@ -86,6 +91,7 @@ namespace pod
 
         solverPR = new PRSolver(tropModel);
     }
+    
     bool  PPPSolution::PPPprocess()
     {
         string stationName = confReader->fetchListValue("stationName");
@@ -356,11 +362,12 @@ namespace pod
         // This is the GNSS data structure that will hold all the
         // GNSS-related information
         gnssRinex gRin;
+        
 
 #pragma region Output strams
 
         // Prepare for printing
-        int precision(4);
+        int prec(4);
 
         ofstream outfile;
         outfile.open(workingDir + "\\" + "PPP_sol.out", ios::out);
@@ -387,6 +394,7 @@ namespace pod
 
             //read the header
             rin >> roh;
+            gMap.header = roh;
 
             // Loop over all data epochs
             while (rin >> gRin)
@@ -457,7 +465,7 @@ namespace pod
                 // Check what type of solver we are using
                 if (cycles < 1)
                 {
-
+                    GnssEpoch ep(gRin);
                     CommonTime time(gRin.header.epoch);
                     if (b)
                     {
@@ -467,20 +475,11 @@ namespace pod
                     }
                     // This is a 'forwards-only' filter. Let's print to output
                     // file the results of this epoch
-                    printSolution(outfile,
-                        pppSolver,
-                        time0,
-                        time,
-                        cDOP,
-                        isNEU,
-                        gRin.numSats(),
-                        drytropo,
-                        stats,
-                        precision,
-                        nominalPos);
-
+                    printSolution(outfile, pppSolver, time0, time, cDOP, isNEU, ep, drytropo, stats, prec, nominalPos);
+                   
+                    //add epoch to results
+                    gMap.data.insert(pair<CommonTime, GnssEpoch>(time, ep));
                 }  // End of 'if ( cycles < 1 )'
-                processData.push_back(gRin);
             }  // End of 'while(rin >> gRin)'
 
             rin.close();
@@ -529,7 +528,7 @@ namespace pod
            // Loop over all data epochs, again, and print results
         while (fbpppSolver.LastProcess(gRin))
         {
-            processData.push_back(gRin);
+            GnssEpoch ep(gRin);
             CommonTime time(gRin.header.epoch);
             if (b)
             {
@@ -537,18 +536,8 @@ namespace pod
                 b = false;
             }
             nominalPos = apprPos[time];
-            printSolution(outfile,
-                fbpppSolver,
-                time0,
-                time,
-                cDOP,
-                isNEU,
-                gRin.numSats(),
-                drytropo,
-                stats,
-                precision,
-                nominalPos
-            );
+            printSolution(outfile, fbpppSolver, time0, time, cDOP, isNEU, ep, drytropo, stats, prec, nominalPos);
+            gMap.data.insert(pair<CommonTime, GnssEpoch>(time, ep));
 
         }  // End of 'while( fbpppSolver.LastProcess(gRin) )'
 
@@ -567,7 +556,6 @@ namespace pod
 
         NeillTropModel NeillModel = NeillTropModel(nominalPos.getAltitude(), nominalPos.getGeodeticLatitude(), DoY);
 
-
         int badSol = 0;
         apprPos.clear();
 
@@ -578,7 +566,7 @@ namespace pod
         solverPR->ionoType = (PRIonoCorrType)confReader->fetchListValueAsInt("PRionoCorrType");
 
         ofstream os;
-        os.open("solutionPR.out");
+        os.open("nomPos_.out");
         //decimation
         int sampl(10);
         double tol(0.1);

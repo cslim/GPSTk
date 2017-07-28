@@ -1,12 +1,14 @@
 #ifndef POD_PPP_SOLVER_LEO_H
 #define POD_PPP_SOLVER_LEO_H
 
+#include<iostream>
+
 #include "CodeKalmanSolver.hpp"
 #include"ComputeDOP.hpp"
 #include"PowerSum.hpp"
 #include"Position.hpp"
 
-#include<iostream>
+#include "GnssEpochMap.h"
 
 using namespace gpstk;
 using namespace std;
@@ -312,8 +314,7 @@ namespace pod
                            const CommonTime& time0,
                            const CommonTime& time,
                            const ComputeDOP& cDOP,
-                           const gnssRinex &  gRin,
-                           int numCS,
+                                 GnssEpoch &   gEpoch,
                            double PCO,
                            vector<PowerSum> &stats,
                            const Position &nomXYZ);

@@ -790,9 +790,8 @@ covariance matrix.");
                                       const CommonTime& time0,
                                       const CommonTime& time,
                                       const ComputeDOP& cDOP,
-                                      const gnssRinex &  gRin,
-                                      int numCS,
-                                      double PCO,
+                                            GnssEpoch &  gEpoch,
+                                       double PCO,
                                       vector<PowerSum> &stats,
                                       const Position &nomXYZ)
     {
@@ -810,15 +809,22 @@ covariance matrix.");
         y = nomXYZ.Y() + getSolution(TypeID::dy);    // dy    - #5
         z = nomXYZ.Z() + getSolution(TypeID::dz);    // dz    - #6
 
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recX, x));
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recY, y));
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recZ, z));
+
         varX = getVariance(TypeID::dx);     // Cov dx    - #8
         varY = getVariance(TypeID::dy);     // Cov dy    - #9
         varZ = getVariance(TypeID::dz);     // Cov dz    - #10
 
-    //
-        outfile << x << "  " << y << "  " << z << " ";
-        outfile << sqrt(varX + varY + varZ) << "  ";
+       
+        double sigma = sqrt(varX + varY + varZ);
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::sigma, sigma));
+        outfile << x << "  " << y << "  " << z << "  " << "  " << sigma << "  ";
 
-        outfile << gRin.numSats() << " " << numCS << endl;    // Number of satellites - #12
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recPDOP, cDOP.getPDOP()));
+
+        outfile << gEpoch.satData.size() << endl;    
         //time of convergence,  seconds;
         double tConv(5400.0);
 

@@ -7,6 +7,7 @@
 #include "ComputeDOP.hpp"
 #include"SP3EphemerisStore.hpp"
 #include"ConfDataReader.hpp"
+#include"GnssEpochMap.h"
 
 using namespace gpstk;
 namespace pod
@@ -15,7 +16,7 @@ namespace pod
     {
 
     public:
-        static PPPSolutionBase * Factory(bool isSpaceborne, ConfDataReader & confReader, string dir);
+        static PPPSolutionBase * Factory(bool isSpaceborne, ConfDataReader & confReader, const string& dir);
         static void printModel(ofstream& modelfile, const gnssRinex& gData, int   precision);
 
         PPPSolutionBase(ConfDataReader & confReader,string workingDir);
@@ -31,9 +32,9 @@ namespace pod
 
         void process();
 
-        std::list<gpstk::gnssRinex> & getData()
+        GnssEpochMap & getData()
         {
-            return processData;
+            return gMap;
         };
 
     protected:
@@ -41,7 +42,6 @@ namespace pod
         virtual bool PPPprocess() = 0;
 
         bool loadApprPos(std::string path);
-
       
 
         void printSolution(ofstream& outfile,
@@ -50,7 +50,7 @@ namespace pod
             const CommonTime& time,
             const ComputeDOP& cDOP,
             bool  useNEU,
-            int   numSats,
+            GnssEpoch &   gEpoch,
             double dryTropo,
             vector<PowerSum> &stats,
             int   precision,
@@ -60,6 +60,10 @@ namespace pod
         
         string genFilesDir;
         string workingDir;
+
+        bool calcApprPos = true;
+        string apprPosFile;
+
 
         uchar maskSNR;
         double maskEl;
@@ -85,7 +89,7 @@ namespace pod
         list<string> rinexObsFiles;
         map<CommonTime, Xvt, std::less<CommonTime>> apprPos;
 
-        std::list<gpstk::gnssRinex> processData;
+       GnssEpochMap gMap;
 
     };
 }

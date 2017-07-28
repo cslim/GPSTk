@@ -66,11 +66,26 @@
 using namespace gpstk;
 namespace pod
 {
-    PODSolution::PODSolution(ConfDataReader & confReader,string dir):
+    void PODSolution::mapSNR(gnssRinex & gRin)
+    {
+        for (auto &it1 : gRin.body)
+        {
+            auto  ts1 = TypeID(TypeID::S1);
+            auto  ts2 = TypeID(TypeID::S2);
+
+            double s1 = it1.second.getValue(ts1);
+            it1.second.at(ts1) = 20.0*log10(s1);
+
+            double s2 = it1.second.getValue(ts2);
+            it1.second.at(ts2) = 20.0*log10(s2);
+        }
+    }
+    PODSolution::PODSolution(ConfDataReader & confReader, const string& dir):
         PPPSolutionBase (confReader,dir)
     {
         solverPR = new PRSolverLEO();
     }
+
     bool PODSolution::PPPprocess()
     {
         int outInt(confReader->getValueAsInt("outputInterval"));
@@ -280,18 +295,20 @@ namespace pod
             auto it = apprPos.begin();
             //read the header
             rin >> roh;
+            gMap.header = roh;
 
             // Loop over all data epochs
             while (rin >> gRin)
             {
+                mapSNR(gRin);
                 // Store current epoch
                 CommonTime time(gRin.header.epoch);
-#ifdef DBG
-                nominalPos = it->second;
-                it++;
-#else
+//#ifdef DBG
+//                nominalPos = it->second;
+//                it++;
+//#else
                 nominalPos = apprPos.at(time);
-#endif // DEBUG
+//#endif // DEBUG
 
                 ///update the nominal position in processing objects
                 XYZ2NEU baseChange(nominalPos);
@@ -359,6 +376,7 @@ namespace pod
                 // Check what type of solver we are using
                 if (cycles < 1)
                 {
+                    GnssEpoch ep(gRin);
                     CommonTime time(gRin.header.epoch);
                     if (b)
                     {
@@ -372,11 +390,10 @@ namespace pod
                     double fm = fmod(((GPSWeekSecond)time).getSOW(), outInt);
 
                     if (fm < 0.1)
-                        pppSolver.printSolution(outfile, time0, time, cDOP, gRin, 0.0, 0.0, stats, nominalPos);
-
+                        pppSolver.printSolution(outfile, time0, time, cDOP, ep,  0.0, stats, nominalPos);
+                    gMap.data.insert(pair<CommonTime, GnssEpoch>(time, ep));
                 }  // End of 'if ( cycles < 1 )'
-                //store the process data
-                processData.push_back(gRin);
+             
             }  // End of 'while(rin >> gRin)'
 
             rin.close();
@@ -418,9 +435,10 @@ namespace pod
 
         // Reprocess is over. Let's finish with the last processing		
         // Loop over all data epochs, again, and print results
-        processData.clear();
+    
         while (fbpppSolver.LastProcess(gRin))
         {
+            GnssEpoch ep(gRin);
             CommonTime time(gRin.header.epoch);
 
             if (b)
@@ -428,13 +446,13 @@ namespace pod
                 time0 = time;
                 b = false;
             }
-            processData.push_back(gRin);
-         
+                    
             nominalPos = apprPos.at(time);
             double fm = fmod(((GPSWeekSecond)time).getSOW(), outInt);
             if (fm < 0.1)
-                fbpppSolver.printSolution(outfile, time0, time, cDOP, gRin, 0.0, 0.0, stats, nominalPos);
-
+                fbpppSolver.printSolution(outfile, time0, time, cDOP, ep, 0.0, stats, nominalPos);
+            //add epoch to results
+            gMap.data.insert(pair<CommonTime, GnssEpoch>(time, ep));
         }  // End of 'while( fbpppSolver.LastProcess(gRin) )'
 
            //print statistic
@@ -543,14 +561,14 @@ namespace pod
                     vector<double> rangeVec;
                     vector<uchar> SNRs;
                     vector<bool> UseSat;
-                    //
 
                     solverPR->selectObservables(rod, indexC1, indexP2, indexCNoL1, prnVec, rangeVec, SNRs);
                     solverPR->Sol = 0.0;
 
                     for (size_t i = 0; i < prnVec.size(); i++)
                     {
-                        if (SNRs[i] >= solverPR->maskSNR)
+                        double snri = 20.0*log10(SNRs[i]);
+                        if (snri >= solverPR->maskSNR)
                         {
                             UseSat.push_back(true);
                             GoodSats++;

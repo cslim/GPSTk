@@ -318,6 +318,10 @@ namespace gpstk
       tStrings[recX]       = "RxPositionX";
       tStrings[recY]       = "RxPositionY";
       tStrings[recZ]       = "RxPositionZ";
+      tStrings[recStDevX]  = "RxPositionStDev_X";
+      tStrings[recStDevY]  = "RxPositionStDev_Y";
+      tStrings[recStDevZ]  = "RxPositionStDev_Z";
+      tStrings[recPDOP]    = "RxPDOP";
       tStrings[recVX]      = "RxVelocityX";
       tStrings[recVY]      = "RxVelocityY";
       tStrings[recVZ]      = "RxVelocityZ";
@@ -342,6 +346,7 @@ namespace gpstk
       tStrings[recJ2kAX]   = "RxJ2kAccelerationX";
       tStrings[recJ2kAY]   = "RxJ2kAccelerationY";
       tStrings[recJ2kAZ]   = "RxJ2kAccelerationZ";
+
       tStrings[sigma]      = "sigma";
       tStrings[iura]       = "iura";
       tStrings[Action]     = "Action";

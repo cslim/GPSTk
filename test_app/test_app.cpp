@@ -61,15 +61,16 @@ void testgpstk()
 
 int main(int argc, char* argv[])
 {
+    auto t = clock();
+    Action a(argv[1]);
+    auto gMap = a.process();
+    auto t2 = clock();
+    cout << "process complete ";
+    cout << (std::clock() - t) / (double)CLOCKS_PER_SEC << endl;
 
-    Action a("D:\\projects\\GPSTk_bin2\\POD\\Release\\config.txt");
-    auto grin = a.process();
-    cout << "process complete" << endl;
     ofstream f("dump.txt");
-    for (auto &it : grin)
-    {
-       PPPSolutionBase::printModel(f,it,4);
-    }
+    gMap.dump(f);
+
     f.close();
     return 0;
 }

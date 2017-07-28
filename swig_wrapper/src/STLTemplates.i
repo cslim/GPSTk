@@ -61,6 +61,8 @@ SWIG_STD_VECTOR_ENHANCED(Rinex3ObsData)
 
 // AKA ObsEpochMap
 %template(ObsEpochMap) std::map<gpstk::CommonTime, gpstk::ObsEpoch>;
+// AKA GnssEpochMap
+%template(map_GnssEpochData) std::map<gpstk::CommonTime, pod::GnssEpoch>;
 
 
 // These are needed to properly interpret an ObsID instance

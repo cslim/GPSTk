@@ -9,9 +9,13 @@ namespace pod
     class PODSolution : public PPPSolutionBase
     {
     public:
-        PODSolution(ConfDataReader & confReader, string dir);
-        virtual ~PODSolution(){};
 
+        ///Map GRACE C/No(Volts???) to dB*Hz by empirical relation
+        static void mapSNR(gnssRinex & gRin);
+
+        PODSolution(ConfDataReader & confReader, const string& dir);
+        virtual ~PODSolution(){};
+    
     protected:
         virtual void PRProcess() override;
         virtual bool PPPprocess() override;

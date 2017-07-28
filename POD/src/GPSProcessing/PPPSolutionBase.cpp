@@ -5,18 +5,19 @@
 #include<windows.h>
 #include<regex>
 
+#include"GnssEpochMap.h"
 #include"PPPSolution.h"
 #include"PODSolution.h"
 #include"auxiliary.h"
+
 
 #include "Rinex3NavHeader.hpp"
 #include "Rinex3NavData.hpp"
 #include "Rinex3NavStream.hpp"
 
-#define DBG
 namespace pod
 {
-    PPPSolutionBase* PPPSolutionBase::Factory(bool isSpaceborne, ConfDataReader & reader, string  dir)
+    PPPSolutionBase* PPPSolutionBase::Factory(bool isSpaceborne, ConfDataReader & reader, const string &  dir)
     {
         if (isSpaceborne)
             return new PODSolution(reader, dir);
@@ -55,6 +56,9 @@ namespace pod
             cout << "IonoModel Loading... ";
             cout << loadIono() << endl;
 
+            calcApprPos = confReader->fetchListValueAsBoolean("calcApprPos");
+            apprPosFile = confReader->fetchListValue("apprPosFile");
+
             return true;
         }
         catch (const std::exception&)
@@ -82,7 +86,6 @@ namespace pod
             // Try to load each ephemeris file
             try
             {
-
                 SP3EphList.loadFile(file);
             }
             catch (FileMissingException& e)
@@ -261,12 +264,19 @@ namespace pod
     //
     void PPPSolutionBase::process()
     {
-#ifndef DBG
-        cout << "Approximate Positions loading... ";
-        cout << loadApprPos("nomPos.in") << endl;
-#else
-        PRProcess();
-#endif
+
+        if (calcApprPos)
+        {
+            PRProcess();
+        }
+        else
+        {
+            string appr_pos_file = workingDir + "\\" + apprPosFile;
+            cout << "Approximate Positions loading from \n"+appr_pos_file+"\n... ";
+            
+            int i = loadApprPos(appr_pos_file);
+        }
+
         PPPprocess();
     }
 
@@ -277,7 +287,7 @@ namespace pod
         const CommonTime& time,
         const ComputeDOP& cDOP,
         bool  useNEU,
-        int   numSats,
+        GnssEpoch &   gEpoch,
         double dryTropo,
         vector<PowerSum> &stats,
         int   precision,
@@ -301,12 +311,17 @@ namespace pod
         // dry tropospheric delay value
         // ztd - #7
         double wetMap = solver.getSolution(TypeID::wetMap) + 0.1 + dryTropo;
+       
+        gEpoch.slnData.insert(pair<TypeID,double> (TypeID::dryTropo, dryTropo));
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::tropo, wetMap));
 
         if (useNEU)
         {
             x = solver.getSolution(TypeID::dLat);      // dLat  - #4
             y = solver.getSolution(TypeID::dLon);      // dLon  - #5
             z = solver.getSolution(TypeID::dH);        // dH    - #6
+
+
 
             varX = solver.getVariance(TypeID::dLat);   // Cov dLat  - #8
             varY = solver.getVariance(TypeID::dLon);   // Cov dLon  - #9
@@ -319,15 +334,24 @@ namespace pod
             y = nomXYZ.Y() + solver.getSolution(TypeID::dy);    // dy    - #5
             z = nomXYZ.Z() + solver.getSolution(TypeID::dz);    // dz    - #6
 
+            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recX, x));
+            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recY, y));
+            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recZ, z));
+
             varX = solver.getVariance(TypeID::dx);     // Cov dx    - #8
             varY = solver.getVariance(TypeID::dy);     // Cov dy    - #9
             varZ = solver.getVariance(TypeID::dz);     // Cov dz    - #10
+
+
         }
         //
-        outfile << x << "  " << y << "  " << z << "  " << wetMap << "  ";
-        outfile << sqrt(varX + varY + varZ) << "  ";
+        
+        double sigma = sqrt(varX + varY + varZ);
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::sigma, sigma));
+        outfile << x << "  " << y << "  " << z << "  " << wetMap << "  " << sigma << "  ";
 
-        outfile << numSats << endl;    // Number of satellites - #12
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recPDOP, cDOP.getPDOP()));
+        outfile << gEpoch.satData.size() << endl;    // Number of satellites - #12
 
         double tConv(5400.0);
 
@@ -363,41 +387,6 @@ namespace pod
         outfile << "St.Dev.  " << Var[0] << "  " << Var[1] << "  " << Var[2] << "  " << sqrt(_3DRMS) << endl;
     }
 
-    // Method to print model values
-    void PPPSolutionBase::printModel(ofstream& modelfile, const gnssRinex& gData, int   precision)
-    {
-        // Prepare for printing
-        modelfile << fixed << setprecision(precision);
-
-        // Get epoch out of GDS
-        CommonTime time(gData.header.epoch);
-
-        // Iterate through the GNSS Data Structure
-        for (auto &it : gData.body)
-        {
-            // Print epoch
-            modelfile << static_cast<YDSTime>(time).year << "  ";    // Year          #1
-            modelfile << static_cast<YDSTime>(time).doy << "  ";    // DayOfYear      #2
-            modelfile << static_cast<YDSTime>(time).sod << "  ";    // SecondsOfDay   #3
-
-            // Print satellite information (Satellite system and ID number)
-            modelfile << (it).first << " ";
-
-            // Print model values
-            for (auto itObs : (it).second)
-            {
-                // Print type names and values
-                modelfile << (itObs).first << " ";
-                modelfile << (itObs).second << " ";
-
-            }  // End of 'for( typeValueMap::const_iterator itObs = ...'
-
-            modelfile << endl;
-
-        }  // End for (it = gData.body.begin(); ... )
-
-    }  // End of method 'ex9::printModel()'
-
     bool PPPSolutionBase::loadApprPos(std::string path)
     {
         apprPos.clear();
@@ -429,13 +418,15 @@ namespace pod
             }
             else
             {
-                return false;
+                auto mess = "Can't load data from file: " + path;
+                std::exception e(mess.c_str());
+                throw e;
             }
         }
         catch (const std::exception& e)
         {
             cout << e.what() << endl;
-            return false;
+            throw e;
         }
         return true;
     }

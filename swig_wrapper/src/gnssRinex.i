@@ -27,11 +27,12 @@
 	   return (*($self)).body;
    }
 
+   /*
          std::map<gpstk::SatID, gpstk::typeValueMap>  getBodyAsMap()
       {
           return (std::map<gpstk::SatID, gpstk::typeValueMap>)((*($self)).body);
       }
-   /*
+   
       gpstk::RinexObsStream&  readRinexObsStream( gpstk::RinexObsStream& strm) {
      RinexObsData rod;
          strm >> rod;
