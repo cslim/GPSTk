@@ -318,10 +318,18 @@ namespace gpstk
       tStrings[recX]       = "RxPositionX";
       tStrings[recY]       = "RxPositionY";
       tStrings[recZ]       = "RxPositionZ";
+      tStrings[recCdt]     = "RxCdt";
+      tStrings[recCdtdot]  = "RxCdtdot";
+      tStrings[recZTropo]  = "RxZenithTropo";
+      tStrings[recZTropoWet] = "RxZenithTropoWet";
+      tStrings[recZTropoDry] = "RxZenithTropoDry";
+
       tStrings[recStDevX]  = "RxPositionStDev_X";
       tStrings[recStDevY]  = "RxPositionStDev_Y";
       tStrings[recStDevZ]  = "RxPositionStDev_Z";
       tStrings[recPDOP]    = "RxPDOP";
+      tStrings[recUsedSV]  = "RxUsedSV";
+      tStrings[recSlnType] = "RxSolutionType",
       tStrings[recVX]      = "RxVelocityX";
       tStrings[recVY]      = "RxVelocityY";
       tStrings[recVZ]      = "RxVelocityZ";
@@ -346,8 +354,8 @@ namespace gpstk
       tStrings[recJ2kAX]   = "RxJ2kAccelerationX";
       tStrings[recJ2kAY]   = "RxJ2kAccelerationY";
       tStrings[recJ2kAZ]   = "RxJ2kAccelerationZ";
-
       tStrings[sigma]      = "sigma";
+
       tStrings[iura]       = "iura";
       tStrings[Action]     = "Action";
       tStrings[dummy0]     = "dummy0";
@@ -705,27 +713,27 @@ namespace gpstk
       }
       else if(sat.system==SatID::systemBeiDou)
       {
-         // Compass E2   I/Q                 C2         L2         D2         S2
+         // Compass B1   I/Q                 C1         L1         D1         S1
          //         E5b  I/Q                 C7         L7         D7         S7
          //         E6   I/Q                 C6         L6         D6         S6
 
          // For E2-B1
          //if(roi.band == ObsID::cbE1) return TypeID::Unknown;
-         if(roi.band == ObsID::cbB3)         // TD is cbB3 correct?
+         if(roi.band == ObsID::cbB1)         // TD is cbB3 correct?
          {
-            if(roi.type == ObsID::otRange) return TypeID::C2;
-            if(roi.type == ObsID::otPhase) return TypeID::L2;
-            if(roi.type == ObsID::otDoppler) return TypeID::D2;
-            if(roi.type == ObsID::otSNR) return TypeID::S2;
+            if(roi.type == ObsID::otRange) return TypeID::C1;
+            if(roi.type == ObsID::otPhase) return TypeID::L1;
+            if(roi.type == ObsID::otDoppler) return TypeID::D1;
+            if(roi.type == ObsID::otSNR) return TypeID::S1;
          }
-         else if(roi.band == ObsID::cbE5b)
+         else if(roi.band == ObsID::cbB2)
          {
             if(roi.type == ObsID::otRange) return TypeID::C7;
             if(roi.type == ObsID::otPhase) return TypeID::L7;
             if(roi.type == ObsID::otDoppler) return TypeID::D7;
             if(roi.type == ObsID::otSNR) return TypeID::S7;
          }
-         else if(roi.band == ObsID::cbE6)
+         else if(roi.band == ObsID::cbB3)
          {
             if(roi.type == ObsID::otRange) return TypeID::C6;
             if(roi.type == ObsID::otPhase) return TypeID::L6;

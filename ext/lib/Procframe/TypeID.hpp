@@ -352,10 +352,17 @@ namespace gpstk
          recX,      ///< Receiver position, X component
          recY,      ///< Receiver position, Y component
          recZ,      ///< Receiver position, Z component
+         recCdt,    ///< Receiver Clock offset 
+         recCdtdot, ///< Receiver Clock offset 1-st derivative
+         recZTropo,  ///< full ZTD
+         recZTropoWet,  ///< Wet component of ZTD
+         recZTropoDry,  ///< Dry component of ZTD
          recStDevX, ///< Receiver position, X component satndard deviation
          recStDevY, ///< Receiver position, Y component satndard deviation
          recStDevZ, ///< Receiver position, Z component satndard deviation
          recPDOP,   ///< PDOP
+         recUsedSV, ///< Number of SV used by receiver for position computation 
+         recSlnType,///< Type of solution
          recVX,     ///< Receiver velocity, X component
          recVY,     ///< Receiver velocity, Y component
          recVZ,     ///< Receiver velocity, Z component
