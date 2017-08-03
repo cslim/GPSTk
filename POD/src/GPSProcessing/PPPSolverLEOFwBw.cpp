@@ -377,7 +377,6 @@ namespace pod
 
         try
         {
-
             // Keep processing while 'ObsData' is not empty
             if (!(ObsData.empty()))
             {

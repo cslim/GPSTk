@@ -157,10 +157,10 @@ namespace gpstk
          {
 
                // Create a new gnssRinex structure with just the data we need
-            gnssRinex gBak(gData.extractTypeID(keepTypeSet));
+            //gnssRinex gBak(gData.extractTypeID(keepTypeSet));
 
                // Store observation data
-            ObsData.push_back(gBak);
+            ObsData.push_back(gData);
 
             // Update the number of processed measurements
             processedMeasurements += gData.numSats();

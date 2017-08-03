@@ -437,8 +437,13 @@ namespace pod
                         >> phaseAlign
                         >> linear3
                         >> baseChange
-                        >> cDOP
-                        >> pppSolver;
+                        >> cDOP;
+
+                    if(cycles<1)
+                        gRin >> pppSolver;
+                    else
+                        gRin >> fbpppSolver;
+
                     // Let's process data. Thanks to 'ProcessingList' this is
                     // very simple and compact: Just one line of code!!!.
                     // gRin >> pList;
@@ -523,11 +528,12 @@ namespace pod
             return false;
 
         }  // End of 'try-catch' block
-
+    
            // Reprocess is over. Let's finish with the last processing		
            // Loop over all data epochs, again, and print results
         while (fbpppSolver.LastProcess(gRin))
         {
+         
             GnssEpoch ep(gRin);
             CommonTime time(gRin.header.epoch);
             if (b)
@@ -536,6 +542,7 @@ namespace pod
                 b = false;
             }
             nominalPos = apprPos[time];
+           
             printSolution(outfile, fbpppSolver, time0, time, cDOP, isNEU, ep, drytropo, stats, prec, nominalPos);
             gMap.data.insert(pair<CommonTime, GnssEpoch>(time, ep));
 

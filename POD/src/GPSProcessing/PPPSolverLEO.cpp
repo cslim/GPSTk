@@ -802,27 +802,28 @@ covariance matrix.");
         outfile << static_cast<YDSTime>(time).sod << "  ";   // SecondsOfDay   - #3
         outfile << setprecision(6) << (static_cast<YDSTime>(time).doy + static_cast<YDSTime>(time).sod / 86400.0) << "  " << setprecision(4);
 
-        //calculate statistic
-        double x(0), y(0), z(0), varX(0), varY(0), varZ(0);
 
-        x = nomXYZ.X() + getSolution(TypeID::dx);    // dx    - #4
-        y = nomXYZ.Y() + getSolution(TypeID::dy);    // dy    - #5
-        z = nomXYZ.Z() + getSolution(TypeID::dz);    // dz    - #6
+        double x = nomXYZ.X() + getSolution(TypeID::dx);    // dx    - #4
+        double y = nomXYZ.Y() + getSolution(TypeID::dy);    // dy    - #5
+        double z = nomXYZ.Z() + getSolution(TypeID::dz);    // dz    - #6
 
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recX, x));
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recY, y));
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recZ, z));
 
-        varX = getVariance(TypeID::dx);     // Cov dx    - #8
-        varY = getVariance(TypeID::dy);     // Cov dy    - #9
-        varZ = getVariance(TypeID::dz);     // Cov dz    - #10
+        double cdt = getSolution(TypeID::cdt);
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdt, cdt));
+
+        double varX = getVariance(TypeID::dx);     // Cov dx    - #8
+        double varY = getVariance(TypeID::dy);     // Cov dy    - #9
+        double varZ = getVariance(TypeID::dz);     // Cov dz    - #10
 
        
         double sigma = sqrt(varX + varY + varZ);
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::sigma, sigma));
         outfile << x << "  " << y << "  " << z << "  " << "  " << sigma << "  ";
 
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recPDOP, cDOP.getPDOP()));
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recSlnType, 16));
 
         outfile << gEpoch.satData.size() << endl;    
         //time of convergence,  seconds;

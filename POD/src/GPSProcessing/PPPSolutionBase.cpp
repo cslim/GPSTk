@@ -312,8 +312,8 @@ namespace pod
         // ztd - #7
         double wetMap = solver.getSolution(TypeID::wetMap) + 0.1 + dryTropo;
        
-        gEpoch.slnData.insert(pair<TypeID,double> (TypeID::dryTropo, dryTropo));
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::tropo, wetMap));
+       // gEpoch.slnData.insert(pair<TypeID,double> (TypeID::dryTropo, dryTropo));
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recZTropo, wetMap));
 
         if (useNEU)
         {
@@ -329,7 +329,6 @@ namespace pod
         }
         else
         {
-
             x = nomXYZ.X() + solver.getSolution(TypeID::dx);    // dx    - #4
             y = nomXYZ.Y() + solver.getSolution(TypeID::dy);    // dy    - #5
             z = nomXYZ.Z() + solver.getSolution(TypeID::dz);    // dz    - #6
@@ -341,16 +340,18 @@ namespace pod
             varX = solver.getVariance(TypeID::dx);     // Cov dx    - #8
             varY = solver.getVariance(TypeID::dy);     // Cov dy    - #9
             varZ = solver.getVariance(TypeID::dz);     // Cov dz    - #10
-
-
         }
         //
-        
+        double cdt = solver.getSolution(TypeID::cdt);
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdt, cdt));
+
         double sigma = sqrt(varX + varY + varZ);
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::sigma, sigma));
         outfile << x << "  " << y << "  " << z << "  " << wetMap << "  " << sigma << "  ";
+     
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recSlnType, 16));
 
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recPDOP, cDOP.getPDOP()));
+        //gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recPDOP, cDOP.getPDOP()));
         outfile << gEpoch.satData.size() << endl;    // Number of satellites - #12
 
         double tConv(5400.0);
