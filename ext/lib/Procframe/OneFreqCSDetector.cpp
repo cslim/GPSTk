@@ -88,11 +88,21 @@ namespace gpstk
             lliType     = TypeID::LLI1;
             resultType  = TypeID::CSL1;
             break;
+         case TypeID::P1:
+             phaseType = TypeID::L1;
+             lliType = TypeID::LLI1;
+             resultType = TypeID::CSL1;
+             break;
          case TypeID::C2:
             phaseType   = TypeID::L2;
             lliType     = TypeID::LLI2;
             resultType  = TypeID::CSL2;
             break;
+         case TypeID::P2:
+             phaseType = TypeID::L2;
+             lliType = TypeID::LLI2;
+             resultType = TypeID::CSL2;
+             break;
          case TypeID::C5:
             phaseType   = TypeID::L5;
             lliType     = TypeID::LLI5;

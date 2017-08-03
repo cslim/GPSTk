@@ -1,4 +1,5 @@
 #include <iostream>
+
 #include "SystemTime.hpp"
 #include"CommonTime.hpp"
 #include"CivilTime.hpp"
@@ -8,13 +9,17 @@
 #include"Rinex3ObsData.hpp"
 #include"Exception.hpp"
 #include"DataStructures.hpp"
+
+#include "PrSmoother.h"
+
 #include"Solution.h"
 #include"Action.h"
+
 using namespace std;
 using namespace gpstk;
 using namespace pod;
 
-void testgpstk()
+void testRinParse(char* path)
 {
     // Create the input file stream
     Rinex3ObsStream rin("cng2182a.17o");
@@ -58,19 +63,34 @@ void testgpstk()
     rout.close();
 }
 
-
-int main(int argc, char* argv[])
+void testPod(char * path)
 {
     auto t = clock();
-    Action a(argv[1]);
+    Action a(path);
     auto gMap = a.process();
     auto t2 = clock();
     cout << "process complete ";
     cout << (std::clock() - t) / (double)CLOCKS_PER_SEC << endl;
-
+    cout <<"epochs "<< gMap.data.size() << endl;
     ofstream f("dump.txt");
     gMap.dump(f);
 
     f.close();
+
+}
+
+void codeSmoother(const char * iPath, int window)
+{
+    list<TypeID> ids{ TypeID::C1,TypeID::P1,TypeID::P2 };
+    PrSmoother prsm(ids, window);
+    prsm.smooth(iPath);
+
+}
+int main(int argc, char* argv[])
+{
+
+    codeSmoother(argv[1], atoi(argv[2]));
+    //testgpstk
+    //testPod(argv[1]);
     return 0;
 }

@@ -166,6 +166,11 @@ namespace gpstk
                phaseObs = (*it).second(phaseType);
                flagObs  = (*it).second(csFlag);
 
+               if(codeObs==0.0 ||phaseObs==0.0 )
+               {
+                   satRejectedSet.insert((*it).first);
+                   continue;
+               }
             }
             catch(...)
             {
