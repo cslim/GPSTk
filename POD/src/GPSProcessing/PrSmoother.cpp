@@ -45,10 +45,18 @@ void PrSmoother::smooth(const char * path)
 
     cout << "Rinex file whith raw PR: " << iPath << endl;
 
-    cout << "Obs. types for smoothing: " << endl;
+    std::list<CodeSmoother> smList;
+    // We MUST mark cycle slips
+    std::list<OneFreqCSDetector> csList;
 
+    cout << "Obs. types for smoothing: " << endl;
     for (auto &it : codes)
+    {
         cout << TypeID::tStrings[it.type] << endl;
+        smList.push_back(CodeSmoother(it, window));
+        csList.push_back(OneFreqCSDetector(it));
+    }
+      
 
     RinexObsStream rin(iPath.string());
     RinexObsStream rout(oPath.string(), ios::out);
@@ -57,15 +65,6 @@ void PrSmoother::smooth(const char * path)
     RinexObsHeader head;
     gnssRinex gRin;
 
-    // We MUST mark cycle slips
-    int smL = 100;
-    std::list<CodeSmoother> smList;
-    for (auto &it : codes)
-        smList.push_back(CodeSmoother(it, window));
-
-    std::list<OneFreqCSDetector> csList;
-    for (auto &it : codes)
-        csList.push_back(OneFreqCSDetector(it));
 
     rin >> head;
     rout << head;

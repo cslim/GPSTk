@@ -9,8 +9,7 @@ namespace pod
     class auxiliary
     {
     public:
-        static int getAllFiles(const string &dir, const string &subDir, list<string> &files);
-        static bool getDirectory(const string& path, string& directory);
+        static void  auxiliary::getAllFilesInDir(const string &dir, list<string> &files);
     };
 }
 #endif // ! POD_AUXILIARY_H

@@ -22,5 +22,4 @@ namespace pod
     };
 }
 
-
 #endif // !POD_POD_SOLUTION_H

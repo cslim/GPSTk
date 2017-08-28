@@ -3,6 +3,10 @@
 #include<windows.h>
 #include "Shlwapi.h"
 #include"auxiliary.h"
+#include<filesystem>
+
+namespace fs = std::experimental::filesystem;
+
 namespace pod
 {
 
@@ -17,18 +21,13 @@ namespace pod
                  false)
     {
         loadConfig(path);
-        std::string  workigDir = "";
-        auxiliary::getDirectory(path, workigDir);
+
         bool isSpace = confReader.fetchListValueAsBoolean("IsSpaceborneRcv");
-        this->solver = PPPSolutionBase::Factory(isSpace, confReader, workigDir);
+        this->solver = PPPSolutionBase::Factory(isSpace, confReader, fs::path(path).parent_path().string());
     }
 
     bool Solution::loadConfig(const char* path)
     {
-
-        // Enable exceptions
-        //confReader.exceptions(ios::failbit);
-
         try
         {
             // Try to open the provided configuration file

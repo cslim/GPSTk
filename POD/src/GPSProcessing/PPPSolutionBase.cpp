@@ -47,7 +47,7 @@ namespace pod
             genFilesDir = workingDir + "\\" + subdir + "\\";
 
             subdir = confReader->fetchListValue("RinesObsDir");
-            auxiliary::getAllFiles(workingDir, subdir, rinexObsFiles);
+            auxiliary::getAllFilesInDir(workingDir+"\\"+ subdir, rinexObsFiles);
 
             cout << "Ephemeris Loading... ";
             cout << loadEphemeris() << endl;
@@ -79,7 +79,7 @@ namespace pod
 
         list<string> files;
         string subdir = confReader->fetchListValue("EphemerisDir");
-        auxiliary::getAllFiles(workingDir, subdir, files);
+        auxiliary::getAllFilesInDir(workingDir+"\\"+ subdir, files);
 
         for (auto file : files)
         {
@@ -104,7 +104,7 @@ namespace pod
     {
         list<string> files;
         string subdir = confReader->fetchListValue("RinexClockDir");
-        auxiliary::getAllFiles(workingDir, subdir, files);
+        auxiliary::getAllFilesInDir(workingDir+"\\" + subdir, files);
 
         for (auto file : files)
         {
@@ -128,7 +128,7 @@ namespace pod
     {
         list<string> files;
         string subdir = confReader->fetchListValue("RinexNavFilesDir");
-        auxiliary::getAllFiles(workingDir, subdir, files);
+        auxiliary::getAllFilesInDir(workingDir+"\\"+ subdir, files);
 
         for (auto file : files)
         {
