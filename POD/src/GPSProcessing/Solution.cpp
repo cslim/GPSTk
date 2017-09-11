@@ -51,11 +51,15 @@ namespace pod
 
         return true;
     }
+
     void Solution::process()
     {
         solver->LoadData();
         solver->process();
     }
 
-   
+    void Solution::chekObs()
+    {
+        solver->checkObservable();
+    }
 }

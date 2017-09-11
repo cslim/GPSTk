@@ -1,6 +1,7 @@
 #include"PPPSolutionBase.h"
 
 #include<list>
+#include<set>
 #include <direct.h>
 #include<windows.h>
 #include<regex>
@@ -37,7 +38,22 @@ namespace pod
     {
         delete solverPR;
     }
+    void PPPSolutionBase::mapSNR(gnssRinex & gRin)
+    {
+        for (auto &it1 : gRin.body)
+        {
+            auto  ts1 = TypeID(TypeID::S1);
+            auto  ts2 = TypeID(TypeID::S2);
+           
+            auto s1 = it1.second.find(ts1);
+            if (s1 != it1.second.end())
+                s1->second =  mapSNR(s1->second);
 
+            auto s2 = it1.second.find(ts1);
+            if (s2 != it1.second.end())
+                s2->second = mapSNR(s2->second);
+        }
+    }
     bool  PPPSolutionBase::LoadData()
     {
         try
@@ -52,7 +68,7 @@ namespace pod
             cout << "Ephemeris Loading... ";
             cout << loadEphemeris() << endl;
             cout << "Clocks Loading... ";
-            cout << loadClocks() << endl;
+            //cout << loadClocks() << endl;
             cout << "IonoModel Loading... ";
             cout << loadIono() << endl;
 
@@ -211,9 +227,19 @@ namespace pod
         return true;
     }
     
-    void PPPSolutionBase::checkObservable(const string & path)
+    void PPPSolutionBase::checkObservable()
     {
-        ofstream os("ObsStatisic.out");
+        string subdir = confReader->fetchListValue("RinesObsDir");
+        auxiliary::getAllFilesInDir(workingDir + "\\" + subdir, rinexObsFiles);
+
+        ofstream os(workingDir+ "\\ObsStatisic.out");
+
+        std::set<SatID::SatelliteSystem> systems;
+        systems.insert(SatID::SatelliteSystem::systemGPS);
+        bool useGLN = confReader->fetchListValueAsBoolean("useGLN");
+        if (useGLN)
+            systems.insert(SatID::SatelliteSystem::systemGlonass);
+
 
         for (auto obsFile : rinexObsFiles)
         {
@@ -229,38 +255,152 @@ namespace pod
 
             //read the header
             rin >> roh;
-            int indexC1 = roh.getObsIndex(L1CCodeID);
-            int indexCNoL1 = roh.getObsIndex(L1CNo);
-            int indexP1 = roh.getObsIndex(L1PCodeID);
-            int indexP2 = roh.getObsIndex(L2CodeID);
+
             while (rin >> rod)
             {
                 if (rod.epochFlag == 0 || rod.epochFlag == 1)  // Begin usable data
                 {
                     int NumC1(0), NumP1(0), NumP2(0), NumBadCNo1(0);
-                    os << setprecision(12) << (CivilTime)rod.time << " " << rod.numSVs << " ";
-
-                    for (auto it : rod.obs)
+                    os << setprecision(12) << (CivilTime)rod.time << " " ;
+                    int nGPS = 0, nGLN = 0;
+                    for (auto &it : rod.obs)
                     {
-                        double C1 = rod.getObs(it.first, indexC1).data;
+                        if (systems.find(it.first.system) == systems.end()) continue;
+                        if (it.first.system == SatID::SatelliteSystem::systemGPS)
+                            nGPS++;
+                        if (it.first.system == SatID::SatelliteSystem::systemGlonass)
+                            nGLN++;
 
-                        int CNoL1 = rod.getObs(it.first, indexCNoL1).data;
-                        if (CNoL1 > 30) NumBadCNo1++;
+                        auto &ids = CodeProcSvData::obsTypes[it.first.system];
 
-                        double P1 = rod.getObs(it.first, indexP1).data;
+                        double C1 = rod.getObs(it.first, ids[TypeID::C1], roh).data;
+
+                        int CNoL1 = rod.getObs(it.first, ids[TypeID::S1], roh).data;
+                        if (CNoL1 < 30) NumBadCNo1++;
+
+                        double P1 = rod.getObs(it.first, ids[TypeID::P1], roh).data;
                         if (P1 > 0.0)  NumP1++;
 
-                        double P2 = rod.getObs(it.first, indexP2).data;
+                        double P2 = rod.getObs(it.first, ids[TypeID::P2], roh).data;
                         if (P2 > 0.0)  NumP2++;
                     }
 
-                    os << NumBadCNo1 << " " << NumP1 << " " << NumP2 << endl;
+                    os <<nGPS<<" "<<nGLN<<" "<< NumBadCNo1 << " " << NumP1 << " " << NumP2 << endl;
                 }
             }
 
         }
     }
 
+    void PPPSolutionBase::PRProcess()
+    {
+        NeillTropModel NeillModel = solverPR->initTropoModel(nominalPos, DoY);
+
+        int badSol = 0;
+        apprPos.clear();
+
+        cout << "solverType " << solverPR->getName() << endl;
+
+        solverPR->maskEl = 5;
+        solverPR->maskSNR = 30;
+        solverPR->ionoType = (CodeIonoCorrType)confReader->fetchListValueAsInt("CodeIonoCorrType");
+
+        std::set<SatID::SatelliteSystem> systems;
+        systems.insert(SatID::SatelliteSystem::systemGPS);
+        bool useGLN = confReader->fetchListValueAsBoolean("useGLN");
+        if (useGLN)
+            systems.insert(SatID::SatelliteSystem::systemGlonass);
+
+        ofstream os;
+        string outPath = workingDir + "\\" + apprPosFile;
+        // string outDbg= workingDir + "\\code_dbg.txt";
+        // solverPR->dbg.open(outDbg);
+        // solverPR->dbg << setprecision(12);
+         os.open(outPath);
+       
+        //decimation
+        int sampl(1);
+        double tol(0.1);
+
+        for (auto obsFile : rinexObsFiles)
+        {
+            cout << obsFile << endl;
+            try 
+            {
+                //Input observation file stream
+                Rinex3ObsStream rin;
+                // Open Rinex observations file in read-only mode
+                rin.open(obsFile, std::ios::in);
+
+                rin.exceptions(ios::failbit);
+                Rinex3ObsHeader roh;
+                Rinex3ObsData rod;
+
+                //read the header
+                rin >> roh;
+                CommonTime ct0 = roh.firstObs;
+                // Let's process all lines of observation data, one by one
+                while (rin >> rod)
+                {
+                    double dt = rod.time - ct0;
+                    GPSWeekSecond gpst = static_cast<GPSWeekSecond>(rod.time);
+
+                    if (fmod(gpst.getSOW(), sampl) > tol) continue;
+
+                    int GoodSats = 0;
+                    int res = 0;
+
+                    CodeProcSvData svData;
+                    
+                    ///
+                    solverPR->selectObservables(rod, roh, systems, CodeProcSvData::obsTypes, svData);
+                    
+                    for (auto &it : svData.data)
+                        it.second.snr = mapSNR(it.second.snr);
+                    
+                    svData.applyCNoMask(solverPR->maskSNR);
+                    GoodSats = svData.getNumUsedSv();
+
+                    os  << setprecision(6);
+                    os  << CivilTime(gpst).printf("%02Y %02m %02d %02H %02M %02S %P") << " "<<dt<< " ";
+
+                    if (GoodSats > 4)
+                    {
+                        solverPR->prepare(rod.time, SP3EphList, svData);
+                        res = solverPR->solve(rod.time, ionoStore, svData);
+                        os << res;
+                    }
+                    else
+                        res = 1;
+
+                    os << *solverPR<<" "<<svData << endl;
+                    if (res == 0)
+                    {
+                        Xvt xvt;
+                        xvt.x = Triple(solverPR->Sol(0), solverPR->Sol(1), solverPR->Sol(2));
+                        xvt.clkbias = solverPR->Sol(3);
+                        apprPos.insert(pair<CommonTime, Xvt>(rod.time, xvt));
+                    }
+                    else
+                    {
+                        solverPR->Sol = 0.0;
+                        badSol++;
+                    }
+                }
+                rin.close();
+            }
+            catch (Exception& e)
+            {
+                cerr << e << endl;
+                GPSTK_RETHROW(e);
+            }
+            catch (...)
+            {
+                cerr << "Caught an unexpected exception." << endl;
+            }
+            cout << "Number of bad solutions " << badSol << endl;
+        }
+    }
     //
     void PPPSolutionBase::process()
     {
@@ -396,18 +536,18 @@ namespace pod
             ifstream file(path);
             if (file.is_open())
             {
-                unsigned int W(0);
-                double sow(0.0), x(0.0), y(0.0), z(0.0), rco(0.0);
+                unsigned int Y(0), m(0), d(0), D(0), M(0), S(0);
+                double sow(0.0), x(0.0), y(0.0), z(0.0), rco(0.0),dt(0);
                 int solType(0);
                 string sTS;
 
                 string line;
-                while (file >> W >> sow >> sTS >> solType >> x >> y >> z >> rco)
+                while (file >> Y >> m >> d >> D >> M >> S >> sTS >> dt>> solType >> x >> y >> z >> rco)
                 {
                     if (!solType)
                     {
-                        GPSWeekSecond gpst(W, sow, TimeSystem::GPS);
-                        CommonTime time = static_cast<CommonTime> (gpst);
+                        CivilTime ct = CivilTime(Y, m, d, D, M, S, TimeSystem::GPS);
+                        CommonTime time = static_cast<CommonTime> (ct);
                         Xvt xvt;
                         xvt.x = Triple(x, y, z);
                         xvt.clkbias = rco;

@@ -303,7 +303,13 @@ namespace gpstk
           * @param useNEU   If true, will compute dLat, dLon, dH coordinates;
           *                 if false (the default), will compute dx, dy, dz.
           */
-      SolverPPPFB(bool useNEU = false);
+      SolverPPPFB(
+          bool useNEU = false,
+          double  tropoQ = 6e-10,
+          double posSigma = 100.0,
+          double clkSigma = 30000.0,
+          double weightFactor = 10000.0
+      );
 
 
          /** Returns a reference to a gnnsSatTypeValue object after

@@ -3,7 +3,7 @@
 
 
 #include"SolverWMS.hpp"
-#include"PRSolverLEO.h"
+#include"CodeSolverLEO.h"
 #include "ComputeDOP.hpp"
 #include"SP3EphemerisStore.hpp"
 #include"ConfDataReader.hpp"
@@ -28,7 +28,7 @@ namespace pod
         bool loadIono();
         bool loadClocks();
 
-        void checkObservable(const string & path);
+        void checkObservable();
 
         void process();
 
@@ -38,13 +38,17 @@ namespace pod
         };
 
     protected:
-        virtual void PRProcess() = 0;
+        void PRProcess();
         virtual bool PPPprocess() = 0;
+
+        void mapSNR(gnssRinex & value);
+        virtual double mapSNR(double value) { return value; };
+
 
         bool loadApprPos(std::string path);
       
-
-        void printSolution(ofstream& outfile,
+        void printSolution(
+            ofstream& outfile,
             const SolverLMS& solver,
             const CommonTime& time0,
             const CommonTime& time,
@@ -54,7 +58,8 @@ namespace pod
             double dryTropo,
             vector<PowerSum> &stats,
             int   precision,
-            const Position &nomXYZ);
+            const Position &nomXYZ
+        );
 
         void printStats(ofstream& outfile, const vector<PowerSum> &stats);
         
@@ -68,11 +73,6 @@ namespace pod
         uchar maskSNR;
         double maskEl;
 
-        const char * L1CCodeID = "C1" ;
-        const char * L1PCodeID = "C1W";
-        const char * L2CodeID  = "C2W";
-        const char * L1CNo     = "S1C";
-        
         //
         int DoY = 0;
         //
@@ -84,7 +84,7 @@ namespace pod
         // object to handle precise ephemeris and clocks
         SP3EphemerisStore SP3EphList;
         //
-        PRSolverBase *solverPR;
+        CodeSolverBase *solverPR;
         IonoModelStore ionoStore;
         list<string> rinexObsFiles;
         map<CommonTime, Xvt, std::less<CommonTime>> apprPos;

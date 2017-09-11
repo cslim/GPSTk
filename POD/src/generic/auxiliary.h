@@ -4,8 +4,21 @@
 #include<string>
 #include<list>
 using namespace std;
+
+#include <Windows.h>
+#include <iostream>
+#include <sstream>
+
+#define DBOUT( s )            \
+{                             \
+   std::ostringstream os_;    \
+   os_ << s;                   \
+   OutputDebugString( os_.str().c_str() );  \
+}
+
 namespace pod
 {
+
     class auxiliary
     {
     public:

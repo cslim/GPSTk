@@ -19,7 +19,7 @@ namespace pod
             delete solver;
         }
         virtual void process();
-        
+        void chekObs();
         GnssEpochMap  getData()
         {
             return solver->getData();

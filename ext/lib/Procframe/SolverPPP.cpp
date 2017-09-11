@@ -65,38 +65,45 @@ namespace gpstk
        * @param useNEU   If true, will compute dLat, dLon, dH coordinates;
        *                 if false (the default), will compute dx, dy, dz.
        */
-   SolverPPP::SolverPPP(bool useNEU)
-      : firstTime(true)
+
+       SolverPPP::SolverPPP(
+       bool useNEU ,
+       double  tropoQ ,
+       double posSigma ,
+       double clkSigma ,
+       double weightFactor 
+   )   : firstTime(true)
    {
 
-         // Set the equation system structure
-      setNEU(useNEU);
+       // Set the equation system structure
+       setNEU(useNEU);
 
-         // Call initializing method
-      Init();
+       // Call initializing method
+       Init(tropoQ, posSigma, clkSigma, weightFactor);
 
    }  // End of 'SolverPPP::SolverPPP()'
 
-
-
       // Initializing method.
-   void SolverPPP::Init(void)
+   void SolverPPP::Init(
+       double  tropoQ,
+       double posSigma,
+       double clkSigma ,
+       double weightFactor
+       )
    {
-       //default 6e-10
-       double Qpr(6e-10);
          // Set qdot value for default random walk stochastic model
-      rwalkModel.setQprime(Qpr);
-      std::cout << Qpr<<" " <<rwalkModel.getQ() << "\n";
+      rwalkModel.setQprime(tropoQ);
+  
          // Pointer to default stochastic model for troposphere (random walk)
       pTropoStoModel = &rwalkModel;
-
          // Set default coordinates stochastic model (constant)
       setCoordinatesModel( &constantModel );
 
-      whitenoiseModelX.setSigma(100.0);
-      whitenoiseModelY.setSigma(100.0);
-      whitenoiseModelZ.setSigma(100.0);
+      whitenoiseModelX.setSigma(posSigma);
+      whitenoiseModelY.setSigma(posSigma);
+      whitenoiseModelZ.setSigma(posSigma);
 
+      whitenoiseModel.setSigma(clkSigma);
          // Pointer to default receiver clock stochastic model (white noise)
       pClockStoModel = &whitenoiseModel;
       
@@ -105,7 +112,7 @@ namespace gpstk
 
          // Set default factor that multiplies phase weights
          // If code sigma is 1 m and phase sigma is 1 cm, the ratio is 100:1
-      weightFactor = 10000.0;       // 100^2
+     this->weightFactor = weightFactor;       // 100^2
 
 
    }  // End of method 'SolverPPP::Init()'

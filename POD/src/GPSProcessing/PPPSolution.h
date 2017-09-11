@@ -15,7 +15,6 @@ namespace pod
         virtual ~PPPSolution(){};
 
     protected:
-        virtual void PRProcess() override;
         virtual bool PPPprocess() override;
         NeillTropModel tropModel;
 

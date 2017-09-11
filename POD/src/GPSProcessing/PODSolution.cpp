@@ -66,24 +66,10 @@
 using namespace gpstk;
 namespace pod
 {
-    void PODSolution::mapSNR(gnssRinex & gRin)
-    {
-        for (auto &it1 : gRin.body)
-        {
-            auto  ts1 = TypeID(TypeID::S1);
-            auto  ts2 = TypeID(TypeID::S2);
-
-            double s1 = it1.second.getValue(ts1);
-            it1.second.at(ts1) = 20.0*log10(s1);
-
-            double s2 = it1.second.getValue(ts2);
-            it1.second.at(ts2) = 20.0*log10(s2);
-        }
-    }
     PODSolution::PODSolution(ConfDataReader & confReader, const string& dir):
         PPPSolutionBase (confReader,dir)
     {
-        solverPR = new PRSolverLEO();
+        solverPR = new CodeSolverLEO();
     }
 
     bool PODSolution::PPPprocess()
@@ -300,7 +286,8 @@ namespace pod
             // Loop over all data epochs
             while (rin >> gRin)
             {
-                mapSNR(gRin);
+                PPPSolutionBase::mapSNR(gRin);
+
                 // Store current epoch
                 CommonTime time(gRin.header.epoch);
 //#ifdef DBG
@@ -465,154 +452,10 @@ namespace pod
     }
 
 
-    void PODSolution::PRProcess()
+
+
+    double PODSolution::mapSNR(double value)
     {
-        //
-        NeillTropModel  NeillModel;
-
-        int badSol = 0;
-        apprPos.clear();
-
-        cout << "solverType " << solverPR->getName() << endl;
-
-        solverPR->maskEl = 5;
-        solverPR->maskSNR = 1;
-        solverPR->ionoType = (PRIonoCorrType)confReader->fetchListValueAsInt("PRionoCorrType");
-
-        ofstream os;
-        os.open(workingDir + "\\solutionPR.out");
-        //decimation
-        int sampl(10);
-        double tol(0.1);
-
-        for (auto obsFile : rinexObsFiles)
-        {
-            cout << obsFile << endl;
-            try {
-
-                //Input observation file stream
-                Rinex3ObsStream rin;
-                // Open Rinex observations file in read-only mode
-                rin.open(obsFile, std::ios::in);
-
-                rin.exceptions(ios::failbit);
-                Rinex3ObsHeader roh;
-                Rinex3ObsData rod;
-
-                //read the header
-                rin >> roh;
-
-#pragma region init observables indexes
-
-                int indexC1 = roh.getObsIndex(L1CCodeID);
-                int indexCNoL1;
-                try
-                {
-                    indexCNoL1 = roh.getObsIndex(L1CNo);
-                    cout << "L1 C/No from " << L1CNo << endl;
-                }
-                catch (...)
-                {
-                    cerr << "The observation file doesn't have L1 C/No" << endl;
-                    continue;
-                }
-                int indexP1;
-                try
-                {
-                    indexP1 = roh.getObsIndex(L1PCodeID);
-                    cout << "L1 PRange from " << L1PCodeID << endl;
-                }
-                catch (...)
-                {
-                    cerr << "The observation file doesn't have L1 pseudoranges." << endl;
-                    continue;
-                }
-
-                int indexP2;
-                try
-                {
-                    indexP2 = roh.getObsIndex(L2CodeID);
-                    cout << "L2 PRange from " << L2CodeID << endl;
-                }
-                catch (...)
-                {
-                    indexP2 = -1;
-                    if (solverPR->ionoType == PRIonoCorrType::IF)
-                        cout << "The observation file doesn't have L2 pseudoranges" << endl;
-                    continue;
-                }
-
-#pragma endregion
-
-                // Let's process all lines of observation data, one by one
-                while (rin >> rod)
-                {
-                    GPSWeekSecond gpst = static_cast<GPSWeekSecond>(rod.time);
-
-                    if (fmod(gpst.getSOW(), sampl) > tol) continue;
-
-                    int GoodSats = 0;
-                    int res = 0;
-
-                    // prepare for iteration loop
-                    Vector<double> Resid;
-
-                    vector<SatID> prnVec;
-                    vector<double> rangeVec;
-                    vector<uchar> SNRs;
-                    vector<bool> UseSat;
-
-                    solverPR->selectObservables(rod, indexC1, indexP2, indexCNoL1, prnVec, rangeVec, SNRs);
-                    solverPR->Sol = 0.0;
-
-                    for (size_t i = 0; i < prnVec.size(); i++)
-                    {
-                        double snri = 20.0*log10(SNRs[i]);
-                        if (snri >= solverPR->maskSNR)
-                        {
-                            UseSat.push_back(true);
-                            GoodSats++;
-                        }
-                        else
-                            UseSat.push_back(false);
-                    }
-
-                    os << setprecision(17) << gpst << " ";
-                    if (GoodSats > 4)
-                    {
-                        Matrix<double> SVP(prnVec.size(), 4), Cov(4, 4);
-                        solverPR->prepare(rod.time, prnVec, rangeVec, SP3EphList, UseSat, SVP);
-                        res = solverPR->solve(rod.time, SVP, UseSat, Cov, Resid, ionoStore);
-                        os << res;
-                    }
-                    else
-                        res = 1;
-
-                    os << solverPR->printSolution(UseSat) << endl;
-                    if (res == 0)
-                    {
-                        Xvt xvt;
-                        xvt.x = Triple(solverPR->Sol(0), solverPR->Sol(1), solverPR->Sol(2));
-                        xvt.clkbias = solverPR->Sol(3);
-                        apprPos.insert(pair<CommonTime, Xvt>(rod.time, xvt));
-                    }
-                    else
-                    {
-                        badSol++;
-                    }
-                }
-                rin.close();
-            }
-            catch (Exception& e)
-            {
-                cerr << e << endl;
-                cerr << "Caught an unexpected exception." << endl;
-            }
-            catch (...)
-            {
-                cerr << "Caught an unexpected exception." << endl;
-            }
-            cout << "Number of bad solutions " << badSol << endl;
-        }
+       return 20.0*log10(value);
     }
 }

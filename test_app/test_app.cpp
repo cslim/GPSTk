@@ -14,6 +14,7 @@
 
 #include"Solution.h"
 #include"Action.h"
+#include"PPPSolution.h"
 
 using namespace std;
 using namespace gpstk;
@@ -88,9 +89,10 @@ void codeSmoother(const char * iPath, int window)
 }
 int main(int argc, char* argv[])
 {
-
-    codeSmoother(argv[1], atoi(argv[2]));
+    //Solution sol(argv[1]);
+    //sol.chekObs();
+    //codeSmoother(argv[1], atoi(argv[2]));
     //testgpstk
-    //testPod(argv[1]);
+    testPod(argv[1]);
     return 0;
 }

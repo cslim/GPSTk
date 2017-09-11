@@ -56,8 +56,14 @@ namespace gpstk
        * @param useNEU   If true, will compute dLat, dLon, dH coordinates;
        *                 if false (the default), will compute dx, dy, dz.
        */
-   SolverPPPFB::SolverPPPFB(bool useNEU)
-      : firstIteration(true)
+   SolverPPPFB::SolverPPPFB(
+       bool useNEU ,
+       double  tropoQ,
+       double posSigma ,
+       double clkSigma ,
+       double weightFactor 
+   )
+      :SolverPPP(useNEU, tropoQ, posSigma, clkSigma, weightFactor), firstIteration(true)
    {
 
          // Initialize the counter of processed measurements

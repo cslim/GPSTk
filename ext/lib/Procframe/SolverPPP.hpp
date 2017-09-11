@@ -226,8 +226,13 @@ namespace gpstk
           * @param useNEU   If true, will compute dLat, dLon, dH coordinates;
           *                 if false (the default), will compute dx, dy, dz.
           */
-      SolverPPP(bool useNEU = false);
-
+          SolverPPP(
+          bool useNEU = false,
+          double  tropoQ = 6e-10,
+          double posSigma = 100.0,
+          double clkSigma = 30000.0,
+          double weightFactor = 10000.0
+      );
 
          /** Compute the PPP Solution of the given equations set.
           *
@@ -595,7 +600,12 @@ namespace gpstk
 
 
          /// Initializing method.
-      void Init(void);
+      void SolverPPP::Init(
+          double  tropoQ = 6e-10,
+          double posSigma = 100.0,
+          double clkSigma = 30000.0,
+          double weightFactor = 10000.0
+          );
 
 
          /// Constant stochastic model

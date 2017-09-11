@@ -74,7 +74,7 @@
 
 //pod includes
 #include "PPPSolution.h"
-#include"PRSolver.h"
+#include"CodeSolver.h"
 #include"GnssEpochMap.h"
 
 namespace pod
@@ -89,7 +89,7 @@ namespace pod
         DoY = confReader.fetchListValueAsInt("dayOfYear");
         tropModel = NeillTropModel(nominalPos.getAltitude(), nominalPos.getGeodeticLatitude(), DoY);
 
-        solverPR = new PRSolver(tropModel);
+        solverPR = new CodeSolver(tropModel);
     }
     
     bool  PPPSolution::PPPprocess()
@@ -296,11 +296,15 @@ namespace pod
 
         // Get if we want results in ECEF or NEU reference system
         bool isNEU(false);
-
+        double tropoQ(confReader->getValueAsDouble("tropoQ"));
+        double posSigma(confReader->getValueAsDouble("posSigma"));
+        double clkSigma(confReader->getValueAsDouble("clkSigma"));
+        double weightFactor(confReader->getValueAsDouble("weightFactor"));
+       
         // Declare solver objects
-        SolverPPP   pppSolver(isNEU);
-        SolverPPPFB fbpppSolver(isNEU);
-
+        SolverPPP   pppSolver (isNEU, tropoQ, posSigma, clkSigma, weightFactor);
+        SolverPPPFB fbpppSolver(isNEU, tropoQ, posSigma, clkSigma, weightFactor);
+        cout <<"getWeightFactor: "<< fbpppSolver.getWeightFactor() << endl;
         // Get if we want 'forwards-backwards' or 'forwards' processing only
         int cycles(confReader->getValueAsInt("forwardBackwardCycles"));
 
@@ -310,7 +314,7 @@ namespace pod
         // White noise stochastic model
         WhiteNoiseModel wnM(100.0);      // 100 m of sigma
 
-                                         // Decide what type of solver we will use for this station
+        // Decide what type of solver we will use for this station
         if (cycles > 0)
         {
             // In this case, we will use the 'forwards-backwards' solver
@@ -558,155 +562,5 @@ namespace pod
 
     }
 
-    void PPPSolution::PRProcess()
-    {
-
-        NeillTropModel NeillModel = NeillTropModel(nominalPos.getAltitude(), nominalPos.getGeodeticLatitude(), DoY);
-
-        int badSol = 0;
-        apprPos.clear();
-
-        cout << "solverType " << solverPR->getName() << endl;
-
-        solverPR->maskEl = 5;
-        solverPR->maskSNR = 30;
-        solverPR->ionoType = (PRIonoCorrType)confReader->fetchListValueAsInt("PRionoCorrType");
-
-        ofstream os;
-        os.open("nomPos_.out");
-        //decimation
-        int sampl(10);
-        double tol(0.1);
-
-        for (auto obsFile : rinexObsFiles)
-        {
-            cout << obsFile << endl;
-            try {
-
-                //Input observation file stream
-                Rinex3ObsStream rin;
-                // Open Rinex observations file in read-only mode
-                rin.open(obsFile, std::ios::in);
-
-                rin.exceptions(ios::failbit);
-                Rinex3ObsHeader roh;
-                Rinex3ObsData rod;
-
-                //read the header
-                rin >> roh;
-
-#pragma region init observables indexes
-
-                int indexC1 = roh.getObsIndex(L1CCodeID);
-                int indexCNoL1;
-                try
-                {
-                    indexCNoL1 = roh.getObsIndex(L1CNo);
-                    cout << "L1 C/No from " << L1CNo << endl;
-                }
-                catch (...)
-                {
-                    cerr << "The observation file doesn't have L1 C/No" << endl;
-                    continue;
-                }
-                int indexP1;
-                try
-                {
-                    indexP1 = roh.getObsIndex(L1PCodeID);
-                    cout << "L1 PRange from " << L1PCodeID << endl;
-                }
-                catch (...)
-                {
-                    cerr << "The observation file doesn't have L1 pseudoranges." << endl;
-                    continue;
-                }
-
-                int indexP2;
-                try
-                {
-                    indexP2 = roh.getObsIndex(L2CodeID);
-                    cout << "L2 PRange from " << L2CodeID << endl;
-                }
-                catch (...)
-                {
-                    indexP2 = -1;
-                    if (solverPR->ionoType == PRIonoCorrType::IF)
-                        cout << "The observation file doesn't have L2 pseudoranges" << endl;
-                    continue;
-                }
-
-#pragma endregion
-
-                // Let's process all lines of observation data, one by one
-                while (rin >> rod)
-                {
-                    GPSWeekSecond gpst = static_cast<GPSWeekSecond>(rod.time);
-
-                    if (fmod(gpst.getSOW(), sampl) > tol) continue;
-
-                    int GoodSats = 0;
-                    int res = 0;
-
-                    // prepare for iteration loop
-                    Vector<double> Resid;
-
-                    vector<SatID> prnVec;
-                    vector<double> rangeVec;
-                    vector<uchar> SNRs;
-                    vector<bool> UseSat;
-                    //
-
-                    solverPR->selectObservables(rod, indexC1, indexP2, indexCNoL1, prnVec, rangeVec, SNRs);
-                    solverPR->Sol = 0.0;
-
-                    for (size_t i = 0; i < prnVec.size(); i++)
-                    {
-                        if (SNRs[i] >= solverPR->maskSNR)
-                        {
-                            UseSat.push_back(true);
-                            GoodSats++;
-                        }
-                        else
-                            UseSat.push_back(false);
-                    }
-
-                    os << setprecision(17) << gpst << " ";
-                    if (GoodSats > 4)
-                    {
-                        Matrix<double> SVP(prnVec.size(), 4), Cov(4, 4);
-                        solverPR->prepare(rod.time, prnVec, rangeVec, SP3EphList, UseSat, SVP);
-                        res = solverPR->solve(rod.time, SVP, UseSat, Cov, Resid, ionoStore);
-                        os << res;
-                    }
-                    else
-                        res = 1;
-
-                    os << solverPR->printSolution(UseSat) << endl;
-                    if (res == 0)
-                    {
-                        Xvt xvt;
-                        xvt.x = Triple(solverPR->Sol(0), solverPR->Sol(1), solverPR->Sol(2));
-                        xvt.clkbias = solverPR->Sol(3);
-                        apprPos.insert(pair<CommonTime, Xvt>(rod.time, xvt));
-                    }
-                    else
-                    {
-                        badSol++;
-                    }
-                }
-                rin.close();
-            }
-            catch (Exception& e)
-            {
-                cerr << e << endl;
-                cerr << "Caught an unexpected exception." << endl;
-            }
-            catch (...)
-            {
-                cerr << "Caught an unexpected exception." << endl;
-            }
-            cout << "Number of bad solutions " << badSol << endl;
-        }
-    }
 
 }
