@@ -30,6 +30,7 @@
    }
 
    static void _remove(gpstk:: ## FORMATNAME ## Stream * ptr) {
+      ptr->close();
       delete ptr;
    }
 
