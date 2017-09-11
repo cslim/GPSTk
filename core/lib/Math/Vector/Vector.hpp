@@ -42,6 +42,8 @@
 #ifndef GPSTK_VECTOR_HPP
 #define GPSTK_VECTOR_HPP
 
+#include <cassert>
+
 #include <limits>
 #include <vector>
 #include "VectorBase.hpp"
@@ -208,16 +210,27 @@ namespace gpstk
 
          /// Non-const operator []
       T& operator[] (size_t i) 
-      { return v[i]; }
+      { 
+          assert(i < s);
+          return v[i]; }
          /// Const operator []
       T operator[] (size_t i) const
-      { return v[i]; }
+      {
+          assert(i < s);
+          return v[i]; 
+      }
          /// Non-const operator ()
       T& operator() (size_t i) 
-      { return v[i]; }
+      { 
+          assert(i < s);
+          return v[i]; 
+      }
          /// Const operator ()
       T operator() (size_t i) const
-      { return v[i]; }
+      {
+          assert(i < s);
+          return v[i]; 
+      }
 
          /// Like valarray, lets you do vec[slice] to get a VectorSlice.
       VectorSlice<T> operator[] (const std::slice& sli)

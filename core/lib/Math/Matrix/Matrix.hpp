@@ -42,6 +42,8 @@
 #ifndef GPSTK_MATRIX_HPP
 #define GPSTK_MATRIX_HPP
 
+#include <cassert>
+
 #include "Vector.hpp"
 #include "MatrixBase.hpp"
 
@@ -176,10 +178,20 @@ namespace gpstk
 
          /// Non-const matrix operator(row,col)
       inline T& operator() (size_t rowNum, size_t colNum)
-      { return v(rowNum + colNum * r); }
+      {
+          assert(rowNum < rows());
+          assert(colNum < cols());
+       
+          return v(rowNum + colNum * r);
+      }
          /// Const matrix operator(row,col)
       inline T operator() (size_t rowNum, size_t colNum) const
-      { return v(rowNum + colNum * r); }
+      {
+          assert(rowNum < rows());
+          assert(colNum < cols());
+
+          return v(rowNum + colNum * r); 
+      }
          /// operator[] that returns a row slice
       inline MatrixRowSlice<T> operator[] (size_t row)
       { return rowRef(row); }
