@@ -22,11 +22,12 @@ using namespace pod;
 
 void testRinParse(char* path)
 {
+
     // Create the input file stream
-    Rinex3ObsStream rin("cng2182a.17o");
+    Rinex3ObsStream rin(path);
 
     // Create the output file stream
-    ofstream rout("cng2182a_.17o", ios::out);
+    ofstream rout("_cng2182a_.17o", ios::out);
     gnssRinex  gRin;
     // Read the RINEX header
     Rinex3ObsHeader head;    //RINEX header object
@@ -93,6 +94,7 @@ int main(int argc, char* argv[])
     //sol.chekObs();
     //codeSmoother(argv[1], atoi(argv[2]));
     //testgpstk
-    testPod(argv[1]);
+    testRinParse(argv[1]);
+    //testPod(argv[1]);
     return 0;
 }

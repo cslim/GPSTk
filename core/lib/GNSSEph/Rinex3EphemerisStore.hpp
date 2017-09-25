@@ -279,9 +279,15 @@ namespace gpstk
           * which returns the overall total
           * @param SatID::SatelliteSystem GNSS of interest
           * @return the number of records or ephemerides in this system */
-      int size(const SatID::SatelliteSystem sys = SatID::systemMixed) const
+      unsigned size(const SatID::SatelliteSystem sys) const
       { return size(SatID(-1,sys)); }
 
+      /** get the total number of records 
+      * @return the number of records */
+      unsigned size() const override
+      {
+          return size(SatID(-1, SatID::systemMixed));
+      }
          /** Add to the map of time system corrections. Overwrite the existing
           * correction of the same type, if it exists.
           * @return true if an existing correction was overwritten. */

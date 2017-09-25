@@ -151,6 +151,7 @@ namespace gpstk
       virtual CommonTime getFinalTime() const
       { return finalTime; }
 
+
          /** Return the earliest time in the store for the given satellite.
           * @todo make work for sat = -1, system
           * @param sat Satellite (or system if sat.id = -1) of interest

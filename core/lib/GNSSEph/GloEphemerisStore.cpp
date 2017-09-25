@@ -318,15 +318,7 @@ namespace gpstk
       // @throw InvalidRequest This is thrown if the object has no data.
    CommonTime GloEphemerisStore::getInitialTime() const
    {
-
-         // Check if the data map is empty
-      if( pe.empty() )
-      {
-         InvalidRequest e( "GloEphemerisStore object has no data." );
-         GPSTK_THROW(e);
-      }
-      
-      return initialTime;
+       return initialTime;
 
    }; // End of method 'GloEphemerisStore::getInitialTime()'
 
@@ -337,16 +329,7 @@ namespace gpstk
       // @throw InvalidRequest This is thrown if the object has no data.
    CommonTime GloEphemerisStore::getFinalTime() const
    {
-
-         // Check if the data map is empty
-      if( pe.empty() )
-      {
-         InvalidRequest e( "GloEphemerisStore object has no data." );
-         GPSTK_THROW(e);
-      }
-
       return finalTime;
-
    }; // End of method 'GloEphemerisStore::getFinalTime()'
 
    // Compute initial time for the given satellite

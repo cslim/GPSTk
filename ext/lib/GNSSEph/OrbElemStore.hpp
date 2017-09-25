@@ -127,6 +127,17 @@ namespace gpstk
          throw()
          { return initialTime; }
 
+      virtual CommonTime getInitialTime(const SatID &id) const
+      {
+          CommonTime initialTime = CommonTime::END_OF_TIME;
+          initialTime.setTimeSystem(timeSysForStore);
+
+          auto &it = ube.find(id);
+          if (it == ube.end())
+              return initialTime;
+
+          return (it->second).begin()->first;
+      }
 
       /// Determine the latest time for which this object can successfully 
       /// determine the Xvt for any object.
@@ -136,6 +147,18 @@ namespace gpstk
          throw()
          { return finalTime; }
 
+      virtual CommonTime getFinalTime(const SatID &id) const
+      {
+          CommonTime finalTime = CommonTime::BEGINNING_OF_TIME;
+          finalTime.setTimeSystem(timeSysForStore);
+        
+          auto &it = ube.find(id);
+          if (it == ube.end())
+              return finalTime;
+
+          auto &last = (it->second).end();
+          return (--last)->first;
+      }
       /// Return the number of orbit/clock elements stored in this store. 
       virtual unsigned size() const
          throw(); 

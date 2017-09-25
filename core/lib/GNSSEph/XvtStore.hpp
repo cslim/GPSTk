@@ -98,17 +98,22 @@ namespace gpstk
          /// @throw InvalidRequest This is thrown if the object has no data.
       virtual CommonTime getInitialTime(void) const = 0;
 
+      virtual CommonTime getInitialTime(const SatID& ) const = 0;
          /// Determine the latest time for which this object can successfully 
          /// determine the Xvt for any object.
          /// @return The final time
          /// @throw InvalidRequest This is thrown if the object has no data.
       virtual CommonTime getFinalTime(void) const = 0;
 
+      virtual CommonTime getFinalTime(const SatID&) const = 0;
          /// Return true if velocity data is present in the store
       virtual bool hasVelocity(void) const = 0;
 
          /// Return true if the given IndexType is present in the store
       virtual bool isPresent(const IndexType& id) const = 0;
+
+         ///
+      virtual unsigned size() const = 0;
 
    }; // end class XvtStore
 

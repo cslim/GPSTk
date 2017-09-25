@@ -532,7 +532,7 @@ namespace gpstk
       { return clkStore.ndata(sys); }
 
          /// same as ndataPosition()
-      inline int size(void) const throw() { return ndataPosition(); }
+      unsigned size(void) const throw() { return ndataPosition(); }
 
 
          /** Load an SP3 ephemeris file; if the clock store uses RINEX

@@ -199,7 +199,7 @@ namespace gpstk
       virtual bool isPresent(const SatID& id) const;
 
          /// Return the number of satellites present in the store
-      int size(void) const
+      unsigned size(void) const
       { return pe.size(); }
 
          /** Find the corresponding GLONASS ephemeris for the given epoch.
