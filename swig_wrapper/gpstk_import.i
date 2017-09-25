@@ -39,6 +39,7 @@
 // =============================================================
 %rename (toString) *::operator std::string() const;
 %rename(toCommonTime) *::convertToCommonTime() const;
+%include"CommonTime.i"
 %ignore *::operator CommonTime() const;
 
 %ignore gpstk::TimeSystem::TimeSystem(int i);
