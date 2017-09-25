@@ -180,6 +180,7 @@ namespace gpstk
       else if (sys == 'C') // BeiDou
       {
          if(band == cbL1) band = cbB1;
+         if(band == cbE5b) band = cbB2;
          if(band == cbE6) band = cbB3;
 
          if(band == cbB1) {
@@ -198,7 +199,7 @@ namespace gpstk
             case tcC2LM: code = tcCIQ7; break;  // 'X'
             default: break;
          }
-         if(band == cbE5b) {
+         if(band == cbB2) {
             switch (code)
             {
                case tcI5: code = tcCI6; break;     // 'I'

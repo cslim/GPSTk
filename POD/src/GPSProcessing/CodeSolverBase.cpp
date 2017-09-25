@@ -320,7 +320,7 @@ namespace pod
     /// stream output for CodeSolverBase
     std::ostream& operator<<(std::ostream& os, const CodeSolverBase& solver)
     {
-        os << setprecision(12) << " ";
+        os << setprecision(10) << " ";
         for (size_t i = 0; i < solver.Sol.size(); i++)
             os << solver.Sol(i) << " ";
 
