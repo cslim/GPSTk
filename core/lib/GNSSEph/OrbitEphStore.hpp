@@ -158,37 +158,30 @@ namespace gpstk
           * @return The store initial time */
       virtual CommonTime getInitialTime(const SatID& sat) const
       {
-         if(satTables.find(sat) == satTables.end())
-            return CommonTime::END_OF_TIME;
+          CommonTime initialTime = CommonTime::END_OF_TIME;
+          initialTime.setTimeSystem(timeSystem);
 
-         CommonTime limit(CommonTime::END_OF_TIME);
-         const TimeOrbitEphTable& table = getTimeOrbitEphMap(sat);
-         TimeOrbitEphTable::const_iterator it;
-         for (it = table.begin(); it != table.end(); ++it) {
-            CommonTime ct(it->first);
-            ct.setTimeSystem(timeSystem);
-            if(ct < limit) limit = ct;
-         }
-         return limit;
+          auto &it = satTables.find(sat);
+          if (it == satTables.end())
+              return initialTime;
+
+          return (it->second).begin()->first;
       }
 
          /** Return the latest time in the store for the given satellite.
           * @param sat Satellite (or system if sat.id = -1) of interest
           * @return The store final time */
-      virtual CommonTime getFinalTime(const SatID& sat) const
+      virtual CommonTime getFinalTime(const SatID& id) const
       {
-         if(satTables.find(sat) == satTables.end())
-            return CommonTime::END_OF_TIME;
+          CommonTime finalTime = CommonTime::BEGINNING_OF_TIME;
+          finalTime.setTimeSystem(timeSystem);
 
-         CommonTime limit(CommonTime::BEGINNING_OF_TIME);
-         const TimeOrbitEphTable& table = getTimeOrbitEphMap(sat);
-         TimeOrbitEphTable::const_iterator it;
-         for (it = table.begin(); it != table.end(); ++it) {
-            CommonTime ct(it->first);
-            ct.setTimeSystem(timeSystem);
-            if(ct > limit) limit = ct;
-         }
-         return limit;
+          auto &it = satTables.find(id);
+          if (it == satTables.end())
+              return finalTime;
+
+          auto &last = (it->second).end();
+          return (--last)->first;
       }
 
          /// Return true if velocity data is present in the store
