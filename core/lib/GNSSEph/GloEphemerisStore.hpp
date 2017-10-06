@@ -84,7 +84,7 @@ namespace gpstk
                          double checkHealth )
             : initialTime(CommonTime::END_OF_TIME),
               finalTime(CommonTime::BEGINNING_OF_TIME),
-              step(rkStep), checkHealthFlag(checkHealth)
+              step(rkStep), checkHealthFlag(checkHealth), validInterval(900.0)
       { };
 
          /// Destructor
@@ -249,6 +249,16 @@ namespace gpstk
          /// @return the number of ephemerides added.
       int addToList( std::list<GloEphemeris>& v ) const;
 
+      void setValidInterval(double dt)
+      {
+          validInterval = dt;
+      }
+
+      double getValidInterval(void) const
+      {
+         return validInterval;
+      }
+
    private:
 
          /// The map of SVs and Xvt's
@@ -266,7 +276,10 @@ namespace gpstk
          /// Flag signaling if satellites will be screened out according to
          /// their health bit (by default it is false)
       bool checkHealthFlag;
-
+         
+         ///
+      double validInterval;
+     
    };  // End of class 'GloEphemerisStore'
 
       //@}

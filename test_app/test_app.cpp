@@ -7,8 +7,10 @@
 #include"SphericalHarmonicsModel.h"
 #include"Rinex3ObsStream.hpp"
 #include"Rinex3ObsData.hpp"
+#include"Rinex3EphemerisStore.hpp"
 #include"Exception.hpp"
 #include"DataStructures.hpp"
+#include"Rinex3EphemerisStore.hpp"
 
 #include "PrSmoother.h"
 
@@ -20,6 +22,17 @@ using namespace std;
 using namespace gpstk;
 using namespace pod;
 
+void testRinNav(char* path)
+{
+    Rinex3EphemerisStore nrin;
+    nrin.loadFile(path);
+    auto &sid = SatID(2, SatID::SatelliteSystem::systemGPS);
+    CommonTime t0 = nrin.getInitialTime(sid);
+    CommonTime te = nrin.getFinalTime(sid);
+    nrin.SearchNear();
+    nrin.getXvt(sid, t0);
+
+}
 void testRinParse(char* path)
 {
 
@@ -88,13 +101,18 @@ void codeSmoother(const char * iPath, int window)
     prsm.smooth(iPath);
 
 }
+
 int main(int argc, char* argv[])
 {
     //Solution sol(argv[1]);
     //sol.chekObs();
     //codeSmoother(argv[1], atoi(argv[2]));
     //testgpstk
+    testRinNav(argv[1]);
+
     testRinParse(argv[1]);
     //testPod(argv[1]);
     return 0;
 }
+
+

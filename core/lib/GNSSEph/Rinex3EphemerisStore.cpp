@@ -420,16 +420,14 @@ namespace gpstk
             case SatID::systemGalileo:
             case SatID::systemBeiDou:
             case SatID::systemQZSS:
-               retTime = ORBstore.getInitialTime(sat);
+               return  ORBstore.getInitialTime(sat);
             case SatID::systemGlonass:
-               retTime = GLOstore.getInitialTime(sat);
+                return GLOstore.getInitialTime(sat);
             //case SatID::systemGeosync:
                //retTime = GEOstore.getInitialTime(sat);
             default:
-               break;
+                return retTime;
          }
-
-         return retTime;
       }
       catch(InvalidRequest& ir) { GPSTK_RETHROW(ir); }
    }
@@ -453,13 +451,13 @@ namespace gpstk
             case SatID::systemGalileo:
             case SatID::systemBeiDou:
             case SatID::systemQZSS:
-               retTime = ORBstore.getFinalTime(sat);
+               return  ORBstore.getFinalTime(sat);
             case SatID::systemGlonass:
-               retTime = GLOstore.getFinalTime(sat);
+               return GLOstore.getFinalTime(sat);
             //case SatID::systemGeosync:
                //retTime = GEOstore.getFinalTime(sat);
             default:
-               break;
+                return retTime;
          }
 
 

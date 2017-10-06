@@ -165,7 +165,7 @@ namespace gpstk
           if (it == satTables.end())
               return initialTime;
 
-          return (it->second).begin()->first;
+          return (it->second.begin())->first;
       }
 
          /** Return the latest time in the store for the given satellite.

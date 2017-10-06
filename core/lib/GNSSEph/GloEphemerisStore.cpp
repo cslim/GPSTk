@@ -47,7 +47,7 @@ using namespace std;
 
 namespace gpstk
 {
-
+     
 
       // Add ephemeris information from a Rinex3NavData object.
    bool GloEphemerisStore::addEphemeris(const Rinex3NavData& data)
@@ -104,8 +104,8 @@ namespace gpstk
       
          // Check that the given epoch is within the available time limits.
          // We have to add a margin of 15 minutes (900 seconds).
-      if ( epoch <  (initialTime - 900.0) ||
-           epoch >  (finalTime   + 900.0)   )
+      if ( epoch <  (initialTime - validInterval) ||
+           epoch >  (finalTime   + validInterval)   )
       {
          InvalidRequest e( "Requested time is out of boundaries for satellite "
                           + StringUtils::asString(sat) );
@@ -141,15 +141,15 @@ namespace gpstk
       }
 
          // If key > (epoch+900), we must use the previous record if possible.
-      if ( ( i->first > (epoch+900.0) ) && ( i != sem.begin() ) )
+      if ( ( i->first > (epoch+ validInterval) ) && ( i != sem.begin() ) )
       {
          i = --i;
       }
 
          // Check that the given epoch is within the available time limits for
          // this specific satellite, with a margin of 15 minutes (900 seconds).
-      if ( epoch <  (i->first - 900.0) ||
-           epoch >= (i->first   + 900.0)   )
+      if ( epoch <  (i->first - validInterval) ||
+           epoch >= (i->first   + validInterval)   )
       {
          InvalidRequest e( "Requested time is out of boundaries for satellite "
                           + StringUtils::asString(sat) );
@@ -159,6 +159,7 @@ namespace gpstk
          // We now have the proper reference data record. Let's use it
       GloEphemeris data( i->second );
 
+      data.setIntegrationStep(step);
          // Compute the satellite position, velocity and clock offset
       sv = data.svXvt( epoch );
 
@@ -371,8 +372,8 @@ namespace gpstk
    {
          // Check that the given epoch is within the available time limits.
          // We have to add a margin of 15 minutes (900 seconds).
-      if ( epoch < (initialTime - 900.0) ||
-           epoch > (finalTime   + 900.0)   )
+      if ( epoch < (initialTime - validInterval) ||
+           epoch > (finalTime   + validInterval)   )
       {
          InvalidRequest e( "Requested time is out of boundaries for satellite "
                           + StringUtils::asString(sat) );
@@ -405,15 +406,15 @@ namespace gpstk
       }
 
          // If key > (epoch+900), we must use the previous record if possible.
-      if ( ( i->first > (epoch+900.0) ) && ( i != sem.begin() ) )
+      if ( ( i->first > (epoch+ validInterval) ) && ( i != sem.begin() ) )
       {
          i = --i;
       }
 
          // Check that the given epoch is within the available time limits for
          // this specific satellite, with a margin of 15 minutes (900 seconds).
-      if ( epoch < (i->first - 900.0) ||
-           epoch > (i->first   + 900.0)   )
+      if ( epoch < (i->first - validInterval) ||
+           epoch > (i->first   + validInterval)   )
       {
          InvalidRequest e( "Requested time is out of boundaries for satellite "
                           + StringUtils::asString(sat) );

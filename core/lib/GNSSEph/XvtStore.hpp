@@ -116,7 +116,7 @@ namespace gpstk
         virtual unsigned size() const = 0;
 
         ///
-        std::string dump(short details)
+        std::string dumpToString(short details)
         {
             std::ostringstream stream;
             dump(stream, details);

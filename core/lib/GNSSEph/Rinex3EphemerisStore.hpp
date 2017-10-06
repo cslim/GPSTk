@@ -450,6 +450,15 @@ namespace gpstk
          ORBstore.SearchUser();
       }
 
+      void setGLNValidInterval(double dt)
+      {
+          this->GLOstore.setValidInterval(dt);
+      }
+
+      double getGLNValidInterval(void) const
+      {
+          return this->GLOstore.getValidInterval();
+      }
    }; // end class Rinex3EphemerisStore
 
       //@}
