@@ -312,7 +312,40 @@ namespace gpstk
       az = a[2];
 
    }  // End of 'Rinex3NavData::Rinex3NavData(const GloEphemeris& ge)'
+  
+   
+   Rinex3NavData::Rinex3NavData(const GeoEphemeris& geoe)
+   {
 
+       // Epoch info
+       satSys = geoe.getSatSys();
+       PRNID = geoe.getPRNID();
+       sat = RinexSatID(PRNID, SatID::systemGeosync);
+       time = geoe.getEpochTime();
+
+       // GLONASS parameters
+       TauN = geoe.clkbias;
+       GammaN = geoe.clkdrift;
+       accCode = geoe.geAccCode();
+       health = geoe.getHealth();
+
+
+       Triple x(geoe.x);
+       px = x[0];
+       py = x[1];
+       pz = x[2];
+
+       Triple v(geoe.v);
+       vx = v[0];
+       vy = v[1];
+       vz = v[2];
+
+       Triple a(geoe.getAcc());
+       ax = a[0];
+       ay = a[1];
+       az = a[2];
+
+   }  // End of 'Rinex3NavData::Rinex3NavData(const GloEphemeris& ge)'
 
       /* This function retrieves a RINEX 3 NAV record from the given
        *  FFStream.
@@ -865,6 +898,25 @@ namespace gpstk
       return qzse;
    }
 
+   Rinex3NavData::operator GeoEphemeris() const throw()
+   {
+       GeoEphemeris geoe;
+
+       geoe.setRecord(satSys,
+           PRNID,
+           time,
+           Triple(px, py, pz),
+           Triple(vx, vy, vz),
+           Triple(ax, ay, az),
+           TauN,
+           GammaN,
+           health,
+           MFtime,
+           IODN,
+           accCode);
+
+       return geoe;
+   }
 
       // Converts the (non-CommonTime) data to an easy list
       // for comparison operators.

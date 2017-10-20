@@ -61,7 +61,7 @@
 
 #include "OrbitEphStore.hpp"
 #include "GloEphemerisStore.hpp"
-//#include "GeoEphemerisStore.hpp"
+#include "GeoEphemerisStore.hpp"
 
 namespace gpstk
 {
@@ -85,7 +85,7 @@ namespace gpstk
       GloEphemerisStore GLOstore;
 
          /// Ephemeris store for Geosync nav messages (stored as GeoRecord)
-         //GeoEphemerisStore GEOstore;
+         GeoEphemerisStore GEOstore;
 
    public:
 
@@ -148,7 +148,7 @@ namespace gpstk
       {
          if(ORBstore.size()) ORBstore.edit(tmin, tmax);
          if(GLOstore.size()) GLOstore.edit(tmin, tmax);
-            //if(GEOstore.size()) GEOstore.edit(tmin, tmax);
+         if(GEOstore.size()) GEOstore.edit(tmin, tmax);
       }
 
          /// Clear the dataset, meaning remove all data
@@ -157,7 +157,7 @@ namespace gpstk
          NavFiles.clear();
          ORBstore.clear();
          GLOstore.clear();
-            //GEOstore.clear();
+         GEOstore.clear();
       }
 
          /** Return time system of this store. 
@@ -190,8 +190,8 @@ namespace gpstk
                return ORBstore.isPresent(sat);
             case SatID::systemGlonass:
                return GLOstore.isPresent(sat);
-                  //case SatID::systemGeosync:
-                  //return GEOstore.isPresent(sat);
+            case SatID::systemGeosync:
+                  return GEOstore.isPresent(sat);
             default:
                return false;
          }
@@ -269,8 +269,8 @@ namespace gpstk
          if(sys == SatID::systemMixed || sys == SatID::systemGlonass)
             n += GLOstore.size();
 
-            //if(sys == SatID::systemMixed || sys == SatID::systemGeosync)
-            //   n += GEOstore.size();
+            if(sys == SatID::systemMixed || sys == SatID::systemGeosync)
+               n += GEOstore.size();
 
          return n;
       }
@@ -416,12 +416,25 @@ namespace gpstk
 
          /// Get integration step for GLONASS Runge-Kutta algorithm (seconds)
       double getGLOStep(void) const
-      { return GLOstore.getIntegrationStep(); }
+      { 
+          return GLOstore.getIntegrationStep();
+      }
+      /// Get integration step for Geostationary SV  Runge-Kutta algorithm (seconds)
+      double getGEOStep(void) const
+      {
+          return GEOstore.getIntegrationStep();
+      }
 
          /// Set integration step for GLONASS Runge-Kutta algorithm (seconds)
       void setGLOStep(double step)
-      { GLOstore.setIntegrationStep(step); }
-
+      { 
+          GLOstore.setIntegrationStep(step); 
+      }
+      /// Set integration step for Geostationary SV  Runge-Kutta algorithm (seconds)
+      void setGEOStep(double step)
+      {
+          GEOstore.setIntegrationStep(step);
+      }
          /** Get flag that causes unhealthy (Orbit-based) ephemerides
           * to be excluded */
       bool getOnlyHealthyFlag(void) const
@@ -434,6 +447,7 @@ namespace gpstk
       {
          ORBstore.setOnlyHealthyFlag(flag);
          GLOstore.setCheckHealthFlag(flag);
+         GEOstore.setCheckHealthFlag(flag);
       }
 
          /** use findNearEphemeris() in the getSat...() routines
@@ -452,13 +466,24 @@ namespace gpstk
 
       void setGLNValidInterval(double dt)
       {
-          this->GLOstore.setValidInterval(dt);
+          GLOstore.setValidInterval(dt);
       }
 
       double getGLNValidInterval(void) const
       {
-          return this->GLOstore.getValidInterval();
+          return GLOstore.getValidInterval();
       }
+
+      void setGEOValidInterval(double dt)
+      {
+          GEOstore.setValidInterval(dt);
+      }
+
+      double getGEOValidInterval(void) const
+      {
+          return GEOstore.getValidInterval();
+      }
+
    }; // end class Rinex3EphemerisStore
 
       //@}

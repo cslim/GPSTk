@@ -46,6 +46,7 @@
 #include "GalEphemeris.hpp"
 #include "BDSEphemeris.hpp"
 #include "QZSEphemeris.hpp"
+#include "GeoEphemeris.hpp"
 
 using namespace std;
 
@@ -97,7 +98,8 @@ namespace gpstk
             break;
 
          case SatID::systemGeosync:
-            //return GEOstore.addEphemeris(GeoEphemeris(Rdata));
+            Rdata.time = correctTimeSystem(Rdata.time, TimeSystem::GPS);
+            return GEOstore.addEphemeris(GeoEphemeris(Rdata));
             break;
 
          default:
@@ -282,10 +284,10 @@ namespace gpstk
                ttag = correctTimeSystem(inttag, TimeSystem::GLO);
                xvt = GLOstore.getXvt(sat,ttag);
                break;
-            //case SatID::systemGeosync:
-            //   ttag = correctTimeSystem(inttag, TimeSystem::GEO);
-            //   xvt = GEOstore.getXvt(sat,ttag);
-            //   break;
+            case SatID::systemGeosync:
+                ttag = correctTimeSystem(inttag, TimeSystem::GPS);
+               xvt = GEOstore.getXvt(sat,ttag);
+               break;
             default:
                InvalidRequest e("Unsupported satellite system");
                GPSTK_THROW(e);
@@ -325,10 +327,10 @@ namespace gpstk
          GLOstore.dump(os, detail);
       }
 
-      //if(GEOstore.size()) {
-         //os << "Dump of GEO ephemeris store:\n";
-         //GEOstore.dump(os, detail);
-      //}
+      if(GEOstore.size()) {
+         os << "Dump of GEO ephemeris store:\n";
+         GEOstore.dump(os, detail);
+      }
 
       os << "End dump of Rinex3EphemerisStore\n";
    }
@@ -356,11 +358,11 @@ namespace gpstk
             retTime = time;
             retTime.setTimeSystem(TimeSystem::Any);
          }
-         //time = GEOstore.getInitialTime();
-         //if(time < retTime) {
-         //   retTime = time;
-         //   retTime.setTimeSystem(TimeSystem::Any);
-         //}
+         time = GEOstore.getInitialTime();
+         if(time < retTime) {
+            retTime = time;
+            retTime.setTimeSystem(TimeSystem::Any);
+         }
 
          return retTime;
       }
@@ -390,11 +392,11 @@ namespace gpstk
             retTime = time;
             retTime.setTimeSystem(TimeSystem::Any);
          }
-         //time = GEOstore.getInitialTime();
-         //if(time > retTime) {
-         //   retTime = time;
-         //   retTime.setTimeSystem(TimeSystem::Any);
-         //}
+         time = GEOstore.getInitialTime();
+         if(time > retTime) {
+            retTime = time;
+            retTime.setTimeSystem(TimeSystem::Any);
+         }
 
          return retTime;
       }
@@ -423,8 +425,8 @@ namespace gpstk
                return  ORBstore.getInitialTime(sat);
             case SatID::systemGlonass:
                 return GLOstore.getInitialTime(sat);
-            //case SatID::systemGeosync:
-               //retTime = GEOstore.getInitialTime(sat);
+            case SatID::systemGeosync:
+                return GEOstore.getInitialTime(sat);
             default:
                 return retTime;
          }
@@ -454,8 +456,8 @@ namespace gpstk
                return  ORBstore.getFinalTime(sat);
             case SatID::systemGlonass:
                return GLOstore.getFinalTime(sat);
-            //case SatID::systemGeosync:
-               //retTime = GEOstore.getFinalTime(sat);
+            case SatID::systemGeosync:
+                return GEOstore.getFinalTime(sat);
             default:
                 return retTime;
          }
@@ -479,7 +481,7 @@ namespace gpstk
       const bool keepGLO(keepAll || sysSat.system==SatID::systemGlonass);
       const bool keepBDS(keepAll || sysSat.system==SatID::systemBeiDou);
       const bool keepQZS(keepAll || sysSat.system==SatID::systemQZSS);
-      //const bool keepGEO(keepAll || sysSat.system==SatID::systemGeosync);
+      const bool keepGEO(keepAll || sysSat.system==SatID::systemGeosync);
       const bool keepOrb(keepAll || keepGPS || keepGAL || keepBDS || keepQZS);
 
       if(keepOrb) {
@@ -519,16 +521,16 @@ namespace gpstk
          for(it=GLOlist.begin(); it != GLOlist.end(); ++it)
             theList.push_back(Rinex3NavData(*it));
       }
-      /*
+      
       if(keepGEO) {
-         list<GeoRecord> GEOlist;
+         list<GeoEphemeris> GEOlist;
          n += GEOstore.addToList(GEOlist);
 
-         list<GeoRecord>::const_iterator it;
+         list<GeoEphemeris>::const_iterator it;
          for(it=GEOlist.begin(); it != GEOlist.end(); ++it)
             theList.push_back(Rinex3NavData(*it));
       }
-      */
+      
       return n;
    }
 

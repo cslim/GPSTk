@@ -50,6 +50,7 @@
 #include "Rinex3NavStream.hpp"
 #include "EngEphemeris.hpp"         // GPS only, deprecated
 #include "GloEphemeris.hpp"
+#include "GeoEphemeris.hpp"
 #include "GPSEphemeris.hpp"
 #include "GalEphemeris.hpp"
 #include "BDSEphemeris.hpp"
@@ -82,6 +83,9 @@ namespace gpstk
 
          /// Initializes the nav data with a GloEphemeris
       Rinex3NavData(const GloEphemeris& gloe);
+
+      /// Initializes the nav data with a GeoEphemeris
+      Rinex3NavData(const GeoEphemeris& gloe);
 
          /// Create from a RinexNavData (for backward compatibility)
       Rinex3NavData(const RinexNavData& rnd);
@@ -133,6 +137,9 @@ namespace gpstk
 
          /// Converts Rinex3NavData to a QZSEphemeris object.
       operator QZSEphemeris() const throw();
+
+      /// Converts Rinex3NavData to a GeoEphemeris object.
+      operator GeoEphemeris() const throw();
 
          /// Converts the (non-CommonTime) data to an easy list
          /// for comparison operators.

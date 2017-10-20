@@ -174,6 +174,7 @@ RELATIONAL_OPERATORS(ObsID)
 %rename (toEngEphemeris) *::operator EngEphemeris() const;
 %rename (toGalEphemeris) *::operator GalEphemeris() const;
 %rename (toGloEphemeris) *::operator GloEphemeris() const;
+%rename (toGeoEphemeris) *::operator GeoEphemeris() const;
 %rename (toAlmOrbit) *::operator AlmOrbit() const;
 
 %include "AstronomicalFunctions.hpp"
@@ -233,6 +234,7 @@ namespace std { class fstream {}; }
 %include "EngEphemeris.hpp"
 %include "GalEphemeris.hpp"
 %include "GloEphemeris.hpp"
+%include "GeoEphemeris.hpp"
 %include "GPSEphemeris.hpp"
 %include "QZSEphemeris.hpp"
 
@@ -288,6 +290,7 @@ namespace std { class fstream {}; }
 %include "BDSEphemerisStore.hpp"
 %include "GalEphemerisStore.hpp"
 %include "GloEphemerisStore.hpp"
+%include "GeoEphemerisStore.hpp"
 %include "GPSEphemerisStore.hpp"
 %include "QZSEphemerisStore.hpp"
 %template (FileStore_RinexNavHeader) gpstk::FileStore<gpstk::RinexNavHeader>;
