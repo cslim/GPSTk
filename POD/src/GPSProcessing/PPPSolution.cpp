@@ -76,6 +76,8 @@
 #include "PPPSolution.h"
 #include"CodeSolver.h"
 #include"GnssEpochMap.h"
+#include"LinearCombination.h"
+#include"ProcessLinear.h"
 
 namespace pod
 {
@@ -96,10 +98,6 @@ namespace pod
     {
         string stationName = confReader->fetchListValue("stationName");
 
-        // Create a 'ProcessingList' object where we'll store
-        // the processing objects in order
-        ProcessingList pList;
-
         // This object will check that all required observables are present
         RequireObservables requireObs;
         requireObs.addRequiredType(TypeID::P2);
@@ -114,9 +112,7 @@ namespace pod
         requireObs.addRequiredType(TypeID::P1);
         PRFilter.addFilteredType(TypeID::P1);
 
-        // Add 'requireObs' to processing list (it is the first)
-        pList.push_back(requireObs);
-
+        
         // IMPORTANT NOTE:
         // It turns out that some receivers don't correct their clocks
         // from drift.
@@ -129,76 +125,51 @@ namespace pod
         // need to.
         bool filterCode(confReader->getValueAsBoolean("filterCode"));
 
-        // Check if we are going to use this "SimpleFilter" object or not
-        if (filterCode)
-        {
-            pList.push_back(PRFilter);       // Add to processing list
-        }
-
-        // This object defines several handy linear combinations
-        LinearCombinations comb;
-
         // Object to compute linear combinations for cycle slip detection
-        ComputeLinear linear1;
+        ProcessLinear linear1;
 
-        linear1.addLinear(comb.pdeltaCombination);
-        linear1.addLinear(comb.mwubbenaCombination);
+        linear1.add(make_unique<PDelta>());
+        linear1.add(make_unique<MWoubenna>());
 
-        linear1.addLinear(comb.ldeltaCombination);
-        linear1.addLinear(comb.liCombination);
-        pList.push_back(linear1);       // Add to processing list
-
-                                        // Objects to mark cycle slips
+        linear1.add(make_unique<LDelta>());
+        linear1.add(make_unique<LICombimnation>());
+        
+        // Objects to mark cycle slips
         LICSDetector2 markCSLI2;         // Checks LI cycle slips
-        pList.push_back(markCSLI2);      // Add to processing list
         MWCSDetector  markCSMW;          // Checks Merbourne-Wubbena cycle slips
-        pList.push_back(markCSMW);       // Add to processing list
-
-                                         // Object to keep track of satellite arcs
+      
+        // Object to keep track of satellite arcs
         SatArcMarker markArc;
         markArc.setDeleteUnstableSats(true);
         markArc.setUnstablePeriod(151.0);
-        pList.push_back(markArc);       // Add to processing list
 
-
-                                        // Object to decimate data
+        // Object to decimate data
         double newSampling(confReader->getValueAsDouble("decimationInterval"));
 
         Decimate decimateData(
             newSampling,
             confReader->getValueAsDouble("decimationTolerance"),
             SP3EphList.getInitialTime());
-        pList.push_back(decimateData);       // Add to processing list
-
-                                             // Declare a basic modeler
-                                             //BasicModel basic(Position(0.0, 0.0, 0.0), SP3EphList);
+     
+        // Declare a basic modeler
+        //BasicModel basic(Position(0.0, 0.0, 0.0), SP3EphList);
         BasicModel basic(nominalPos, SP3EphList);
         // Set the minimum elevation
         basic.setMinElev(maskEl);
 
         basic.setDefaultObservable(TypeID::P1);
 
-        // Add to processing list
-        pList.push_back(basic);
-
         // Object to remove eclipsed satellites
         EclipsedSatFilter eclipsedSV;
-        pList.push_back(eclipsedSV);       // Add to processing list
 
-
-                                           // Object to compute gravitational delay effects
+        // Object to compute gravitational delay effects
         GravitationalDelay grDelay(nominalPos);
 
-        pList.push_back(grDelay);       // Add to processing list
-
-
-                                        // Vector from monument to antenna ARP [UEN], in meters
+        // Vector from monument to antenna ARP [UEN], in meters
         double uARP(confReader->fetchListValueAsDouble("offsetARP"));
         double eARP(confReader->fetchListValueAsDouble("offsetARP"));
         double nARP(confReader->fetchListValueAsDouble("offsetARP"));
         Triple offsetARP(uARP, eARP, nARP);
-
-
 
         AntexReader antexReader;
         Antenna receiverAntenna;
@@ -219,10 +190,7 @@ namespace pod
         // Feed 'ComputeSatPCenter' object with 'AntexReader' object
         svPcenter.setAntexReader(antexReader);
 
-
-        pList.push_back(svPcenter);       // Add to processing list
-
-                                          // Declare an object to correct observables to monument
+        // Declare an object to correct observables to monument
         CorrectObservables corr(SP3EphList);
 
         corr.setMonument(offsetARP);
@@ -232,19 +200,15 @@ namespace pod
         if (usepatterns)
         {
             corr.setAntenna(receiverAntenna);
-
             // Should we use elevation/azimuth patterns or just elevation?
             corr.setUseAzimuth(confReader->getValueAsBoolean("useAzim"));
         }
 
-        pList.push_back(corr);
-
         // Object to compute wind-up effect
         ComputeWindUp windup(SP3EphList, nominalPos, genFilesDir + confReader->getValue("satDataFile"));
-        pList.push_back(windup);       // Add to processing list
+      
 
-
-                                       // Declare a NeillTropModel object, setting its parameters
+        // Declare a NeillTropModel object, setting its parameters
         NeillTropModel neillTM(nominalPos.getAltitude(), nominalPos.getGeodeticLatitude(), DoY);
 
         // We will need this value later for printing
@@ -252,14 +216,12 @@ namespace pod
 
         // Object to compute the tropospheric data
         ComputeTropModel computeTropo(neillTM);
-        pList.push_back(computeTropo);       // Add to processing list
 
-                                             // Object to compute ionosphere-free combinations to be used
-                                             // as observables in the PPP processing
-        ComputeLinear linear2;
-        linear2.addLinear(comb.pcCombination);
-        linear2.addLinear(comb.lcCombination);
-        pList.push_back(linear2);
+        // Object to compute ionosphere-free combinations to be used
+        // as observables in the PPP processing
+        ProcessLinear linear2;
+        linear2.add(make_unique<PCCombimnation>());
+        linear2.add(make_unique<LCCombimnation>());
 
         // Add to processing list
         // Declare a simple filter object to screen PC
@@ -271,39 +233,42 @@ namespace pod
         // deactivate the "SimpleFilter" object that filters out PC, in case
         // you need to.
 
-        pList.push_back(pcFilter);       // Add to processing list
-
-
-                                         // Object to align phase with code measurements
+        // Object to align phase with code measurements
         PhaseCodeAlignment phaseAlign;
-        pList.push_back(phaseAlign);       // Add to processing list
 
-
-                                           // Object to compute prefit-residuals
+        LinearCombinations comb;
+        // Object to compute prefit-residuals
         ComputeLinear linear3(comb.pcPrefit);
         linear3.addLinear(comb.lcPrefit);
-        pList.push_back(linear3);       // Add to processing list
 
-                                        // Declare a base-changing object: From ECEF to North-East-Up (NEU)
+        // Declare a base-changing object: From ECEF to North-East-Up (NEU)
         XYZ2NEU baseChange(nominalPos);
-
-        // We always need both ECEF and NEU data for 'ComputeDOP', so add this
-        pList.push_back(baseChange);
 
         // Object to compute DOP values
         ComputeDOP cDOP;
-        pList.push_back(cDOP);
 
-        // Get if we want results in ECEF or NEU reference system
-        bool isNEU(false);
         double tropoQ(confReader->getValueAsDouble("tropoQ"));
         double posSigma(confReader->getValueAsDouble("posSigma"));
         double clkSigma(confReader->getValueAsDouble("clkSigma"));
         double weightFactor(confReader->getValueAsDouble("weightFactor"));
        
+        //estimate receiver linear clock drift parameters together with  clock offset?
+        bool useAdvClkModel = confReader->getValueAsBoolean("useAdvClkModel");
+        basic.useClkDrift(useAdvClkModel);
+        
         // Declare solver objects
-        SolverPPP   pppSolver (isNEU, tropoQ, posSigma, clkSigma, weightFactor);
-        SolverPPPFB fbpppSolver(isNEU, tropoQ, posSigma, clkSigma, weightFactor);
+        SolverPPP   pppSolver (useAdvClkModel,tropoQ, posSigma, clkSigma, weightFactor);
+        SolverPPPFB fbpppSolver(useAdvClkModel, tropoQ, posSigma, clkSigma, weightFactor);
+
+        if (useAdvClkModel)
+        {
+            double q1clk(confReader->getValueAsDouble("q1Clk"));
+            double q2clk(confReader->getValueAsDouble("q2Clk"));
+            AdvClockModel mod(q1clk, q2clk);
+            pppSolver.setAdvClkModel(mod);
+            fbpppSolver.setAdvClkModel(mod);
+        }
+
         cout <<"getWeightFactor: "<< fbpppSolver.getWeightFactor() << endl;
         // Get if we want 'forwards-backwards' or 'forwards' processing only
         int cycles(confReader->getValueAsInt("forwardBackwardCycles"));
@@ -318,36 +283,21 @@ namespace pod
         if (cycles > 0)
         {
             // In this case, we will use the 'forwards-backwards' solver
-
             // Check about coordinates as white noise
             if (isWN)
-            {
-                // Reconfigure solver
                 fbpppSolver.setCoordinatesModel(&wnM);
-            }
-
-            // Add solver to processing list
-            pList.push_back(fbpppSolver);
         }
         else
         {
-
             // In this case, we will use the 'forwards-only' solver
-
             // Check about coordinates as white noise
             if (isWN)
-            {
-                // Reconfigure solver
                 pppSolver.setCoordinatesModel(&wnM);
-            }
-
-            // Add solver to processing list
-            pList.push_back(pppSolver);
-
         }  // End of 'if ( cycles > 0 )'
 
-           // Object to compute tidal effects
+           // Objects to compute tidal effects
 #pragma region Tides
+
         SolidTides solid;
 
         // Configure ocean loading model
@@ -368,7 +318,7 @@ namespace pod
         gnssRinex gRin;
         
 
-#pragma region Output strams
+#pragma region Output streams
 
         // Prepare for printing
         int prec(4);
@@ -382,7 +332,7 @@ namespace pod
         vector<PowerSum> stats(4);
         CommonTime time0;
         bool b = true;
-
+      
         //// *** Now comes the REAL forwards processing part *** ////
         for (auto obsFile : rinexObsFiles)
         {
@@ -400,8 +350,10 @@ namespace pod
             rin >> roh;
             gMap.header = roh;
 
+            //set def. interval for basic model object
+            basic.setDefaultInterval(roh.interval);
+  
             // Loop over all data epochs
-            int cur_i = 1;
             while (rin >> gRin)
             {
                 //
@@ -427,7 +379,8 @@ namespace pod
                 try
                 {
                     gRin >> requireObs;
-                    gRin >> PRFilter;
+                    if (filterCode)
+                        gRin >> PRFilter;
                     gRin >> linear1;
                     gRin >> markCSLI2;
                     gRin >> markCSMW;
@@ -446,31 +399,27 @@ namespace pod
                     gRin >> linear3;
                     gRin >> baseChange;
                     gRin >> cDOP;
-
+                    std::cout << "2" << std::endl;
                     if(cycles<1)
                         gRin >> pppSolver;
                     else
                         gRin >> fbpppSolver;
-                    
-                    cur_i++;
                 }
                 catch (DecimateEpoch& d)
                 {
                     // If we catch a DecimateEpoch exception, just continue.
                     return false;
                 }
-                catch (Exception& e)
-                {
-                    cerr << "Exception for receiver '" << stationName <<
-                        "' at epoch: " << time << "; " << e << endl;
-                    return false;
-                }
-                catch (...)
-                {
-                    cerr << "Unknown exception for receiver '" << stationName <<
-                        " at epoch: " << time << endl;
-                    return false;
-                }
+                //catch (Exception& e)
+                //{
+                //    cerr << "Exception for receiver '" << stationName << "' at epoch: " << time << "; " << e << endl;
+                //    GPSTK_RETHROW(e);
+                //}
+                //catch (std::exception & e)
+                //{
+                //    cerr << "Unknown exception for receiver '" << stationName << " at epoch: " << time << endl;
+                //    throw;
+                //}
 
                 // Check what type of solver we are using
                 if (cycles < 1)
@@ -480,12 +429,11 @@ namespace pod
                     if (b)
                     {
                         time0 = time;
-
                         b = false;
                     }
                     // This is a 'forwards-only' filter. Let's print to output
                     // file the results of this epoch
-                    printSolution(outfile, pppSolver, time0, time, cDOP, isNEU, ep, drytropo, stats, prec, nominalPos);
+                    printSolution(outfile, pppSolver, time0, time, cDOP,  ep, drytropo, stats, prec, nominalPos);
                    
                     //add epoch to results
                     gMap.data.insert(pair<CommonTime, GnssEpoch>(time, ep));
@@ -501,8 +449,6 @@ namespace pod
         // then we are done and should continue with next station.
         if (cycles < 1)
         {
-
-            // Close output file for this station
             outfile.close();
 
             // We are done with this station. Let's show a message
@@ -548,7 +494,7 @@ namespace pod
             }
             nominalPos = apprPos[time];
            
-            printSolution(outfile, fbpppSolver, time0, time, cDOP, isNEU, ep, drytropo, stats, prec, nominalPos);
+            printSolution(outfile, fbpppSolver, time0, time, cDOP,  ep, drytropo, stats, prec, nominalPos);
             gMap.data.insert(pair<CommonTime, GnssEpoch>(time, ep));
 
         }  // End of 'while( fbpppSolver.LastProcess(gRin) )'
@@ -563,6 +509,4 @@ namespace pod
 
         return true;
     }
-
-
 }

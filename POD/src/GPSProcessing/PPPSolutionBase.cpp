@@ -54,20 +54,32 @@ namespace pod
                 s2->second = mapSNR(s2->second);
         }
     }
+
     bool  PPPSolutionBase::LoadData()
     {
         try
         {
+            systems.insert(SatID::SatelliteSystem::systemGPS);
+            bool useGLN = confReader->fetchListValueAsBoolean("useGLN");
+            if (useGLN)
+                systems.insert(SatID::SatelliteSystem::systemGlonass);
+
+            cout << "Used Sat. Systems: ";
+            for (auto& ss : systems)
+                cout << SatID::convertSatelliteSystemToString(ss) << " ";
+            cout << endl;
+
+            bceDir = confReader->fetchListValue("RinexNavFilesDir");
             //set generic files direcory 
             string subdir = confReader->fetchListValue("GenericFilesDir");
             genFilesDir = workingDir + "\\" + subdir + "\\";
 
             subdir = confReader->fetchListValue("RinesObsDir");
-            auxiliary::getAllFilesInDir(workingDir+"\\"+ subdir, rinexObsFiles);
+            auxiliary::getAllFilesInDir(workingDir + "\\" + subdir, rinexObsFiles);
 
             cout << "Ephemeris Loading... ";
             cout << loadEphemeris() << endl;
-           
+
             //load clock data from RINEX clk files
             if (confReader->fetchListValueAsBoolean("UseRinexClock"))
             {
@@ -78,18 +90,11 @@ namespace pod
             cout << "IonoModel Loading... ";
             cout << loadIono() << endl;
 
+            cout << "Load Glonass FCN data... ";
+            cout << loadFcn() << endl;
+
             calcApprPos = confReader->fetchListValueAsBoolean("calcApprPos");
             apprPosFile = confReader->fetchListValue("apprPosFile");
-
-            systems.insert(SatID::SatelliteSystem::systemGPS);
-            bool useGLN = confReader->fetchListValueAsBoolean("useGLN");
-            if (useGLN)
-                systems.insert(SatID::SatelliteSystem::systemGlonass);
-
-            cout << "Used Sat. Systems: ";
-            for (auto& ss : systems)
-                cout << SatID::convertSatelliteSystemToString(ss) << " ";
-            cout << endl;
 
             return true;
         }
@@ -158,10 +163,11 @@ namespace pod
 
     bool  PPPSolutionBase::loadIono()
     {
+        const string gpsObsExt = ".[\\d]{2}[nN]";
         list<string> files;
-        string subdir = confReader->fetchListValue("RinexNavFilesDir");
-        auxiliary::getAllFilesInDir(workingDir+"\\"+ subdir, files);
 
+        auxiliary::getAllFilesInDir(workingDir+"\\"+ bceDir, gpsObsExt, files);
+        int i = 0;
         for (auto file : files)
         {
             try
@@ -223,11 +229,13 @@ namespace pod
 
                     // Feed the ionospheric model with the parameters
                     iMod.setModel(ionAlpha, ionBeta);
+                    i++;
                 }
                 else
                 {
                     cerr << "WARNING: Navigation file " << file
                         << " doesn't have valid ionospheric correction parameters." << endl;
+                    exit(-1);
                 }
 
                 ionoStore.addIonoModel(refTime, iMod);
@@ -240,9 +248,42 @@ namespace pod
                 exit(-1);
             }
         }
-        return true;
+        return  i > 0;
     }
-    
+
+    bool  PPPSolutionBase::loadFcn()
+    {
+        const string glnObsExt = ".[\\d]{2}[gG]";
+        list<string> files;
+        auxiliary::getAllFilesInDir(workingDir + "\\" + bceDir, glnObsExt, files);
+        int i = 0;
+        for (auto file : files)
+        {
+            try
+            {
+                Rinex3NavStream rNavFile;
+                Rinex3NavHeader rNavHeader;
+
+                rNavFile.open(file.c_str(), std::ios::in);
+                rNavFile >> rNavHeader;
+                Rinex3NavData nm;
+                while (rNavFile >> nm)
+                {
+                    SatID::glonassFcn[SatID(nm.sat)] = nm.freqNum;
+                    i++;
+                }
+            }
+            catch (...)
+            {
+                cerr << "Problem opening file " << file << endl;
+                cerr << "Maybe it doesn't exist or you don't have proper read "
+                    << "permissions." << endl;
+                exit(-1);
+            }
+        }
+        return i > 0;
+    }
+
     void PPPSolutionBase::checkObservable()
     {
         string subdir = confReader->fetchListValue("RinesObsDir");
@@ -352,9 +393,7 @@ namespace pod
 
                     int GoodSats = 0;
                     int res = 0;
-
                     CodeProcSvData svData;
-                    
                     ///
                     solverPR->selectObservables(rod, roh, systems, CodeProcSvData::obsTypes, svData);
                     
@@ -417,7 +456,7 @@ namespace pod
             string appr_pos_file = workingDir + "\\" + apprPosFile;
             cout << "Approximate Positions loading from \n"+appr_pos_file+"\n... ";
             
-            int i = loadApprPos(appr_pos_file);
+            loadApprPos(appr_pos_file);
         }
       
         PPPprocess();
@@ -425,18 +464,16 @@ namespace pod
 
     // Method to print solution values
     void PPPSolutionBase::printSolution(ofstream& outfile,
-        const SolverLMS& solver,
+        const SolverPPP& solver,
         const CommonTime& time0,
         const CommonTime& time,
         const ComputeDOP& cDOP,
-        bool  useNEU,
         GnssEpoch &   gEpoch,
         double dryTropo,
         vector<PowerSum> &stats,
         int   precision,
         const Position &nomXYZ)
     {
-
         // Prepare for printing
         outfile << fixed << setprecision(precision);
 
@@ -454,44 +491,28 @@ namespace pod
         // dry tropospheric delay value
         // ztd - #7
         double wetMap = solver.getSolution(TypeID::wetMap) + 0.1 + dryTropo;
-       
-       // gEpoch.slnData.insert(pair<TypeID,double> (TypeID::dryTropo, dryTropo));
+
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recZTropo, wetMap));
 
-        if (useNEU)
-        {
-            x = solver.getSolution(TypeID::dLat);      // dLat  - #4
-            y = solver.getSolution(TypeID::dLon);      // dLon  - #5
-            z = solver.getSolution(TypeID::dH);        // dH    - #6
 
+        x = nomXYZ.X() + solver.getSolution(TypeID::dx);    // dx    - #4
+        y = nomXYZ.Y() + solver.getSolution(TypeID::dy);    // dy    - #5
+        z = nomXYZ.Z() + solver.getSolution(TypeID::dz);    // dz    - #6
 
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recX, x));
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recY, y));
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recZ, z));
 
-            varX = solver.getVariance(TypeID::dLat);   // Cov dLat  - #8
-            varY = solver.getVariance(TypeID::dLon);   // Cov dLon  - #9
-            varZ = solver.getVariance(TypeID::dH);     // Cov dH    - #10
-        }
-        else
-        {
-            x = nomXYZ.X() + solver.getSolution(TypeID::dx);    // dx    - #4
-            y = nomXYZ.Y() + solver.getSolution(TypeID::dy);    // dy    - #5
-            z = nomXYZ.Z() + solver.getSolution(TypeID::dz);    // dz    - #6
-
-            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recX, x));
-            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recY, y));
-            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recZ, z));
-
-            varX = solver.getVariance(TypeID::dx);     // Cov dx    - #8
-            varY = solver.getVariance(TypeID::dy);     // Cov dy    - #9
-            varZ = solver.getVariance(TypeID::dz);     // Cov dz    - #10
-        }
-
+        varX = solver.getVariance(TypeID::dx);     // Cov dx    - #8
+        varY = solver.getVariance(TypeID::dy);     // Cov dy    - #9
+        varZ = solver.getVariance(TypeID::dz);     // Cov dz    - #10
 
         double cdt = solver.getSolution(TypeID::cdt);
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdt, cdt));
-       
+
         //
         outfile << x << "  " << y << "  " << z << "  " << cdt << " ";
-        
+
         auto defeq = solver.getDefaultEqDefinition();
 
         auto itcdtGLO = defeq.body.find(TypeID::recCdtGLO);
@@ -499,14 +520,21 @@ namespace pod
         {
             double cdtGLO = solver.getSolution(TypeID::recCdtGLO);
             gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdtGLO, cdtGLO));
-            
+
             outfile << cdtGLO << " ";
         }
 
+        if (defeq.body.find(TypeID::recCdtdot) != defeq.body.end())
+        {
+            double recCdtdot = solver.getSolution(TypeID::recCdtdot);
+            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdtdot, recCdtdot));
+
+            outfile << recCdtdot << " ";
+        }
         double sigma = sqrt(varX + varY + varZ);
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::sigma, sigma));
         outfile << wetMap << "  " << sigma << "  ";
-     
+
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recSlnType, 16));
 
         //gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recPDOP, cDOP.getPDOP()));

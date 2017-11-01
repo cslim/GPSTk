@@ -57,46 +57,38 @@ namespace pod
        *                 if false (the default), will compute dx, dy, dz.
        */
    SolverPPPFB::SolverPPPFB(
-       bool useNEU ,
+       bool isUseAdvClkModel,
        double  tropoQ,
-       double posSigma ,
-       double clkSigma ,
-       double weightFactor 
+       double posSigma,
+       double clkSigma,
+       double weightFactor
    )
-      :SolverPPP(useNEU, tropoQ, posSigma, clkSigma, weightFactor), firstIteration(true)
+       :SolverPPP(isUseAdvClkModel, tropoQ, posSigma, clkSigma, weightFactor), firstIteration(true)
    {
 
-         // Initialize the counter of processed measurements
-      processedMeasurements = 0;
+       // Initialize the counter of processed measurements
+       processedMeasurements = 0;
 
-         // Initialize the counter of rejected measurements
-      rejectedMeasurements = 0;
+       // Initialize the counter of rejected measurements
+       rejectedMeasurements = 0;
 
-         // Set the equation system structure
-      SolverPPP::setNEU(useNEU);
+       // Indicate the TypeID's that we want to keep
+       keepTypeSet.insert(TypeID::wetMap);
 
-         // Indicate the TypeID's that we want to keep
-      keepTypeSet.insert(TypeID::wetMap);
+       keepTypeSet.insert(TypeID::dx);
+       keepTypeSet.insert(TypeID::dy);
+       keepTypeSet.insert(TypeID::dz);
 
-      if (useNEU)
-      {
-         keepTypeSet.insert(TypeID::dLat);
-         keepTypeSet.insert(TypeID::dLon);
-         keepTypeSet.insert(TypeID::dH);
-      }
-      else
-      {
-         keepTypeSet.insert(TypeID::dx);
-         keepTypeSet.insert(TypeID::dy);
-         keepTypeSet.insert(TypeID::dz);
-      }
 
-      keepTypeSet.insert(TypeID::cdt);
-      keepTypeSet.insert(TypeID::prefitC);
-      keepTypeSet.insert(TypeID::prefitL);
-      keepTypeSet.insert(TypeID::weight);
-      keepTypeSet.insert(TypeID::CSL1);
-      keepTypeSet.insert(TypeID::satArc);
+       keepTypeSet.insert(TypeID::cdt);
+       keepTypeSet.insert(TypeID::recCdtdot);
+       keepTypeSet.insert(TypeID::recCdtGLO);
+
+       keepTypeSet.insert(TypeID::prefitC);
+       keepTypeSet.insert(TypeID::prefitL);
+       keepTypeSet.insert(TypeID::weight);
+       keepTypeSet.insert(TypeID::CSL1);
+       keepTypeSet.insert(TypeID::satArc);
 
 
    }  // End of 'SolverPPPFB::SolverPPPFB()'
@@ -161,7 +153,6 @@ namespace pod
             // Before returning, store the results for a future iteration
          if(firstIteration)
          {
-
                // Create a new gnssRinex structure with just the data we need
             //gnssRinex gBak(gData.extractTypeID(keepTypeSet));
 
@@ -257,7 +248,6 @@ namespace pod
       }
 
    }  // End of method 'SolverPPPFB::ReProcess()'
-
 
 
       /* Reprocess the data stored during a previous 'Process()' call.
@@ -513,53 +503,6 @@ namespace pod
       return;
 
    }  // End of method 'SolverPPPFB::checkLimits()'
-
-
-
-      /* Sets if a NEU system will be used.
-       *
-       * @param useNEU  Boolean value indicating if a NEU system will
-       *                be used
-       *
-       */
-   SolverPPPFB& SolverPPPFB::setNEU( bool useNEU )
-   {
-
-         // Set the SolverPPP filter
-      SolverPPP::setNEU(useNEU);
-
-
-         // Clear current 'keepTypeSet' and indicate the TypeID's that
-         // we want to keep
-      keepTypeSet.clear();
-
-      keepTypeSet.insert(TypeID::wetMap);
-
-      if (useNEU)
-      {
-         keepTypeSet.insert(TypeID::dLat);
-         keepTypeSet.insert(TypeID::dLon);
-         keepTypeSet.insert(TypeID::dH);
-      }
-      else
-      {
-         keepTypeSet.insert(TypeID::dx);
-         keepTypeSet.insert(TypeID::dy);
-         keepTypeSet.insert(TypeID::dz);
-      }
-
-      keepTypeSet.insert(TypeID::cdt);
-      keepTypeSet.insert(TypeID::prefitC);
-      keepTypeSet.insert(TypeID::prefitL);
-      keepTypeSet.insert(TypeID::weight);
-      keepTypeSet.insert(TypeID::CSL1);
-      keepTypeSet.insert(TypeID::satArc);
-
-
-         // Return this object
-      return (*this);
-
-   }  // End of method 'SolverPPPFB::setNEU()'
 
 
 }  // End of namespace gpstk

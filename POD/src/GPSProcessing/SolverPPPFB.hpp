@@ -304,7 +304,7 @@ namespace pod
           *                 if false (the default), will compute dx, dy, dz.
           */
       SolverPPPFB(
-          bool useNEU = false,
+          bool isUseAdvClkModel = false,
           double  tropoQ = 6e-10,
           double posSigma = 100.0,
           double clkSigma = 30000.0,
@@ -442,16 +442,6 @@ namespace pod
          /// off limits.
       virtual int getRejectedMeasurements(void) const
       { return rejectedMeasurements; };
-
-
-         /** Sets if a NEU system will be used.
-          *
-          * @param useNEU  Boolean value indicating if a NEU system will
-          *                be used
-          *
-          */
-      virtual SolverPPPFB& setNEU( bool useNEU );
-
 
          /// Returns a string identifying this object.
       virtual std::string getClassName(void) const;

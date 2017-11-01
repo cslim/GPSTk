@@ -78,12 +78,12 @@ namespace gpstk
                            Position::CoordinateSystem s,
                            EllipsoidModel *ell,
                            ReferenceFrame frame )
+       : minElev(10.0), defaultObservable(TypeID::C1), useTGD(false), addTGD(false),
+       useCdtDot(false), isFirstTime(false), currTime(CommonTime::END_OF_TIME),
+       prevTime(CommonTime::BEGINNING_OF_TIME), defInterval(30)
    {
 
-      minElev = 10.0;
       pDefaultEphemeris = NULL;
-      defaultObservable = TypeID::C1;
-      useTGD = false;
       setInitialRxPosition( aRx, bRx, cRx, s, ell, frame );
 
    }  // End of 'BasicModel::BasicModel()'
@@ -92,12 +92,13 @@ namespace gpstk
       // Explicit constructor, taking as input a Position object
       // containing reference station coordinates.
    BasicModel::BasicModel(const Position& RxCoordinates)
+       : minElev(10.0), defaultObservable(TypeID::C1), useTGD(false), addTGD(false),
+       useCdtDot(false), isFirstTime(false), currTime(CommonTime::END_OF_TIME),
+       prevTime(CommonTime::BEGINNING_OF_TIME), defInterval(30)
    {
 
-      minElev = 10.0;
       pDefaultEphemeris = NULL;
-      defaultObservable = TypeID::C1;
-      useTGD = false;
+          
       setInitialRxPosition(RxCoordinates);
 
    }  // End of 'BasicModel::BasicModel()'
@@ -118,15 +119,16 @@ namespace gpstk
    BasicModel::BasicModel( const Position& RxCoordinates,
                            XvtStore<SatID>& dEphemeris,
                            const TypeID& dObservable,
-                           const bool& applyTGD )
+                           const bool& applyTGD,
+                           const bool& isaddTGD)
+       : minElev(10.0), defaultObservable(dObservable), useTGD(applyTGD), addTGD(isaddTGD),
+       useCdtDot(false), isFirstTime(false), currTime(CommonTime::END_OF_TIME),
+       prevTime(CommonTime::BEGINNING_OF_TIME), defInterval(30)
    {
 
-      minElev = 10.0;
       setInitialRxPosition(RxCoordinates);
       setDefaultEphemeris(dEphemeris);
-      defaultObservable = dObservable;
-      useTGD = applyTGD;
-
+    
    }  // End of 'BasicModel::BasicModel()'
 
 
@@ -141,11 +143,16 @@ namespace gpstk
                                          satTypeValueMap& gData )
       throw(ProcessingException)
    {
-
+       
+      
       try
       {
+          prevTime = currTime;
+          currTime = time;
+          double dt = isFirstTime ? defInterval : std::abs(currTime - prevTime);
 
-         SatIDSet satRejectedSet;
+          SatIDSet satRejectedSet;
+          int numGLN(0);
 
             // Loop through all the satellites
          satTypeValueMap::iterator stv;
@@ -190,10 +197,7 @@ namespace gpstk
 
             }
 
-               // Computing Total Group Delay (TGD - meters), if possible
-            double tempTGD(getTGDCorrections( time,
-                                              (*pDefaultEphemeris),
-                                              (*stv).first ) );
+           
 
                // Now we have to add the new values to the data structure
             (*stv).second[TypeID::dtSat] = cerange.svclkbias;
@@ -210,6 +214,18 @@ namespace gpstk
                // When using pseudorange method, this is 1.0
             (*stv).second[TypeID::cdt] = 1.0;
 
+            //Glonass-spacific bias(ISB)
+            double cdtGLO (0.0);
+
+            if (stv->first.system == SatID::SatelliteSystem::systemGlonass)
+            {
+                cdtGLO = 1;
+                numGLN++;
+            }
+            if (useCdtDot)
+                (*stv).second[TypeID::recCdtdot] = dt;
+
+            (*stv).second[TypeID::recCdtGLO] = cdtGLO;
                // Now we have to add the new values to the data structure
             (*stv).second[TypeID::rho] = cerange.rawrange;
             (*stv).second[TypeID::rel] = -cerange.relativity;
@@ -236,24 +252,36 @@ namespace gpstk
             (*stv).second[TypeID::recVY] = 0.0;
             (*stv).second[TypeID::recVZ] = 0.0;
 
-               // Apply correction to C1 observable, if appropriate
-            if(useTGD)
+            if (addTGD)
             {
-                  // Look for C1
-               if( (*stv).second.find(TypeID::C1) != (*stv).second.end() )
-               {
-                  (*stv).second[TypeID::C1] =
-                                       (*stv).second[TypeID::C1] - tempTGD;
-               };
-            };
+                // Computing Total Group Delay (TGD - meters), if possible
+                double tempTGD = getTGDCorrections(time, (*pDefaultEphemeris), (*stv).first);
 
-            (*stv).second[TypeID::instC1] = tempTGD;
+                // Apply correction to C1 observable, if appropriate
+                if (useTGD)
+                {
+                    // Look for C1
+                    if ((*stv).second.find(TypeID::C1) != (*stv).second.end())
+                    {
+                        (*stv).second[TypeID::C1] =
+                            (*stv).second[TypeID::C1] - tempTGD;
+                    };
+                };
 
+                (*stv).second[TypeID::instC1] = tempTGD;
+            }
          } // End of loop for(stv = gData.begin()...
 
             // Remove satellites with missing data
          gData.removeSatID(satRejectedSet);
+       
+         if (numGLN < 2)
+         {
+             gData.removeSatSyst(SatID::SatelliteSystem::systemGlonass);
+             gData.removeTypeID(TypeID::recCdtGLO);
+         }
 
+         isFirstTime = false;
          return gData;
 
       }   // End of try...

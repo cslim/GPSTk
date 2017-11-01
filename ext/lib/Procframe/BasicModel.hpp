@@ -116,9 +116,11 @@ namespace gpstk
          /// Default constructor. Observable C1 will be used for computations
          /// and satellites with elevation less than 10 degrees will be
          /// deleted.
-      BasicModel()
-         : minElev(10.0), pDefaultEphemeris(NULL),
-           defaultObservable(TypeID::C1), useTGD(false)
+       BasicModel()
+           : minElev(10.0), pDefaultEphemeris(NULL),
+           defaultObservable(TypeID::C1), useTGD(false), addTGD(false),
+           useCdtDot(false),isFirstTime(false), currTime(CommonTime::END_OF_TIME),
+           prevTime(CommonTime::BEGINNING_OF_TIME), defInterval(30)
       { setInitialRxPosition(); };
 
 
@@ -167,7 +169,9 @@ namespace gpstk
       BasicModel( const Position& RxCoordinates,
                   XvtStore<SatID>& dEphemeris,
                   const TypeID& dObservable = TypeID::C1,
-                  const bool& applyTGD = false );
+                  const bool& applyTGD = false,
+                  const bool& addTGD = false
+          );
 
 
          /** Returns a satTypeValueMap object, adding the new data generated
@@ -225,6 +229,19 @@ namespace gpstk
       virtual BasicModel& setDefaultObservable(const TypeID& type)
       { defaultObservable = type; return (*this); };
 
+      virtual BasicModel& setDefaultInterval(double dt)
+      {
+          defInterval = dt; return (*this);
+      };
+
+      virtual double getDefaultInterval(double dt)
+      {
+           return dt; 
+      };
+      virtual BasicModel& useClkDrift(bool use)
+      {
+          useCdtDot = use; return (*this);
+      };
 
          /// Method to get a pointer to the default XvtStore<SatID> to be used
          /// with GNSS data structures.
@@ -268,12 +285,24 @@ namespace gpstk
 
          /// Default observable to be used when fed with GNSS data structures.
       TypeID defaultObservable;
-
-
-         /// Whether the TGD effect will be applied to C1 observable or not.
+        
+      /// Whether the TGD effect will be applied to C1 observable or not.
       bool useTGD;
+        
+      ///Whether the TGD value will be calculated and added GDS
+      bool addTGD;
+         
+      /// Whether receiver clock linear drift partial derivative will be added  to GDS
+      bool useCdtDot;
+        
+      /// indicates first entry
+      bool isFirstTime;
+       
+      CommonTime currTime;
 
+      CommonTime prevTime;
 
+      double defInterval;
          /** Method to set the initial (a priori) position of receiver.
           * @return
           *  0 if OK

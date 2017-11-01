@@ -44,6 +44,7 @@
 #define POD_SOLVERPPP_HPP
 
 #include "CodeKalmanSolver.hpp"
+#include"AdvClockModel.h"
 
 using namespace gpstk;
 
@@ -228,7 +229,7 @@ namespace pod
           *                 if false (the default), will compute dx, dy, dz.
           */
           SolverPPP(
-          bool useNEU = false,
+          bool isUseAdvClkModel = false,
           double  tropoQ = 6e-10,
           double posSigma = 100.0,
           double clkSigma = 30000.0,
@@ -308,15 +309,6 @@ namespace pod
       { kFilter.Reset( newState, newErrorCov ); return (*this); };
 
 
-         /** Sets if a NEU system will be used.
-          *
-          * @param useNEU  Boolean value indicating if a NEU system will
-          *                be used
-          *
-          */
-      virtual SolverPPP& setNEU( bool useNEU );
-
-
          /** Get the weight factor multiplying the phase measurements sigmas.
           *  This factor is the code_sigma/phase_sigma ratio.
           */
@@ -377,7 +369,15 @@ namespace pod
       SolverPPP& setZCoordinatesModel(StochasticModel* pModel)
       { pCoordZStoModel = pModel; return (*this); };
 
+      SolverPPP& setAdvClkModel(const AdvClockModel & pModel)
+      {
+          advClkStoModel = pModel; return (*this);
+      };
 
+      AdvClockModel&  getAdvClkModel(const AdvClockModel & pModel)
+      {
+          return advClkStoModel;
+      };
          /** Set a single coordinates stochastic model to ALL coordinates.
           *
           * @param pModel      Pointer to StochasticModel associated with
@@ -510,7 +510,8 @@ namespace pod
 
    private:
 
-
+          /// use advansed clk model
+       bool useAdvClkModel;
          /// Number of variables
       int numVar;
 
@@ -552,6 +553,8 @@ namespace pod
          /// Pointer to stochastic model for phase biases
       StochasticModel* pBiasStoModel;
 
+      //
+      AdvClockModel advClkStoModel;
 
          /// State Transition Matrix (PhiMatrix)
       Matrix<double> phiMatrix;
@@ -603,6 +606,7 @@ namespace pod
 
          /// Initializing method.
       void Init(
+          bool isUseAdvClkModel = false,
           double  tropoQ = 6e-10,
           double posSigma = 100.0,
           double clkSigma = 30000.0,
@@ -614,10 +618,9 @@ namespace pod
 
         /// update transition (Phi) and process noise (Q) matrices
       void updateMatrices(Matrix<double> & phiMatrix, Matrix<double> & qMatrix, gnssRinex& gData);
-       ///
+       
+      ///update weight Matrix
       void updateWeightMatrix(Matrix<double> & rMatrix, gnssRinex& gData, int numCurrentSV);
-         /// Current solution
-      typeValueMap curSol;
 
          /// Constant stochastic model
       StochasticModel constantModel;

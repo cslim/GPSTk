@@ -52,7 +52,7 @@
 #include <map>
 
 #include "Exception.hpp"
-#include "SatID.hpp"
+//#include "SatID.hpp"
 #include "ObsIDInitializer.hpp"
 
 namespace gpstk

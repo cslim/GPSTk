@@ -3365,7 +3365,9 @@ in matrix and number of types do not match") );
             if(types[i].type==ObsID::otPhase)   // Phase
             {
                // TODO:: handle glonass data later(yanweigps)
-               tvMap[type] = it->second[i].data*getWavelength(sat,n);
+               int fcn = static_cast<SatID>(sat).getGloFcn();
+
+               tvMap[type] = it->second[i].data*getWavelength(sat, n, fcn);
 
                // n=1 2 5 6 7 8
                if(n==1)

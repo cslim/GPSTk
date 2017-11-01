@@ -2,7 +2,7 @@
 #define POD_PPP_SOLUTION_BASE_H
 
 
-#include"SolverWMS.hpp"
+#include"SolverPPP.hpp"
 #include"CodeSolverLEO.h"
 #include "ComputeDOP.hpp"
 #include"SP3EphemerisStore.hpp"
@@ -26,8 +26,8 @@ namespace pod
         bool LoadData();
         bool loadEphemeris();
         bool loadIono();
+        bool loadFcn();
         bool loadClocks();
-
         void checkObservable();
 
         void process();
@@ -49,11 +49,10 @@ namespace pod
       
         void printSolution(
             ofstream& outfile,
-            const SolverLMS& solver,
+            const SolverPPP& solver,
             const CommonTime& time0,
             const CommonTime& time,
             const ComputeDOP& cDOP,
-            bool  useNEU,
             GnssEpoch &   gEpoch,
             double dryTropo,
             vector<PowerSum> &stats,
@@ -65,6 +64,7 @@ namespace pod
         
         string genFilesDir;
         string workingDir;
+        string bceDir;
 
         bool calcApprPos = true;
         string apprPosFile;

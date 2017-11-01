@@ -1,21 +1,58 @@
 #include"auxiliary.h"
-#include<filesystem>
+#include<regex>
+
+using namespace std;
 
 namespace fs = std::experimental::filesystem;
 namespace pod
 {
     void  auxiliary::getAllFilesInDir(const string &dir, list<string> &files)
     {
+        list<fs::path> paths;
+        getAllFilesInDir(dir, paths);
+
+        for (auto &p : paths)
+            files.push_back(p.string());
+    }
+
+    void  auxiliary::getAllFilesInDir(const string &dir, list<fs::path> &files)
+    {
         files.clear();
         fs::path p(dir);
+
         if (!fs::exists(p))
         {
             string  message = "directory: " + dir + " doesn't exist.";
             throw std::exception(message.c_str());
         }
-         
 
         for (auto &p : fs::directory_iterator(dir))
-            files.push_back(p.path().string());
+            files.push_back(p.path());
+    }
+
+    void  auxiliary::getAllFilesInDir(const string &dir, const string &ext, list<string> &files)
+    {
+        list<fs::path> paths;
+        getAllFilesInDir(dir, ext, paths);
+
+        for (auto &p : paths)
+            files.push_back(p.string());
+    }
+
+    void  auxiliary::getAllFilesInDir(const string &dir, const string &ext, list<fs::path> &files )
+    {
+        regex rx(ext);
+        int totalUrls = 0;
+        list<fs::path> paths;
+        getAllFilesInDir(dir, paths);
+        for (auto &p : paths)
+        {
+            if (p.has_extension())
+            {
+                string exti = p.extension().string();
+                if (regex_match(exti, rx))
+                    files.push_back(p);
+            }
+        }
     }
 }
