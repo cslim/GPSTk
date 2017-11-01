@@ -88,8 +88,8 @@ namespace pod
         IonoModelStore ionoStore;
         list<string> rinexObsFiles;
         map<CommonTime, Xvt, std::less<CommonTime>> apprPos;
-
-       GnssEpochMap gMap;
+        SatSystSet systems;
+        GnssEpochMap gMap;
 
     };
 }

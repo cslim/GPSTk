@@ -108,10 +108,11 @@ int main(int argc, char* argv[])
     //sol.chekObs();
     //codeSmoother(argv[1], atoi(argv[2]));
     //testgpstk
-    testRinNav(argv[1]);
+    //testRinNav(argv[1]);
 
-    testRinParse(argv[1]);
-    //testPod(argv[1]);
+    //testRinParse(argv[1]);
+    testPod(argv[1]);
+    system("pause");
     return 0;
 }
 

@@ -286,6 +286,9 @@ namespace pod
             // Loop over all data epochs
             while (rin >> gRin)
             {
+
+                gRin.keepOnlySatSyst(systems);
+
                 PPPSolutionBase::mapSNR(gRin);
 
                 // Store current epoch
@@ -449,10 +452,9 @@ namespace pod
 
         // Close output file for this station
         outfile.close();
+        
+        return true;
     }
-
-
-
 
     double PODSolution::mapSNR(double value)
     {

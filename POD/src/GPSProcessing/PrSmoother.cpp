@@ -80,7 +80,6 @@ void PrSmoother::smooth(const char * path)
             bool isSVFirstTime = true;
             for (auto& it1 : csList)
             {
-
                 auto csType = it1.getResultType();
                 double CS = it.second.getValue(csType);
                 if (CS > 0)

@@ -354,6 +354,7 @@ namespace gpstk
          recZ,      ///< Receiver position, Z component
          recCdt,    ///< Receiver Clock offset 
          recCdtdot, ///< Receiver Clock offset 1-st derivative
+         recCdtGLO, ///< Receiver Clock offset to GLONASS sydyem time or intersystem GLONASS bias
          recZTropo,  ///< full ZTD
          recZTropoWet,  ///< Wet component of ZTD
          recZTropoDry,  ///< Dry component of ZTD

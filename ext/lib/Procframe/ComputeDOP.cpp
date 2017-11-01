@@ -42,7 +42,6 @@
 
 #include "ComputeDOP.hpp"
 
-
 namespace gpstk
 {
 
@@ -96,7 +95,6 @@ namespace gpstk
             // Let's try to invert AT*A matrices
          try
          {
-
             covM1 = inverseChol( covM1 );
             valid1 = true;
 

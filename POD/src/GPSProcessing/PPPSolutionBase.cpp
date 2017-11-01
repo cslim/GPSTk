@@ -67,13 +67,29 @@ namespace pod
 
             cout << "Ephemeris Loading... ";
             cout << loadEphemeris() << endl;
-            cout << "Clocks Loading... ";
-            //cout << loadClocks() << endl;
+           
+            //load clock data from RINEX clk files
+            if (confReader->fetchListValueAsBoolean("UseRinexClock"))
+            {
+                cout << "Rinex clock data Loading... ";
+                cout << loadClocks() << endl;
+            }
+
             cout << "IonoModel Loading... ";
             cout << loadIono() << endl;
 
             calcApprPos = confReader->fetchListValueAsBoolean("calcApprPos");
             apprPosFile = confReader->fetchListValue("apprPosFile");
+
+            systems.insert(SatID::SatelliteSystem::systemGPS);
+            bool useGLN = confReader->fetchListValueAsBoolean("useGLN");
+            if (useGLN)
+                systems.insert(SatID::SatelliteSystem::systemGlonass);
+
+            cout << "Used Sat. Systems: ";
+            for (auto& ss : systems)
+                cout << SatID::convertSatelliteSystemToString(ss) << " ";
+            cout << endl;
 
             return true;
         }
@@ -234,13 +250,6 @@ namespace pod
 
         ofstream os(workingDir+ "\\ObsStatisic.out");
 
-        std::set<SatID::SatelliteSystem> systems;
-        systems.insert(SatID::SatelliteSystem::systemGPS);
-        bool useGLN = confReader->fetchListValueAsBoolean("useGLN");
-        if (useGLN)
-            systems.insert(SatID::SatelliteSystem::systemGlonass);
-
-
         for (auto obsFile : rinexObsFiles)
         {
 
@@ -304,12 +313,6 @@ namespace pod
         solverPR->maskEl = 5;
         solverPR->maskSNR = 30;
         solverPR->ionoType = (CodeIonoCorrType)confReader->fetchListValueAsInt("CodeIonoCorrType");
-
-        std::set<SatID::SatelliteSystem> systems;
-        systems.insert(SatID::SatelliteSystem::systemGPS);
-        bool useGLN = confReader->fetchListValueAsBoolean("useGLN");
-        if (useGLN)
-            systems.insert(SatID::SatelliteSystem::systemGlonass);
 
         ofstream os;
         string outPath = workingDir + "\\" + apprPosFile;
@@ -416,7 +419,7 @@ namespace pod
             
             int i = loadApprPos(appr_pos_file);
         }
-
+      
         PPPprocess();
     }
 
@@ -481,13 +484,28 @@ namespace pod
             varY = solver.getVariance(TypeID::dy);     // Cov dy    - #9
             varZ = solver.getVariance(TypeID::dz);     // Cov dz    - #10
         }
-        //
+
+
         double cdt = solver.getSolution(TypeID::cdt);
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdt, cdt));
+       
+        //
+        outfile << x << "  " << y << "  " << z << "  " << cdt << " ";
+        
+        auto defeq = solver.getDefaultEqDefinition();
+
+        auto itcdtGLO = defeq.body.find(TypeID::recCdtGLO);
+        if (defeq.body.find(TypeID::recCdtGLO) != defeq.body.end())
+        {
+            double cdtGLO = solver.getSolution(TypeID::recCdtGLO);
+            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdtGLO, cdtGLO));
+            
+            outfile << cdtGLO << " ";
+        }
 
         double sigma = sqrt(varX + varY + varZ);
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::sigma, sigma));
-        outfile << x << "  " << y << "  " << z << "  " << wetMap << "  " << sigma << "  ";
+        outfile << wetMap << "  " << sigma << "  ";
      
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recSlnType, 16));
 

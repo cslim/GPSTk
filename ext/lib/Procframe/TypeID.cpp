@@ -320,6 +320,7 @@ namespace gpstk
       tStrings[recZ]       = "RxPositionZ";
       tStrings[recCdt]     = "RxCdt";
       tStrings[recCdtdot]  = "RxCdtdot";
+      tStrings[recCdtGLO]  = "RxCdtGLO";
       tStrings[recZTropo]  = "RxZenithTropo";
       tStrings[recZTropoWet] = "RxZenithTropoWet";
       tStrings[recZTropoDry] = "RxZenithTropoDry";

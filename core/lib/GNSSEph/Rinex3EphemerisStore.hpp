@@ -158,6 +158,7 @@ namespace gpstk
          ORBstore.clear();
          GLOstore.clear();
          GEOstore.clear();
+         
       }
 
          /** Return time system of this store. 

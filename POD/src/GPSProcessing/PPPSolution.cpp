@@ -401,8 +401,12 @@ namespace pod
             gMap.header = roh;
 
             // Loop over all data epochs
+            int cur_i = 1;
             while (rin >> gRin)
             {
+                //
+                gRin.keepOnlySatSyst(systems);
+
                 // Store current epoch
                 CommonTime time(gRin.header.epoch);
                 nominalPos = apprPos.at(time);
@@ -422,36 +426,33 @@ namespace pod
 
                 try
                 {
-                    gRin >> requireObs
-                        >> PRFilter
-                        >> linear1
-                        >> markCSLI2
-                        >> markCSMW
-                        >> markArc
-                        >> decimateData
-                        >> basic
-                        >> eclipsedSV
-                        >> grDelay
-                        >> svPcenter
-                        >> corr
-                        >> windup
-                        >> computeTropo
-                        >> linear2
-                        >> pcFilter
-                        >> phaseAlign
-                        >> linear3
-                        >> baseChange
-                        >> cDOP;
+                    gRin >> requireObs;
+                    gRin >> PRFilter;
+                    gRin >> linear1;
+                    gRin >> markCSLI2;
+                    gRin >> markCSMW;
+                    gRin >> markArc;
+                    gRin >> decimateData;
+                    gRin >> basic;
+                    gRin >> eclipsedSV;
+                    gRin >> grDelay;
+                    gRin >> svPcenter;
+                    gRin >> corr;
+                    gRin >> windup;
+                    gRin >> computeTropo;
+                    gRin >> linear2;
+                    gRin >> pcFilter;
+                    gRin >> phaseAlign;
+                    gRin >> linear3;
+                    gRin >> baseChange;
+                    gRin >> cDOP;
 
                     if(cycles<1)
                         gRin >> pppSolver;
                     else
                         gRin >> fbpppSolver;
-
-                    // Let's process data. Thanks to 'ProcessingList' this is
-                    // very simple and compact: Just one line of code!!!.
-                    // gRin >> pList;
-
+                    
+                    cur_i++;
                 }
                 catch (DecimateEpoch& d)
                 {
@@ -560,6 +561,7 @@ namespace pod
         // Close output file for this station
         outfile.close();
 
+        return true;
     }
 
 
