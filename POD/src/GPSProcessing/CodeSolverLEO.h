@@ -4,6 +4,7 @@
 #include"CodeSolverBase.h"
 #include"IonoModelStore.hpp"
 #include"CodeProcSvData.h"
+#include"NeillTropModel.hpp"
 
 using namespace gpstk;
 

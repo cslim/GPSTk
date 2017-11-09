@@ -8,7 +8,7 @@
 #include"IonoModelStore.hpp"
 #include"Matrix.hpp"
 #include"TropModel.hpp"
-
+#include"NeillTropModel.hpp"
 #include"CodeProcSvData.h"
 
 using namespace std;

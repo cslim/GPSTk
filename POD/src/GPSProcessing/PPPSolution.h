@@ -3,7 +3,7 @@
 
 #include"ConfDataReader.hpp"
 #include "PPPSolutionBase.h"
-#include"TropModel.hpp"
+#include"NeillTropModel.hpp"
 
 using namespace gpstk;
 namespace pod
