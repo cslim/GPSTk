@@ -28,16 +28,12 @@ namespace pod
 
     PPPSolutionBase::PPPSolutionBase(ConfDataReader & cReader,string dir ) : confReader(&cReader), workingDir(dir)
     {
-        maskEl = confReader->fetchListValueAsDouble("ElMask");
-        maskSNR = confReader->fetchListValueAsInt("SNRmask");
-
-        cout << "mask El " << maskEl << endl;
-        cout << "mask SNR " << (int)maskSNR << endl;
     } 
     PPPSolutionBase:: ~PPPSolutionBase()
     {
-        delete solverPR;
+        solverPR.release();
     }
+
     void PPPSolutionBase::mapSNR(gnssRinex & gRin)
     {
         for (auto &it1 : gRin.body)
@@ -55,12 +51,19 @@ namespace pod
         }
     }
 
-    bool  PPPSolutionBase::LoadData()
+    void  PPPSolutionBase::LoadData()
     {
         try
         {
+            maskEl = confReader->getValueAsDouble("ElMask");
+           
+            solverPR->maskSNR = maskSNR = confReader->getValueAsDouble("SNRmask");
+
+            cout << "mask El " << maskEl << endl;
+            cout << "mask SNR " << (int)maskSNR << endl;
+
             systems.insert(SatID::SatelliteSystem::systemGPS);
-            bool useGLN = confReader->fetchListValueAsBoolean("useGLN");
+            bool useGLN = confReader->getValueAsBoolean("useGLN");
             if (useGLN)
                 systems.insert(SatID::SatelliteSystem::systemGlonass);
 
@@ -69,19 +72,25 @@ namespace pod
                 cout << SatID::convertSatelliteSystemToString(ss) << " ";
             cout << endl;
 
-            bceDir = confReader->fetchListValue("RinexNavFilesDir");
+            //set BCE files direcory 
+            bceDir = confReader->getValue("RinexNavFilesDir");
             //set generic files direcory 
-            string subdir = confReader->fetchListValue("GenericFilesDir");
+            string subdir = confReader->getValue("GenericFilesDir");
             genFilesDir = workingDir + "\\" + subdir + "\\";
 
-            subdir = confReader->fetchListValue("RinesObsDir");
+            subdir = confReader->getValue("RinesObsDir");
             auxiliary::getAllFilesInDir(workingDir + "\\" + subdir, rinexObsFiles);
 
             cout << "Ephemeris Loading... ";
             cout << loadEphemeris() << endl;
 
-            //load clock data from RINEX clk files
-            if (confReader->fetchListValueAsBoolean("UseRinexClock"))
+            calcApprPos = confReader->getValueAsBoolean("calcApprPos");
+            apprPosFile = confReader->getValue("apprPosFile");
+
+            this->dynamics = (Dynamics)confReader->getValueAsInt("Dynamics");
+
+            //load clock data from RINEX clk files, if required
+            if (confReader->getValueAsBoolean("UseRinexClock"))
             {
                 cout << "Rinex clock data Loading... ";
                 cout << loadClocks() << endl;
@@ -93,15 +102,19 @@ namespace pod
             cout << "Load Glonass FCN data... ";
             cout << loadFcn() << endl;
 
-            calcApprPos = confReader->fetchListValueAsBoolean("calcApprPos");
-            apprPosFile = confReader->fetchListValue("apprPosFile");
+            cout << "Load Earth orientation Parameters data... ";
+            cout << loadEOPData() << endl;
 
-            return true;
         }
-        catch (const std::exception&)
+        catch (const Exception& e)
         {
-            cout << "failed to load input data" << endl;
-            return false;
+            cout << "Failed to load input data. An error has occured: " <<e.what() << endl;
+            exit(-1);
+        }
+        catch (const std::exception& e)
+        {
+            cout << "failed to load input data: An error has occured: " << e.what() << endl;
+            exit(-1);
         }
     }
     
@@ -115,7 +128,7 @@ namespace pod
         SP3EphList.rejectBadClocks(true);
 
         list<string> files;
-        string subdir = confReader->fetchListValue("EphemerisDir");
+        string subdir = confReader->getValue("EphemerisDir");
         auxiliary::getAllFilesInDir(workingDir+"\\"+ subdir, files);
 
         for (auto file : files)
@@ -130,17 +143,16 @@ namespace pod
                 // If file doesn't exist, issue a warning
                 cerr << "SP3 file '" << file << "' doesn't exist or you don't "
                     << "have permission to read it. Skipping it." << endl;
-
-                return false;
+                exit(-1);
             }
         }
-        return true;
+        return files.size() > 0;
     }
-    //reading clock
+     //reading clock data
     bool PPPSolutionBase::loadClocks()
     {
         list<string> files;
-        string subdir = confReader->fetchListValue("RinexClockDir");
+        string subdir = confReader->getValue("RinexClockDir");
         auxiliary::getAllFilesInDir(workingDir+"\\" + subdir, files);
 
         for (auto file : files)
@@ -155,10 +167,10 @@ namespace pod
                 // If file doesn't exist, issue a warning
                 cerr << "Rinex clock file '" << file << "' doesn't exist or you don't "
                     << "have permission to read it. Skipping it." << endl;
-                return false;
+                exit(-1);
             }
         }//   while ((ClkFile = confReader->fetchListValue("rinexClockFiles", station)) != "")
-        return true;
+        return files.size()>0;
     }
 
     bool  PPPSolutionBase::loadIono()
@@ -284,9 +296,37 @@ namespace pod
         return i > 0;
     }
 
+    bool PPPSolutionBase::loadEOPData()
+    {
+
+        string iersEopFile = genFilesDir;
+        try 
+        {
+            iersEopFile += confReader->getValue("IersEopFile");
+        }
+        catch (...)
+        {
+            cerr << "Problem get value from config: file \"IersEopFile\" " << endl;
+            exit(-1);
+        }
+
+        try
+        {         
+            eopStore.addIERSFile(iersEopFile);
+        }
+        catch (...)
+        {
+            cerr << "Problem opening file " << iersEopFile << endl;
+            cerr << "Maybe it doesn't exist or you don't have proper read "
+                << "permissions." << endl;
+            exit(-1);
+        }
+        return eopStore.size() > 0;
+    }
+
     void PPPSolutionBase::checkObservable()
     {
-        string subdir = confReader->fetchListValue("RinesObsDir");
+        string subdir = confReader->getValue("RinesObsDir");
         auxiliary::getAllFilesInDir(workingDir + "\\" + subdir, rinexObsFiles);
 
         ofstream os(workingDir+ "\\ObsStatisic.out");
@@ -338,7 +378,6 @@ namespace pod
                     os <<nGPS<<" "<<nGLN<<" "<< NumBadCNo1 << " " << NumP1 << " " << NumP2 << endl;
                 }
             }
-
         }
     }
 
@@ -352,15 +391,11 @@ namespace pod
         cout << "solverType " << solverPR->getName() << endl;
 
         solverPR->maskEl = 5;
-        solverPR->maskSNR = 30;
-        solverPR->ionoType = (CodeIonoCorrType)confReader->fetchListValueAsInt("CodeIonoCorrType");
+        solverPR->ionoType = (CodeIonoCorrType)confReader->getValueAsInt("CodeIonoCorrType");
 
         ofstream os;
         string outPath = workingDir + "\\" + apprPosFile;
-        // string outDbg= workingDir + "\\code_dbg.txt";
-        // solverPR->dbg.open(outDbg);
-        // solverPR->dbg << setprecision(12);
-         os.open(outPath);
+        os.open(outPath);
        
         //decimation
         int sampl(1);
@@ -383,9 +418,14 @@ namespace pod
                 //read the header
                 rin >> roh;
                 CommonTime ct0 = roh.firstObs;
+                CommonTime Tpre( CommonTime::BEGINNING_OF_TIME);
+                Tpre.setTimeSystem(TimeSystem::Any);
                 // Let's process all lines of observation data, one by one
                 while (rin >> rod)
                 {
+                    //work around for post header comments
+                    if (std::abs(rod.time - Tpre) <= CommonTime::eps) continue;
+                    Tpre = rod.time;
                     double dt = rod.time - ct0;
                     GPSWeekSecond gpst = static_cast<GPSWeekSecond>(rod.time);
 
@@ -416,6 +456,7 @@ namespace pod
                         res = 1;
 
                     os << *solverPR<<" "<<svData << endl;
+
                     if (res == 0)
                     {
                         Xvt xvt;
@@ -457,6 +498,7 @@ namespace pod
             cout << "Approximate Positions loading from \n"+appr_pos_file+"\n... ";
             
             loadApprPos(appr_pos_file);
+            cout << "Complete." << endl;
         }
       
         PPPprocess();
@@ -465,12 +507,10 @@ namespace pod
     // Method to print solution values
     void PPPSolutionBase::printSolution(ofstream& outfile,
         const SolverPPP& solver,
-        const CommonTime& time0,
         const CommonTime& time,
         const ComputeDOP& cDOP,
         GnssEpoch &   gEpoch,
         double dryTropo,
-        vector<PowerSum> &stats,
         int   precision,
         const Position &nomXYZ)
     {
@@ -510,6 +550,7 @@ namespace pod
         double cdt = solver.getSolution(TypeID::cdt);
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdt, cdt));
 
+
         //
         outfile << x << "  " << y << "  " << z << "  " << cdt << " ";
 
@@ -529,51 +570,30 @@ namespace pod
             double recCdtdot = solver.getSolution(TypeID::recCdtdot);
             gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdtdot, recCdtdot));
 
-            outfile << recCdtdot << " ";
+            outfile <<setprecision(12) << recCdtdot << " ";
         }
         double sigma = sqrt(varX + varY + varZ);
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::sigma, sigma));
-        outfile << wetMap << "  " << sigma << "  ";
+        outfile << setprecision(6) <<wetMap << "  " << sigma << "  ";
 
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recSlnType, 16));
 
         //gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recPDOP, cDOP.getPDOP()));
         outfile << gEpoch.satData.size() << endl;    // Number of satellites - #12
 
-        double tConv(5400.0);
-
-        double dt = time - time0;
-        if (dt > tConv)
-        {
-            stats[0].add(x);
-            stats[1].add(y);
-            stats[2].add(z);
-            stats[3].add(wetMap);
-        }
-
         return;
-
 
     }  // End of method 'ex9::printSolution()'
 
-    void PPPSolutionBase::printStats(ofstream& outfile,
-        const vector<PowerSum> &stats)
+    void PPPSolutionBase::updateNomPos(const CommonTime& time, Position &nominalPos)
     {
-        Triple Aver, Var;
-        double _3DRMS(0.0);
-
-        for (size_t i = 0; i < 3; i++)
+        if (dynamics == Dynamics::Kinematic)
         {
-            Aver[i] = stats[i].average();
-            Var[i] = stats[i].variance();
-            _3DRMS += Var[i];
-            Var[i] = sqrt(Var[i]);
+            auto it_pos = apprPos.find(time);
+            if (it_pos != apprPos.end())
+                nominalPos = it_pos->second;
         }
-
-        outfile << "Averege  " << Aver[0] << "  " << Aver[1] << "  " << Aver[2] << "  ";
-        outfile << "St.Dev.  " << Var[0] << "  " << Var[1] << "  " << Var[2] << "  " << sqrt(_3DRMS) << endl;
     }
-
     bool PPPSolutionBase::loadApprPos(std::string path)
     {
         apprPos.clear();
@@ -617,4 +637,5 @@ namespace pod
         }
         return true;
     }
+
 }

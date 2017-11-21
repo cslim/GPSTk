@@ -41,7 +41,9 @@
  */
 
 #include "SolverPPPFB.hpp"
-
+#include"LICSDetector2.hpp"
+#include"MWCSDetector.hpp"
+#include"SatArcMarker.hpp"
 
 namespace pod
 {
@@ -83,11 +85,18 @@ namespace pod
        keepTypeSet.insert(TypeID::cdt);
        keepTypeSet.insert(TypeID::recCdtdot);
        keepTypeSet.insert(TypeID::recCdtGLO);
+       
+       keepTypeSet.insert(TypeID::L1);
+       keepTypeSet.insert(TypeID::L2);
+       keepTypeSet.insert(TypeID::C1);
+       keepTypeSet.insert(TypeID::P1);
+       keepTypeSet.insert(TypeID::P2);
 
        keepTypeSet.insert(TypeID::prefitC);
        keepTypeSet.insert(TypeID::prefitL);
        keepTypeSet.insert(TypeID::weight);
        keepTypeSet.insert(TypeID::CSL1);
+       keepTypeSet.insert(TypeID::CSL2);
        keepTypeSet.insert(TypeID::satArc);
 
 
@@ -205,11 +214,8 @@ namespace pod
       try
       {
 
-         std::list<gnssRinex>::iterator pos;
-         std::list<gnssRinex>::reverse_iterator rpos;
-
             // Backwards iteration. We must do this at least once
-         for (rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
+         for ( auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
          {
 
             SolverPPP::Process( (*rpos) );
@@ -221,18 +227,19 @@ namespace pod
          {
 
                // Forwards iteration
-            for (pos = ObsData.begin(); pos != ObsData.end(); ++pos)
+            for (auto pos = ObsData.begin(); pos != ObsData.end(); ++pos)
             {
                SolverPPP::Process( (*pos) );
             }
 
                // Backwards iteration.
-            for (rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
+            for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
             {
                SolverPPP::Process( (*rpos) );
             }
 
          }  // End of 'for (int i=0; i<(cycles-1), i++)'
+
 
          return;
 
@@ -240,8 +247,7 @@ namespace pod
       catch(Exception& u)
       {
             // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + u.what() );
+         ProcessingException e( getClassName() + ":" + u.what() );
 
          GPSTK_THROW(e);
 
@@ -275,22 +281,14 @@ namespace pod
       try
       {
 
-         std::list<gnssRinex>::iterator pos;
-         std::list<gnssRinex>::reverse_iterator rpos;
-
             // Backwards iteration. We must do this at least once
-         for (rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
-         {
+         for ( auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
 
-            SolverPPP::Process( (*rpos) );
+             SolverPPP::Process( (*rpos) );
 
-         }
 
             // If both sizes are '0', let's return
-         if( maxSize == 0 )
-         {
-            return;
-         }
+         if (maxSize == 0) return;
 
             // We will store the limits here. By default we use very big values
          double codeLimit( 1000000.0 );
@@ -321,7 +319,7 @@ namespace pod
 
 
                // Forwards iteration
-            for (pos = ObsData.begin(); pos != ObsData.end(); ++pos)
+            for (auto pos = ObsData.begin(); pos != ObsData.end(); ++pos)
             {
                   // Let's check limits
                checkLimits( (*pos), codeLimit, phaseLimit );
@@ -331,7 +329,7 @@ namespace pod
             }
 
                // Backwards iteration.
-            for (rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
+            for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
             {
                   // Let's check limits
                checkLimits( (*rpos), codeLimit, phaseLimit );
@@ -348,8 +346,7 @@ namespace pod
       catch(Exception& u)
       {
             // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + u.what() );
+         ProcessingException e( getClassName() + ":" + u.what() );
 
          GPSTK_THROW(e);
 
@@ -393,8 +390,7 @@ namespace pod
       catch(Exception& u)
       {
             // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + u.what() );
+         ProcessingException e( getClassName() + ":" + u.what() );
 
          GPSTK_THROW(e);
 
@@ -414,7 +410,6 @@ namespace pod
    bool SolverPPPFB::LastProcess(gnssRinex& gData)
       throw(ProcessingException)
    {
-
       try
       {
 
@@ -425,16 +420,22 @@ namespace pod
                // Get the first data epoch in 'ObsData' and process it. The
                // result will be stored in 'gData'
             gData = SolverPPP::Process( ObsData.front() );
-
+            // gData = ObsData.front();
                // Remove the first data epoch in 'ObsData', freeing some
                // memory and preparing for next epoch
             ObsData.pop_front();
 
-
-               // Update some inherited fields
+            // Update some inherited fields
             solution = SolverPPP::solution;
             covMatrix = SolverPPP::covMatrix;
             postfitResiduals = SolverPPP::postfitResiduals;
+
+ /*           solution = sols.front(); 
+            sols.pop_front();
+            covMatrix =covs.front();
+            covs.pop_front();
+            postfitResiduals = ress.front();
+            ress.pop_front();*/
 
                // If everything is fine so far, then results should be valid
             valid = true;
@@ -444,7 +445,6 @@ namespace pod
          }
          else
          {
-
                // There are no more data
             return false;
 
@@ -454,8 +454,7 @@ namespace pod
       catch(Exception& u)
       {
             // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + u.what() );
+         ProcessingException e( getClassName() + ":" + u.what() );
 
          GPSTK_THROW(e);
 
@@ -475,9 +474,7 @@ namespace pod
       SatIDSet satRejectedSet;
 
          // Let's check limits
-      for( satTypeValueMap::iterator it = gData.body.begin();
-           it != gData.body.end();
-           ++it )
+      for( auto it = gData.body.begin(); it != gData.body.end(); ++it )
       {
 
             // Check postfit values and mark satellites as rejected
@@ -504,5 +501,65 @@ namespace pod
 
    }  // End of method 'SolverPPPFB::checkLimits()'
 
+      ///two part processing: first halh from backward solution
+      ///second halh from forward solution
+   void SolverPPPFB::TwoPartProcessing()
+   {
+       int n1 = ObsData.size() / 2;
+       auto delim = ObsData.begin();
+
+       std::list<gnssRinex> resData1;
+       int ifwd = 0;
+       for (auto pos = ObsData.begin(); pos != ObsData.end(); ++pos)
+       {
+           SolverPPP::Process((*pos));
+           if (ifwd > n1)
+           {
+               resData1.push_back(*pos);
+               sols.push_back(SolverPPP::solution);
+               covs.push_back(SolverPPP::covMatrix);
+               ress.push_back(SolverPPP::postfitResiduals);
+           }
+           else
+               delim = pos;
+           ifwd++;
+       }
+       bool isfound = false, isSetLast = false;
+       gnssRinex last;
+
+       for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
+       {
+           if (ObsData.size() - resData1.size() < 7)
+           {
+               if (!isSetLast)
+               {
+                   last = *rpos;
+                   isSetLast = true;
+               }
+               for (auto& it : last.body)
+               {
+                   (*rpos).body[it.first][TypeID::CSL1] = it.second[TypeID::CSL1];
+                   (*rpos).body[it.first][TypeID::CSL2] = it.second[TypeID::CSL2];
+                   (*rpos).body[it.first][TypeID::satArc] = it.second[TypeID::satArc];
+               }
+
+           }
+
+           SolverPPP::Process((*rpos));
+           auto r = rpos;
+           if ((++r).base() == delim)
+               isfound = true;
+           if (isfound)
+           {
+               resData1.push_front(*rpos);
+               sols.push_front(SolverPPP::solution);
+               covs.push_front(SolverPPP::covMatrix);
+               ress.push_front(SolverPPP::postfitResiduals);
+
+           }
+       }
+
+       ObsData = resData1;
+   }
 
 }  // End of namespace gpstk

@@ -144,7 +144,7 @@ namespace gpstk
                         lliType2(TypeID::LLI2), resultType1(TypeID::CSL1),
                         resultType2(TypeID::CSL2), deltaTMax(61.0),
                         satThreshold(0.08), timeConst(60.0), useLLI(true),
-                        maxBufferSize(12)
+                        useEpochFlag(false), maxBufferSize(12)
       { };
 
 
@@ -227,7 +227,11 @@ namespace gpstk
       virtual bool getUseLLI() const
       { return useLLI; };
 
-
+        /// Method to know if the LLI check is enabled or disabled.
+      virtual bool getEpochFlag() const
+      {
+          return useEpochFlag;
+      };
          /** Method to set whether the LLI indexes will be used as an aid
           *  or not.
           *
@@ -236,6 +240,15 @@ namespace gpstk
       virtual LICSDetector2& setUseLLI(const bool& use)
       { useLLI = use; return (*this); };
 
+        /** Method to set whether the epoch flag indexes will be used as an aid
+        *  or not.
+        *
+        * @param use   Boolean value enabling/disabling epoch flag check
+        */
+      virtual LICSDetector2& setUseEpochFlag(const bool& use)
+      {
+          useEpochFlag = use; return (*this);
+      };
 
          /** Method to get the maximum buffer size for data, in samples.
           */
@@ -319,6 +332,10 @@ namespace gpstk
          /// This field tells whether to use or ignore the LLI indexes as
          /// an aid.
       bool useLLI;
+
+         /// This field tells whether to use or ignore the Epoch flag value as
+         /// an aid.
+      bool useEpochFlag;
 
 
          /// Maximum buffer size.

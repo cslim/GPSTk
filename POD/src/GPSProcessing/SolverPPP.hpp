@@ -354,7 +354,11 @@ namespace pod
           */
       SolverPPP& setYCoordinatesModel(StochasticModel* pModel)
       { pCoordYStoModel = pModel; return (*this); };
-
+    
+      SolverPPP& setISBModel(StochasticModel* pModel)
+      {
+          pBiasStoModel = pModel; return  (*this);
+      }
 
          /// Get stochastic model pointer for dz (or dH) coordinate
       StochasticModel* getZCoordinatesModel() const

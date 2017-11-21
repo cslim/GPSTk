@@ -67,7 +67,7 @@ namespace gpstk
                                const bool& use )
       : obsType(TypeID::MWubbena), lliType1(TypeID::LLI1),
         lliType2(TypeID::LLI2), resultType1(TypeID::CSL1),
-        resultType2(TypeID::CSL2), useLLI(use)
+        resultType2(TypeID::CSL2), useLLI(use),useEpochFlag(false)
    {
       setDeltaTMax(dtMax);
       setMaxNumLambdas(mLambdas);
@@ -243,8 +243,8 @@ namespace gpstk
 
       try
       {
-
-         Process(gData.header.epoch, gData.body, gData.header.epochFlag);
+         auto flag = (useEpochFlag) ? gData.header.epochFlag : 0;
+         Process(gData.header.epoch, gData.body, flag);
 
          return gData;
 

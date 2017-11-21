@@ -453,6 +453,9 @@ namespace pod
 
    private:
 
+       ///two part processing: first halh from backward solution
+       ///second halh from forward solution
+       void TwoPartProcessing();
 
          /// Boolean indicating if this is the first iteration of this filter.
       bool firstIteration;
@@ -461,6 +464,9 @@ namespace pod
          /// List holding the information regarding every observation.
       std::list<gnssRinex> ObsData;
 
+      std::list< Vector<double>> sols;
+      std::list< Vector<double>> ress;
+      std::list< Matrix<double>> covs;
 
          /// Set storing the TypeID's that we want to keep.
       TypeIDSet keepTypeSet;

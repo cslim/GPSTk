@@ -285,8 +285,7 @@ namespace gpstk
       catch(Exception& u)
       {
             // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + u.what() );
+         ProcessingException e( getClassName() + ":" + u.what() );
 
          GPSTK_THROW(e);
 

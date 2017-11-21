@@ -6,6 +6,7 @@ namespace pod
 {
     double CodeSolverBase::eps = 1e-3;
     GPSEllipsoid CodeSolverBase::ellGPS;
+
     CodeSolverBase::CodeSolverBase() :
         maskEl(0.0), maskSNR(0.0), maxIter(15), Sol(5),
         sigmaMax(25), ionoType(IF), RMS3D(DBL_MAX), PDOP(DBL_MAX), sigma(0)
@@ -58,11 +59,19 @@ namespace pod
                 try
                 {
                     C1 = rod.getObs(it.first, ids.at(TypeID::C1),roh).data;
-                    S1 = rod.getObs(it.first, ids.at(TypeID::S1),roh).data;
+                    
                 }
-                catch (...)
+                catch (gpstk::Exception &e)
                 {
                     continue;
+                }
+                try
+                {
+                    S1 = rod.getObs(it.first, ids.at(TypeID::S1), roh).data;
+                }
+                catch (gpstk::Exception &e)
+                {
+
                 }
 
                 double ionocorr(0.0);
@@ -73,7 +82,7 @@ namespace pod
                     {
                         P2 = rod.getObs(it.first, ids.at(TypeID::P2), roh).data;
                     }
-                    catch (...)
+                    catch (gpstk::Exception &e)
                     {
                         continue;
                     }
@@ -99,34 +108,37 @@ namespace pod
     {
         CommonTime tx;
 
-        for (auto &it:svData.data)
+        for (auto it = svData.data.rbegin();it!= svData.data.rend();  ++it)
         {
-            if (!it.second.use) continue;
-            // transmit time
-            Xvt PVT;
-            // first estimate of transmit time
-            tx = t;
-            tx -= it.second.pr / C_MPS;
-            
-            // get ephemeris range, etc
-            try
+            if (it->second.use)
             {
-                PVT = Eph.getXvt(it.first, tx);
-            }
-            catch (InvalidRequest& e)
-            {
-                svData.tryRemove(it.first);
-                continue;
-            }
+                // transmit time
+                Xvt PVT;
+                // first estimate of transmit time
+                tx = t;
+                tx -= it->second.pr / C_MPS;
 
-            tx -= PVT.clkbias + PVT.relcorr;
-        
-            // SVP = {SV position at transmit time}, raw range + clk + rel
-            for (int l = 0; l < 3; l++)
-            {
-                it.second.pos[l] = PVT.x[l];
+                // get ephemeris range, etc
+                try
+                {
+                    PVT = Eph.getXvt(it->first, tx);
+                }
+                catch (InvalidRequest& e)
+                {
+                    svData.tryRemove(it->first);
+                    continue;
+                }
+
+                tx -= PVT.clkbias + PVT.relcorr;
+
+                // SVP = {SV position at transmit time}, raw range + clk + rel
+                for (int l = 0; l < 3; l++)
+                {
+                    it->second.pos[l] = PVT.x[l];
+                }
+                it->second.pr = it->second.pr + C_MPS * (PVT.clkbias + PVT.relcorr);
             }
-            it.second.pr = it.second.pr + C_MPS * (PVT.clkbias + PVT.relcorr);
+          
         }
     }
 
@@ -240,6 +252,7 @@ namespace pod
         } 
         return 0;
     }
+
     void CodeSolverBase::calcSigma(
         const Position& rxPos,
         const Matrix<double> & W,
@@ -260,6 +273,7 @@ namespace pod
         sigma = sqrt(vpv / r);
         
     }
+
     int CodeSolverBase::solve(
         const gpstk::CommonTime &t,
         const gpstk::IonoModelStore &iono,
@@ -318,7 +332,8 @@ namespace pod
     }
 
     /// stream output for CodeSolverBase
-    std::ostream& operator<<(std::ostream& os, const CodeSolverBase& solver)
+    std::ostream& operator<<(std::ostream& os, 
+        const CodeSolverBase& solver)
     {
         os << setprecision(10) << " ";
         for (size_t i = 0; i < solver.Sol.size(); i++)

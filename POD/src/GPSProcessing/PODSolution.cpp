@@ -69,7 +69,7 @@ namespace pod
     PODSolution::PODSolution(ConfDataReader & confReader, const string& dir):
         PPPSolutionBase (confReader,dir)
     {
-        solverPR = new CodeSolverLEO();
+       solverPR  = unique_ptr<CodeSolverBase>( new CodeSolverLEO());
     }
 
     bool PODSolution::PPPprocess()
@@ -293,12 +293,8 @@ namespace pod
 
                 // Store current epoch
                 CommonTime time(gRin.header.epoch);
-//#ifdef DBG
-//                nominalPos = it->second;
-//                it++;
-//#else
+
                 nominalPos = apprPos.at(time);
-//#endif // DEBUG
 
                 ///update the nominal position in processing objects
                 XYZ2NEU baseChange(nominalPos);
@@ -340,9 +336,7 @@ namespace pod
                         >> cDOP;
 
                     if (cycles < 1)
-                    {
                         gRin >> pppSolver;
-                    }
                     else
                         gRin >> fbpppSolver;
                     
@@ -444,11 +438,6 @@ namespace pod
             //add epoch to results
             gMap.data.insert(pair<CommonTime, GnssEpoch>(time, ep));
         }  // End of 'while( fbpppSolver.LastProcess(gRin) )'
-
-           //print statistic
-        printStats(outfile, stats);
-
-        // We are done. Close and go for next station
 
         // Close output file for this station
         outfile.close();

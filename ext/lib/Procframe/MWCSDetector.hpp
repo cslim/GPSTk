@@ -140,7 +140,7 @@ namespace gpstk
       MWCSDetector() : obsType(TypeID::MWubbena), lliType1(TypeID::LLI1),
                        lliType2(TypeID::LLI2), resultType1(TypeID::CSL1),
                        resultType2(TypeID::CSL2), deltaTMax(61.0),
-                       maxNumLambdas(10.0), useLLI(true)
+                       maxNumLambdas(10.0), useLLI(true), useEpochFlag(false)
       { };
 
 
@@ -210,12 +210,20 @@ namespace gpstk
       virtual MWCSDetector& setUseLLI(const bool& use)
       { useLLI = use; return (*this); };
 
+      virtual MWCSDetector& setUseEpochFlag(const bool& use)
+      {
+          useEpochFlag= use; return (*this);
+      };
 
          /// Method to know if the LLI check is enabled or disabled.
       virtual bool getUseLLI() const
       { return useLLI; };
 
-
+      /// Method to know if the LLI check is enabled or disabled.
+      virtual bool getUseEpochFlag() const
+      {
+          return useEpochFlag;
+      };
          /** Returns a gnnsSatTypeValue object, adding the new data generated
           *  when calling this object.
           *
@@ -280,7 +288,9 @@ namespace gpstk
 
          /// Whether use or ignore the LLI indexes as an aid. 
       bool useLLI;
-
+      
+      /// Whether use or ignore the EpochFlag indexes as an aid. 
+      bool useEpochFlag;
 
          /// A structure used to store filter data for a SV.
       struct filterData

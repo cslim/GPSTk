@@ -43,6 +43,7 @@
 #include "SolverPPP.hpp"
 #include "MatrixFunctors.hpp"
 #include"auxiliary.h"
+using namespace std;
 
 namespace pod
 {
@@ -591,7 +592,7 @@ namespace pod
                // Feed the filter with the correct state and covariance matrix
             if (firstTime)
             {
-
+                cout << "first time!" << endl;
                 Vector<double> initialState(numUnknowns, 0.0);
                 Matrix<double> initialErrorCovariance(numUnknowns, numUnknowns, 0.0);
 
@@ -609,7 +610,7 @@ namespace pod
                 if (useAdvClkModel)
                 {
                     initialErrorCovariance(4, 4) = 9.0e10;
-                    initialErrorCovariance(5, 5) = 9.0e10;
+                    initialErrorCovariance(5, 5) = 9.0e3;
                 }
                 else
                 {
@@ -635,8 +636,7 @@ namespace pod
                 firstTime = false;
                 state = initialState;
                 cov = initialErrorCovariance;
-                //DBOUT("\covar\n");
-                //DBOUT(initialErrorCovariance);
+
             }
             else
             {
@@ -692,29 +692,12 @@ namespace pod
                 }
 
                 cov = currentErrorCov;
-              /*  DBOUT("\nstate\n");
-                DBOUT(currentState);
-                DBOUT("\covar\n");
-                DBOUT(currentErrorCov);*/
+
                 // Reset Kalman filter to current state and covariance matrix
                 kFilter.Reset(currentState, currentErrorCov);
 
             }  // End of 'if(firstTime)'
             static int n = 1;
-            //std::cout<<n++<< std::endl;
-            //DBOUT("\nhMatrix\n");
-            //DBOUT(hMatrix);
-            //DBOUT("\nphiMatrix\n");
-            //DBOUT(phiMatrix);
-            //DBOUT("\nqMatrix\n");
-            //DBOUT(qMatrix);
-          
-            //DBOUT("\nPMinus\n");
-            //auto m = (phiMatrix*cov*transpose(phiMatrix) + qMatrix);
-            //DBOUT(m);
-            //DBOUT("\ninvPMinus\n");
-            //DBOUT(inverseChol(m));
-            //DBOUT("\n");
 
                // Call the Compute() method with the defined equation model.
                // This equation model MUST HAS BEEN previously set, usually when
@@ -774,8 +757,8 @@ namespace pod
         }
 
     }  // End of method 'SolverPPP::Process()'
-
-
+      
+       // End of method 'SolverPPP::setCoordinatesModel()'
        /* Set a single coordinates stochastic model to ALL coordinates.
         *
         * @param pModel      Pointer to StochasticModel associated with

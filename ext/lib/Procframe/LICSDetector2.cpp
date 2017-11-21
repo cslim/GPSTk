@@ -68,7 +68,7 @@ namespace gpstk
                                  const double& dtMax,
                                  const bool& use )
       : obsType(TypeID::LI), lliType1(TypeID::LLI1), lliType2(TypeID::LLI2),
-        resultType1(TypeID::CSL1), resultType2(TypeID::CSL2), useLLI(use)
+        resultType1(TypeID::CSL1), resultType2(TypeID::CSL2), useLLI(use), useEpochFlag(false)
    {
       setDeltaTMax(dtMax);
       setSatThreshold(satThr);
@@ -291,8 +291,8 @@ namespace gpstk
 
       try
       {
-
-         Process(gData.header.epoch, gData.body, gData.header.epochFlag);
+          auto flag = (useEpochFlag) ? gData.header.epochFlag: 0;
+         Process(gData.header.epoch, gData.body, flag);
 
          return gData;
 
@@ -483,9 +483,7 @@ namespace gpstk
          if( (2.0*maxDeltaLI) < currentBias )
          {
                // Compute limit to declare cycle slip
-            double deltaLimit( satThreshold /
-                               ( 1.0 + ( 1.0 /
-                                         std::exp(currentDeltaT/timeConst) )));
+            double deltaLimit( satThreshold / ( 1.0 + ( 1.0 / std::exp(currentDeltaT/timeConst) )));
 
                // Check if current LI deviation is above deltaLimit threshold
             if( currentBias > deltaLimit )

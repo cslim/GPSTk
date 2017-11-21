@@ -180,7 +180,7 @@ namespace pod
     void CodeProcSvData::applyCNoMask(double CNoMask)
     {
         for (auto & it : data)
-            it.second.use = (it.second.snr > CNoMask) ? true : false;
+            it.second.use = (it.second.snr >= CNoMask) ? true : false;
     }
     void CodeProcSvData::clear()
     {

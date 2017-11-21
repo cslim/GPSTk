@@ -88,10 +88,11 @@ namespace pod
         double yapp(confReader.fetchListValueAsDouble("nominalPosition"));
         double zapp(confReader.fetchListValueAsDouble("nominalPosition"));
         nominalPos = Position(xapp, yapp, zapp);
+        
         DoY = confReader.fetchListValueAsInt("dayOfYear");
         tropModel = NeillTropModel(nominalPos.getAltitude(), nominalPos.getGeodeticLatitude(), DoY);
 
-        solverPR = new CodeSolver(tropModel);
+        solverPR = unique_ptr<CodeSolverBase>(new CodeSolver(tropModel));
     }
     
     bool  PPPSolution::PPPprocess()
@@ -100,6 +101,8 @@ namespace pod
 
         // This object will check that all required observables are present
         RequireObservables requireObs;
+
+        requireObs.addRequiredType(TypeID::P1);
         requireObs.addRequiredType(TypeID::P2);
         requireObs.addRequiredType(TypeID::L1);
         requireObs.addRequiredType(TypeID::L2);
@@ -109,7 +112,6 @@ namespace pod
         SimpleFilter PRFilter;
         PRFilter.setFilteredType(TypeID::P2);
 
-        requireObs.addRequiredType(TypeID::P1);
         PRFilter.addFilteredType(TypeID::P1);
 
         
@@ -136,13 +138,15 @@ namespace pod
         
         // Objects to mark cycle slips
         LICSDetector2 markCSLI2;         // Checks LI cycle slips
+        markCSLI2.setSatThreshold(confReader->getValueAsDouble("LISatThreshold"));
         MWCSDetector  markCSMW;          // Checks Merbourne-Wubbena cycle slips
-      
+        markCSMW.setMaxNumLambdas(confReader->getValueAsDouble("MWNLambdas"));
+
         // Object to keep track of satellite arcs
         SatArcMarker markArc;
         markArc.setDeleteUnstableSats(true);
-        markArc.setUnstablePeriod(151.0);
-
+        markArc.setUnstablePeriod(31.0);
+        
         // Object to decimate data
         double newSampling(confReader->getValueAsDouble("decimationInterval"));
 
@@ -181,8 +185,7 @@ namespace pod
         antexReader.open(afile);
 
         // Get receiver antenna parameters
-        receiverAntenna =
-            antexReader.getAntenna(confReader->getValue("antennaModel"));
+        receiverAntenna = antexReader.getAntenna(confReader->getValue("antennaModel"));
 
         // Object to compute satellite antenna phase center effect
         ComputeSatPCenter svPcenter(nominalPos);
@@ -259,7 +262,8 @@ namespace pod
         // Declare solver objects
         SolverPPP   pppSolver (useAdvClkModel,tropoQ, posSigma, clkSigma, weightFactor);
         SolverPPPFB fbpppSolver(useAdvClkModel, tropoQ, posSigma, clkSigma, weightFactor);
-
+        bool ISBasWN = confReader->getValueAsBoolean("ISBasWN");
+       
         if (useAdvClkModel)
         {
             double q1clk(confReader->getValueAsDouble("q1Clk"));
@@ -273,52 +277,34 @@ namespace pod
         // Get if we want 'forwards-backwards' or 'forwards' processing only
         int cycles(confReader->getValueAsInt("forwardBackwardCycles"));
 
-        // Get if we want to process coordinates as white noise
-        bool isWN(true);
+        // White noise stochastic models
+        WhiteNoiseModel wnM(100.0);
+        WhiteNoiseModel isbM(confReader->getValueAsInt("ISBasWNSigma"));
 
-        // White noise stochastic model
-        WhiteNoiseModel wnM(100.0);      // 100 m of sigma
-
-        // Decide what type of solver we will use for this station
-        if (cycles > 0)
+        if (ISBasWN)
         {
-            // In this case, we will use the 'forwards-backwards' solver
-            // Check about coordinates as white noise
-            if (isWN)
-                fbpppSolver.setCoordinatesModel(&wnM);
+            fbpppSolver.setISBModel(&isbM);
+            pppSolver.setISBModel(&isbM);
         }
-        else
+
+        if (dynamics == Dynamics::Kinematic)
         {
-            // In this case, we will use the 'forwards-only' solver
-            // Check about coordinates as white noise
-            if (isWN)
-                pppSolver.setCoordinatesModel(&wnM);
-        }  // End of 'if ( cycles > 0 )'
+            fbpppSolver.setCoordinatesModel(&wnM);
+            pppSolver.setCoordinatesModel(&wnM);
+        }
 
            // Objects to compute tidal effects
-#pragma region Tides
-
         SolidTides solid;
 
         // Configure ocean loading model
         OceanLoading ocean;
         ocean.setFilename(genFilesDir + confReader->getValue("oceanLoadingFile"));
 
-        // Numerical values (xp, yp) are pole displacements (arcsec).
-        double xp(confReader->fetchListValueAsDouble("poleDisplacements"));
-        double yp(confReader->fetchListValueAsDouble("poleDisplacements"));
-        // Object to model pole tides
-        PoleTides pole;
-        pole.setXY(xp, yp);
-
-#pragma endregion
-
         // This is the GNSS data structure that will hold all the
         // GNSS-related information
         gnssRinex gRin;
-        
 
-#pragma region Output streams
+        #pragma region Output streams
 
         // Prepare for printing
         int prec(4);
@@ -326,25 +312,19 @@ namespace pod
         ofstream outfile;
         outfile.open(workingDir + "\\" + "PPP_sol.out", ios::out);
 
-#pragma endregion
+        #pragma endregion
 
-        //statistics for coorinates and tropo delay
-        vector<PowerSum> stats(4);
-        CommonTime time0;
-        bool b = true;
-      
         //// *** Now comes the REAL forwards processing part *** ////
         for (auto obsFile : rinexObsFiles)
         {
             cout << obsFile << endl;
             //Input observation file stream
             Rinex3ObsStream rin;
-            // Open Rinex observations file in read-only mode
+            //Open Rinex observations file in read-only mode
             rin.open(obsFile, std::ios::in);
 
             rin.exceptions(ios::failbit);
             Rinex3ObsHeader roh;
-            Rinex3ObsData rod;
 
             //read the header
             rin >> roh;
@@ -352,17 +332,28 @@ namespace pod
 
             //set def. interval for basic model object
             basic.setDefaultInterval(roh.interval);
-  
-            // Loop over all data epochs
+            CommonTime Tpre(CommonTime::BEGINNING_OF_TIME);
+            Tpre.setTimeSystem(TimeSystem::Any);
+            int i = 1;
+            // Let's process all lines of observation data, one by one
             while (rin >> gRin)
             {
+                //work around for post header comments
+                if (std::abs(gRin.header.epoch - Tpre) <= CommonTime::eps) continue;
+                Tpre = gRin.header.epoch;
+                
                 //
                 gRin.keepOnlySatSyst(systems);
 
-                // Store current epoch
+                // update current time and nominal position
                 CommonTime time(gRin.header.epoch);
-                nominalPos = apprPos.at(time);
-
+                updateNomPos(gRin.header.epoch, nominalPos);
+               
+                /// compute pole tide displacment
+                auto eop =   eopStore.getEOP(MJD(time).mjd, IERSConvention::IERS2010);
+                PoleTides pole;
+                pole.setXY(eop.xp, eop.yp);
+                
                 basic.rxPos = nominalPos;
                 grDelay.setNominalPosition(nominalPos);
                 svPcenter.setNominalPosition(nominalPos);
@@ -399,7 +390,7 @@ namespace pod
                     gRin >> linear3;
                     gRin >> baseChange;
                     gRin >> cDOP;
-                    std::cout << "2" << std::endl;
+               
                     if(cycles<1)
                         gRin >> pppSolver;
                     else
@@ -410,30 +401,16 @@ namespace pod
                     // If we catch a DecimateEpoch exception, just continue.
                     return false;
                 }
-                //catch (Exception& e)
-                //{
-                //    cerr << "Exception for receiver '" << stationName << "' at epoch: " << time << "; " << e << endl;
-                //    GPSTK_RETHROW(e);
-                //}
-                //catch (std::exception & e)
-                //{
-                //    cerr << "Unknown exception for receiver '" << stationName << " at epoch: " << time << endl;
-                //    throw;
-                //}
+                ++i;
 
                 // Check what type of solver we are using
                 if (cycles < 1)
                 {
                     GnssEpoch ep(gRin);
                     CommonTime time(gRin.header.epoch);
-                    if (b)
-                    {
-                        time0 = time;
-                        b = false;
-                    }
-                    // This is a 'forwards-only' filter. Let's print to output
-                    // file the results of this epoch
-                    printSolution(outfile, pppSolver, time0, time, cDOP,  ep, drytropo, stats, prec, nominalPos);
+
+                    // This is a 'forwards-only' filter. Let's print to output file the results of this epoch
+                    printSolution(outfile, pppSolver, time, cDOP, ep, drytropo, prec, nominalPos);
                    
                     //add epoch to results
                     gMap.data.insert(pair<CommonTime, GnssEpoch>(time, ep));
@@ -450,11 +427,9 @@ namespace pod
         if (cycles < 1)
         {
             outfile.close();
-
             // We are done with this station. Let's show a message
             cout << "Processing finished for station: '" << stationName << endl;
 
-            // Go process next station
             return true;
         }
 
@@ -484,25 +459,14 @@ namespace pod
            // Loop over all data epochs, again, and print results
         while (fbpppSolver.LastProcess(gRin))
         {
-         
+            // update current time and nominal position
             GnssEpoch ep(gRin);
             CommonTime time(gRin.header.epoch);
-            if (b)
-            {
-                time0 = time;
-                b = false;
-            }
-            nominalPos = apprPos[time];
-           
-            printSolution(outfile, fbpppSolver, time0, time, cDOP,  ep, drytropo, stats, prec, nominalPos);
+            updateNomPos(gRin.header.epoch,nominalPos);
+            printSolution(outfile, fbpppSolver, time, cDOP, ep, drytropo, prec, nominalPos);
             gMap.data.insert(pair<CommonTime, GnssEpoch>(time, ep));
 
         }  // End of 'while( fbpppSolver.LastProcess(gRin) )'
-
-           //print statistic
-        printStats(outfile, stats);
-
-        // We are done. Close and go for next station
 
         // Close output file for this station
         outfile.close();
