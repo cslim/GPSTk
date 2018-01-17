@@ -471,8 +471,6 @@ namespace gpstk
 
    }  // End of method 'ConfDataReader::fetchListValue()'
 
-
-
       /* Method to fetch (as boolean) the first value of a given
        * variable list.
        *
@@ -485,6 +483,7 @@ namespace gpstk
        * \warning This method will MODIFY the original content of
        * 'variableList'.
        */
+
    bool ConfDataReader::fetchListValueAsBoolean( string variableList,
                                                  string section,
                                                  bool   defaultVal )
@@ -553,6 +552,57 @@ namespace gpstk
        * @param section    Section the variable belongs to.
        *
        */
+
+       /** Method to get (as string) the all values of a given
+       *  variable list.
+       *
+       * In this context, a variable list is the same as a variable but
+       * it is composed of several parts (words), separated by spaces.
+       *
+       * @param variableList   Variable list name.
+       * @param section        Section the variable list belongs to.
+       *
+       * \warning This method will MODIFY the original content of
+       * 'variableList'.
+       */
+   list<string> ConfDataReader::getListValue(std::string variableList,
+       std::string section,
+       std::string defaultVal)
+   {
+       list<string> values;
+       int length = getNumItem(variableList, section);
+       for (size_t i = 0; i < length; i++)
+           values.push_back(fetchListValue(variableList, section, defaultVal));
+       return values;
+   }
+
+   /** Method to get (as double) the all values of a given
+   *  variable list.
+   *
+   * In this context, a variable list is the same as a variable but
+   * it is composed of several parts (words), separated by spaces.
+   *
+   * @param variableList   Variable list name.
+   * @param section        Section the variable list belongs to.
+   *
+   * \warning This method will MODIFY the original content of
+   * 'variableList'.
+   */
+   std::list<double> ConfDataReader::getListValueAsDouble(std::string variableList,
+       std::string section ,
+       double defaultVal )
+
+   {
+       auto strVal = getListValue(variableList,
+           section,
+           StringUtils::asString(defaultVal));
+       std::list<double> dblVal;
+       for (const auto &it : strVal)
+           dblVal.push_back(StringUtils::asDouble(it));
+
+       return dblVal;
+   }
+
    string ConfDataReader::getVariableDescription( string variable,
                                                   string section )
       throw(ConfigurationException)

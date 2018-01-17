@@ -87,10 +87,10 @@ void testPod(char * path)
     cout << "process complete ";
     cout << (std::clock() - t) / (double)CLOCKS_PER_SEC << endl;
     cout <<"epochs "<< gMap.data.size() << endl;
-    ofstream f("dump.txt");
-    gMap.dump(f);
+    // ofstream f("dump.txt");
+    // gMap.dump(f);
 
-    f.close();
+    //f.close();
 
 }
 

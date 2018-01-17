@@ -150,15 +150,12 @@ namespace gpstk
           prevTime = currTime;
           currTime = time;
           double dt = isFirstTime ? defInterval : std::abs(currTime - prevTime);
-
+         
           SatIDSet satRejectedSet;
           int numGLN(0);
 
             // Loop through all the satellites
-         satTypeValueMap::iterator stv;
-         for( stv = gData.begin();
-              stv != gData.end();
-              ++stv )
+         for(auto stv = gData.begin(); stv != gData.end(); ++stv )
          {
                // Scalar to hold temporal value
             double observable( (*stv).second(defaultObservable) );
@@ -288,8 +285,7 @@ namespace gpstk
       catch(Exception& u)
       {
             // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + u.what() );
+         ProcessingException e( getClassName() + ":" + u.what() );
 
          GPSTK_THROW(e);
 

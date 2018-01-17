@@ -138,7 +138,7 @@ namespace gpstk
                }
                else if(type == TypeID::P2)
                {
-                  gData[sat][TypeID::instC2] = getDCBCorrection(receiverName, 
+                  gData[sat][TypeID::instC2] = getDCBCorrection(receiverName,
                                                                 sat, type, usingC1);
                }
 
@@ -178,13 +178,20 @@ namespace gpstk
       {
          satP1P2 = dcbP1P2.getDCB(sat);
          satP1C1 = dcbP1C1.getDCB(sat);
-         receiverP1P2 = dcbP1P2.getDCB(receiver, SatID::systemGPS);
       }
       catch(...)
       {
             // exception
          satP1P2 = 0.0;
          satP1C1 = 0.0;
+      }
+      try 
+      {
+          receiverP1P2 = dcbP1P2.getDCB(receiver, SatID::systemGPS);
+      }
+      catch (...)
+      {
+
       }
          
       int ind = -1;

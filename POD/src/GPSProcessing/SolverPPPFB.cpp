@@ -323,7 +323,13 @@ namespace pod
             {
                   // Let's check limits
                checkLimits( (*pos), codeLimit, phaseLimit );
-
+               
+               if (pos->body.size() == 0)
+               {
+                   Exception e("Rejected all satellites at reprocessing part, check phase and code limits");
+                   GPSTK_THROW(e);
+               }
+                   
                   // Process data
                SolverPPP::Process( (*pos) );
             }

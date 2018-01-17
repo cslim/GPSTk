@@ -278,7 +278,6 @@ namespace gpstk
                                           std::string defaultVal = "" )
          throw(ConfigurationException);
 
-
          /** Method to fetch (as double) the first value of a given
           *  variable list.
           *
@@ -352,6 +351,44 @@ namespace gpstk
           * @param section        Section the variable list belongs to.
           *
           */
+
+
+          /** Method to get (as string) the all values of a given
+          *  variable list.
+          *
+          * In this context, a variable list is the same as a variable but
+          * it is composed of several parts (words), separated by spaces.
+          *
+          * @param variableList   Variable list name.
+          * @param section        Section the variable list belongs to.
+          *
+          * \warning This method will MODIFY the original content of
+          * 'variableList'.
+          */
+      virtual std::list<std::string> getListValue(std::string variableList,
+          std::string section = "DEFAULT",
+          std::string defaultVal = "")
+          throw(ConfigurationException);
+
+      /** Method to get (as double) the all values of a given
+      *  variable list.
+      *
+      * In this context, a variable list is the same as a variable but
+      * it is composed of several parts (words), separated by spaces.
+      *
+      * @param variableList   Variable list name.
+      * @param section        Section the variable list belongs to.
+      *
+      * \warning This method will MODIFY the original content of
+      * 'variableList'.
+      */
+      virtual std::list<double> getListValueAsDouble(std::string variableList,
+          std::string section = "DEFAULT",
+          double defaultVal = 0.0)
+          throw(ConfigurationException);
+
+
+
       virtual int getNumItem( std::string variableList,
                               std::string section = "DEFAULT" )
          throw(ConfigurationException)

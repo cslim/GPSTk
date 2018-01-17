@@ -103,13 +103,27 @@ namespace pod
         return 3 + ss.size();
     }
 
-    double CodeProcSvData::appendResid(Vector<double> sol, SatID::SatelliteSystem sys) const
+    void CodeProcSvData::updateSolutionLength(Vector<double> & sol) const
+    {
+        if(sol.size() < getParamNum())
+        {
+            Vector<double> temp(5);
+            if (sol.size() == 5)
+                for (size_t i = 0; i < sol.size(); i++)
+                    temp(i) = sol[i];
+            temp(4) = 0;
+            sol = temp;
+        }
+    }
+
+    double CodeProcSvData::appendResid(Vector<double> & sol, SatID::SatelliteSystem sys) const
     {
         if (getParamNum() > 4 && sys == SatID::SatelliteSystem::systemGlonass)
             return sol(4);
         else
             return 0.0;
     }
+ 
     int CodeProcSvData::getEquations(Matrix<double>& A, Matrix<double>& W, Vector<double>& resid)
     {
 

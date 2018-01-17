@@ -153,6 +153,7 @@ namespace pod
         double conv = DBL_MAX;
         while(true)
         {
+            svsData.updateSolutionLength(Sol);
             Position rxPos(Sol(0), Sol(1), Sol(2));
           
             for (auto &it : svsData.data)
@@ -315,7 +316,7 @@ namespace pod
             else
                 it.second.use = true;
         }
-        return 1;
+        return -1;
     }
 
     void CodeSolverBase::calcStat(const Matrix<double>& Cov)

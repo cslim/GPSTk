@@ -10,6 +10,7 @@
 #include"ConfDataReader.hpp"
 #include"GnssEpochMap.h"
 #include"EOPStore.hpp"
+#include"CorrectCodeBiases.hpp"
 
 using namespace gpstk;
 namespace pod
@@ -36,9 +37,9 @@ namespace pod
         bool loadFcn();
         bool loadClocks();
         bool loadEOPData();
+        bool loadCodeBiades();
 
         void checkObservable();
-  
 
         void process();
 
@@ -53,7 +54,7 @@ namespace pod
 
         void mapSNR(gnssRinex & value);
         virtual double mapSNR(double value) { return value; };
-        //shared_ptr<StochasticModel> getCoordModel();
+
         void updateNomPos(const CommonTime& time, Position &nominalPos);
         bool loadApprPos(std::string path);
       
@@ -72,18 +73,20 @@ namespace pod
         string workingDir;
         string bceDir;
 
-        bool calcApprPos = true;
-        string apprPosFile;
-
-
+        bool useC1;
         uchar maskSNR;
         double maskEl;
 
         //
         int DoY = 0;
-        //
-        Position nominalPos;
 
+        //
+        bool calcApprPos = true;
+        string apprPosFile;
+        Position nominalPos;
+        map<CommonTime, Xvt, std::less<CommonTime>> apprPos;
+        //
+        
         // Configuration file reader
         ConfDataReader* confReader;
 
@@ -93,17 +96,15 @@ namespace pod
         //Earth orintation parameters store
         EOPStore eopStore;
         
+        CorrectCodeBiases DCBData;
         //pointer to object for code solution 
         unique_ptr<CodeSolverBase> solverPR;
 
         IonoModelStore ionoStore;
         list<string> rinexObsFiles;
-        map<CommonTime, Xvt, std::less<CommonTime>> apprPos;
-        SatSystSet systems;
-        
-        GnssEpochMap gMap;
 
-        
+        SatSystSet systems;       
+        GnssEpochMap gMap;
 
     };
 }

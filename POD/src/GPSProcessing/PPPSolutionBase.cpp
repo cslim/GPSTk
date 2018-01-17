@@ -102,7 +102,7 @@ namespace pod
             cout << "Load Glonass FCN data... ";
             cout << loadFcn() << endl;
 
-            cout << "Load Earth orientation Parameters data... ";
+            cout << "Load Earth orientation data... ";
             cout << loadEOPData() << endl;
 
         }
@@ -324,6 +324,33 @@ namespace pod
         return eopStore.size() > 0;
     }
 
+    bool PPPSolutionBase::loadCodeBiades()
+    {
+        string biasesFile = genFilesDir;
+        try
+        {
+            biasesFile += confReader->getValue("IersEopFile");
+        }
+        catch (...)
+        {
+            cerr << "Problem get value from config: file \"IersEopFile\" " << endl;
+            exit(-1);
+        }
+
+        try
+        {
+           // DCBData.setDCBFile(biasesFile,);
+        }
+        catch (...)
+        {
+            cerr << "Problem opening file " << biasesFile << endl;
+            cerr << "Maybe it doesn't exist or you don't have proper read "
+                << "permissions." << endl;
+            exit(-1);
+        }
+        return eopStore.size() > 0;
+    }
+
     void PPPSolutionBase::checkObservable()
     {
         string subdir = confReader->getValue("RinesObsDir");
@@ -385,7 +412,6 @@ namespace pod
     {
         NeillTropModel NeillModel = solverPR->initTropoModel(nominalPos, DoY);
 
-        int badSol = 0;
         apprPos.clear();
 
         cout << "solverType " << solverPR->getName() << endl;
@@ -403,6 +429,7 @@ namespace pod
 
         for (auto obsFile : rinexObsFiles)
         {
+            int badSol(0);
             cout << obsFile << endl;
             try 
             {
@@ -446,14 +473,21 @@ namespace pod
                     os  << setprecision(6);
                     os  << CivilTime(gpst).printf("%02Y %02m %02d %02H %02M %02S %P") << " "<<dt<< " ";
 
-                    if (GoodSats > 4)
+                    if (GoodSats >= 4)
                     {
-                        solverPR->prepare(rod.time, SP3EphList, svData);
-                        res = solverPR->solve(rod.time, ionoStore, svData);
-                        os << res;
+                        try
+                        {
+                            solverPR->prepare(rod.time, SP3EphList, svData);
+                            res = solverPR->solve(rod.time, ionoStore, svData);
+                            os << res;
+                        }
+                        catch (Exception &e)
+                        {
+                            GPSTK_RETHROW(e)
+                        }
                     }
                     else
-                        res = 1;
+                        res = -1;
 
                     os << *solverPR<<" "<<svData << endl;
 
@@ -481,7 +515,7 @@ namespace pod
             {
                 cerr << "Caught an unexpected exception." << endl;
             }
-            cout << "Number of bad solutions " << badSol << endl;
+            cout << "Number of bad solutions for file " << badSol << endl;
         }
     }
     //
@@ -495,13 +529,29 @@ namespace pod
         else
         {
             string appr_pos_file = workingDir + "\\" + apprPosFile;
-            cout << "Approximate Positions loading from \n"+appr_pos_file+"\n... ";
-            
+            cout << "Approximate Positions loading from \n" + appr_pos_file + "\n... ";
+
             loadApprPos(appr_pos_file);
-            cout << "Complete." << endl;
+            cout << "\nComplete." << endl;
         }
-      
-        PPPprocess();
+        try
+        {
+            PPPprocess();
+        }
+        catch (ConfigurationException &conf_exp)
+        {
+            cerr << conf_exp.what() << endl;
+            throw;
+        }
+        catch (Exception &gpstk_e)
+        {
+            GPSTK_RETHROW(gpstk_e);
+        }
+        catch (std::exception &std_e)
+        {
+            cerr << std_e.what() << endl;
+            throw;
+        }
     }
 
     // Method to print solution values
@@ -594,6 +644,7 @@ namespace pod
                 nominalPos = it_pos->second;
         }
     }
+    
     bool PPPSolutionBase::loadApprPos(std::string path)
     {
         apprPos.clear();
