@@ -362,8 +362,28 @@ namespace gpstk
          recStDevY, ///< Receiver position, Y component satndard deviation
          recStDevZ, ///< Receiver position, Z component satndard deviation
          recPDOP,   ///< PDOP
+         recHDOP,   ///< HDOP
+         recVDOP,   ///< VDOP
          recUsedSV, ///< Number of SV used by receiver for position computation 
-         recSlnType,///< Type of solution
+         recSlnType,///< Solution type 
+         recSiteID, ///< Site ID
+        
+                    //TPS-specific types
+         snrL1P,
+         snrL2C,
+         LP1,
+         LC2,
+         LbandSNR,
+         LbandAGC,
+         hrms,
+         vrms,
+         heading,
+         pitch,
+         correctionAge,
+         recVel3D,
+         recAntDyn,
+         satStatus,
+         
          recVX,     ///< Receiver velocity, X component
          recVY,     ///< Receiver velocity, Y component
          recVZ,     ///< Receiver velocity, Z component

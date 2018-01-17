@@ -324,11 +324,12 @@ namespace gpstk
       tStrings[recZTropo]  = "RxZenithTropo";
       tStrings[recZTropoWet] = "RxZenithTropoWet";
       tStrings[recZTropoDry] = "RxZenithTropoDry";
-
       tStrings[recStDevX]  = "RxPositionStDev_X";
       tStrings[recStDevY]  = "RxPositionStDev_Y";
       tStrings[recStDevZ]  = "RxPositionStDev_Z";
       tStrings[recPDOP]    = "RxPDOP";
+      tStrings[recHDOP] = "RxHDOP";
+      tStrings[recVDOP] = "RxVDOP";
       tStrings[recUsedSV]  = "RxUsedSV";
       tStrings[recSlnType] = "RxSolutionType",
       tStrings[recVX]      = "RxVelocityX";
@@ -356,6 +357,23 @@ namespace gpstk
       tStrings[recJ2kAY]   = "RxJ2kAccelerationY";
       tStrings[recJ2kAZ]   = "RxJ2kAccelerationZ";
       tStrings[sigma]      = "sigma";
+
+      tStrings[snrL1P]     = "SNR_L1P";
+      tStrings[snrL2C]     = "SNR_L1C";
+
+      tStrings[LP1]        = "Phase_L1P";
+      tStrings[LC2]        = "Phase_L2C";
+      tStrings[LbandSNR]   = "L-Band SNR";
+      tStrings[LbandAGC]   = "L-Band AGC";
+      tStrings[hrms]       = "HRMS";
+      tStrings[vrms]       = "VRMS";
+      tStrings[heading]    = "heading";
+      tStrings[pitch]      = "pitch";
+      tStrings[correctionAge] = "Corr.Age";
+      tStrings[recVel3D]  = "RxVelocity3D";
+      tStrings[recAntDyn] = "RxAntennaDynamics";
+      tStrings[satStatus] = "SvStatusCode";
+      tStrings[recSiteID] = "RxSiteId";
 
       tStrings[iura]       = "iura";
       tStrings[Action]     = "Action";
