@@ -24,10 +24,10 @@ namespace pod
             Kinematic,
         }dynamics;
 
-        static PPPSolutionBase * Factory(bool isSpaceborne, ConfDataReader & confReader, const string& dir);
+        static PPPSolutionBase* Factory(bool isSpaceborne, ConfDataReader &confReader, const string& dir);
         //static void printModel(ofstream& modelfile, const gnssRinex& gData, int   precision);
 
-        PPPSolutionBase(ConfDataReader & confReader,string workingDir);
+        PPPSolutionBase(ConfDataReader &confReader,string workingDir);
 
         virtual ~PPPSolutionBase();
 
@@ -43,19 +43,22 @@ namespace pod
 
         void process();
 
-        GnssEpochMap & getData()
+        GnssEpochMap& getData()
         {
             return gMap;
         };
 
     protected:
         void PRProcess();
-        virtual bool PPPprocess() = 0;
+        
+        virtual bool processCore() = 0;
 
-        void mapSNR(gnssRinex & value);
+        void mapSNR(gnssRinex& value);
+
         virtual double mapSNR(double value) { return value; };
 
-        void updateNomPos(const CommonTime& time, Position &nominalPos);
+        void updateNomPos(const CommonTime& time, Position& nominalPos);
+
         bool loadApprPos(std::string path);
       
         void printSolution(
@@ -63,12 +66,14 @@ namespace pod
             const SolverPPP& solver,
             const CommonTime& time,
             const ComputeDOP& cDOP,
-            GnssEpoch &   gEpoch,
+            GnssEpoch&   gEpoch,
             double dryTropo,
             int   precision,
-            const Position &nomXYZ
+            const Position& nomXYZ
         );
 
+
+#pragma region Fields
         string genFilesDir;
         string workingDir;
         string bceDir;
@@ -86,7 +91,7 @@ namespace pod
         Position nominalPos;
         map<CommonTime, Xvt, std::less<CommonTime>> apprPos;
         //
-        
+
         // Configuration file reader
         ConfDataReader* confReader;
 
@@ -95,7 +100,7 @@ namespace pod
 
         //Earth orintation parameters store
         EOPStore eopStore;
-        
+
         CorrectCodeBiases DCBData;
         //pointer to object for code solution 
         unique_ptr<CodeSolverBase> solverPR;
@@ -103,8 +108,9 @@ namespace pod
         IonoModelStore ionoStore;
         list<string> rinexObsFiles;
 
-        SatSystSet systems;       
+        SatSystSet systems;
         GnssEpochMap gMap;
+#pragma endregion
 
     };
 }

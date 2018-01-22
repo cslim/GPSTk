@@ -536,7 +536,7 @@ namespace pod
         }
         try
         {
-            PPPprocess();
+            processCore();
         }
         catch (ConfigurationException &conf_exp)
         {

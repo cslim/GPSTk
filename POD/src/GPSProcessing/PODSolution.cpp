@@ -72,7 +72,7 @@ namespace pod
        solverPR  = unique_ptr<CodeSolverBase>( new CodeSolverLEO());
     }
 
-    bool PODSolution::PPPprocess()
+    bool PODSolution::processCore()
     {
         int outInt(confReader->getValueAsInt("outputInterval"));
 

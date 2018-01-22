@@ -24,6 +24,7 @@ namespace pod
 
         bool isSpace = confReader.fetchListValueAsBoolean("IsSpaceborneRcv");
         this->solver = PPPSolutionBase::Factory(isSpace, confReader, fs::path(path).parent_path().string());
+
     }
 
     bool Solution::loadConfig(const char* path)

@@ -6,15 +6,19 @@
 
 namespace pod
 {
+    // linear clock model 
     class AdvClockModel
     {
     public:
         AdvClockModel() : q1(1e-29), q2(1e-30), previousTime(gpstk::CommonTime::BEGINNING_OF_TIME),
             currentTime(gpstk::CommonTime::END_OF_TIME) {};
+
         AdvClockModel(double q1_, double q2_) :
             q1(q1_), q2(q2_), previousTime(gpstk::CommonTime::BEGINNING_OF_TIME), currentTime(gpstk::CommonTime::END_OF_TIME) {};
+       
         AdvClockModel(double q1_, double q2_, const gpstk::CommonTime & t1, const gpstk::CommonTime & t2) :
             q1(q1_), q2(q2_), previousTime(t1), currentTime(t2) {};
+
        virtual ~AdvClockModel() {};
 
        /** Set the value of previous epoch

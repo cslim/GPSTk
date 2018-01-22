@@ -1,5 +1,5 @@
-#ifndef CODE_PROCESS_DATA_H
-#define CODE_PROCESS_DATA_H
+#ifndef CODE_PROC_SV_DATA_H
+#define CODE_PROC_SV_DATA_H
 #include<map>
 #include<set>
 
@@ -87,7 +87,6 @@ namespace pod
         ///
         void clear();
 
-        //double CNoMask, elMask;
         set<SatID::SatelliteSystem> satSyst;
 
         map<SatID, SvDataItem> data;
@@ -96,4 +95,4 @@ namespace pod
     };
 }
 
-#endif // !CODE_PROCESS_DATA_H
+#endif // !CODE_PROC_SV_DATA_H

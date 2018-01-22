@@ -26,11 +26,12 @@ void testRinNav(char* path)
 {
     Rinex3EphemerisStore nrin;
     nrin.loadFile(path);
-    auto &sid = SatID(2, SatID::SatelliteSystem::systemGPS);
+    auto &sid = SatID(2, SatID::SatelliteSystem::systemBeiDou);
     CommonTime t0 = nrin.getInitialTime(sid);
     CommonTime te = nrin.getFinalTime(sid);
     nrin.SearchNear();
-    nrin.getXvt(sid, t0);
+    auto t = t0 + (te - t0) / 2;
+    nrin.getXvt(sid, t);
 
 }
 void testRinParse(char* path)
@@ -108,10 +109,10 @@ int main(int argc, char* argv[])
     //sol.chekObs();
     //codeSmoother(argv[1], atoi(argv[2]));
     //testgpstk
-    //testRinNav(argv[1]);
+    testRinNav(argv[1]);
 
     //testRinParse(argv[1]);
-    testPod(argv[1]);
+    //testPod(argv[1]);
     system("pause");
     return 0;
 }

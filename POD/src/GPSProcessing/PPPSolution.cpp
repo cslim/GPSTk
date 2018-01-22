@@ -56,7 +56,7 @@ namespace pod
         solverPR = unique_ptr<CodeSolverBase>(new CodeSolver(tropModel));
     }
     
-    bool  PPPSolution::PPPprocess()
+    bool  PPPSolution::processCore()
     {
         string stationName = confReader->fetchListValue("stationName");
 

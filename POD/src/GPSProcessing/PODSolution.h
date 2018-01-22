@@ -14,7 +14,7 @@ namespace pod
         virtual ~PODSolution(){};
     
     protected:
-        virtual bool PPPprocess() override;
+        virtual bool processCore() override;
         virtual double mapSNR(double  value) override;
     };
 }
