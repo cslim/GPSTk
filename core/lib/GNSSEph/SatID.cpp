@@ -35,7 +35,8 @@
 //=============================================================================
 #include "SatID.hpp"
 #include "GNSSconstants.hpp"
-
+#include"Rinex3NavStream.hpp"
+#include"Rinex3NavData.hpp"
 /**
 * @file SatID.cpp
 * gpstk::SatID - navigation system-independent representation of a satellite.
@@ -57,5 +58,16 @@ namespace gpstk
         }
 
         return it->second;
+    }
+    void SatID::loadGloFcn(const char * path)
+    {
+        Rinex3NavStream rNavFile;
+        Rinex3NavHeader rNavHeader;
+
+        rNavFile.open(path, std::ios::in);
+        rNavFile >> rNavHeader;
+        Rinex3NavData nm;
+        while (rNavFile >> nm)
+            SatID::glonassFcn[SatID(nm.sat)] = nm.freqNum;
     }
 }

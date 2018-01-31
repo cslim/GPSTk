@@ -9,7 +9,7 @@
 #include"GnssEpochMap.h"
 #include"PPPSolution.h"
 #include"PODSolution.h"
-#include"auxiliary.h"
+#include"FsUtils.h"
 
 
 #include "Rinex3NavHeader.hpp"
@@ -79,7 +79,7 @@ namespace pod
             genFilesDir = workingDir + "\\" + subdir + "\\";
 
             subdir = confReader->getValue("RinesObsDir");
-            auxiliary::getAllFilesInDir(workingDir + "\\" + subdir, rinexObsFiles);
+            FsUtils::getAllFilesInDir(workingDir + "\\" + subdir, rinexObsFiles);
 
             cout << "Ephemeris Loading... ";
             cout << loadEphemeris() << endl;
@@ -129,7 +129,7 @@ namespace pod
 
         list<string> files;
         string subdir = confReader->getValue("EphemerisDir");
-        auxiliary::getAllFilesInDir(workingDir+"\\"+ subdir, files);
+        FsUtils::getAllFilesInDir(workingDir+"\\"+ subdir, files);
 
         for (auto file : files)
         {
@@ -153,7 +153,7 @@ namespace pod
     {
         list<string> files;
         string subdir = confReader->getValue("RinexClockDir");
-        auxiliary::getAllFilesInDir(workingDir+"\\" + subdir, files);
+        FsUtils::getAllFilesInDir(workingDir+"\\" + subdir, files);
 
         for (auto file : files)
         {
@@ -178,7 +178,7 @@ namespace pod
         const string gpsObsExt = ".[\\d]{2}[nN]";
         list<string> files;
 
-        auxiliary::getAllFilesInDir(workingDir+"\\"+ bceDir, gpsObsExt, files);
+        FsUtils::getAllFilesInDir(workingDir+"\\"+ bceDir, gpsObsExt, files);
         int i = 0;
         for (auto file : files)
         {
@@ -267,23 +267,13 @@ namespace pod
     {
         const string glnObsExt = ".[\\d]{2}[gG]";
         list<string> files;
-        auxiliary::getAllFilesInDir(workingDir + "\\" + bceDir, glnObsExt, files);
-        int i = 0;
+        FsUtils::getAllFilesInDir(workingDir + "\\" + bceDir, glnObsExt, files);
+
         for (auto file : files)
         {
             try
             {
-                Rinex3NavStream rNavFile;
-                Rinex3NavHeader rNavHeader;
-
-                rNavFile.open(file.c_str(), std::ios::in);
-                rNavFile >> rNavHeader;
-                Rinex3NavData nm;
-                while (rNavFile >> nm)
-                {
-                    SatID::glonassFcn[SatID(nm.sat)] = nm.freqNum;
-                    i++;
-                }
+                SatID::loadGloFcn(file.c_str());
             }
             catch (...)
             {
@@ -293,7 +283,7 @@ namespace pod
                 exit(-1);
             }
         }
-        return i > 0;
+        return   SatID::glonassFcn.size() > 0;
     }
 
     bool PPPSolutionBase::loadEOPData()
@@ -354,7 +344,7 @@ namespace pod
     void PPPSolutionBase::checkObservable()
     {
         string subdir = confReader->getValue("RinesObsDir");
-        auxiliary::getAllFilesInDir(workingDir + "\\" + subdir, rinexObsFiles);
+        FsUtils::getAllFilesInDir(workingDir + "\\" + subdir, rinexObsFiles);
 
         ofstream os(workingDir+ "\\ObsStatisic.out");
 
@@ -537,6 +527,8 @@ namespace pod
         try
         {
             processCore();
+
+            gMap.updateMetadata();
         }
         catch (ConfigurationException &conf_exp)
         {

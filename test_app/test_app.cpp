@@ -1,5 +1,5 @@
-#include <iostream>
 
+#include "CommonTime.hpp"
 #include "SystemTime.hpp"
 #include"CommonTime.hpp"
 #include"CivilTime.hpp"
@@ -13,10 +13,17 @@
 #include"Rinex3EphemerisStore.hpp"
 
 #include "PrSmoother.h"
-
 #include"Solution.h"
 #include"Action.h"
 #include"PPPSolution.h"
+#include"SQLiteAdapter.h"
+
+#include <iostream>
+#include<filesystem>
+#include<chrono>
+#include <iostream>
+#include <iomanip>
+
 
 using namespace std;
 using namespace gpstk;
@@ -32,8 +39,8 @@ void testRinNav(char* path)
     nrin.SearchNear();
     auto t = t0 + (te - t0) / 2;
     nrin.getXvt(sid, t);
-
 }
+
 void testRinParse(char* path)
 {
 
@@ -87,12 +94,11 @@ void testPod(char * path)
     auto t2 = clock();
     cout << "process complete ";
     cout << (std::clock() - t) / (double)CLOCKS_PER_SEC << endl;
-    cout <<"epochs "<< gMap.data.size() << endl;
+    cout << "epochs " << gMap.data.size() << endl;
     // ofstream f("dump.txt");
     // gMap.dump(f);
 
     //f.close();
-
 }
 
 void codeSmoother(const char * iPath, int window)
@@ -103,18 +109,19 @@ void codeSmoother(const char * iPath, int window)
 
 }
 
+
 int main(int argc, char* argv[])
 {
+    cout << CivilTime(CommonTime::BEGINNING_OF_TIME) << endl;
     //Solution sol(argv[1]);
     //sol.chekObs();
     //codeSmoother(argv[1], atoi(argv[2]));
-    //testgpstk
-    testRinNav(argv[1]);
+    //testRinNav(argv[1]);
+    SQLiteAdapter:: testSQLite(argv[1], argv[2]);
+    //test();
 
     //testRinParse(argv[1]);
     //testPod(argv[1]);
     system("pause");
     return 0;
 }
-
-

@@ -42,7 +42,7 @@
 #include<iostream>
 #include "SolverPPP.hpp"
 #include "MatrixFunctors.hpp"
-#include"auxiliary.h"
+#include"FsUtils.h"
 using namespace std;
 
 namespace pod

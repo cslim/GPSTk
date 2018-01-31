@@ -179,7 +179,7 @@ namespace gpstk
        }
 
        int getGloFcn() const;
-
+       static void loadGloFcn(const char * path);
        int id;                   ///< satellite identifier, e.g. PRN
        SatelliteSystem system;   ///< system for this satellite
 

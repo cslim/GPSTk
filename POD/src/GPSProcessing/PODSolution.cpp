@@ -356,7 +356,6 @@ namespace pod
                     return false;
                 }
 
-
                 // Check what type of solver we are using
                 if (cycles < 1)
                 {
@@ -365,7 +364,6 @@ namespace pod
                     if (b)
                     {
                         time0 = time;
-
                         b = false;
                     }
 

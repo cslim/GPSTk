@@ -368,7 +368,7 @@ namespace gpstk
          recSlnType,///< Solution type 
          recSiteID, ///< Site ID
         
-                    //TPS-specific types
+                    ///TPS-specific types
          snrL1P,
          snrL2C,
          LP1,

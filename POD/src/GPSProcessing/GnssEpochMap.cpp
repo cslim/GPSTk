@@ -1,6 +1,7 @@
 #include"GnssEpochMap.h"
 
 using namespace std;
+using namespace gpstk;
 
 namespace pod
 {
@@ -51,6 +52,14 @@ namespace pod
 
     GnssEpochMap::~GnssEpochMap()
     { }
+
+    void GnssEpochMap::updateMetadata()
+    {
+        svs.clear();
+        for (auto & epoch : data)
+            for (auto & svRcord : epoch.second.satData)
+                svs.insert(svRcord.first);
+    }
 
     /// Method to print data values
     std::ostream& GnssEpochMap::dump(std::ostream& s, int precision)

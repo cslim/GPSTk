@@ -1,12 +1,12 @@
-#include"auxiliary.h"
+#include"FsUtils.h"
 #include<regex>
 
 using namespace std;
 
-namespace fs = std::experimental::filesystem;
+
 namespace pod
 {
-    void  auxiliary::getAllFilesInDir(const string &dir, list<string> &files)
+    void  FsUtils::getAllFilesInDir(const string &dir, list<string> &files)
     {
         list<fs::path> paths;
         getAllFilesInDir(dir, paths);
@@ -15,11 +15,11 @@ namespace pod
             files.push_back(p.string());
     }
 
-    void  auxiliary::getAllFilesInDir(const string &dir, list<fs::path> &files)
+    void  FsUtils::getAllFilesInDir(const string &dir, list<fs::path> &files)
     {
         files.clear();
         fs::path p(dir);
-
+        
         if (!fs::exists(p))
         {
             string  message = "directory: " + dir + " doesn't exist.";
@@ -30,7 +30,7 @@ namespace pod
             files.push_back(p.path());
     }
 
-    void  auxiliary::getAllFilesInDir(const string &dir, const string &ext, list<string> &files)
+    void  FsUtils::getAllFilesInDir(const string &dir, const string &ext, list<string> &files)
     {
         list<fs::path> paths;
         getAllFilesInDir(dir, ext, paths);
@@ -39,7 +39,7 @@ namespace pod
             files.push_back(p.string());
     }
 
-    void  auxiliary::getAllFilesInDir(const string &dir, const string &ext, list<fs::path> &files )
+    void  FsUtils::getAllFilesInDir(const string &dir, const string &ext, list<fs::path> &files )
     {
         regex rx(ext);
         int totalUrls = 0;

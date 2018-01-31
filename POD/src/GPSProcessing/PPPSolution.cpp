@@ -38,7 +38,7 @@
 #include"GnssEpochMap.h"
 #include"LinearCombination.h"
 #include"ProcessLinear.h"
-#include"auxiliary.h"
+#include"FsUtils.h"
 
 namespace pod
 {

@@ -2,10 +2,8 @@
 #include <direct.h>
 #include<windows.h>
 #include "Shlwapi.h"
-#include"auxiliary.h"
-#include<filesystem>
 
-namespace fs = std::experimental::filesystem;
+#include"FsUtils.h"
 
 namespace pod
 {

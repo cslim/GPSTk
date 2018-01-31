@@ -350,6 +350,7 @@ RELATIONAL_OPERATORS(SourceID)
 %template(GnssDataSatTypeValue)    gpstk::gnssData<gpstk::sourceEpochHeader, std::map<gpstk::SatID, std::map<gpstk::TypeID, double>>>;
 
 %include"Action.h"
+%include"SQLiteAdapter.h"
 %include"GnssEpochMap.h"
 
 // Geomatics:

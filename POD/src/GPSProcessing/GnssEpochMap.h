@@ -1,11 +1,8 @@
 #ifndef POD_GNSS_EPOCH_H
 #define POD_GNSS_EPOCH_H
-#include<iostream>
 
 #include"DataStructures.hpp"
 #include"CommonTime.hpp"
-
-using namespace gpstk;
 
 namespace pod
 {
@@ -14,13 +11,13 @@ namespace pod
 
         GnssEpoch();
 
-        GnssEpoch(const satTypeValueMap&  sData);
-        GnssEpoch(const gnssRinex& gRin);
+        GnssEpoch(const gpstk::satTypeValueMap&  sData);
+        GnssEpoch(const gpstk::gnssRinex& gRin);
         ~GnssEpoch();
 
-        satTypeValueMap satData;
+        gpstk::satTypeValueMap satData;
 
-        typeValueMap slnData;
+        gpstk::typeValueMap slnData;
 
         std::ostream& GnssEpoch::dump(std::ostream& s, int precision = 4);
   
@@ -33,9 +30,17 @@ namespace pod
 
         ~GnssEpochMap();
 
-        Rinex3ObsHeader header;
-        std::map<CommonTime, GnssEpoch> data;
+        //dump object to a stream
         std::ostream& dump(std::ostream& s, int precision = 4);
+        
+        void updateMetadata();
+        std::string title;
+        //all sv in data 
+        std::set<gpstk::SatID> svs;
+
+        gpstk::Rinex3ObsHeader header;
+        std::map<gpstk::CommonTime, GnssEpoch> data;
+
     };
 
 

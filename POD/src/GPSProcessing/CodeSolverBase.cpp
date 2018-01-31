@@ -1,7 +1,9 @@
 #include"CodeSolverBase.h"
 #include<math.h>
 #include"Matrix.hpp"
-#include"auxiliary.h"
+#include"FsUtils.h"
+#include"WinUtils.h"
+
 namespace pod
 {
     double CodeSolverBase::eps = 1e-3;

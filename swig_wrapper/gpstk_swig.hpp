@@ -177,4 +177,5 @@
 //POD 
 #include"Action.h"
 #include"GnssEpochMap.h"
+#include"SQLiteAdapter.h"
 #endif
