@@ -10,12 +10,14 @@
 #include"TropModel.hpp"
 #include"NeillTropModel.hpp"
 #include"CodeProcSvData.h"
+#include"GnssDataStore.hpp"
 
 using namespace std;
 using namespace gpstk;
 
 namespace pod
 {
+    typedef   std::shared_ptr< pod::GnssDataStore> GnssDataStore_sptr;
     typedef unsigned char uchar;
     enum CodeIonoCorrType { NONE = 0, Klobuchar, IF };
 
@@ -30,7 +32,7 @@ namespace pod
 
     public:
 
-        CodeSolverBase();
+        CodeSolverBase(GnssDataStore_sptr data );
         virtual ~CodeSolverBase()
         {};
 

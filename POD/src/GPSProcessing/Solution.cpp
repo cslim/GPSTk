@@ -18,47 +18,20 @@ namespace pod
                  " [-c|--conffile]    Name of configuration file ('config.txt' by default).",
                  false)
     {
-        loadConfig(path);
+        data.reset(new GnssDataStore(confReader));
+        data->LoadData(path);
 
-        bool isSpace = confReader.fetchListValueAsBoolean("IsSpaceborneRcv");
-        this->solver = PPPSolutionBase::Factory(isSpace, confReader, fs::path(path).parent_path().string());
-
-    }
-
-    bool Solution::loadConfig(const char* path)
-    {
-        try
-        {
-            // Try to open the provided configuration file
-            confReader.open(path);
-        }
-        catch (...)
-        {
-            cerr << "Problem opening file "
-                << confFile.getValue()[0]
-                << endl;
-            cerr << "Maybe it doesn't exist or you don't have proper "
-                << "read permissions." << endl;
-
-            exit(-1);
-
-        }  // End of 'try-catch' block
-
-        // If a given variable is not found in the provided section, then
-        // 'confReader' will look for it in the 'DEFAULT' section.
-        confReader.setFallback2Default(true);
-
-        return true;
+        this->solver = PPPSolutionBase::Factory(data);
+        cout << this->solver << endl;
     }
 
     void Solution::process()
     {
-        solver->LoadData();
         solver->process();
     }
 
     void Solution::chekObs()
     {
-        solver->checkObservable();
+        data->checkObservable();
     }
 }

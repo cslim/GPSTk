@@ -13,7 +13,7 @@ namespace pod
     class CodeSolverLEO : public CodeSolverBase
     {
     public:
-        CodeSolverLEO() : CodeSolverBase()
+        CodeSolverLEO(GnssDataStore_sptr data) : CodeSolverBase(data)
         {};
         virtual ~CodeSolverLEO()
         {};

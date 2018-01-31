@@ -117,11 +117,11 @@ int main(int argc, char* argv[])
     //sol.chekObs();
     //codeSmoother(argv[1], atoi(argv[2]));
     //testRinNav(argv[1]);
-    SQLiteAdapter:: testSQLite(argv[1], argv[2]);
+    //SQLiteAdapter:: testSQLite(argv[1], argv[2]);
     //test();
 
     //testRinParse(argv[1]);
-    //testPod(argv[1]);
+    testPod(argv[1]);
     system("pause");
     return 0;
 }

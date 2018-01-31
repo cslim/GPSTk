@@ -11,35 +11,21 @@
 #include"GnssEpochMap.h"
 #include"EOPStore.hpp"
 #include"CorrectCodeBiases.hpp"
+#include"GnssDataStore.hpp"
 
 using namespace gpstk;
+typedef   std::shared_ptr< pod::GnssDataStore> GnssDataStore_sptr;
 namespace pod
 {
     class PPPSolutionBase 
     {
     public:
-        enum Dynamics
-        {
-            Static = 0,
-            Kinematic,
-        }dynamics;
 
-        static PPPSolutionBase* Factory(bool isSpaceborne, ConfDataReader &confReader, const string& dir);
-        //static void printModel(ofstream& modelfile, const gnssRinex& gData, int   precision);
+        static PPPSolutionBase* Factory(GnssDataStore_sptr data);
 
-        PPPSolutionBase(ConfDataReader &confReader,string workingDir);
+        PPPSolutionBase(GnssDataStore_sptr data);
 
         virtual ~PPPSolutionBase();
-
-        void LoadData();
-        bool loadEphemeris();
-        bool loadIono();
-        bool loadFcn();
-        bool loadClocks();
-        bool loadEOPData();
-        bool loadCodeBiades();
-
-        void checkObservable();
 
         void process();
 
@@ -47,6 +33,16 @@ namespace pod
         {
             return gMap;
         };
+        
+        ConfDataReader& confReader()
+        {
+            return *(data->confReader);
+        }
+
+        GnssDataStore::ProcessOpt & opts()
+        {
+            return (data->opts);
+        }
 
     protected:
         void PRProcess();
@@ -59,7 +55,6 @@ namespace pod
 
         void updateNomPos(const CommonTime& time, Position& nominalPos);
 
-        bool loadApprPos(std::string path);
       
         void printSolution(
             ofstream& outfile,
@@ -74,41 +69,17 @@ namespace pod
 
 
 #pragma region Fields
-        string genFilesDir;
-        string workingDir;
-        string bceDir;
+        
+        //Input processing data and configuration
+        GnssDataStore_sptr data;
 
-        bool useC1;
-        uchar maskSNR;
-        double maskEl;
-
-        //
-        int DoY = 0;
-
-        //
-        bool calcApprPos = true;
-        string apprPosFile;
+        //nominal position
         Position nominalPos;
-        map<CommonTime, Xvt, std::less<CommonTime>> apprPos;
-        //
 
-        // Configuration file reader
-        ConfDataReader* confReader;
-
-        // object to handle precise ephemeris and clocks
-        SP3EphemerisStore SP3EphList;
-
-        //Earth orintation parameters store
-        EOPStore eopStore;
-
-        CorrectCodeBiases DCBData;
         //pointer to object for code solution 
         unique_ptr<CodeSolverBase> solverPR;
-
-        IonoModelStore ionoStore;
-        list<string> rinexObsFiles;
-
-        SatSystSet systems;
+        
+        // processing result
         GnssEpochMap gMap;
 #pragma endregion
 

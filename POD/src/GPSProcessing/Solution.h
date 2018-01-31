@@ -26,8 +26,8 @@ namespace pod
         };
 
     protected:
-     
-        bool loadConfig(const char* path);
+        
+        GnssDataStore_sptr data;
 
         CommandOptionWithArg confFile;
 

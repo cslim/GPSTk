@@ -12,7 +12,7 @@ namespace pod
     {
     public:
 
-        CodeSolver(gpstk::TropModel &tropo) :CodeSolverBase(), tropo(&tropo)
+        CodeSolver(gpstk::TropModel &tropo, GnssDataStore_sptr data) :CodeSolverBase(data), tropo(&tropo)
         {};
         virtual ~CodeSolver()
         {

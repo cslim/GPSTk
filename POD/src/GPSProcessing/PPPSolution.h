@@ -11,7 +11,7 @@ namespace pod
     class PPPSolution : public PPPSolutionBase
     {
     public:
-        PPPSolution(ConfDataReader & confReader, string dir);
+        PPPSolution(GnssDataStore_sptr  confReader);
         virtual ~PPPSolution(){};
 
     protected:

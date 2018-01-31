@@ -1,7 +1,6 @@
 #ifndef POD_POD_SOLUTION_H
 #define POD_POD_SOLUTION_H
 
-#include "ConfDataReader.hpp"
 #include"PPPSolutionBase.h"
 using namespace gpstk;
 namespace pod
@@ -10,7 +9,7 @@ namespace pod
     {
     public:
 
-        PODSolution(ConfDataReader & confReader, const string& dir);
+        PODSolution(GnssDataStore_sptr confData);
         virtual ~PODSolution(){};
     
     protected:

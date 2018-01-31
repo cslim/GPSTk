@@ -42,28 +42,31 @@
 
 namespace pod
 {
-    PPPSolution::PPPSolution(ConfDataReader & confReader, string dir)
-        :PPPSolutionBase(confReader, dir)
+    PPPSolution::PPPSolution(GnssDataStore_sptr gnssData)
+        :PPPSolutionBase (gnssData)
     {
-        double xapp(confReader.fetchListValueAsDouble("nominalPosition"));
-        double yapp(confReader.fetchListValueAsDouble("nominalPosition"));
-        double zapp(confReader.fetchListValueAsDouble("nominalPosition"));
+
+        double xapp(confReader().fetchListValueAsDouble("nominalPosition"));
+        double yapp(confReader().fetchListValueAsDouble("nominalPosition"));
+        double zapp(confReader().fetchListValueAsDouble("nominalPosition"));
         nominalPos = Position(xapp, yapp, zapp);
         
-        DoY = confReader.fetchListValueAsInt("dayOfYear");
-        tropModel = NeillTropModel(nominalPos.getAltitude(), nominalPos.getGeodeticLatitude(), DoY);
+       opts().DoY = confReader().fetchListValueAsInt("dayOfYear");
 
-        solverPR = unique_ptr<CodeSolverBase>(new CodeSolver(tropModel));
+        //initialize troposhperic model
+        tropModel = NeillTropModel(nominalPos.getAltitude(), nominalPos.getGeodeticLatitude(),opts().DoY);
+
+        solverPR = unique_ptr<CodeSolverBase>(new CodeSolver(tropModel, data));
     }
     
     bool  PPPSolution::processCore()
     {
-        string stationName = confReader->fetchListValue("stationName");
+        string stationName = confReader().fetchListValue("stationName");
 
         // This object will check that all required observables are present
         RequireObservables requireObs;
         
-        TypeID codeL1 = confReader->getValueAsBoolean("useC1") ? TypeID::C1 : TypeID::P1;
+        TypeID codeL1 = confReader().getValueAsBoolean("useC1") ? TypeID::C1 : TypeID::P1;
            
         requireObs.addRequiredType(codeL1);
         requireObs.addRequiredType(TypeID::P2);
@@ -88,7 +91,7 @@ namespace pod
         // Thence, the "filterCode" option allows you to deactivate the
         // "SimpleFilter" object that filters out C1, P1 and P2, in case you
         // need to.
-        //bool filterCode(confReader->getValueAsBoolean("filterCode"));
+        //bool filterCode(confReader().getValueAsBoolean("filterCode"));
 
         // Object to compute linear combinations for cycle slip detection
         ProcessLinear linear1;
@@ -101,9 +104,9 @@ namespace pod
         
         // Objects to mark cycle slips
         LICSDetector2 markCSLI2;         // Checks LI cycle slips
-        markCSLI2.setSatThreshold(confReader->getValueAsDouble("LISatThreshold"));
+        markCSLI2.setSatThreshold(confReader().getValueAsDouble("LISatThreshold"));
         MWCSDetector  markCSMW;          // Checks Merbourne-Wubbena cycle slips
-        markCSMW.setMaxNumLambdas(confReader->getValueAsDouble("MWNLambdas"));
+        markCSMW.setMaxNumLambdas(confReader().getValueAsDouble("MWNLambdas"));
 
         // Object to keep track of satellite arcs
         SatArcMarker markArc;
@@ -111,18 +114,18 @@ namespace pod
         markArc.setUnstablePeriod(31.0);
         
         // Object to decimate data
-        double newSampling(confReader->getValueAsDouble("decimationInterval"));
+        double newSampling(confReader().getValueAsDouble("decimationInterval"));
 
         Decimate decimateData(
             newSampling,
-            confReader->getValueAsDouble("decimationTolerance"),
-            SP3EphList.getInitialTime());
+            confReader().getValueAsDouble("decimationTolerance"),
+            data->SP3EphList.getInitialTime());
      
         // Declare a basic modeler
         //BasicModel basic(Position(0.0, 0.0, 0.0), SP3EphList);
-        BasicModel basic(nominalPos, SP3EphList);
+        BasicModel basic(nominalPos, data->SP3EphList);
         // Set the minimum elevation
-        basic.setMinElev(maskEl);
+        basic.setMinElev(opts().maskEl);
 
         basic.setDefaultObservable(codeL1);
 
@@ -133,22 +136,22 @@ namespace pod
         GravitationalDelay grDelay(nominalPos);
 
         // Vector from monument to antenna ARP [UEN], in meters
-        double uARP(confReader->fetchListValueAsDouble("offsetARP"));
-        double eARP(confReader->fetchListValueAsDouble("offsetARP"));
-        double nARP(confReader->fetchListValueAsDouble("offsetARP"));
+        double uARP(confReader().fetchListValueAsDouble("offsetARP"));
+        double eARP(confReader().fetchListValueAsDouble("offsetARP"));
+        double nARP(confReader().fetchListValueAsDouble("offsetARP"));
         Triple offsetARP(uARP, eARP, nARP);
 
         AntexReader antexReader;
         Antenna receiverAntenna;
 
         // Feed Antex reader object with Antex file
-        string afile = genFilesDir;
-        afile += confReader->getValue("antexFile");
+        string afile = data->genericFilesDirectory;
+        afile += confReader().getValue("antexFile");
 
         antexReader.open(afile);
 
         // Get receiver antenna parameters
-        receiverAntenna = antexReader.getAntenna(confReader->getValue("antennaModel"));
+        receiverAntenna = antexReader.getAntenna(confReader().getValue("antennaModel"));
 
         // Object to compute satellite antenna phase center effect
         ComputeSatPCenter svPcenter(nominalPos);
@@ -157,24 +160,24 @@ namespace pod
         svPcenter.setAntexReader(antexReader);
 
         // Declare an object to correct observables to monument
-        CorrectObservables corr(SP3EphList);
+        CorrectObservables corr(data->SP3EphList);
 
         corr.setMonument(offsetARP);
 
         // Check if we want to use Antex patterns
-        bool usepatterns(confReader->getValueAsBoolean("usePCPatterns"));
+        bool usepatterns(confReader().getValueAsBoolean("usePCPatterns"));
         if (usepatterns)
         {
             corr.setAntenna(receiverAntenna);
             // Should we use elevation/azimuth patterns or just elevation?
-            corr.setUseAzimuth(confReader->getValueAsBoolean("useAzim"));
+            corr.setUseAzimuth(confReader().getValueAsBoolean("useAzim"));
         }
 
         // Object to compute wind-up effect
-        ComputeWindUp windup(SP3EphList, nominalPos, genFilesDir + confReader->getValue("satDataFile"));
+        ComputeWindUp windup(data->SP3EphList, nominalPos, data->genericFilesDirectory + confReader().getValue("satDataFile"));
       
         // Declare a NeillTropModel object, setting its parameters
-        NeillTropModel neillTM(nominalPos.getAltitude(), nominalPos.getGeodeticLatitude(), DoY);
+        NeillTropModel neillTM(nominalPos.getAltitude(), nominalPos.getGeodeticLatitude(), opts().DoY);
 
         // We will need this value later for printing
         double drytropo(neillTM.dry_zenith_delay());
@@ -212,30 +215,30 @@ namespace pod
         // Object to compute DOP values
         ComputeDOP cDOP;
 
-        double tropoQ(confReader->getValueAsDouble("tropoQ"));
-        double posSigma(confReader->getValueAsDouble("posSigma"));
-        double clkSigma(confReader->getValueAsDouble("clkSigma"));
-        double weightFactor(confReader->getValueAsDouble("weightFactor"));
+        double tropoQ(confReader().getValueAsDouble("tropoQ"));
+        double posSigma(confReader().getValueAsDouble("posSigma"));
+        double clkSigma(confReader().getValueAsDouble("clkSigma"));
+        double weightFactor(confReader().getValueAsDouble("weightFactor"));
        
         //estimate receiver linear clock drift parameters together with  clock offset?
-        bool useAdvClkModel = confReader->getValueAsBoolean("useAdvClkModel");
+        bool useAdvClkModel = confReader().getValueAsBoolean("useAdvClkModel");
         basic.useClkDrift(useAdvClkModel);
         
         // Declare solver objects
         SolverPPP   pppSolver (useAdvClkModel,tropoQ, posSigma, clkSigma, weightFactor);
         SolverPPPFB fbpppSolver(useAdvClkModel, tropoQ, posSigma, clkSigma, weightFactor);
        
-        list<double> phaselims = confReader->getListValueAsDouble("phaseLimlist");
+        list<double> phaselims = confReader().getListValueAsDouble("phaseLimlist");
         fbpppSolver.setPhaseList(phaselims);
-        list<double> codelims = confReader->getListValueAsDouble("codeLimList");
+        list<double> codelims = confReader().getListValueAsDouble("codeLimList");
         fbpppSolver.setCodeList(codelims);
         int cycles(std::max<int>(phaselims.size(), codelims.size()));
         cout <<"cycles "<< cycles << endl;
 
         if (useAdvClkModel)
         {
-            double q1clk(confReader->getValueAsDouble("q1Clk"));
-            double q2clk(confReader->getValueAsDouble("q2Clk"));
+            double q1clk(confReader().getValueAsDouble("q1Clk"));
+            double q2clk(confReader().getValueAsDouble("q2Clk"));
             AdvClockModel mod(q1clk, q2clk);
             pppSolver.setAdvClkModel(mod);
             fbpppSolver.setAdvClkModel(mod);
@@ -244,7 +247,7 @@ namespace pod
         // White noise stochastic models
         WhiteNoiseModel wnM(100.0);
 
-        if (dynamics == Dynamics::Kinematic)
+        if (opts().dynamics == GnssDataStore:: Dynamics::Kinematic)
         {
             fbpppSolver.setCoordinatesModel(&wnM);
             pppSolver.setCoordinatesModel(&wnM);
@@ -255,7 +258,7 @@ namespace pod
 
         // Configure ocean loading model
         OceanLoading ocean;
-        ocean.setFilename(genFilesDir + confReader->getValue("oceanLoadingFile"));
+        ocean.setFilename(data->genericFilesDirectory + confReader().getValue("oceanLoadingFile"));
 
         // This is the GNSS data structure that will hold all the
         // GNSS-related information
@@ -267,13 +270,13 @@ namespace pod
         int prec(4);
 
         ofstream outfile;
-        outfile.open(workingDir + "\\" + "PPP_sol.out", ios::out);
+        outfile.open(data->workingDir + "\\" + "PPP_sol.out", ios::out);
 
         #pragma endregion
 
         int i = 1;
         cout << "First forward processing part started." << endl;
-        for (auto obsFile : rinexObsFiles)
+        for (auto obsFile : data->rinexObsFiles)
         {
             cout << obsFile << endl;
             //Input observation file stream
@@ -298,14 +301,14 @@ namespace pod
                 //work around for post header comments
                 if (gRin.body.size() == 0) continue;
                 //
-                gRin.keepOnlySatSyst(systems);
+                gRin.keepOnlySatSyst(opts().systems);
 
                 /// update current time and nominal position
                 CommonTime time(gRin.header.epoch);
                 updateNomPos(gRin.header.epoch, nominalPos);
 
                 /// compute pole tide displacment
-                auto eop = eopStore.getEOP(MJD(time).mjd, IERSConvention::IERS2010);
+                auto eop = data->eopStore.getEOP(MJD(time).mjd, IERSConvention::IERS2010);
                 PoleTides pole;
                 pole.setXY(eop.xp, eop.yp);
 

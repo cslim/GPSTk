@@ -62,19 +62,21 @@
 // satellite clock information with a 900 s sample rate.
 #include "Decimate.hpp"
 
+#include "ConfDataReader.hpp"
 #include"BasicModel.hpp"
+
 using namespace gpstk;
 namespace pod
 {
-    PODSolution::PODSolution(ConfDataReader & confReader, const string& dir):
-        PPPSolutionBase (confReader,dir)
+    PODSolution::PODSolution(GnssDataStore_sptr confData):
+        PPPSolutionBase (confData)
     {
-       solverPR  = unique_ptr<CodeSolverBase>( new CodeSolverLEO());
+       solverPR  = unique_ptr<CodeSolverBase>( new CodeSolverLEO(data));
     }
 
     bool PODSolution::processCore()
     {
-        int outInt(confReader->getValueAsInt("outputInterval"));
+        int outInt(confReader().getValueAsInt("outputInterval"));
 
         // This object will check that all required observables are present
         RequireObservables requireObs;
@@ -90,7 +92,7 @@ namespace pod
         PRFilter.addFilteredType(TypeID::P1);
         PRFilter.setFilteredType(TypeID::P2);
 
-        SimpleFilter SNRFilter(TypeID::S1, (double)maskSNR, 1e7);
+        SimpleFilter SNRFilter(TypeID::S1, (double)opts().maskSNR, 1e7);
 
         // This object defines several handy linear combinations
         LinearCombinations comb;
@@ -108,7 +110,7 @@ namespace pod
         LICSDetector2 markCSLI2;         // Checks LI cycle slips
                                          // markCSLI2.setSatThreshold(1);
        // Checks Merbourne-Wubbena cycle slips
-        MWCSDetector  markCSMW(confReader->getValueAsDouble("MWNumLambdas"));          
+        MWCSDetector  markCSMW(confReader().getValueAsDouble("MWNumLambdas"));          
 
         // Object to keep track of satellite arcs
         SatArcMarker markArc;
@@ -116,18 +118,18 @@ namespace pod
         markArc.setUnstablePeriod(61.0);
 
         // Object to decimate data
-        double newSampling(confReader->getValueAsDouble("decimationInterval"));
+        double newSampling(confReader().getValueAsDouble("decimationInterval"));
 
         Decimate decimateData(
             newSampling,
-            confReader->getValueAsDouble("decimationTolerance"),
-            SP3EphList.getInitialTime());
+            confReader().getValueAsDouble("decimationTolerance"),
+            data->SP3EphList.getInitialTime());
 
         // Declare a basic modeler
         //BasicModel basic(Position(0.0, 0.0, 0.0), SP3EphList);
-        BasicModel basic(nominalPos, SP3EphList);
+        BasicModel basic(nominalPos, data->SP3EphList);
         // Set the minimum elevation
-        basic.setMinElev(maskEl);
+        basic.setMinElev(opts().maskEl);
 
         basic.setDefaultObservable(TypeID::P1);
 
@@ -138,19 +140,19 @@ namespace pod
         GravitationalDelay grDelay(nominalPos);
 
         // Vector from monument to antenna ARP [UEN], in meters
-        double uARP(confReader->fetchListValueAsDouble("offsetARP"));
-        double eARP(confReader->fetchListValueAsDouble("offsetARP"));
-        double nARP(confReader->fetchListValueAsDouble("offsetARP"));
+        double uARP(confReader().fetchListValueAsDouble("offsetARP"));
+        double eARP(confReader().fetchListValueAsDouble("offsetARP"));
+        double nARP(confReader().fetchListValueAsDouble("offsetARP"));
         Triple offsetARP(uARP, eARP, nARP);
 
         // Declare an object to correct observables to monument
-        CorrectObservables corr(SP3EphList);
+        CorrectObservables corr(data->SP3EphList);
         corr.setMonument(offsetARP);
 
         // Feed Antex reader object with Antex file
         AntexReader antexReader;
-        string afile = genFilesDir;
-        afile += confReader->getValue("antexFile");
+        string afile = data->genericFilesDirectory;
+        afile += confReader().getValue("antexFile");
         antexReader.open(afile);
 
         // Object to compute satellite antenna phase center effect
@@ -160,35 +162,35 @@ namespace pod
 
 #pragma region receiver antenna parameters
 
-        bool useAntex(confReader->fetchListValueAsBoolean("useRcvAntennaModel"));
+        bool useAntex(confReader().fetchListValueAsBoolean("useRcvAntennaModel"));
         Triple ofstL1(0.0, 0.0, 0.0), ofstL2(0.0, 0.0, 0.0);
         if (useAntex)
         {
             Antenna receiverAntenna;
             // Get receiver antenna parameters
-            string aModel(confReader->getValue("antennaModel"));
+            string aModel(confReader().getValue("antennaModel"));
             receiverAntenna = antexReader.getAntenna(aModel);
 
             // Check if we want to use Antex patterns
-            bool usepatterns(confReader->getValueAsBoolean("usePCPatterns"));
+            bool usepatterns(confReader().getValueAsBoolean("usePCPatterns"));
             if (usepatterns)
             {
                 corr.setAntenna(receiverAntenna);
                 // Should we use elevation/azimuth patterns or just elevation?
-                corr.setUseAzimuth(confReader->getValueAsBoolean("useAzim"));
+                corr.setUseAzimuth(confReader().getValueAsBoolean("useAzim"));
             }
         }
         else
         {
             // Fill vector from antenna ARP to L1 phase center [UEN], in meters
-            ofstL1[0] = confReader->fetchListValueAsDouble("offsetL1");
-            ofstL1[1] = confReader->fetchListValueAsDouble("offsetL1");
-            ofstL1[2] = confReader->fetchListValueAsDouble("offsetL1");
+            ofstL1[0] = confReader().fetchListValueAsDouble("offsetL1");
+            ofstL1[1] = confReader().fetchListValueAsDouble("offsetL1");
+            ofstL1[2] = confReader().fetchListValueAsDouble("offsetL1");
 
             // Vector from antenna ARP to L2 phase center [UEN], in meters
-            ofstL2[0] = confReader->fetchListValueAsDouble("offsetL2");
-            ofstL2[1] = confReader->fetchListValueAsDouble("offsetL2");
-            ofstL2[2] = confReader->fetchListValueAsDouble("offsetL2");
+            ofstL2[0] = confReader().fetchListValueAsDouble("offsetL2");
+            ofstL2[1] = confReader().fetchListValueAsDouble("offsetL2");
+            ofstL2[2] = confReader().fetchListValueAsDouble("offsetL2");
             //
             corr.setL1pc(ofstL1);
             corr.setL2pc(ofstL2);
@@ -197,7 +199,7 @@ namespace pod
 #pragma endregion
 
         // Object to compute wind-up effect
-        ComputeWindUp windup(SP3EphList, nominalPos, genFilesDir + confReader->getValue("satDataFile"));
+        ComputeWindUp windup(data->SP3EphList, nominalPos, data->genericFilesDirectory + confReader().getValue("satDataFile"));
 
         // Object to compute ionosphere-free combinations to be used
         // as observables in the PPP processing
@@ -234,13 +236,13 @@ namespace pod
         fbpppSolver.setCoordinatesModel(&wnM);
 
         // Get if we want 'forwards-backwards' or 'forwards' processing only
-        int cycles(confReader->getValueAsInt("forwardBackwardCycles"));
+        int cycles(confReader().getValueAsInt("forwardBackwardCycles"));
 
         list<double> phaseLimits, codeLimits;
         double val(0);
-        while ((val = confReader->fetchListValueAsDouble("codeLimits")) != 0.0)
+        while ((val = confReader().fetchListValueAsDouble("codeLimits")) != 0.0)
             codeLimits.push_back(val);
-        while ((val = confReader->fetchListValueAsDouble("phaseLimits")) != 0.0)
+        while ((val = confReader().fetchListValueAsDouble("phaseLimits")) != 0.0)
             phaseLimits.push_back(val);
 
         fbpppSolver.setPhaseList(phaseLimits);
@@ -256,7 +258,7 @@ namespace pod
         int precision(4);
 
         ofstream outfile;
-        outfile.open(workingDir +"\\PPP_sol.out", ios::out);
+        outfile.open(data->workingDir +"\\PPP_sol.out", ios::out);
 
 #pragma endregion
 
@@ -266,8 +268,9 @@ namespace pod
         bool b = true;
 
         //// *** Now comes the REAL forwards processing part *** ////
-        for (auto obsFile : rinexObsFiles)
+        for (auto obsFile : data->rinexObsFiles)
         {
+
             cout << obsFile << endl;
             //Input observation file stream
             Rinex3ObsStream rin;
@@ -278,7 +281,7 @@ namespace pod
             Rinex3ObsHeader roh;
             Rinex3ObsData rod;
 
-            auto it = apprPos.begin();
+            auto it = data->apprPos.begin();
             //read the header
             rin >> roh;
             gMap.header = roh;
@@ -287,14 +290,14 @@ namespace pod
             while (rin >> gRin)
             {
 
-                gRin.keepOnlySatSyst(systems);
+                gRin.keepOnlySatSyst(opts().systems);
 
                 PPPSolutionBase::mapSNR(gRin);
 
                 // Store current epoch
                 CommonTime time(gRin.header.epoch);
 
-                nominalPos = apprPos.at(time);
+                nominalPos = data->apprPos.at(time);
 
                 ///update the nominal position in processing objects
                 XYZ2NEU baseChange(nominalPos);
@@ -429,7 +432,7 @@ namespace pod
                 b = false;
             }
                     
-            nominalPos = apprPos.at(time);
+            nominalPos = data->apprPos.at(time);
             double fm = fmod(((GPSWeekSecond)time).getSOW(), outInt);
             if (fm < 0.1)
                 fbpppSolver.printSolution(outfile, time0, time, cDOP, ep, 0.0, stats, nominalPos);

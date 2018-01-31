@@ -9,10 +9,11 @@ namespace pod
     double CodeSolverBase::eps = 1e-3;
     GPSEllipsoid CodeSolverBase::ellGPS;
 
-    CodeSolverBase::CodeSolverBase() :
-        maskEl(0.0), maskSNR(0.0), maxIter(15), Sol(5),
+    CodeSolverBase::CodeSolverBase(GnssDataStore_sptr data) :
+        maskEl(data->opts.maskEl), maskSNR(data->opts.maskSNR), maxIter(15), Sol(5),
         sigmaMax(25), ionoType(IF), RMS3D(DBL_MAX), PDOP(DBL_MAX), sigma(0)
     {
+       
         Sol = 0.0;
     };
     void CodeSolverBase::refreshSolution(Vector<double> &Sol, Vector<double> &dSol)
