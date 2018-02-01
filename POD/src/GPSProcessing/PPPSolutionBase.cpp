@@ -27,7 +27,7 @@ namespace pod
             return new PPPSolution(data);
     }
 
-    PPPSolutionBase::PPPSolutionBase(GnssDataStore_sptr procData ) :data(procData)
+    PPPSolutionBase::PPPSolutionBase(GnssDataStore_sptr procData ) :GnssSolution(procData)
     {
     } 
     PPPSolutionBase:: ~PPPSolutionBase()
@@ -201,9 +201,8 @@ namespace pod
 
     // Method to print solution values
     void PPPSolutionBase::printSolution(ofstream& outfile,
-        const SolverPPP& solver,
+        const SolverLMS& solver,
         const CommonTime& time,
-        const ComputeDOP& cDOP,
         GnssEpoch &   gEpoch,
         double dryTropo,
         int   precision,
@@ -218,9 +217,6 @@ namespace pod
         outfile << static_cast<YDSTime>(time).sod << "  ";   // SecondsOfDay   - #3
         outfile << setprecision(6) << (static_cast<YDSTime>(time).doy + static_cast<YDSTime>(time).sod / 86400.0) << "  " << setprecision(precision);
 
-        //calculate statistic
-        double x(0), y(0), z(0), varX(0), varY(0), varZ(0);
-
         // We add 0.1 meters to 'wetMap' because 'NeillTropModel' sets a
         // nominal value of 0.1 m. Also to get the total we have to add the
         // dry tropospheric delay value
@@ -230,21 +226,21 @@ namespace pod
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recZTropo, wetMap));
 
 
-        x = nomXYZ.X() + solver.getSolution(TypeID::dx);    // dx    - #4
-        y = nomXYZ.Y() + solver.getSolution(TypeID::dy);    // dy    - #5
-        z = nomXYZ.Z() + solver.getSolution(TypeID::dz);    // dz    - #6
+        double x = nomXYZ.X() + solver.getSolution(TypeID::dx);    // dx    - #4
+        double y = nomXYZ.Y() + solver.getSolution(TypeID::dy);    // dy    - #5
+        double z = nomXYZ.Z() + solver.getSolution(TypeID::dz);    // dz    - #6
 
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recX, x));
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recY, y));
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recZ, z));
 
-        varX = solver.getVariance(TypeID::dx);     // Cov dx    - #8
-        varY = solver.getVariance(TypeID::dy);     // Cov dy    - #9
-        varZ = solver.getVariance(TypeID::dz);     // Cov dz    - #10
+        double varX = solver.getVariance(TypeID::dx);     // Cov dx    - #8
+        double varY = solver.getVariance(TypeID::dy);     // Cov dy    - #9
+        double varZ = solver.getVariance(TypeID::dz);     // Cov dz    - #10
+        double sigma = sqrt(varX + varY + varZ);
 
         double cdt = solver.getSolution(TypeID::cdt);
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdt, cdt));
-
 
         //
         outfile << x << "  " << y << "  " << z << "  " << cdt << " ";
@@ -267,13 +263,12 @@ namespace pod
 
             outfile <<setprecision(12) << recCdtdot << " ";
         }
-        double sigma = sqrt(varX + varY + varZ);
+
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::sigma, sigma));
         outfile << setprecision(6) <<wetMap << "  " << sigma << "  ";
 
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recSlnType, 16));
 
-        //gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recPDOP, cDOP.getPDOP()));
         outfile << gEpoch.satData.size() << endl;    // Number of satellites - #12
 
         return;

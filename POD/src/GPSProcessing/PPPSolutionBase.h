@@ -12,75 +12,51 @@
 #include"EOPStore.hpp"
 #include"CorrectCodeBiases.hpp"
 #include"GnssDataStore.hpp"
+#include"GnssSolution.h"
 
 using namespace gpstk;
-typedef   std::shared_ptr< pod::GnssDataStore> GnssDataStore_sptr;
+
 namespace pod
 {
-    class PPPSolutionBase 
+    class PPPSolutionBase: public GnssSolution
     {
-    public:
+    public: static PPPSolutionBase* Factory(GnssDataStore_sptr data);
 
-        static PPPSolutionBase* Factory(GnssDataStore_sptr data);
+    public: PPPSolutionBase(GnssDataStore_sptr data);
 
-        PPPSolutionBase(GnssDataStore_sptr data);
+    public: virtual ~PPPSolutionBase();
 
-        virtual ~PPPSolutionBase();
+#pragma region Methods
 
-        void process();
+    public: void process() override;
 
-        GnssEpochMap& getData()
-        {
-            return gMap;
-        };
-        
-        ConfDataReader& confReader()
-        {
-            return *(data->confReader);
-        }
+    protected: void PRProcess();
 
-        GnssDataStore::ProcessOpt & opts()
-        {
-            return (data->opts);
-        }
+    protected: virtual bool processCore() = 0;
 
-    protected:
-        void PRProcess();
-        
-        virtual bool processCore() = 0;
+    protected: void mapSNR(gnssRinex& value);
 
-        void mapSNR(gnssRinex& value);
+    protected: virtual double mapSNR(double value) { return value; };
 
-        virtual double mapSNR(double value) { return value; };
+    protected: void updateNomPos(const CommonTime& time, Position& nominalPos);
 
-        void updateNomPos(const CommonTime& time, Position& nominalPos);
+    protected: virtual void printSolution(
+        ofstream& outfile,
+        const SolverLMS& solver,
+        const CommonTime& time,
+        GnssEpoch&   gEpoch,
+        double dryTropo,
+        int   precision,
+        const Position& nomXYZ
+    ) override;
 
-      
-        void printSolution(
-            ofstream& outfile,
-            const SolverPPP& solver,
-            const CommonTime& time,
-            const ComputeDOP& cDOP,
-            GnssEpoch&   gEpoch,
-            double dryTropo,
-            int   precision,
-            const Position& nomXYZ
-        );
-
+#pragma endregion
 
 #pragma region Fields
-        
-        //Input processing data and configuration
-        GnssDataStore_sptr data;
-
-        //nominal position
-        Position nominalPos;
 
         //pointer to object for code solution 
-        unique_ptr<CodeSolverBase> solverPR;
-        
-        // processing result
-        GnssEpochMap gMap;
+    protected: unique_ptr<CodeSolverBase> solverPR;
+
 #pragma endregion
 
     };

@@ -4,8 +4,8 @@
 #include"BasicFramework.hpp"
 #include"ConfDataReader.hpp"
 #include"PPPSolutionBase.h"
-
 #include"GnssEpochMap.h"
+
 using namespace gpstk;
 namespace pod
 {

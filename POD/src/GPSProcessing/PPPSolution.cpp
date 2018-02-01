@@ -368,7 +368,7 @@ namespace pod
                     CommonTime time(gRin.header.epoch);
 
                     // Let's print to output file the results of this epoch
-                    printSolution(outfile, pppSolver, time, cDOP, ep, drytropo, prec, nominalPos);
+                    printSolution(outfile, pppSolver, time,  ep, drytropo, prec, nominalPos);
 
                     //add epoch to results
                     gMap.data.insert(pair<CommonTime, GnssEpoch>(time, ep));
@@ -416,7 +416,7 @@ namespace pod
             // update current time and nominal position
             GnssEpoch ep(gRin);
             updateNomPos(gRin.header.epoch,nominalPos);
-            printSolution(outfile, fbpppSolver, gRin.header.epoch, cDOP, ep, drytropo, prec, nominalPos);
+            printSolution(outfile, fbpppSolver, gRin.header.epoch, ep, drytropo, prec, nominalPos);
             gMap.data.insert(pair<CommonTime, GnssEpoch>(gRin.header.epoch, ep));
 
         }  // End of 'while( fbpppSolver.LastProcess(gRin) )'

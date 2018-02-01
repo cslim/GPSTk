@@ -17,7 +17,6 @@ using namespace gpstk;
 
 namespace pod
 {
-    typedef   std::shared_ptr< pod::GnssDataStore> GnssDataStore_sptr;
     typedef unsigned char uchar;
     enum CodeIonoCorrType { NONE = 0, Klobuchar, IF };
 

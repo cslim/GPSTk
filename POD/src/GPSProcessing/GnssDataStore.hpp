@@ -15,8 +15,6 @@
 
 namespace pod
 {
-
-
     //@class to store processing configuration and input data  
     struct GnssDataStore
     {
@@ -92,38 +90,55 @@ namespace pod
         Spaceborne,
     };
 
+            // desired type of GNSS solution
+    public: enum SlnType
+    {
+        Standalone = 1,
+        DGNSS,
+        PD_Float,
+        PD_Fixed,
+        PPP_Float,
+        PPP_Fixed,
+
+        NONE = 0,
+    };
             //pocessing-spacific options
-    public: struct ProcessOpt
+    public: struct ProcessOpts
     {
 
-        // is data relate to the spacecraft-based receiver?
+        // Is data relate to the spacecraft-based receiver?
         bool isSpaceborneRcv = false;
 
-        // day of year. Used for tropospheric model object  initialization 
+        // Day of year. Used for tropospheric model object  initialization 
         int DoY = 0;
 
-        //Compute approximate position by standalone positioning engin or import it from file
+        // Compute approximate position by standalone positioning engin or import it from file
         bool isComputeApprPos = true;
 
-        //satellite systems used for position computation 
+        // Satellite systems used for position computation 
         gpstk::SatSystSet systems;
 
-        //use C1 pseudoranges  for position computation instead of P1
-        bool useC1;
+        // Use C1 pseudoranges  for position computation instead of P1
+        bool useC1 = false;
 
-        //S1 (L1 C/No) threshold for position computation 
-        unsigned char maskSNR;
+        // S1 (L1 C/No) threshold for position computation 
+        unsigned char maskSNR = 0;
 
-        // Elevation Mask for position computation
-        double maskEl;
+        // Elevation mask (degrees) for position computation
+        double maskEl = 10;
 
-        //  receiver dynamic mode
-        Dynamics dynamics;
+        // Receiver dynamic mode
+        Dynamics dynamics = Kinematic;
+
+        // Desired type of GNSS solution
+        SlnType slnType = SlnType::Standalone;
 
     } opts;
 
-
 #pragma endregion
+
     };
+
+    typedef   std::shared_ptr< pod::GnssDataStore> GnssDataStore_sptr;
 }
 #endif // !POD_GNSSDATA_STORE_H
