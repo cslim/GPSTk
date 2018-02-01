@@ -211,6 +211,14 @@ namespace gpstk
          throw(DecimateEpoch)
       { Process(gData.header.epoch, gData.body); return gData; };
 
+      /** Returns a boolean value (instead of thrown an exception),
+       *  which indicates is decimation conditions are met.
+       *  TRUE - decimation conditions are met
+       *  FALSE - current epoch should be skiped
+       *
+       * @param gData    Data object holding the data.
+       */
+      virtual bool check(gnssRinex& gData);
 
          /// Returns sampling interval, in seconds.
       virtual double getSampleInterval(void) const

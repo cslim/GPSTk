@@ -109,8 +109,8 @@ namespace gpstk
    public:
 
          /// Default constructor.
-      ComputeIonoModel()
-         : ionoType(Zero), nominalPos(0.0,0.0,0.0)
+       ComputeIonoModel()
+           : ionoType(Zero), nominalPos(0.0, 0.0, 0.0), applyToCode(true)
       { };
 
 
@@ -119,7 +119,7 @@ namespace gpstk
           * @param stapos    Nominal position of receiver station.
           */
       ComputeIonoModel(const Position& stapos) 
-         : ionoType(Zero), nominalPos(stapos)
+         : ionoType(Zero), nominalPos(stapos), applyToCode(true)
       { };
 
 
@@ -180,6 +180,11 @@ namespace gpstk
       virtual Position getNominalPosition(void) const
       { return nominalPos; };
 
+      virtual bool getIsApply(void) const
+      { return applyToCode; };
+
+      virtual ComputeIonoModel& setIsApply(bool isApplyCorr) 
+      { this->applyToCode = isApplyCorr;  return (*this); };
 
          /** Sets nominal position of receiver station.
           * @param stapos    Nominal position of receiver station.
@@ -208,6 +213,8 @@ namespace gpstk
 
          /// Receiver position
       Position nominalPos;
+
+      bool applyToCode;
 
 
    }; // End of class 'ComputeIonoModel'

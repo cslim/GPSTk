@@ -81,7 +81,10 @@ namespace gpstk
          satTypeValueMap::iterator stv;
          for(stv = gData.begin(); stv != gData.end(); ++stv) 
          {
+             int fcn = stv->first.getGloFcn();
 
+             double L1_FREQ = C_MPS / getWavelength(stv->first, 1, fcn);
+             double L2_FREQ = C_MPS / getWavelength(stv->first, 2, fcn);
             Position svPos(0.0, 0.0, 0.0, Position::Cartesian);
             
                // If elevation or azimuth is missing, then remove satellite
@@ -136,7 +139,7 @@ namespace gpstk
             }
             else if(ionoType == DualFreq)
             {
-               const double gamma = (L1_FREQ_GPS/L2_FREQ_GPS) * (L1_FREQ_GPS/L2_FREQ_GPS);
+               double gamma = (L1_FREQ/ L2_FREQ) * (L1_FREQ/L2_FREQ);
 
                double P1(0.0);
                if(stv->second.find(TypeID::P1)==stv->second.end())
@@ -163,15 +166,28 @@ namespace gpstk
                }
             }
 
-            double ionL2 = ionL1 * (L1_FREQ_GPS/L2_FREQ_GPS) * (L1_FREQ_GPS/L2_FREQ_GPS);
-            double ionL5 = ionL1 * (L1_FREQ_GPS/L5_FREQ_GPS) * (L1_FREQ_GPS/L5_FREQ_GPS);
+            double ionL2 = ionL1 * (L1_FREQ/L2_FREQ) * (L1_FREQ/L2_FREQ);
+            //double ionL5 = ionL1 * (L1_FREQ_GPS/L5_FREQ_GPS) * (L1_FREQ_GPS/L5_FREQ_GPS);
             
                // TODO: more frequency later
 
-               // Now we have to add the new values to the data structure
-            (*stv).second[TypeID::ionoL1] = ionL1;
-            (*stv).second[TypeID::ionoL2] = ionL2;
-            (*stv).second[TypeID::ionoL5] = ionL5;
+            //apply correction to pseudorange measurements, if required
+            if (applyToCode)
+            {
+                if(stv->second.find(TypeID::C1) != stv->second.end())
+                    (*stv).second[TypeID::C1] += ionL1;
+                if (stv->second.find(TypeID::P1) != stv->second.end())
+                    (*stv).second[TypeID::P1] += ionL1;
+                if (stv->second.find(TypeID::P2) != stv->second.end())
+                    (*stv).second[TypeID::P2] += ionL2;
+            }
+            //  add the new values to the data structure otherwise
+            else
+            {
+                (*stv).second[TypeID::ionoL1] = ionL1;
+                (*stv).second[TypeID::ionoL2] = ionL2;
+            }
+            //(*stv).second[TypeID::ionoL5] = ionL5;
 
          }  // End of loop 'for(stv = gData.begin()...'
 
@@ -181,13 +197,13 @@ namespace gpstk
          return gData;
 
       }   // End of try...
-      catch(Exception& u)
+      catch (Exception& u)
       {
-            // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + u.what() );
+          // Throw an exception if something unexpected happens
+          ProcessingException e(getClassName() + ":"
+              + u.what());
 
-         GPSTK_THROW(e);
+          GPSTK_THROW(e);
 
       }
 
