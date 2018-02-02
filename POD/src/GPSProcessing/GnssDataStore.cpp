@@ -8,6 +8,21 @@ using namespace gpstk;
 
 namespace pod
 {
+    std::map<SlnType, std::string> pod::slnType2Str;
+
+    GnssDataStore::Initializer::Initializer()
+    {
+        slnType2Str[SlnType::Standalone] = "Standalone";
+        slnType2Str[SlnType::CODE_DIFF] = "CODE_DIFF";
+        slnType2Str[SlnType::PD_Float] = "PD_Float";
+        slnType2Str[SlnType::PD_Fixed] = "PD_Fixed";
+        slnType2Str[SlnType::PPP_Float] = "PPP_Float";
+        slnType2Str[SlnType::PPP_Fixed] = "PPP_Fixed";
+        slnType2Str[SlnType::NONE_SOLUTION] = "NONE_SOLUTION";
+    }
+
+    GnssDataStore::Initializer GnssDataStore::GnssDataInitializer;
+
     bool GnssDataStore::initReader(const char* path)
     {
         try
@@ -39,8 +54,10 @@ namespace pod
         {
             initReader(path);
             workingDir = fs::path(path).parent_path().string();
-            opts.isSpaceborneRcv = confReader->fetchListValueAsBoolean("IsSpaceborneRcv");
-            
+            opts.slnType = (SlnType)confReader->getValueAsInt("slnType");
+            opts.isSpaceborneRcv = confReader->getValueAsBoolean("IsSpaceborneRcv");
+            opts.isSmoothCode = confReader->getValueAsBoolean("IsSmoothCode");
+
             opts.maskEl = confReader->getValueAsDouble("ElMask");
 
             opts.maskSNR = confReader->getValueAsDouble("SNRmask");
@@ -75,11 +92,11 @@ namespace pod
             //load clock data from RINEX clk files, if required
             if (confReader->getValueAsBoolean("UseRinexClock"))
             {
-                cout << "Rinex clock data Loading... ";
+                cout << "Load Rinex clock data ... ";
                 cout << loadClocks() << endl;
             }
 
-            cout << "IonoModel Loading... ";
+            cout << "Load ionospheric data ... ";
             cout << loadIono() << endl;
 
             cout << "Load Glonass FCN data... ";
@@ -131,6 +148,7 @@ namespace pod
         }
         return files.size() > 0;
     }
+
     //reading clock data
     bool GnssDataStore::loadClocks()
     {
@@ -152,11 +170,41 @@ namespace pod
                     << "have permission to read it. Skipping it." << endl;
                 exit(-1);
             }
-        }//   while ((ClkFile = confReader->fetchListValue("rinexClockFiles", station)) != "")
+        }
         return files.size() > 0;
     }
 
     bool  GnssDataStore::loadIono()
+    {
+        auto type = (ComputeIonoModel::IonoModelType)confReader->getValueAsInt("CodeIonoCorrType");
+        switch (type)
+        {
+        case gpstk::ComputeIonoModel::Zero:
+            ionoCorrector.setZeroModel();
+            break;
+        case gpstk::ComputeIonoModel::Klobuchar:
+            if (!loadBceIonoModel())
+                GPSTK_THROW(InvalidRequest("Can't load iono model from Rinex GPS Navigation files."));
+            break;
+        case gpstk::ComputeIonoModel::Ionex:
+            if (!loadIonoMap())
+                GPSTK_THROW(InvalidRequest("Can't load Ionosphere map from Ionex files."));
+            break;
+        case gpstk::ComputeIonoModel::DualFreq:
+            ionoCorrector.setDualFreqModel();
+            break;
+        default:
+            GPSTK_THROW(InvalidRequest("Unknown Ionospheric model type."));
+        }
+        return true;
+    }
+
+    bool GnssDataStore::loadIonoMap()
+    {
+        return false;
+    }
+
+    bool  GnssDataStore::loadBceIonoModel()
     {
         const string gpsObsExt = ".[\\d]{2}[nN]";
         list<string> files;
@@ -233,7 +281,7 @@ namespace pod
                     exit(-1);
                 }
 
-                ionoStore.addIonoModel(refTime, iMod);
+                bceIonoStore.addIonoModel(refTime, iMod);
             }
             catch (...)
             {
@@ -243,6 +291,10 @@ namespace pod
                 exit(-1);
             }
         }
+        
+        //
+        ionoCorrector.setKlobucharModel(bceIonoStore);
+
         return  i > 0;
     }
 
@@ -380,7 +432,6 @@ namespace pod
             }
         }
     }
-
 
     bool GnssDataStore::loadApprPos()
     {

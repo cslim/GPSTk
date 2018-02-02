@@ -617,9 +617,6 @@ namespace pod
           double weightFactor = 10000.0
           );
 
-        /// update cuurent set of parameters
-      void updateCurPar(gnssRinex& gRin);
-
         /// update transition (Phi) and process noise (Q) matrices
       void updateMatrices(Matrix<double> & phiMatrix, Matrix<double> & qMatrix, gnssRinex& gData);
        

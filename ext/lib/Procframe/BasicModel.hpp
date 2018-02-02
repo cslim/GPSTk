@@ -289,7 +289,7 @@ namespace gpstk
       /// Whether the TGD effect will be applied to C1 observable or not.
       bool useTGD;
         
-      ///Whether the TGD value will be calculated and added GDS
+      ///Whether the TGD value will be calculated and added to GDS
       bool addTGD;
          
       /// Whether receiver clock linear drift partial derivative will be added  to GDS

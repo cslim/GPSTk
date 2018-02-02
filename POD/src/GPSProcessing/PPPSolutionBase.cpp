@@ -17,15 +17,10 @@
 #include "Rinex3NavStream.hpp"
 #include"GnssDataStore.hpp"
 
+#include"GnssSolution.h"
+
 namespace pod
 {
-    PPPSolutionBase* PPPSolutionBase::Factory(GnssDataStore_sptr data)
-    {
-        if (data->opts.isSpaceborneRcv)
-            return new PODSolution(data);
-        else
-            return new PPPSolution(data);
-    }
 
     PPPSolutionBase::PPPSolutionBase(GnssDataStore_sptr procData ) :GnssSolution(procData)
     {
@@ -61,7 +56,7 @@ namespace pod
         cout << "solverType " << solverPR->getName() << endl;
 
         solverPR->maskEl = 5;
-        solverPR->ionoType = (CodeIonoCorrType)confReader().getValueAsInt("CodeIonoCorrType");
+        solverPR->ionoType = data->ionoCorrector.getType();
 
         ofstream os;
         string outPath = data->workingDir + "\\" + data->apprPosFile;
@@ -122,7 +117,7 @@ namespace pod
                         try
                         {
                             solverPR->prepare(rod.time, data->SP3EphList, svData);
-                            res = solverPR->solve(rod.time, data->ionoStore, svData);
+                            res = solverPR->solve(rod.time, data->bceIonoStore, svData);
                             os << res;
                         }
                         catch (Exception &e)
@@ -199,81 +194,6 @@ namespace pod
         }
     }
 
-    // Method to print solution values
-    void PPPSolutionBase::printSolution(ofstream& outfile,
-        const SolverLMS& solver,
-        const CommonTime& time,
-        GnssEpoch &   gEpoch,
-        double dryTropo,
-        int   precision,
-        const Position &nomXYZ)
-    {
-        // Prepare for printing
-        outfile << fixed << setprecision(precision);
-
-        // Print results
-        outfile << static_cast<YDSTime>(time).year << "-";   // Year           - #1
-        outfile << static_cast<YDSTime>(time).doy << "-";    // DayOfYear      - #2
-        outfile << static_cast<YDSTime>(time).sod << "  ";   // SecondsOfDay   - #3
-        outfile << setprecision(6) << (static_cast<YDSTime>(time).doy + static_cast<YDSTime>(time).sod / 86400.0) << "  " << setprecision(precision);
-
-        // We add 0.1 meters to 'wetMap' because 'NeillTropModel' sets a
-        // nominal value of 0.1 m. Also to get the total we have to add the
-        // dry tropospheric delay value
-        // ztd - #7
-        double wetMap = solver.getSolution(TypeID::wetMap) + 0.1 + dryTropo;
-
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recZTropo, wetMap));
-
-
-        double x = nomXYZ.X() + solver.getSolution(TypeID::dx);    // dx    - #4
-        double y = nomXYZ.Y() + solver.getSolution(TypeID::dy);    // dy    - #5
-        double z = nomXYZ.Z() + solver.getSolution(TypeID::dz);    // dz    - #6
-
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recX, x));
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recY, y));
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recZ, z));
-
-        double varX = solver.getVariance(TypeID::dx);     // Cov dx    - #8
-        double varY = solver.getVariance(TypeID::dy);     // Cov dy    - #9
-        double varZ = solver.getVariance(TypeID::dz);     // Cov dz    - #10
-        double sigma = sqrt(varX + varY + varZ);
-
-        double cdt = solver.getSolution(TypeID::cdt);
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdt, cdt));
-
-        //
-        outfile << x << "  " << y << "  " << z << "  " << cdt << " ";
-
-        auto defeq = solver.getDefaultEqDefinition();
-
-        auto itcdtGLO = defeq.body.find(TypeID::recCdtGLO);
-        if (defeq.body.find(TypeID::recCdtGLO) != defeq.body.end())
-        {
-            double cdtGLO = solver.getSolution(TypeID::recCdtGLO);
-            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdtGLO, cdtGLO));
-
-            outfile << cdtGLO << " ";
-        }
-
-        if (defeq.body.find(TypeID::recCdtdot) != defeq.body.end())
-        {
-            double recCdtdot = solver.getSolution(TypeID::recCdtdot);
-            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdtdot, recCdtdot));
-
-            outfile <<setprecision(12) << recCdtdot << " ";
-        }
-
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::sigma, sigma));
-        outfile << setprecision(6) <<wetMap << "  " << sigma << "  ";
-
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recSlnType, 16));
-
-        outfile << gEpoch.satData.size() << endl;    // Number of satellites - #12
-
-        return;
-
-    }  // End of method 'ex9::printSolution()'
     
     void PPPSolutionBase::updateNomPos(const CommonTime& time, Position &nominalPos)
     {
@@ -284,4 +204,5 @@ namespace pod
                 nominalPos = it_pos->second;
         }
     }
+
 }

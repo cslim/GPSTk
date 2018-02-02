@@ -88,16 +88,20 @@ void testRinParse(char* path)
 
 void testPod(char * path)
 {
-    auto t = clock();
-    Action a(path);
-    auto gMap = a.process();
-    auto t2 = clock();
+    auto t1 = clock();
+    Solution sol(path);
+    sol.process();
     cout << "process complete ";
-    cout << (std::clock() - t) / (double)CLOCKS_PER_SEC << endl;
-    cout << "epochs " << gMap.data.size() << endl;
+    auto t2 = clock();
+    cout << (t2 - t1) / (double)CLOCKS_PER_SEC << endl;
+    cout << "processed epochs: " << sol.getData().data.size() << endl;
+    sol.saveToDb();
+
+    cout << "inserting to db complete ";
+    cout << (std::clock() - t2) / (double)CLOCKS_PER_SEC << endl;
+
     // ofstream f("dump.txt");
     // gMap.dump(f);
-
     //f.close();
 }
 
@@ -112,7 +116,7 @@ void codeSmoother(const char * iPath, int window)
 
 int main(int argc, char* argv[])
 {
-    cout << CivilTime(CommonTime::BEGINNING_OF_TIME) << endl;
+    //cout << CivilTime(CommonTime::BEGINNING_OF_TIME) << endl;
     //Solution sol(argv[1]);
     //sol.chekObs();
     //codeSmoother(argv[1], atoi(argv[2]));
@@ -122,6 +126,6 @@ int main(int argc, char* argv[])
 
     //testRinParse(argv[1]);
     testPod(argv[1]);
-    system("pause");
+    //system("pause");
     return 0;
 }

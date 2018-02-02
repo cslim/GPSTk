@@ -52,7 +52,7 @@ namespace pod
     {
         sqlite3_initialize();
 
-        int rc = sqlite3_open_v2(fileName, &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
+        int rc = sqlite3_open_v2(fileName.c_str(), &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
         if (rc)
         {
             auto excStr = (boost::format("Error opening SQLite3 database:%1%") % sqlite3_errmsg(db)).str();

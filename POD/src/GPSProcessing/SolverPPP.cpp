@@ -346,23 +346,7 @@ namespace pod
 
     }  // End of method 'SolverPPP::Process()'
 
-
-       /// refresh the number of core parameters
-    void SolverPPP::updateCurPar(gnssRinex& gRin)
-    {
-        int numGLN = 0;
-        for (const auto &it : gRin.body)
-        {
-            if (it.first.system == SatID::SatelliteSystem::systemGlonass)
-                numGLN++;
-        }
-
-        if (numGLN < 2)
-            gRin.keepOnlySatSystem(SatID::SatelliteSystem::systemGPS);
-        else
-            defaultEqDef.body.insert(TypeID::recCdtGLO);
-    }
-
+  
     /// update transition (Phi) and process noise (Q) matrices
     void SolverPPP::updateMatrices(Matrix<double> & phiMatrix, Matrix<double> & qMatrix, gnssRinex& gData)
     {
@@ -589,7 +573,7 @@ namespace pod
 
             Matrix<double> cov;
             Matrix<double> state;
-               // Feed the filter with the correct state and covariance matrix
+            // Feed the filter with the correct state and covariance matrix
             if (firstTime)
             {
                 cout << "first time!" << endl;
@@ -622,7 +606,7 @@ namespace pod
                     initialErrorCovariance(numVar - 1, numVar - 1) = 9.0e9;
                 }
 
-                   // Finally, the phase biases
+                // Finally, the phase biases
                 for (int i = numVar; i < numUnknowns; i++)
                 {
                     initialErrorCovariance(i, i) = 4.0e14;     // (20000 km)**2
@@ -697,7 +681,7 @@ namespace pod
                 kFilter.Reset(currentState, currentErrorCov);
 
             }  // End of 'if(firstTime)'
-            static int n = 1;
+           // static int n = 1;
 
                // Call the Compute() method with the defined equation model.
                // This equation model MUST HAS BEEN previously set, usually when
@@ -756,8 +740,9 @@ namespace pod
             GPSTK_THROW(e);
         }
 
-    }  // End of method 'SolverPPP::Process()'
+    } // End of method 'SolverPPP::Process()'
       
+
        // End of method 'SolverPPP::setCoordinatesModel()'
        /* Set a single coordinates stochastic model to ALL coordinates.
         *

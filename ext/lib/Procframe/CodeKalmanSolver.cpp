@@ -78,31 +78,16 @@ namespace gpstk
       // Initializing method.
    void CodeKalmanSolver::Init()
    {
-
-      numUnknowns = defaultEqDef.body.size();
-
-      Vector<double> initialState(numUnknowns, 0.0);
-      Matrix<double> initialErrorCovariance(numUnknowns, numUnknowns, 0.0);
-         // Fill the initialErrorCovariance matrix
-         // First, the coordinates
-      for (int i=0; i<3; i++)
-      {
-         initialErrorCovariance(i,i) = 100.0;
-      }
-         // Now, the receiver clock
-      initialErrorCovariance(3,3) = 9.0e10;
-
-      kFilter.Reset( initialState, initialErrorCovariance );
-
+      firstTime = true;
+  
          // Set default coordinates stochastic model (constant)
       setCoordinatesModel(&constantModel);
 
 
          // Pointer to default receiver clock stochastic model (white noise)
-      pClockStoModel = &whitenoiseModel;
+      pClockStoModel = &whiteNoiseModel;
 
-
-      solution.resize(numUnknowns);
+      pIsbStoModel = &constantModel;
 
    }  // End of method 'CodeKalmanSolver::Init()'
 
@@ -358,109 +343,167 @@ covariance matrix.");
        * @param gData     Data object holding the data.
        */
    gnssRinex& CodeKalmanSolver::Process(gnssRinex& gData)
-      throw(ProcessingException)
+       throw(ProcessingException)
    {
 
-      try
-      {
+       try
+       {
+           const int numCoreVar = 4;
+           updateCurPar(gData);
+           numUnknowns = defaultEqDef.body.size();
 
-            // Number of measurements equals the number of visible satellites
-         numMeas = gData.numSats();
+           // Number of measurements equals the number of visible satellites
+           numMeas = gData.numSats();
 
-            // State Transition Matrix (PhiMatrix)
-         phiMatrix.resize(numUnknowns, numUnknowns, 0.0);
+           // State Transition Matrix (PhiMatrix)
+           phiMatrix.resize(numUnknowns, numUnknowns, 0.0);
 
-            // Noise covariance matrix (QMatrix)
-         qMatrix.resize(numUnknowns, numUnknowns, 0.0);
+           // Noise covariance matrix (QMatrix)
+           qMatrix.resize(numUnknowns, numUnknowns, 0.0);
 
-            // Geometry matrix
-         hMatrix.resize(numMeas, numUnknowns, 0.0);
+           // Geometry matrix
+           hMatrix.resize(numMeas, numUnknowns, 0.0);
 
-            // Weights matrix
-         rMatrix.resize(numMeas, numMeas, 0.0);
+           // Weights matrix
+           rMatrix.resize(numMeas, numMeas, 0.0);
 
-            // Measurements vector (Prefit-residuals)
-         measVector.resize(numMeas, 0.0);
+           // Measurements vector (Prefit-residuals)
+           measVector.resize(numMeas, 0.0);
 
-            // Build the vector of measurements
-         measVector = gData.getVectorOfTypeID(defaultEqDef.header);
-
-
-            // Generate the appropriate weights matrix
-            // Try to extract weights from GDS
-         satTypeValueMap dummy(gData.body.extractTypeID(TypeID::weight));
-
-            // Count the number of satellites with weights
-         size_t nW(dummy.numSats());
-         for (int i=0; i<numMeas; i++)
-         {
-            if (nW == numMeas)   // Check if weights match
-            {
-               Vector<double>
-                  weightsVector(gData.getVectorOfTypeID(TypeID::weight));
-
-               rMatrix(i,i) = weightsVector(i);
-            }
-            else
-            {
-
-                 // If weights don't match, assign generic weights
-               rMatrix(i,i) = 1.0;
-
-            }
-         }
+           // Build the vector of measurements
+           measVector = gData.getVectorOfTypeID(defaultEqDef.header);
 
 
-            // Generate the corresponding geometry/design matrix
-         hMatrix = gData.body.getMatrixOfTypes((*this).defaultEqDef.body);
+           // Generate the appropriate weights matrix
+           // Try to extract weights from GDS
+           satTypeValueMap dummy(gData.body.extractTypeID(TypeID::weight));
 
-         SatID  dummySat;
+           // Count the number of satellites with weights
+           size_t nW(dummy.numSats());
+           for (int i = 0; i < numMeas; i++)
+           {
+               if (nW == numMeas)   // Check if weights match
+               {
+                   Vector<double> weightsVector(gData.getVectorOfTypeID(TypeID::weight));
 
-            // Now, let's fill the Phi and Q matrices
-            // First, the coordinates
-         pCoordXStoModel->Prepare(dummySat, gData);
-         phiMatrix(0,0) = pCoordXStoModel->getPhi();
-         qMatrix(0,0)   = pCoordXStoModel->getQ();
+                   rMatrix(i, i) = weightsVector(i);
+               }
+               else
+               {
 
-         pCoordYStoModel->Prepare(dummySat, gData);
-         phiMatrix(1,1) = pCoordYStoModel->getPhi();
-         qMatrix(1,1)   = pCoordYStoModel->getQ();
+                   // If weights don't match, assign generic weights
+                   rMatrix(i, i) = 1.0;
 
-         pCoordZStoModel->Prepare(dummySat, gData);
-         phiMatrix(2,2) = pCoordZStoModel->getPhi();
-         qMatrix(2,2)   = pCoordZStoModel->getQ();
-
-
-            // Now, the receiver clock
-         pClockStoModel->Prepare(dummySat, gData);
-         phiMatrix(3,3) = pClockStoModel->getPhi();
-         qMatrix(3,3)   = pClockStoModel->getQ();
-
-             // Call the Compute() method with the defined equation model.
-             // This equation model MUST HAS BEEN previously set, usually
-             // when creating the CodeKalmanSolver object with the
-             // appropriate constructor.
-         Compute(measVector, hMatrix, rMatrix);
+               }
+           }
 
 
-            // Now we have to add the new values to the data structure
-         if ( defaultEqDef.header == TypeID::prefitC )
-         {
-            gData.insertTypeIDVector(TypeID::postfitC, postfitResiduals);
-         }
+           // Generate the corresponding geometry/design matrix
+           hMatrix = gData.body.getMatrixOfTypes((*this).defaultEqDef.body);
 
-         return gData;
+           SatID  dummySat;
 
-      }
-      catch(Exception& u)
-      {
-            // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + u.what() );
+           // Now, let's fill the Phi and Q matrices
+           // First, the coordinates
+           pCoordXStoModel->Prepare(dummySat, gData);
+           phiMatrix(0, 0) = pCoordXStoModel->getPhi();
+           qMatrix(0, 0) = pCoordXStoModel->getQ();
 
-         GPSTK_THROW(e);
+           pCoordYStoModel->Prepare(dummySat, gData);
+           phiMatrix(1, 1) = pCoordYStoModel->getPhi();
+           qMatrix(1, 1) = pCoordYStoModel->getQ();
 
-      }
+           pCoordZStoModel->Prepare(dummySat, gData);
+           phiMatrix(2, 2) = pCoordZStoModel->getPhi();
+           qMatrix(2, 2) = pCoordZStoModel->getQ();
+
+
+           // Now, the receiver clock
+           pClockStoModel->Prepare(dummySat, gData);
+           phiMatrix(3, 3) = pClockStoModel->getPhi();
+           qMatrix(3, 3) = pClockStoModel->getQ();
+
+           // Now, the ISB
+           if (defaultEqDef.body.find(TypeID::recCdtGLO) != defaultEqDef.body.end())
+           {
+               pIsbStoModel->Prepare(dummySat, gData);
+               phiMatrix(4, 4) = pIsbStoModel->getPhi();
+               qMatrix(4, 4) = pIsbStoModel->getQ();
+           }
+
+           Vector<double> currState(numUnknowns, 0.0);
+           Matrix<double> currErrorCov(numUnknowns, numUnknowns, 0.0);
+
+           if (firstTime)
+           {
+               // Fill the initialErrorCovariance matrix
+               // First, the coordinates
+               for (int i = 0; i < 3; i++)
+               {
+                   currErrorCov(i, i) = 100.0;
+               }
+               // Now, the receiver clock
+               currErrorCov(3, 3) = 9.0e10;
+               if (numUnknowns > 4)
+               {
+                   currErrorCov(4, 4) = 1.0e3;
+               }
+           }
+           else
+           {
+               int row = 0;
+               for (auto it_row : defaultEqDef.body)
+               {
+                   currState(row) = coreData[it_row].value;
+                   int col = 0;
+                   for (auto it_col : defaultEqDef.body)
+                   {
+                       currErrorCov(col, row) = currErrorCov(row, col) = coreData[it_row].valCov[it_col];
+                       ++col;
+                   }
+                   ++row;
+               }
+           }
+
+           firstTime = false;
+
+           kFilter.Reset(currState, currErrorCov);
+
+           // Call the Compute() method with the defined equation model.
+           // This equation model MUST HAS BEEN previously set, usually
+           // when creating the CodeKalmanSolver object with the
+           // appropriate constructor.
+           Compute(measVector, hMatrix, rMatrix);
+
+           // Now we have to add the new values to the data structure
+           int row = 0;
+           for (const auto& it_row : defaultEqDef.body)
+           {
+               coreData[it_row].value = solution(row);
+
+               int col = 0;
+               for (const auto&  it_col : defaultEqDef.body)
+               {
+                   coreData[it_row].valCov[it_col] = covMatrix(row, col);
+                   ++col;
+               }
+               ++row;
+           }
+
+           gData.insertTypeIDVector(TypeID::postfitC, postfitResiduals);
+
+           return gData;
+
+       }
+       catch (Exception& u)
+       {
+           // Throw an exception if something unexpected happens
+           ProcessingException e(getClassName() + ":"
+               + u.what());
+
+           GPSTK_THROW(e);
+
+       }
 
    }  // End of method 'CodeKalmanSolver::Process()'
 

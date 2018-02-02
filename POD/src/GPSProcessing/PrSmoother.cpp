@@ -15,128 +15,130 @@ namespace fs = std::experimental::filesystem;
 typedef std::map<TypeID, int> band_stat ;
 typedef std::map<SatID, std::map<TypeID, int>> sv_stat;
 typedef std::pair<TypeID, int> band_stat_pair;
-
-PrSmoother::PrSmoother(): window(100), codes(std::list<TypeID>(TypeID::C1))
+namespace pod
 {
-}
-
-PrSmoother::PrSmoother(const std::list<TypeID>& tList, int l) : window(l), codes(tList)
-{
-}
-
-PrSmoother::~PrSmoother()
-{
-}
-
-void PrSmoother::smooth(const char * path)
-{
-
-    fs::path iPath(path);
-    fs::path oPath(iPath);
-
-    fs::path stem = oPath.stem();
-    stem += "_sm";
-    fs::path ext = iPath.extension();
-
-    oPath.replace_filename(stem);
-    oPath.replace_extension(ext);
-    fs::path sPath = iPath;
-    sPath.replace_extension("out");
-
-    cout << "Rinex file whith raw PR: " << iPath << endl;
-
-    std::list<CodeSmoother> smList;
-    // We MUST mark cycle slips
-    std::list<OneFreqCSDetector> csList;
-
-    cout << "Obs. types for smoothing: " << endl;
-    for (auto &it : codes)
+    PrSmoother::PrSmoother() : window(100), codes(std::list<TypeID>(TypeID::C1))
     {
-        cout << TypeID::tStrings[it.type] << endl;
-        smList.push_back(CodeSmoother(it, window));
-        csList.push_back(OneFreqCSDetector(it));
     }
-      
 
-    RinexObsStream rin(iPath.string());
-    RinexObsStream rout(oPath.string(), ios::out);
-    ofstream fStat(sPath, ios::out);
-
-    RinexObsHeader head;
-    gnssRinex gRin;
-
-
-    rin >> head;
-    rout << head;
-    sv_stat stat;
-    while (rin >> gRin)
+    PrSmoother::PrSmoother(const std::list<TypeID>& tList, int l) : window(l), codes(tList)
     {
-        for (auto &it : csList)
-            gRin >> it;
+    }
 
-        bool isEpochFirstTime = true;
-        for (auto &it : gRin.body)
+    PrSmoother::~PrSmoother()
+    {
+    }
+
+    void PrSmoother::smooth(const char * path)
+    {
+
+        fs::path iPath(path);
+        fs::path oPath(iPath);
+
+        fs::path stem = oPath.stem();
+        stem += "_sm";
+        fs::path ext = iPath.extension();
+
+        oPath.replace_filename(stem);
+        oPath.replace_extension(ext);
+        fs::path sPath = iPath;
+        sPath.replace_extension("out");
+
+        cout << "Rinex file whith raw PR: " << iPath << endl;
+
+        std::list<CodeSmoother> smList;
+        // We MUST mark cycle slips
+        std::list<OneFreqCSDetector> csList;
+
+        cout << "Obs. types for smoothing: " << endl;
+        for (auto &it : codes)
         {
-            bool isSVFirstTime = true;
-            for (auto& it1 : csList)
+            cout << TypeID::tStrings[it.type] << endl;
+            smList.push_back(CodeSmoother(it, window));
+            csList.push_back(OneFreqCSDetector(it));
+        }
+
+
+        RinexObsStream rin(iPath.string());
+        RinexObsStream rout(oPath.string(), ios::out);
+        ofstream fStat(sPath, ios::out);
+
+        RinexObsHeader head;
+        gnssRinex gRin;
+
+
+        rin >> head;
+        rout << head;
+        sv_stat stat;
+        while (rin >> gRin)
+        {
+            for (auto &it : csList)
+                gRin >> it;
+
+            bool isEpochFirstTime = true;
+            for (auto &it : gRin.body)
             {
-                auto csType = it1.getResultType();
-                double CS = it.second.getValue(csType);
-                if (CS > 0)
+                bool isSVFirstTime = true;
+                for (auto& it1 : csList)
                 {
-                    if (isEpochFirstTime)
+                    auto csType = it1.getResultType();
+                    double CS = it.second.getValue(csType);
+                    if (CS > 0)
                     {
-                        fStat << CivilTime(gRin.header.epoch) << " " << endl;
-                        isEpochFirstTime = false;
-                    }
+                        if (isEpochFirstTime)
+                        {
+                            fStat << CivilTime(gRin.header.epoch) << " " << endl;
+                            isEpochFirstTime = false;
+                        }
 
-                    if (isSVFirstTime)
-                    {
-                        fStat << it.first << " ";
-                        isSVFirstTime = false;
-                    }
+                        if (isSVFirstTime)
+                        {
+                            fStat << it.first << " ";
+                            isSVFirstTime = false;
+                        }
 
-                    auto s_it = stat.find(it.first);
-                    if (s_it == stat.end())
-                        stat.emplace(it.first, band_stat({ band_stat_pair(csType, 1) }));
-                    else
-                    {
-                        auto b_it = (*s_it).second.find(csType);
-                        if (b_it == (*s_it).second.end())
-                            (*s_it).second.emplace(csType, 1);
+                        auto s_it = stat.find(it.first);
+                        if (s_it == stat.end())
+                            stat.emplace(it.first, band_stat({ band_stat_pair(csType, 1) }));
                         else
-                            b_it->second++;
+                        {
+                            auto b_it = (*s_it).second.find(csType);
+                            if (b_it == (*s_it).second.end())
+                                (*s_it).second.emplace(csType, 1);
+                            else
+                                b_it->second++;
+                        }
+                        fStat << TypeID::tStrings[csType.type] << " ";
                     }
-                    fStat << TypeID::tStrings[csType.type] << " ";
                 }
-            } 
-            if (!isSVFirstTime)
+                if (!isSVFirstTime)
+                    fStat << endl;
+            }
+            if (!isEpochFirstTime)
                 fStat << endl;
+            for (auto &it : smList)
+                gRin >> it;
+
+            rout << gRin;
         }
-        if (!isEpochFirstTime)
-            fStat << endl;
-        for (auto &it : smList)
-            gRin >> it;
-
-        rout << gRin;
-    }
 
 
-    cout << "Rinex file whith smoothed PR: " << oPath << endl;
-    cout << "File for CS statistic PR: " << sPath << endl;
+        cout << "Rinex file whith smoothed PR: " << oPath << endl;
+        cout << "File for CS statistic PR: " << sPath << endl;
 
 
-    for (auto &it : stat)
-    {
-        fStat << it.first <<" ";
-        for (auto &it1 : it.second)
+        for (auto &it : stat)
         {
-            fStat << it1.first << " " << it1.second<<" ";
+            fStat << it.first << " ";
+            for (auto &it1 : it.second)
+            {
+                fStat << it1.first << " " << it1.second << " ";
+            }
+            fStat << endl;
         }
-        fStat << endl;
-    }
 
-    rin.close();
-    rout.close();
-    fStat.close();
+        rin.close();
+        rout.close();
+        fStat.close();
+    }
 }

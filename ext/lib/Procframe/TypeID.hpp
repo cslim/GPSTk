@@ -361,6 +361,7 @@ namespace gpstk
          recStDevX, ///< Receiver position, X component satndard deviation
          recStDevY, ///< Receiver position, Y component satndard deviation
          recStDevZ, ///< Receiver position, Z component satndard deviation
+         recStDev3D,
          recPDOP,   ///< PDOP
          recHDOP,   ///< HDOP
          recVDOP,   ///< VDOP

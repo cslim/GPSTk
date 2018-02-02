@@ -18,7 +18,6 @@ using namespace gpstk;
 namespace pod
 {
     typedef unsigned char uchar;
-    enum CodeIonoCorrType { NONE = 0, Klobuchar, IF };
 
     using namespace std;
     class CodeSolverBase
@@ -93,7 +92,7 @@ namespace pod
         );
 
     public:
-        CodeIonoCorrType ionoType;
+        ComputeIonoModel::IonoModelType ionoType;
 
         double maskSNR;
         double maskEl;

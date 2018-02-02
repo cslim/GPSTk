@@ -232,12 +232,13 @@ namespace gpstk
 
    protected:
 
+       void SolverLMS::updateCurPar(gnssRinex& gRin);
 
          /** Default equation definition to be used when fed with
           *  GNSS data structures.
           */
       gnssEquationDefinition defaultEqDef;
-
+      
 
    }; // End of class 'SolverLMS'
 

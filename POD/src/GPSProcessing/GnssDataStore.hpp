@@ -7,17 +7,43 @@
 #include"CorrectCodeBiases.hpp"
 #include"EOPStore.hpp"
 #include"ConfDataReader.hpp"
+#include"ComputeIonoModel.hpp"
+#include"IonoModelStore.hpp"
+#include"IonexStore.hpp"
 
 #include<memory>
 #include<string>
 #include<map>
 
-
 namespace pod
-{
-    //@class to store processing configuration and input data  
+{ 
+    typedef gpstk::ComputeIonoModel::IonoModelType IonoModelType;
+
+    // desired type of GNSS solution
+    enum SlnType
+    {
+        Standalone = 1,
+        CODE_DIFF,
+        PD_Float,
+        PD_Fixed,
+        PPP_Float,
+        PPP_Fixed,
+
+        NONE_SOLUTION = 0,
+    };
+    extern std::map<SlnType, std::string>  slnType2Str;
+
+    //class to store processing configuration and input data  
     struct GnssDataStore
     {
+        //GnssDataStore static data initializer
+        class Initializer
+        {
+           
+        public:
+            Initializer();
+        };
+        static Initializer GnssDataInitializer;
 
 #pragma region Constructors
     public: GnssDataStore(gpstk::ConfDataReader& confReader) :confReader(&confReader)
@@ -37,8 +63,13 @@ namespace pod
     public: void LoadData(const char* path);
 
     private: bool initReader(const char* path);
-    private: bool loadEphemeris();
+
+
     private: bool loadIono();
+    private: bool loadBceIonoModel();
+    private: bool loadIonoMap();
+
+    private: bool loadEphemeris();
     private: bool loadFcn();
     private: bool loadClocks();
     private: bool loadEOPData();
@@ -67,7 +98,10 @@ namespace pod
     public: gpstk::EOPStore eopStore;
 
             //GPS Navigation Message based ionospheric models store
-    public: gpstk::IonoModelStore ionoStore;
+    public: gpstk::IonoModelStore bceIonoStore;
+
+            // compute the  values related to a given GNSS ionospheric model.
+    public: gpstk::ComputeIonoModel ionoCorrector;
 
             //std::list of pathes to rinex observation file to processing
     public: std::list<std::string> rinexObsFiles;
@@ -90,18 +124,6 @@ namespace pod
         Spaceborne,
     };
 
-            // desired type of GNSS solution
-    public: enum SlnType
-    {
-        Standalone = 1,
-        DGNSS,
-        PD_Float,
-        PD_Fixed,
-        PPP_Float,
-        PPP_Fixed,
-
-        NONE = 0,
-    };
             //pocessing-spacific options
     public: struct ProcessOpts
     {
@@ -132,6 +154,9 @@ namespace pod
 
         // Desired type of GNSS solution
         SlnType slnType = SlnType::Standalone;
+
+        // Use carrier-smoothing of code pseudoranges
+        bool isSmoothCode = false;
 
     } opts;
 

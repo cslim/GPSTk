@@ -22,17 +22,14 @@
 #include "PowerSum.hpp"
 #include "EclipsedSatFilter.hpp"
 #include "Decimate.hpp"
-
-
-#include "SolverPPP.hpp"
-#include"SolverPPPFB.hpp"
 #include"ProcessingList.hpp"
-
 #include"BasicModel.hpp"
 
 #pragma endregion
 
 //pod includes
+#include "SolverPPP.hpp"
+#include"SolverPPPFB.hpp"
 #include "PPPSolution.h"
 #include"CodeSolver.h"
 #include"GnssEpochMap.h"
@@ -45,34 +42,26 @@ namespace pod
     PPPSolution::PPPSolution(GnssDataStore_sptr gnssData)
         :PPPSolutionBase (gnssData)
     {
-
-        double xapp(confReader().fetchListValueAsDouble("nominalPosition"));
-        double yapp(confReader().fetchListValueAsDouble("nominalPosition"));
-        double zapp(confReader().fetchListValueAsDouble("nominalPosition"));
-        nominalPos = Position(xapp, yapp, zapp);
-        
-       opts().DoY = confReader().fetchListValueAsInt("dayOfYear");
+        nominalPos.asECEF();
+        int i = 0;
+        for (auto& it: confReader().getListValueAsDouble("nominalPosition"))
+            nominalPos[i++] = it;
+     
+       opts().DoY = confReader().getValueAsInt("dayOfYear");
 
         //initialize troposhperic model
         tropModel = NeillTropModel(nominalPos.getAltitude(), nominalPos.getGeodeticLatitude(),opts().DoY);
 
         solverPR = unique_ptr<CodeSolverBase>(new CodeSolver(tropModel, data));
+        fName = "ppp_sln.txt";
     }
     
     bool  PPPSolution::processCore()
     {
         string stationName = confReader().fetchListValue("stationName");
 
-        // This object will check that all required observables are present
-        RequireObservables requireObs;
+        updateRequaredObs();
         
-        TypeID codeL1 = confReader().getValueAsBoolean("useC1") ? TypeID::C1 : TypeID::P1;
-           
-        requireObs.addRequiredType(codeL1);
-        requireObs.addRequiredType(TypeID::P2);
-        requireObs.addRequiredType(TypeID::L1);
-        requireObs.addRequiredType(TypeID::L2);
-
         // This object will check that code observations are within
         // reasonable limits
         SimpleFilter PRFilter; 
@@ -114,10 +103,8 @@ namespace pod
         markArc.setUnstablePeriod(31.0);
         
         // Object to decimate data
-        double newSampling(confReader().getValueAsDouble("decimationInterval"));
-
         Decimate decimateData(
-            newSampling,
+            confReader().getValueAsDouble("decimationInterval"),
             confReader().getValueAsDouble("decimationTolerance"),
             data->SP3EphList.getInitialTime());
      
@@ -136,10 +123,10 @@ namespace pod
         GravitationalDelay grDelay(nominalPos);
 
         // Vector from monument to antenna ARP [UEN], in meters
-        double uARP(confReader().fetchListValueAsDouble("offsetARP"));
-        double eARP(confReader().fetchListValueAsDouble("offsetARP"));
-        double nARP(confReader().fetchListValueAsDouble("offsetARP"));
-        Triple offsetARP(uARP, eARP, nARP);
+        Triple offsetARP;
+        int i = 0;
+        for(auto &it:confReader().getListValueAsDouble("offsetARP"))
+            offsetARP[i++] = it;
 
         AntexReader antexReader;
         Antenna receiverAntenna;
@@ -178,9 +165,6 @@ namespace pod
       
         // Declare a NeillTropModel object, setting its parameters
         NeillTropModel neillTM(nominalPos.getAltitude(), nominalPos.getGeodeticLatitude(), opts().DoY);
-
-        // We will need this value later for printing
-        double drytropo(neillTM.dry_zenith_delay());
 
         // Object to compute the tropospheric data
         ComputeTropModel computeTropo(neillTM);
@@ -270,13 +254,13 @@ namespace pod
         int prec(4);
 
         ofstream outfile;
-        outfile.open(data->workingDir + "\\" + "PPP_sol.out", ios::out);
+        outfile.open(data->workingDir + "\\" + fileName(), ios::out);
 
         #pragma endregion
 
-        int i = 1;
+        i = 1;
         cout << "First forward processing part started." << endl;
-        for (auto obsFile : data->rinexObsFiles)
+        for (auto& obsFile : data->rinexObsFiles)
         {
             cout << obsFile << endl;
             //Input observation file stream
@@ -368,7 +352,7 @@ namespace pod
                     CommonTime time(gRin.header.epoch);
 
                     // Let's print to output file the results of this epoch
-                    printSolution(outfile, pppSolver, time,  ep, drytropo, prec, nominalPos);
+                    printSolution(outfile, pppSolver, time,  ep);
 
                     //add epoch to results
                     gMap.data.insert(pair<CommonTime, GnssEpoch>(time, ep));
@@ -416,7 +400,7 @@ namespace pod
             // update current time and nominal position
             GnssEpoch ep(gRin);
             updateNomPos(gRin.header.epoch,nominalPos);
-            printSolution(outfile, fbpppSolver, gRin.header.epoch, ep, drytropo, prec, nominalPos);
+            printSolution(outfile, fbpppSolver, gRin.header.epoch, ep);
             gMap.data.insert(pair<CommonTime, GnssEpoch>(gRin.header.epoch, ep));
 
         }  // End of 'while( fbpppSolver.LastProcess(gRin) )'
@@ -427,5 +411,82 @@ namespace pod
         outfile.close();
 
         return true;
+    }
+
+    void PPPSolution::updateRequaredObs()
+    {
+        codeL1 = confReader().getValueAsBoolean("useC1") ? TypeID::C1 : TypeID::P1;
+
+        requireObs.addRequiredType(codeL1);
+        requireObs.addRequiredType(TypeID::P2);
+        requireObs.addRequiredType(TypeID::L1);
+        requireObs.addRequiredType(TypeID::L2);
+        requireObs.addRequiredType(TypeID::S1);
+    }
+
+    void PPPSolution::printSolution(ofstream& outfile, const SolverLMS& solver, const CommonTime& time, GnssEpoch& gEpoch)
+    {
+        // Prepare for printing
+        outfile << fixed << setprecision(outputPrec);
+
+        // Print results
+        outfile << static_cast<YDSTime>(time).year << "-";   // Year           - #1
+        outfile << static_cast<YDSTime>(time).doy << "-";    // DayOfYear      - #2
+        outfile << static_cast<YDSTime>(time).sod << "  ";   // SecondsOfDay   - #3
+        outfile << setprecision(6) << (static_cast<YDSTime>(time).doy + static_cast<YDSTime>(time).sod / 86400.0) << "  " << setprecision(outputPrec);
+
+        // We add 0.1 meters to 'wetMap' because 'NeillTropModel' sets a
+        // nominal value of 0.1 m. Also to get the total we have to add the
+        // dry tropospheric delay value
+        // ztd - #7
+        double wetMap = solver.getSolution(TypeID::wetMap) + 0.1 + this->tropModel.dry_zenith_delay();
+
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recZTropo, wetMap));
+
+
+        double x = nominalPos.X() + solver.getSolution(TypeID::dx);    // dx    - #4
+        double y = nominalPos.Y() + solver.getSolution(TypeID::dy);    // dy    - #5
+        double z = nominalPos.Z() + solver.getSolution(TypeID::dz);    // dz    - #6
+
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recX, x));
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recY, y));
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recZ, z));
+
+        double varX = solver.getVariance(TypeID::dx);     // Cov dx    - #8
+        double varY = solver.getVariance(TypeID::dy);     // Cov dy    - #9
+        double varZ = solver.getVariance(TypeID::dz);     // Cov dz    - #10
+        double sigma = sqrt(varX + varY + varZ);
+
+        double cdt = solver.getSolution(TypeID::cdt);
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdt, cdt));
+
+        //
+        outfile << x << "  " << y << "  " << z << "  " << cdt << " ";
+
+        auto defeq = solver.getDefaultEqDefinition();
+
+        auto itcdtGLO = defeq.body.find(TypeID::recCdtGLO);
+        if (defeq.body.find(TypeID::recCdtGLO) != defeq.body.end())
+        {
+            double cdtGLO = solver.getSolution(TypeID::recCdtGLO);
+            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdtGLO, cdtGLO));
+
+            outfile << cdtGLO << " ";
+        }
+
+        if (defeq.body.find(TypeID::recCdtdot) != defeq.body.end())
+        {
+            double recCdtdot = solver.getSolution(TypeID::recCdtdot);
+            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdtdot, recCdtdot));
+
+            outfile << setprecision(12) << recCdtdot << " ";
+        }
+
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::sigma, sigma));
+        outfile << setprecision(6) << wetMap << "  " << sigma << "  ";
+
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recSlnType, 16));
+
+        outfile << gEpoch.satData.size() << endl;
     }
 }

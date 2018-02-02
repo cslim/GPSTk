@@ -20,7 +20,7 @@ namespace pod
 
        virtual gpstk::gnssRinex& Process(gpstk::gnssRinex& gData) override;
 
-       virtual std::string getClassName(void) const override { return "LinearCombList"; }
+       virtual std::string getClassName(void) const override { return "ProcessLinear"; }
 
        ProcessLinear& clear()
        {

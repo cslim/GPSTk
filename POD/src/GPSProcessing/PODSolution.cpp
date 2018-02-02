@@ -72,19 +72,14 @@ namespace pod
         PPPSolutionBase (confData)
     {
        solverPR  = unique_ptr<CodeSolverBase>( new CodeSolverLEO(data));
+       fName = "pod_sln.txt";
     }
 
     bool PODSolution::processCore()
     {
         int outInt(confReader().getValueAsInt("outputInterval"));
 
-        // This object will check that all required observables are present
-        RequireObservables requireObs;
-        requireObs.addRequiredType(TypeID::P1);
-        requireObs.addRequiredType(TypeID::P2);
-        requireObs.addRequiredType(TypeID::L1);
-        requireObs.addRequiredType(TypeID::L2);
-        requireObs.addRequiredType(TypeID::S1);
+        updateRequaredObs();
 
         // This object will check that code observations are within
         // reasonable limits
@@ -140,10 +135,10 @@ namespace pod
         GravitationalDelay grDelay(nominalPos);
 
         // Vector from monument to antenna ARP [UEN], in meters
-        double uARP(confReader().fetchListValueAsDouble("offsetARP"));
-        double eARP(confReader().fetchListValueAsDouble("offsetARP"));
-        double nARP(confReader().fetchListValueAsDouble("offsetARP"));
-        Triple offsetARP(uARP, eARP, nARP);
+        Triple offsetARP;
+        int i = 0;
+        for (auto &it : confReader().getListValueAsDouble("offsetARP"))
+            offsetARP[i++] = it;
 
         // Declare an object to correct observables to monument
         CorrectObservables corr(data->SP3EphList);
@@ -162,8 +157,7 @@ namespace pod
 
 #pragma region receiver antenna parameters
 
-        bool useAntex(confReader().fetchListValueAsBoolean("useRcvAntennaModel"));
-        Triple ofstL1(0.0, 0.0, 0.0), ofstL2(0.0, 0.0, 0.0);
+        bool useAntex(confReader().getValueAsBoolean("useRcvAntennaModel"));
         if (useAntex)
         {
             Antenna receiverAntenna;
@@ -182,16 +176,14 @@ namespace pod
         }
         else
         {
-            // Fill vector from antenna ARP to L1 phase center [UEN], in meters
-            ofstL1[0] = confReader().fetchListValueAsDouble("offsetL1");
-            ofstL1[1] = confReader().fetchListValueAsDouble("offsetL1");
-            ofstL1[2] = confReader().fetchListValueAsDouble("offsetL1");
+            Triple ofstL1(0.0, 0.0, 0.0), ofstL2(0.0, 0.0, 0.0); 
+            int i = 0;
+            for (auto& it: confReader().getListValueAsDouble("offsetL1"))
+                ofstL1[i++] = it;
+            i = 0;
+            for (auto& it : confReader().getListValueAsDouble("offsetL2"))
+                ofstL2[i++] = it;
 
-            // Vector from antenna ARP to L2 phase center [UEN], in meters
-            ofstL2[0] = confReader().fetchListValueAsDouble("offsetL2");
-            ofstL2[1] = confReader().fetchListValueAsDouble("offsetL2");
-            ofstL2[2] = confReader().fetchListValueAsDouble("offsetL2");
-            //
             corr.setL1pc(ofstL1);
             corr.setL2pc(ofstL2);
         }
@@ -239,11 +231,11 @@ namespace pod
         int cycles(confReader().getValueAsInt("forwardBackwardCycles"));
 
         list<double> phaseLimits, codeLimits;
-        double val(0);
-        while ((val = confReader().fetchListValueAsDouble("codeLimits")) != 0.0)
-            codeLimits.push_back(val);
-        while ((val = confReader().fetchListValueAsDouble("phaseLimits")) != 0.0)
-            phaseLimits.push_back(val);
+        for (double val: confReader().getListValueAsDouble("codeLimits"))
+        if(val != 0.0) codeLimits.push_back(val);
+
+        for (double val : confReader().getListValueAsDouble("phaseLimits"))
+        if (val != 0.0) phaseLimits.push_back(val);
 
         fbpppSolver.setPhaseList(phaseLimits);
         fbpppSolver.setCodeList(codeLimits);
@@ -258,7 +250,7 @@ namespace pod
         int precision(4);
 
         ofstream outfile;
-        outfile.open(data->workingDir +"\\PPP_sol.out", ios::out);
+        outfile.open(data->workingDir +"\\"+fName, ios::out);
 
 #pragma endregion
 
@@ -449,5 +441,70 @@ namespace pod
     double PODSolution::mapSNR(double value)
     {
        return 20.0*log10(value);
+    }
+    void PODSolution::updateRequaredObs()
+    {
+        requireObs.addRequiredType(TypeID::P1);
+        requireObs.addRequiredType(TypeID::P2);
+        requireObs.addRequiredType(TypeID::L1);
+        requireObs.addRequiredType(TypeID::L2);
+        requireObs.addRequiredType(TypeID::S1);
+    }
+    void PODSolution::printSolution(ofstream& outfile, const SolverLMS& solver, const CommonTime& time, GnssEpoch& gEpoch)
+    {
+        // Prepare for printing
+        outfile << fixed << setprecision(outputPrec);
+
+        // Print results
+        outfile << static_cast<YDSTime>(time).year << "-";   // Year           - #1
+        outfile << static_cast<YDSTime>(time).doy << "-";    // DayOfYear      - #2
+        outfile << static_cast<YDSTime>(time).sod << "  ";   // SecondsOfDay   - #3
+        outfile << setprecision(6) << (static_cast<YDSTime>(time).doy + static_cast<YDSTime>(time).sod / 86400.0) << "  " << setprecision(outputPrec);
+
+        double x = nominalPos.X() + solver.getSolution(TypeID::dx);    // dx    - #4
+        double y = nominalPos.Y() + solver.getSolution(TypeID::dy);    // dy    - #5
+        double z = nominalPos.Z() + solver.getSolution(TypeID::dz);    // dz    - #6
+
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recX, x));
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recY, y));
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recZ, z));
+
+        double varX = solver.getVariance(TypeID::dx);     // Cov dx    - #8
+        double varY = solver.getVariance(TypeID::dy);     // Cov dy    - #9
+        double varZ = solver.getVariance(TypeID::dz);     // Cov dz    - #10
+        double sigma = sqrt(varX + varY + varZ);
+
+        double cdt = solver.getSolution(TypeID::cdt);
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdt, cdt));
+
+        //
+        outfile << x << "  " << y << "  " << z << "  " << cdt << " ";
+
+        auto defeq = solver.getDefaultEqDefinition();
+
+        auto itcdtGLO = defeq.body.find(TypeID::recCdtGLO);
+        if (defeq.body.find(TypeID::recCdtGLO) != defeq.body.end())
+        {
+            double cdtGLO = solver.getSolution(TypeID::recCdtGLO);
+            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdtGLO, cdtGLO));
+
+            outfile << cdtGLO << " ";
+        }
+
+        if (defeq.body.find(TypeID::recCdtdot) != defeq.body.end())
+        {
+            double recCdtdot = solver.getSolution(TypeID::recCdtdot);
+            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdtdot, recCdtdot));
+
+            outfile << setprecision(12) << recCdtdot << " ";
+        }
+
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::sigma, sigma));
+        outfile << setprecision(4) << sigma << "  ";
+
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recSlnType, 16));
+
+        outfile << gEpoch.satData.size() << endl;    // Number of satellites - #12
+
     }
 }

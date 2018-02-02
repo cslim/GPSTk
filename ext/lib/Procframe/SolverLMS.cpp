@@ -264,4 +264,24 @@ of designMatrix");
    }  // End of method 'SolverLMS::getVariance()'
 
 
+      /* refresh the current core parameters set
+       * 
+       * @param gRin     Data object holding the data.
+       */
+   void SolverLMS::updateCurPar(gnssRinex& gRin)
+   {
+       int numGLN = 0;
+       for (const auto &it : gRin.body)
+       {
+           if (it.first.system == SatID::SatelliteSystem::systemGlonass)
+               numGLN++;
+       }
+
+       if (numGLN < 2)
+           gRin.keepOnlySatSystem(SatID::SatelliteSystem::systemGPS);
+       else
+           defaultEqDef.body.insert(TypeID::recCdtGLO);
+   }
+
+
 }  // End of namespace gpstk

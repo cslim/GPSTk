@@ -5,7 +5,7 @@
 #include"ConfDataReader.hpp"
 #include"PPPSolutionBase.h"
 #include"GnssEpochMap.h"
-
+#include"CustomSolution.h"
 using namespace gpstk;
 namespace pod
 {
@@ -16,13 +16,15 @@ namespace pod
         Solution(const char* path);
        virtual ~Solution()
         {
-            delete solver;
+           
         }
         virtual void process();
         void chekObs();
+        void saveToDb();
+
         GnssEpochMap  getData()
         {
-            return solver->getData();
+            return solver.getData();
         };
 
     protected:
@@ -34,7 +36,7 @@ namespace pod
         // Configuration file reader
         ConfDataReader confReader;
 
-        PPPSolutionBase* solver;
+        CustomSolution solver;
 
     };
 }

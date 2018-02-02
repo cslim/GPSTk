@@ -2,21 +2,22 @@
 
 #include"TypeID.hpp"
 
-
 using namespace gpstk;
 
-class PrSmoother
+namespace pod
 {
-public:
-    PrSmoother();
-    PrSmoother(const std::list<TypeID>& tList, int l);
-    ~PrSmoother();
+    class PrSmoother
+    {
+    public:
+        PrSmoother();
+        PrSmoother(const std::list<TypeID>& tList, int l);
+        ~PrSmoother();
 
-    void smooth(const char * path);
-private:
-    std::list<TypeID>  codes;
-    int window;
+        void smooth(const char * path);
+    private:
+        std::list<TypeID>  codes;
+        int window;
 
 
-};
-
+    };
+}

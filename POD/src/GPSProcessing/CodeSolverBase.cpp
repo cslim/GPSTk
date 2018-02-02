@@ -11,7 +11,7 @@ namespace pod
 
     CodeSolverBase::CodeSolverBase(GnssDataStore_sptr data) :
         maskEl(data->opts.maskEl), maskSNR(data->opts.maskSNR), maxIter(15), Sol(5),
-        sigmaMax(25), ionoType(IF), RMS3D(DBL_MAX), PDOP(DBL_MAX), sigma(0)
+        sigmaMax(25), ionoType(ComputeIonoModel::DualFreq), RMS3D(DBL_MAX), PDOP(DBL_MAX), sigma(0)
     {
        
         Sol = 0.0;
@@ -78,7 +78,7 @@ namespace pod
                 }
 
                 double ionocorr(0.0);
-                if (ionoType == CodeIonoCorrType::IF)
+                if (ionoType == ComputeIonoModel::IonoModelType::DualFreq)
                 {
                     double P2(0.0);
                     try
@@ -191,7 +191,7 @@ namespace pod
                         it.second.use = false;
                         continue;
                     }
-                    if (ionoType == CodeIonoCorrType::Klobuchar)
+                    if (ionoType == ComputeIonoModel::IonoModelType::Klobuchar)
                     {
                         double azm = rxPos.azimuth(svPos);
                         ioDel = iono.getCorrection(t, rxPos, elv, azm);

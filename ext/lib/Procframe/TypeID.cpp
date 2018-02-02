@@ -327,6 +327,7 @@ namespace gpstk
       tStrings[recStDevX]  = "RxPositionStDev_X";
       tStrings[recStDevY]  = "RxPositionStDev_Y";
       tStrings[recStDevZ]  = "RxPositionStDev_Z";
+      tStrings[recStDev3D] = "RxPositionStDev_3D";
       tStrings[recPDOP]    = "RxPDOP";
       tStrings[recHDOP] = "RxHDOP";
       tStrings[recVDOP] = "RxVDOP";

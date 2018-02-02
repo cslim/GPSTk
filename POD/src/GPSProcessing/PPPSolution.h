@@ -17,6 +17,9 @@ namespace pod
     protected:
         virtual bool processCore() override;
         NeillTropModel tropModel;
+        virtual void updateRequaredObs() override;
+
+    protected: virtual void printSolution( ofstream& of, const SolverLMS& solver, const CommonTime& time, GnssEpoch& gEpoch ) override;
 
     };
 }

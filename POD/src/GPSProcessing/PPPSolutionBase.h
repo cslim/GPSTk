@@ -18,9 +18,8 @@ using namespace gpstk;
 
 namespace pod
 {
-    class PPPSolutionBase: public GnssSolution
+    class PPPSolutionBase : public GnssSolution
     {
-    public: static PPPSolutionBase* Factory(GnssDataStore_sptr data);
 
     public: PPPSolutionBase(GnssDataStore_sptr data);
 
@@ -40,21 +39,11 @@ namespace pod
 
     protected: void updateNomPos(const CommonTime& time, Position& nominalPos);
 
-    protected: virtual void printSolution(
-        ofstream& outfile,
-        const SolverLMS& solver,
-        const CommonTime& time,
-        GnssEpoch&   gEpoch,
-        double dryTropo,
-        int   precision,
-        const Position& nomXYZ
-    ) override;
-
 #pragma endregion
 
 #pragma region Fields
 
-        //pointer to object for code solution 
+               //pointer to object for code solution 
     protected: unique_ptr<CodeSolverBase> solverPR;
 
 #pragma endregion

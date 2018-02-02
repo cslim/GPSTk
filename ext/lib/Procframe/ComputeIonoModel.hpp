@@ -164,6 +164,8 @@ namespace gpstk
          /// Correct ionospheric delay with klobuchar model
       virtual ComputeIonoModel& setKlobucharModel(const IonoModel& im);
 
+      /// Correct ionospheric delay with klobuchar model
+      virtual ComputeIonoModel& setKlobucharModel(const IonoModelStore& ims);
 
          /// Correct ionospheric delay with klobuchar model
       virtual ComputeIonoModel& setklobucharModel(const std::string& brdcFile);
@@ -192,6 +194,10 @@ namespace gpstk
       virtual ComputeIonoModel& setNominalPosition(const Position& stapos)
         { nominalPos = stapos; return (*this); };
 
+      virtual IonoModelType geType() const
+      {
+          return ionoType;
+      };
          /// Returns a string identifying this object.
       virtual std::string getClassName(void) const;
 

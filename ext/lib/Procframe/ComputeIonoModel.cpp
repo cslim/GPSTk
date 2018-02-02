@@ -220,6 +220,7 @@ namespace gpstk
       return (*this);
    }
 
+   /// Correct ionospheric delay with klobuchar model
    ComputeIonoModel& ComputeIonoModel::setKlobucharModel(const IonoModel& im)
    {
       klbStore.addIonoModel(CommonTime::BEGINNING_OF_TIME, im);
@@ -228,6 +229,16 @@ namespace gpstk
       return (*this);
    }
 
+   /// Correct ionospheric delay with klobuchar model
+    ComputeIonoModel& ComputeIonoModel::setKlobucharModel(const IonoModelStore& ims)
+   {
+        klbStore = ims;
+        ionoType = Klobuchar;
+
+        return (*this);
+   }
+
+    /// Correct ionospheric delay with klobuchar model
    ComputeIonoModel& ComputeIonoModel::setklobucharModel(const std::string& brdcFile)
    {
       if( isRinexNavFile( brdcFile ) )

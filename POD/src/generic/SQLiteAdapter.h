@@ -18,7 +18,10 @@ namespace pod
 
 #pragma region Create methods
 
-
+    public: SQLiteAdapter(const std::string& spath) :firstTime(true), fileName(spath)
+    {
+        initialize();
+    }
 
     public: SQLiteAdapter(char * path) :firstTime(true), fileName(path)
     {
@@ -71,7 +74,7 @@ namespace pod
 
 #pragma region Fields
 
-    private: char* fileName;
+    private: std::string fileName;
     private: sqlite3 *db;
 
     private: int  lastFileID;

@@ -21,13 +21,32 @@ namespace pod
         data.reset(new GnssDataStore(confReader));
         data->LoadData(path);
 
-        this->solver = PPPSolutionBase::Factory(data);
-        cout << this->solver << endl;
+        solver.setConfigData(data);
+
     }
 
     void Solution::process()
     {
-        solver->process();
+        solver.process();
+
+    }
+    void Solution::saveToDb()
+    {
+
+        auto gMap = solver.getData();
+        gMap.updateMetadata();
+
+        fs::path dbPath(data->workingDir + "\\" + solver.fileName());
+
+        dbPath.replace_extension("db");
+
+        //delete curtrent db file if exists
+        string cmd = "del \"" + dbPath.string() + "\"";
+        system(cmd.c_str());
+
+        SQLiteAdapter db(dbPath.string());
+        gMap.title = confReader.filename;
+        db.addNewFile(gMap);
     }
 
     void Solution::chekObs()

@@ -47,7 +47,6 @@
 #include "StochasticModel.hpp"
 #include "SimpleKalmanFilter.hpp"
 
-
 namespace gpstk
 {
 
@@ -374,9 +373,23 @@ namespace gpstk
          /// Destructor.
       virtual ~CodeKalmanSolver() {};
 
+      protected:
+
+          //values and its covariance processed so far
+          struct kfCoreData
+          {
+              // Default constructor initializing the data in the structure
+              kfCoreData() : value(0.0) {};
+              //value
+              double value = 0.0;
+          std::map<TypeID, double> valCov;
+          };
+          /// Map holding the information regarding every variable
+          std::map<TypeID, kfCoreData> coreData;
 
    private:
-
+     
+      bool firstTime;
 
          /// Number of unknowns
       int numUnknowns;
@@ -401,6 +414,8 @@ namespace gpstk
          /// Pointer to stochastic model for receiver clock
       StochasticModel* pClockStoModel;
 
+      /// Pointer to stochastic model for intersystem bias
+      StochasticModel* pIsbStoModel;
 
          /// State Transition Matrix (PhiMatrix)
       Matrix<double> phiMatrix;
@@ -435,7 +450,7 @@ namespace gpstk
 
 
          /// White noise stochastic model
-      WhiteNoiseModel whitenoiseModel;
+      WhiteNoiseModel whiteNoiseModel;
 
 
    }; // End of class 'CodeKalmanSolver'
