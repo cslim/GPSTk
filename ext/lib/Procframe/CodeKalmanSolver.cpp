@@ -390,13 +390,10 @@ covariance matrix.");
                }
                else
                {
-
                    // If weights don't match, assign generic weights
                    rMatrix(i, i) = 1.0;
-
                }
            }
-
 
            // Generate the corresponding geometry/design matrix
            hMatrix = gData.body.getMatrixOfTypes((*this).defaultEqDef.body);

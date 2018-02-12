@@ -12,7 +12,7 @@ namespace pod
     //base class for all GNSS post processing  classes
     class GnssSolution
     {
-   
+    public: static  std::ostream& printMsg(const gpstk::CommonTime& time, const char* msg);
 
 #pragma region Constructors
 

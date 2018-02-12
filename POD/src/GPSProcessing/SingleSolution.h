@@ -24,10 +24,20 @@ namespace pod
 
     protected: virtual void updateRequaredObs() override;
 
-    protected: virtual void printSolution(std::ofstream& of, 
+    protected: virtual void printSolution(
+        std::ofstream& of, 
         const gpstk::SolverLMS& solver, 
         const gpstk::CommonTime& time,
         GnssEpoch& gEpoch) override;
+
+    protected: virtual int computeApprPos(
+        const gpstk::gnssRinex & gRin, 
+        const gpstk::XvtStore<gpstk::SatID>& Eph,
+        gpstk::Position& pos);
+    
+    
+    protected: void updateNomPos(CodeKalmanSolver &solver);
+
                //cycle slip marker
     protected: std::unique_ptr<gpstk::ProcessingClass> csMarker;
 

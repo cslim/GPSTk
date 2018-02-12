@@ -64,6 +64,7 @@ namespace gpstk
        * @param time      Epoch.
        * @param gData     Data object holding the data.
        */
+
    satTypeValueMap& ComputeIonoModel::Process( const CommonTime& time,
                                                satTypeValueMap& gData )
       throw(ProcessingException)
@@ -85,109 +86,110 @@ namespace gpstk
 
              double L1_FREQ = C_MPS / getWavelength(stv->first, 1, fcn);
              double L2_FREQ = C_MPS / getWavelength(stv->first, 2, fcn);
-            Position svPos(0.0, 0.0, 0.0, Position::Cartesian);
-            
-               // If elevation or azimuth is missing, then remove satellite
-            if( stv->second.find(TypeID::elevation) == stv->second.end() ||
-               stv->second.find(TypeID::azimuth)   == stv->second.end() )
-            {
+             Position svPos(0.0, 0.0, 0.0, Position::Cartesian);
 
-               satRejectedSet.insert( stv->first );
+             // If elevation or azimuth is missing, then remove satellite
+             if (stv->second.find(TypeID::elevation) == stv->second.end() ||
+                 stv->second.find(TypeID::azimuth) == stv->second.end())
+             {
 
-               continue;
+                 satRejectedSet.insert(stv->first);
 
-            }
-            
-            const double elevation = (*stv).second[TypeID::elevation];
-            const double azimuth = (*stv).second[TypeID::azimuth]; 
+                 continue;
 
-            double ionL1 = 0.0;
-            
-            if(ionoType == Ionex)
-            {
-               try
-               {
-                  //const string mapType = "SLM";
-                  //const double ionoHeight = 450000.0;
+             }
 
-                  const string mapType = "MSLM";
-                  const double ionoHeight = 506700.0;
+             const double elevation = (*stv).second[TypeID::elevation];
+             const double azimuth = (*stv).second[TypeID::azimuth];
 
-                  Position IPP = rxPos.getIonosphericPiercePoint(elevation,
-                     azimuth,
-                     ionoHeight);
+             double ionL1 = 0.0;
 
-                  Position pos(IPP);
-                  pos.transformTo(Position::Geocentric);
+             if (ionoType == Ionex)
+             {
+                 try
+                 {
+                     //const string mapType = "SLM";
+                     //const double ionoHeight = 450000.0;
 
-                  Triple val = gridStore.getIonexValue( time, pos );
+                     const string mapType = "MSLM";
+                     const double ionoHeight = 506700.0;
 
-                  double tecval = val[0];
+                     Position IPP = rxPos.getIonosphericPiercePoint(elevation,
+                         azimuth,
+                         ionoHeight);
 
-                  (void)gridStore.iono_mapping_function(elevation, mapType);
-                  ionL1 = gridStore.getIonoL1(elevation, tecval, mapType);
-               }
-               catch(InvalidRequest& e)
-               {
-                  satRejectedSet.insert(stv->first);
-                  continue;
-               }
-            }
-            else if(ionoType == Klobuchar)
-            {
-               ionL1 = klbStore.getCorrection(time,rxPos,elevation,azimuth);
-            }
-            else if(ionoType == DualFreq)
-            {
-               double gamma = (L1_FREQ/ L2_FREQ) * (L1_FREQ/L2_FREQ);
+                     Position pos(IPP);
+                     pos.transformTo(Position::Geocentric);
 
-               double P1(0.0);
-               if(stv->second.find(TypeID::P1)==stv->second.end())
-               {
-                  if(stv->second.find(TypeID::C1)!=stv->second.end())
-                  {
-                     P1 = stv->second[TypeID::C1];
-                  }
-               }
-               else
-               {
-                  P1 = stv->second[TypeID::P1];
-               }
+                     Triple val = gridStore.getIonexValue(time, pos);
 
-               double P2(0.0);
-               if(stv->second.find(TypeID::P2)!=stv->second.end())
-               {
-                  P2 = stv->second[TypeID::P2];
-               }
-               
-               if( P1!=0 && P2!=0 )
-               {
-                  ionL1 = (P1-P2)/(1.0-gamma);
-               }
-            }
+                     double tecval = val[0];
 
-            double ionL2 = ionL1 * (L1_FREQ/L2_FREQ) * (L1_FREQ/L2_FREQ);
-            //double ionL5 = ionL1 * (L1_FREQ_GPS/L5_FREQ_GPS) * (L1_FREQ_GPS/L5_FREQ_GPS);
-            
-               // TODO: more frequency later
+                     (void)gridStore.iono_mapping_function(elevation, mapType);
+                     ionL1 = gridStore.getIonoL1(elevation, tecval, mapType);
+                 }
+                 catch (InvalidRequest& e)
+                 {
+                     satRejectedSet.insert(stv->first);
+                     continue;
+                 }
+             }
+             else if (ionoType == Klobuchar)
+             {
+                 ionL1 = klbStore.getCorrection(time, rxPos, elevation, azimuth);
+             }
+             else if (ionoType == DualFreq)
+             {
+                 double gamma = (L1_FREQ / L2_FREQ) * (L1_FREQ / L2_FREQ);
 
-            //apply correction to pseudorange measurements, if required
-            if (applyToCode)
-            {
-                if(stv->second.find(TypeID::C1) != stv->second.end())
-                    (*stv).second[TypeID::C1] += ionL1;
-                if (stv->second.find(TypeID::P1) != stv->second.end())
-                    (*stv).second[TypeID::P1] += ionL1;
-                if (stv->second.find(TypeID::P2) != stv->second.end())
-                    (*stv).second[TypeID::P2] += ionL2;
-            }
-            //  add the new values to the data structure otherwise
-            else
-            {
-                (*stv).second[TypeID::ionoL1] = ionL1;
-                (*stv).second[TypeID::ionoL2] = ionL2;
-            }
-            //(*stv).second[TypeID::ionoL5] = ionL5;
+                 double P1(0.0);
+                 if (stv->second.find(TypeID::P1) == stv->second.end())
+                 {
+                     if (stv->second.find(TypeID::C1) != stv->second.end())
+                     {
+                         P1 = stv->second[TypeID::C1];
+                     }
+                 }
+                 else
+                 {
+                     P1 = stv->second[TypeID::P1];
+                 }
+
+                 double P2(0.0);
+                 if (stv->second.find(TypeID::P2) != stv->second.end())
+                 {
+                     P2 = stv->second[TypeID::P2];
+                 }
+
+                 if (P1 != 0 && P2 != 0)
+                 {
+                     ionL1 = (P1 - P2) / (1.0 - gamma);
+                 }
+             }
+
+             double ionL2 = ionL1 * (L1_FREQ / L2_FREQ) * (L1_FREQ / L2_FREQ);
+             //double ionL5 = ionL1 * (L1_FREQ_GPS/L5_FREQ_GPS) * (L1_FREQ_GPS/L5_FREQ_GPS);
+
+             // TODO: more frequency later
+
+             //apply correction to pseudorange measurements, if required
+             if (applyToCode)
+             {
+                 if (stv->second.find(TypeID::C1) != stv->second.end())
+                     (*stv).second[TypeID::C1] -= ionL1;
+                 if (stv->second.find(TypeID::P1) != stv->second.end())
+                     (*stv).second[TypeID::P1] -= ionL1;
+                 if (stv->second.find(TypeID::P2) != stv->second.end())
+                     (*stv).second[TypeID::P2] -= ionL2;
+             }
+             //  add the new values to the data structure otherwise
+             else
+             {
+                 (*stv).second[TypeID::ionoL1] = ionL1;
+                 (*stv).second[TypeID::ionoL2] = ionL2;
+             }
+             //(*stv).second[TypeID::ionoL5] = ionL5;
+
 
          }  // End of loop 'for(stv = gData.begin()...'
 
@@ -278,6 +280,15 @@ namespace gpstk
       ionoType = Ionex;
 
       return (*this);
+   }
+
+   ComputeIonoModel& ComputeIonoModel::setIonosphereMap(const IonexStore& ionexStore)
+   {
+       gridStore.clear();
+       gridStore = ionexStore;
+       ionoType = Ionex;
+
+       return (*this);
    }
 
 } // End of namespace gpstk

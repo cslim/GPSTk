@@ -13,6 +13,8 @@
 #include"ComputeMOPSWeights.hpp"
 #include"ComputeTropModel.hpp"
 #include"LinearCombinations.hpp"
+#include"PRSolution2.hpp"
+#include"Bancroft.hpp"
 
 #include<memory>
 using namespace std;
@@ -44,13 +46,12 @@ namespace pod
             PRFilter.setFilteredType(TypeID::P2);
 
         SimpleFilter SNRFilter(TypeID::S1, 30, DBL_MAX);
+        list<Position> nomPos;
+        //nominalPos.asECEF();
+        //int i = 0;
+        //for (auto& it : confReader().getListValueAsDouble("nominalPosition"))
+        //    nominalPos[i++] = it;
 
-        nominalPos.asECEF();
-        int i = 0;
-        for (auto& it : confReader().getListValueAsDouble("nominalPosition"))
-            nominalPos[i++] = it;
-
-        cout << setprecision(10) << nominalPos << endl;
         // Object to decimate data
         Decimate decimateData(
             confReader().getValueAsDouble("decimationInterval"),
@@ -62,7 +63,6 @@ namespace pod
         model.setDefaultEphemeris(data->SP3EphList);
         model.setDefaultObservable(codeL1);
         model.setMinElev(5);
-        model.rxPos = nominalPos;
 
         //troposhere modeling object
         unique_ptr<NeillTropModel> uptrTropModel = make_unique<NeillTropModel>();
@@ -70,7 +70,6 @@ namespace pod
 
         //
         ComputeWeightSimple w;
-        
 
         // White noise stochastic models
         WhiteNoiseModel wnM(confReader().getValueAsDouble("posSigma"));
@@ -84,7 +83,8 @@ namespace pod
         ofstream ostream;
         ostream.open(data->workingDir + "\\" + fileName(), ios::out);
 
-        bool isfirstTime = true;
+        bool firstTime = true;
+
         gnssRinex gRin;
 
         for (auto &obsFile : data->rinexObsFiles)
@@ -113,7 +113,15 @@ namespace pod
             while (rin >> gRin)
             {
                 //work around for post header comments 
-                if (gRin.body.size() == 0 || decimateData.check(gRin)) continue;
+                if (gRin.body.size() == 0  )
+                {
+                    printMsg(gRin.header.epoch, "Empty epoch record in Rinex file");
+                    continue;
+                }
+
+                if (decimateData.check(gRin))
+                    continue;
+
                 auto& t = gRin.header.epoch;
 
                 //keep only satellites from satellites systems selecyted for processing
@@ -121,8 +129,17 @@ namespace pod
 
                 //keep only types used for processing
                 gRin.keepOnlyTypeID(requireObs.getRequiredType());
-                
-                //update position
+
+                //compute approximate position
+                if (firstTime)
+                {
+                    if (computeApprPos(gRin, data->SP3EphList, nominalPos))
+                        continue;
+                    cout << setprecision(10) << nominalPos << endl;
+                    firstTime = false;
+                }
+
+                //update position 
                 data->ionoCorrector.setNominalPosition(nominalPos);
                 uptrTropModel->setAllParameters(t, nominalPos);
                 model.rxPos = nominalPos;
@@ -131,6 +148,7 @@ namespace pod
                 gRin >> requireObs;
                 gRin >> PRFilter;
                 gRin >> SNRFilter;
+                gRin >> computeLinear;
 
                 // smooth pseudoranges if required
                 if (opts().isSmoothCode)
@@ -142,7 +160,11 @@ namespace pod
                     for (auto& it : codeSmoothers)
                         gRin >> it;
                 }
-
+                if (gRin.body.size() == 0)
+                {
+                    printMsg(gRin.header.epoch, "All SV has been rejected.");
+                    continue;
+                }
                 gRin >> model;
                 gRin >> computeTropo;
                 gRin >> data->ionoCorrector;
@@ -152,11 +174,13 @@ namespace pod
                 if (forwardBackwardCycles > 0)
                 {
                     gRin >> solverFB;
+                    //updateNomPos(solverFB);
                 }
                 else
                 {
                     gRin >> solver;
                     GnssEpoch ep(gRin);
+                   // updateNomPos(solverFB);
                     printSolution(ostream, solver, t, ep);
                     gMap.data.insert(std::make_pair(t, ep));
                 }
@@ -172,9 +196,29 @@ namespace pod
             while (solverFB.lastProcess(gRin))
             {
                 GnssEpoch ep(gRin);
+                //updateNomPos(solverFB);
                 printSolution(ostream, solverFB, gRin.header.epoch, ep);
                 gMap.data.insert(std::make_pair(gRin.header.epoch, ep));
             }
+        }
+    }
+
+    void SingleSolution::updateNomPos(CodeKalmanSolver &solver)
+    {
+        PowerSum psum;
+        for (auto it : solver.postfitResiduals)
+            psum.add(it);
+        double sigma = sqrt(psum.variance());
+
+        int numSats = solver.postfitResiduals.size();
+        Position newPos;
+        if (numSats >= 4 && sigma < MAX_SIGMA)
+        {
+            newPos[0] = nominalPos.X() + solver.getSolution(TypeID::dx);    // dx    - #4
+            newPos[1] = nominalPos.Y() + solver.getSolution(TypeID::dy);    // dy    - #5
+            newPos[2] = nominalPos.Z() + solver.getSolution(TypeID::dz);    // dz    - #6
+
+            nominalPos = newPos;
         }
     }
 
@@ -212,6 +256,8 @@ namespace pod
             requireObs.addRequiredType(TypeID::P2);
             requireObs.addRequiredType(TypeID::L1);
             requireObs.addRequiredType(TypeID::L2);
+            requireObs.addRequiredType(TypeID::LLI1);
+            requireObs.addRequiredType(TypeID::LLI2);
 
             codeSmoothers.push_back(CodeSmoother(codeL1));
             codeSmoothers.push_back(CodeSmoother(TypeID::P2));
@@ -224,18 +270,39 @@ namespace pod
         {
             requireObs.addRequiredType(TypeID::P2);
         }
+        //
         else if (data->ionoCorrector.getType() != IonoModelType::DualFreq && opts().isSmoothCode)
         {
             requireObs.addRequiredType(TypeID::L1);
+            requireObs.addRequiredType(TypeID::LLI1);
 
             codeSmoothers.push_back(CodeSmoother(codeL1));
 
-            csMarker = std::make_unique<LICSDetector>();
+            csMarker = std::make_unique<OneFreqCSDetector>();
         }
         requireObs.addRequiredType(TypeID::C1);
         requireObs.addRequiredType(TypeID::S1);
     }
 
+    int SingleSolution::computeApprPos(
+        const gpstk::gnssRinex & gRin,
+        const gpstk::XvtStore<gpstk::SatID>& Eph,
+        gpstk::Position& pos)
+    {
+        auto svs = gRin.getVectorOfSatID().toStdVector();
+        auto meas = gRin.getVectorOfTypeID(codeL1).toStdVector();
+        Matrix<double> svp;
+        if (PRSolution2::PrepareAutonomousSolution(gRin.header.epoch, svs, meas, Eph, svp))
+            return -1;
+       
+        Bancroft ban;
+        Vector<double> res;
+        if (ban.Compute(svp, res))
+            return -2;
+        pos = Position(res(0), res(1), res(2));
+
+        return 0;
+    }
     void SingleSolution::printSolution(std::ofstream& os, const gpstk::SolverLMS& solver, const gpstk::CommonTime& time, GnssEpoch& gEpoch)
     {
         os << setprecision(6);
@@ -261,10 +328,9 @@ namespace pod
             cdt = solver.getSolution(TypeID::cdt);
             gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdt, cdt));
 
-          //  nominalPos = newPos;
         }
 
-        os << setprecision(10) << newPos.X() << "  " << newPos.Y() << "  " << newPos.Z() << "  " << cdt << " ";
+        os << setprecision(10) << nominalPos.X() << "  " << nominalPos.Y() << "  " << nominalPos.Z() << "  " << cdt << " ";
 
         double varX = solver.getVariance(TypeID::dx);     // Cov dx    - #8
         double varY = solver.getVariance(TypeID::dy);     // Cov dy    - #9

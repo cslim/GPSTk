@@ -201,7 +201,17 @@ namespace pod
 
     bool GnssDataStore::loadIonoMap()
     {
-        return false;
+        list<string> files;
+        string subdir = confReader->getValue("IonexDir");
+        FsUtils::getAllFilesInDir(workingDir + "\\" + subdir, files);
+        IonexStore ionStore;
+        for (auto& file : files)
+        {
+            ionStore.loadFile(file);
+           
+        }
+        ionoCorrector.setIonosphereMap(ionStore);
+        return ionStore.size() > 0;
     }
 
     bool  GnssDataStore::loadBceIonoModel()

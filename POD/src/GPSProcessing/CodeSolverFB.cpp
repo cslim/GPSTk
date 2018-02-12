@@ -105,7 +105,7 @@ namespace pod
             for (auto &it : ObsData)
             {
                 checkLimits(it, limit);
-                updateWeights(it);
+                //updateWeights(it);
                 CodeKalmanSolver::Process(it);
             }
 
@@ -125,9 +125,7 @@ namespace pod
             // Check postfit values and mark satellites as rejected
             if (std::abs((*it).second(TypeID::postfitC)) > codeLimit)
                 satRejectedSet.insert((*it).first);
-
         } 
-
 
            // Update the number of rejected measurements
         rejectedMeasurements += satRejectedSet.size();
@@ -148,10 +146,11 @@ namespace pod
         for (auto &it : gData.body)
         {
             double res = it.second[TypeID::postfitC];
+
             if (::abs(res) > sigma)
-            {
                 it.second[TypeID::weight] = sigma*sigma / res / res;
-            }
+            else
+                it.second[TypeID::weight] = 1;
         }
     }
 }
