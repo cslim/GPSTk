@@ -708,7 +708,7 @@ namespace gpstk
       min   = asInt(line.substr(24,6));
       sec   = asInt(line.substr(30,6));
 
-      return CivilTime( year, month, day, hour, min, (double)sec );
+      return  CivilTime( year, month, day, hour, min, (double)sec, TimeSystem::Any);
 
    }  // End of method 'IonexData::parseTime()'
 
