@@ -300,7 +300,7 @@ namespace gpstk
       {
          std::vector<T> v;
          for(size_t i = 0; i < s; i++)
-            v.push_back(v[i] );
+            v.push_back(this->v[i] );
          return v;
       }
 
