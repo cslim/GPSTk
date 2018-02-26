@@ -105,7 +105,6 @@ namespace gpstk
    }  // End of method 'RandomWalkModel::Prepare()'
 
 
-
       // Get element of the state transition matrix Phi
    double PhaseAmbiguityModel::getPhi()
    {

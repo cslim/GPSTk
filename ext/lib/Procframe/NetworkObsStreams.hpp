@@ -131,7 +131,7 @@ namespace gpstk
          /// Get the SourceID of the rinex observation file
       SourceID sourceIDOfRinexObsFile(std::string obsFile);
 
-      RinexObsStream* getRinexObsStream(const SourceID& source)
+      Rinex3ObsStream* getRinexObsStream(const SourceID& source)
       { return mapSourceStream[source]; }
 
    protected:
@@ -144,14 +144,14 @@ namespace gpstk
          SourceID obsSource;
 
          Synchronize* pSynchro;
-         RinexObsStream* pObsStream;
+         Rinex3ObsStream* pObsStream;
       };
 
          /// Object to hold all the data of the network
       std::list<ObsData> allStreamData;
 
          /// Map to easy access the streams by 'SourceID'
-      std::map<SourceID, RinexObsStream*> mapSourceStream;
+      std::map<SourceID, Rinex3ObsStream*> mapSourceStream;
 
          /// Map to easy access the synchronize object
       std::map<SourceID, Synchronize*> mapSourceSynchro;

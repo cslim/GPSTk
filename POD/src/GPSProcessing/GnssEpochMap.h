@@ -35,12 +35,17 @@ namespace pod
         
         void updateMetadata();
         std::string title;
+
         //all sv in data 
         std::set<gpstk::SatID> svs;
+        //all solution types
+        std::set<int> slnTypes;
+        //all typeIDs 
+        gpstk::TypeIDSet types;
 
         gpstk::Rinex3ObsHeader header;
         std::map<gpstk::CommonTime, GnssEpoch> data;
-
+    protected: void updateTypes(const gpstk::TypeIDSet & types);
     };
 
 

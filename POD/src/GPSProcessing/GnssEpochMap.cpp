@@ -53,12 +53,45 @@ namespace pod
     GnssEpochMap::~GnssEpochMap()
     { }
 
+    void GnssEpochMap::updateTypes(const TypeIDSet & newTypes)
+    {
+        types.insert(newTypes.begin(), newTypes.end());
+    }
+
     void GnssEpochMap::updateMetadata()
     {
         svs.clear();
+        slnTypes.clear();
+        types.clear();
+        types.insert(TypeID::recSlnType);
+
         for (auto & epoch : data)
-            for (auto & svRcord : epoch.second.satData)
+        {
+            for (const auto & svRcord : epoch.second.satData)
+            {
+                //update list of SV 
                 svs.insert(svRcord.first);
+                //update list of typeID 
+                for (const auto & data : svRcord.second)
+                    types.insert(data.first);
+            }
+
+            //update list of  typeID
+            for (const auto & data : epoch.second.slnData)
+                types.insert(data.first);
+            //update list of Solution types
+            const auto& st = epoch.second.slnData.find(TypeID::recSlnType);
+
+            if (st == epoch.second.slnData.end())
+            {
+                epoch.second.slnData[TypeID::recSlnType] = 0;
+                slnTypes.insert(0);
+            }
+                
+            else
+                slnTypes.insert(st->second);
+        }
+
     }
 
     /// Method to print data values

@@ -320,7 +320,11 @@ namespace gpstk
       tStrings[recZ]       = "RxPositionZ";
       tStrings[recCdt]     = "RxCdt";
       tStrings[recCdtdot]  = "RxCdtdot";
-      tStrings[recCdtGLO]  = "RxCdtGLO";
+
+      tStrings[recISB_GLN]  = "Rx ISB GLONASS";
+      tStrings[recISB_GAL] = "Rx ISB GALILEO";
+      tStrings[recISB_BDS] = "Rx ISB BEIDOU";
+
       tStrings[recZTropo]  = "RxZenithTropo";
       tStrings[recZTropoWet] = "RxZenithTropoWet";
       tStrings[recZTropoDry] = "RxZenithTropoDry";

@@ -1,4 +1,4 @@
-#include "CodeSolverFB.h"
+#include "KalmanSolverFB.h"
 #include"PowerSum.hpp"
 
 using namespace gpstk;
@@ -6,17 +6,24 @@ using namespace std;
 
 namespace pod
 {
-    CodeSolverFB::CodeSolverFB():firstIteration(true), processedMeasurements(0), rejectedMeasurements(0)
-    {
-    }
-    
-    CodeSolverFB::~CodeSolverFB()
+    KalmanSolverFB::KalmanSolverFB()
+        :firstIteration(true), processedMeasurements(0), rejectedMeasurements(0)
     {
     }
 
-    gpstk::gnssRinex & CodeSolverFB::Process(gpstk::gnssRinex & gRin)
+    KalmanSolverFB::KalmanSolverFB(eqComposer_sptr eqs)
+        : firstIteration(true), processedMeasurements(0), rejectedMeasurements(0)
     {
-        CodeKalmanSolver::Process(gRin);
+        solver = KalmanSolver(eqs);
+    }
+
+    KalmanSolverFB::~KalmanSolverFB()
+    {
+    }
+
+    gpstk::gnssRinex & KalmanSolverFB::Process(gpstk::gnssRinex & gRin)
+    {
+        solver.Process(gRin);
 
 
         // Before returning, store the results for a future iteration
@@ -37,7 +44,7 @@ namespace pod
     }
 
 
-    bool CodeSolverFB::lastProcess(gpstk::gnssRinex & gRin)
+    bool KalmanSolverFB::lastProcess(gpstk::gnssRinex & gRin)
     {
 
         // Keep processing while 'ObsData' is not empty
@@ -46,7 +53,7 @@ namespace pod
 
             // Get the first data epoch in 'ObsData' and process it. The
             // result will be stored in 'gData'
-            gRin = Process(ObsData.front());
+            gRin = solver.Process(ObsData.front());
             // gData = ObsData.front();
             // Remove the first data epoch in 'ObsData', freeing some
             // memory and preparing for next epoch
@@ -59,7 +66,7 @@ namespace pod
         }
     }
 
-    void CodeSolverFB::reProcess(int cycles)
+    void KalmanSolverFB::reProcess(int cycles)
     {
         // Check number of cycles. The minimum allowed is "1".
         if (cycles < 1)
@@ -70,7 +77,7 @@ namespace pod
         // Backwards iteration. We must do this at least once
         for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
         {
-            CodeKalmanSolver::Process((*rpos));
+            solver.Process((*rpos));
         }
 
         // If 'cycles > 1', let's do the other iterations
@@ -80,52 +87,51 @@ namespace pod
             // Forwards iteration
             for (auto pos = ObsData.begin(); pos != ObsData.end(); ++pos)
             {
-                CodeKalmanSolver::Process((*pos));
+                solver.Process((*pos));
             }
 
             // Backwards iteration.
             for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
             {
-                CodeKalmanSolver::Process((*rpos));
+                solver.Process((*rpos));
             }
 
         }  // End of 'for (int i=0; i<(cycles-1), i++)'
         return;
     }
-    void CodeSolverFB::reProcess()
+    void KalmanSolverFB::reProcess()
     {
         firstIteration = false;
         // Backwards iteration. We must do this at least once
         for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
-            CodeKalmanSolver::Process((*rpos));
+            solver.Process((*rpos));
 
         for (auto limit : codeLimits)
         {
-
             for (auto &it : ObsData)
             {
-                checkLimits(it, limit);
-                //updateWeights(it);
-                CodeKalmanSolver::Process(it);
+                checkLimits(it, TypeID::postfitC, limit);
+
+                solver.Process(it);
             }
 
             for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
-                CodeKalmanSolver::Process((*rpos));
+                solver.Process((*rpos));
         }
     }
 
-    void CodeSolverFB::checkLimits(gnssRinex& gData, double codeLimit)
+    void KalmanSolverFB::checkLimits(gnssRinex& gData, const TypeID& type, double limit)
     {
         // Set to store rejected satellites
         SatIDSet satRejectedSet;
 
         // Let's check limits
-        for (auto it = gData.body.begin(); it != gData.body.end(); ++it)
+        for (const auto& it :gData.body)
         {
             // Check postfit values and mark satellites as rejected
-            if (std::abs((*it).second(TypeID::postfitC)) > codeLimit)
-                satRejectedSet.insert((*it).first);
-        } 
+            if (std::abs(it.second.at(type)) > limit)
+                satRejectedSet.insert(it.first);
+        }
 
            // Update the number of rejected measurements
         rejectedMeasurements += satRejectedSet.size();
@@ -135,22 +141,7 @@ namespace pod
 
     }
 
-    void CodeSolverFB::updateWeights(gnssRinex& gData)
-    {
-        PowerSum ps;
-        for (auto it : gData.body)
-            ps.add(it.second[TypeID::postfitC]);
+   
 
-        double sigma = sqrt(ps.variance());
 
-        for (auto &it : gData.body)
-        {
-            double res = it.second[TypeID::postfitC];
-
-            if (::abs(res) > sigma)
-                it.second[TypeID::weight] = sigma*sigma / res / res;
-            else
-                it.second[TypeID::weight] = 1;
-        }
-    }
 }

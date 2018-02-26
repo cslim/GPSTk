@@ -51,7 +51,6 @@ namespace gpstk
    { return "Synchronize"; }
 
 
-
       /* Sets tolerance, in seconds.
        *
        * @param tol                 Tolerance, in seconds.
@@ -143,6 +142,11 @@ namespace gpstk
          (std::abs( gData.header.epoch - time ) > tolerance ) )
       {
          (*pRinexRef) >> gData;   // Get data out of ref station RINEX file
+         if (pRinexRef->eof())
+         {
+             SynchronizeException e("End of file has been reached." + time.asString());
+             GPSTK_THROW(e);
+         }
       }
 
 

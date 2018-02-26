@@ -48,6 +48,7 @@ namespace pod
 
         return true;
     }
+
     void  GnssDataStore::LoadData(const char* path)
     {
         try
@@ -59,7 +60,6 @@ namespace pod
             opts.isSmoothCode = confReader->getValueAsBoolean("IsSmoothCode");
 
             opts.maskEl = confReader->getValueAsDouble("ElMask");
-
             opts.maskSNR = confReader->getValueAsDouble("SNRmask");
 
             opts.systems.insert(SatID::SatelliteSystem::systemGPS);
@@ -78,14 +78,16 @@ namespace pod
             string subdir = confReader->getValue("GenericFilesDir");
             genericFilesDirectory = workingDir + "\\" + subdir + "\\";
 
-            subdir = confReader->getValue("RinesObsDir");
-            FsUtils::getAllFilesInDir(workingDir + "\\" + subdir, rinexObsFiles);
+           
+            SiteRover = confReader->getValue("SiteRover");
+            SiteBase = confReader->getValue("SiteBase");
 
             cout << "Ephemeris Loading... ";
             cout << loadEphemeris() << endl;
 
             opts.isComputeApprPos = confReader->getValueAsBoolean("calcApprPos");
-            apprPosFile = confReader->getValue("apprPosFile");
+            if (opts.isComputeApprPos)
+                apprPosFile = confReader->getValue("apprPosFile");
 
             opts.dynamics = (Dynamics)confReader->getValueAsInt("Dynamics");
 
@@ -113,7 +115,7 @@ namespace pod
         }
         catch (const std::exception& e)
         {
-            cout << "failed to load input data: An error has occured: " << e.what() << endl;
+            cout << "Failed to load input data: An error has occured: " << e.what() << endl;
             exit(-1);
         }
     }
@@ -388,12 +390,9 @@ namespace pod
 
     void GnssDataStore::checkObservable()
     {
-        string subdir = confReader->getValue("RinesObsDir");
-        FsUtils::getAllFilesInDir(workingDir + "\\" + subdir, rinexObsFiles);
-
         ofstream os(workingDir + "\\ObsStatisic.out");
 
-        for (auto obsFile : rinexObsFiles)
+        for (auto obsFile : getObsFiles(SiteRover))
         {
 
             //Input observation file stream
@@ -485,5 +484,13 @@ namespace pod
             throw e;
         }
         return true;
+    }
+
+    std::list<string> GnssDataStore::getObsFiles(const std::string & siteID)const
+    {
+        std::list<string> ObsFiles;
+        string  subdir = confReader->getValue("RinesObsDir");
+        FsUtils::getAllFilesInDir(workingDir + "\\" + subdir + "\\" + siteID, ObsFiles);
+        return ObsFiles;
     }
 }

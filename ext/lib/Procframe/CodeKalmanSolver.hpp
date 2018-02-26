@@ -453,6 +453,7 @@ namespace gpstk
       WhiteNoiseModel whiteNoiseModel;
 
 
+
    }; // End of class 'CodeKalmanSolver'
 
       //@}

@@ -73,10 +73,10 @@ namespace gpstk
        *
        *      // EBRE station nominal position
        *   Position nominalPos(4833520.192, 41537.1043, 4147461.560);
-       *   RinexObsStream rin("ebre0300.02o");  // Data stream
+       *   Rinex3ObsStream rin("ebre0300.02o");  // Data stream
        *
        *      // Create the input observation file stream for REFERENCE STATION
-       *   RinexObsStream rinRef("bell0300.02o");
+       *   Rinex3ObsStream rinRef("bell0300.02o");
        *
        *      // GDS for rover data
        *   gnssRinex gRin;
@@ -145,7 +145,7 @@ namespace gpstk
        *   }
        * @endcode
        *
-       * Each Synchronize object will take data out of a RinexObsStream object
+       * Each Synchronize object will take data out of a Rinex3ObsStream object
        * holding reference data until the data stream is synchronized (within
        * a given tolerance) with another data stream.
        *
@@ -166,15 +166,26 @@ namespace gpstk
          : pRinexRef(NULL), pgRov1(NULL), tolerance(1.0),
            firstTime(true)
       { };
-
+      /** Common constructor.
+      *
+      * @param rinexObs      Rinex3ObsStream object of reference data.
+      * @param roverData     gnssRinex that holds ROVER receiver data
+      * @param tol           Tolerance, in seconds.
+      */
+      Synchronize( gnssRinex& roverData,
+          const double tol = 1.0)
+          : tolerance(tol), firstTime(true)
+      {
+           setRoverData(roverData);
+      };
 
          /** Common constructor.
           *
-          * @param rinexObs      RinexObsStream object of reference data.
+          * @param rinexObs      Rinex3ObsStream object of reference data.
           * @param roverData     gnssRinex that holds ROVER receiver data
           * @param tol           Tolerance, in seconds.
           */
-      Synchronize( RinexObsStream& rinexObs,
+      Synchronize( Rinex3ObsStream& rinexObs,
                    gnssRinex& roverData,
                    const double tol = 1.0 )
          : tolerance(tol), firstTime(true)
@@ -183,11 +194,11 @@ namespace gpstk
 
          /** Common constructor.
           *
-          * @param rinexObs      RinexObsStream object of reference data.
+          * @param rinexObs      Rinex3ObsStream object of reference data.
           * @param roverData     gnssSatTypeValue that holds ROVER receiver data
           * @param tol           Tolerance, in seconds.
           */
-      Synchronize( RinexObsStream& rinexObs,
+      Synchronize( Rinex3ObsStream& rinexObs,
                    gnssSatTypeValue& roverData,
                    const double tol = 1.0 )
          : tolerance(tol), firstTime(true)
@@ -224,16 +235,16 @@ namespace gpstk
       virtual Synchronize& setTolerance(const double tol);
 
 
-         /// Returns a pointer to the RinexObsStream object of reference data.
-      virtual RinexObsStream* getPtrReferenceSource(void) const
+         /// Returns a pointer to the Rinex3ObsStream object of reference data.
+      virtual Rinex3ObsStream* getPtrReferenceSource(void) const
       { return pRinexRef; };
 
 
-         /** Sets the RinexObsStream object of reference data.
+         /** Sets the Rinex3ObsStream object of reference data.
           *
-          * @param rinexObs      RinexObsStream object of reference data.
+          * @param rinexObs      Rinex3ObsStream object of reference data.
           */
-      virtual Synchronize& setReferenceSource(RinexObsStream& rinexObs)
+      virtual Synchronize& setReferenceSource(Rinex3ObsStream& rinexObs)
       { pRinexRef = &rinexObs; firstTime=true; return (*this); }
 
 
@@ -251,7 +262,6 @@ namespace gpstk
           */
       virtual Synchronize& setRoverData(gnssSatTypeValue& roverData)
       { pgRov1 = &roverData; return (*this); }
-
 
          /// Returns a string identifying this object.
       virtual std::string getClassName(void) const;
@@ -271,7 +281,8 @@ namespace gpstk
 
 
          /// Pointer to input observation file stream for reference station.
-      RinexObsStream* pRinexRef;
+      Rinex3ObsStream* pRinexRef;
+
 
 
          /// Pointer to gnnsRinex data structure (GDS) that holds ROVER data.

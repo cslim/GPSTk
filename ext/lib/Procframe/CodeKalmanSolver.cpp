@@ -321,7 +321,6 @@ covariance matrix.");
          gData.body = g1.body;
 
          return gData;
-
       }
       catch(Exception& u)
       {
@@ -421,7 +420,7 @@ covariance matrix.");
            qMatrix(3, 3) = pClockStoModel->getQ();
 
            // Now, the ISB
-           if (defaultEqDef.body.find(TypeID::recCdtGLO) != defaultEqDef.body.end())
+           if (defaultEqDef.body.find(TypeID::recISB_GLN) != defaultEqDef.body.end())
            {
                pIsbStoModel->Prepare(dummySat, gData);
                phiMatrix(4, 4) = pIsbStoModel->getPhi();

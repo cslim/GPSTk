@@ -64,7 +64,6 @@ namespace pod
 
     private: bool initReader(const char* path);
 
-
     private: bool loadIono();
     private: bool loadBceIonoModel();
     private: bool loadIonoMap();
@@ -74,6 +73,8 @@ namespace pod
     private: bool loadClocks();
     private: bool loadEOPData();
     private: bool loadCodeBiades();
+
+    public: std::list<std::string> getObsFiles(const std::string & siteID) const;
 
 #pragma endregion
 
@@ -102,9 +103,12 @@ namespace pod
 
             // compute the  values related to a given GNSS ionospheric model.
     public: gpstk::ComputeIonoModel ionoCorrector;
+            
+            //rover receiver site ID
+    public: std::string SiteRover;
 
-            //std::list of pathes to rinex observation file to processing
-    public: std::list<std::string> rinexObsFiles;
+            //base receiver site ID
+    public: std::string SiteBase;
 
             //path to approximate position and code clock bias file
     public: std::string apprPosFile;

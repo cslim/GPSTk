@@ -72,7 +72,6 @@ namespace pod
         PPPSolutionBase (confData)
     {
        solverPR  = unique_ptr<CodeSolverBase>( new CodeSolverLEO(data));
-       fName = "pod_sln.txt";
     }
 
     bool PODSolution::processCore()
@@ -250,7 +249,7 @@ namespace pod
         int precision(4);
 
         ofstream outfile;
-        outfile.open(data->workingDir +"\\"+fName, ios::out);
+        outfile.open(data->workingDir +"\\"+fileName(), ios::out);
 
 #pragma endregion
 
@@ -260,7 +259,7 @@ namespace pod
         bool b = true;
 
         //// *** Now comes the REAL forwards processing part *** ////
-        for (auto obsFile : data->rinexObsFiles)
+        for (auto obsFile : data->getObsFiles(data->SiteRover))
         {
 
             cout << obsFile << endl;
@@ -482,19 +481,19 @@ namespace pod
 
         auto defeq = solver.getDefaultEqDefinition();
 
-        auto itcdtGLO = defeq.body.find(TypeID::recCdtGLO);
-        if (defeq.body.find(TypeID::recCdtGLO) != defeq.body.end())
+        auto itcdtGLO = defeq.body.find(TypeID::recISB_GLN);
+        if (defeq.body.find(TypeID::recISB_GLN) != defeq.body.end())
         {
-            double cdtGLO = solver.getSolution(TypeID::recCdtGLO);
-            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdtGLO, cdtGLO));
+            double cdtGLO = solver.getSolution(TypeID::recISB_GLN);
+            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recISB_GLN, cdtGLO));
 
             outfile << cdtGLO << " ";
         }
 
         if (defeq.body.find(TypeID::recCdtdot) != defeq.body.end())
         {
-            double recCdtdot = solver.getSolution(TypeID::recCdtdot);
-            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdtdot, recCdtdot));
+            double recCdtdot = solver.getSolution(TypeID::recISB_GLN);
+            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recISB_GLN, recCdtdot));
 
             outfile << setprecision(12) << recCdtdot << " ";
         }

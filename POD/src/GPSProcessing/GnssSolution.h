@@ -31,10 +31,7 @@ namespace pod
         return gMap;
     };
 
-    public: virtual std::string&  fileName()
-    {
-        return fName;
-    };
+    public: virtual std::string  fileName() const = 0;
  
     public: virtual GnssSolution& setConfigData(GnssDataStore_sptr dataStore)
     {
@@ -77,9 +74,6 @@ namespace pod
 
               //number of decimal places for output
     protected: int outputPrec = 3;
-
-              // output file name
-    protected: std::string fName;
 
               //adapter for SQLite3 database
     //protected: SQLiteAdapter db;

@@ -133,10 +133,11 @@ namespace gpstk
 
         // Check if current epoch - lastEpoch is NOT within threshold,
         // implying that it must be decimated
-        bool b = (!(std::abs(gData.header.epoch - lastEpoch) > threshold)) ? true : false;
+       if(!(std::abs(gData.header.epoch - lastEpoch) > threshold)) 
+          return true;
         // Update reference epoch
         lastEpoch = gData.header.epoch;
-        return b;
+        return false;
     }
 
 

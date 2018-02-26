@@ -46,7 +46,7 @@
 
 #include "CommonTime.hpp"
 #include "DataStructures.hpp"
-
+#include<memory>
 
 
 namespace gpstk
@@ -579,6 +579,8 @@ namespace gpstk
 
    }; // End of class 'TropoRandomWalkModel'
 
+   typedef std::unique_ptr<StochasticModel> StochasticModel_uptr;
+   typedef std::shared_ptr<StochasticModel> StochasticModel_sptr;
       //@}
 
 }  // End of namespace gpstk

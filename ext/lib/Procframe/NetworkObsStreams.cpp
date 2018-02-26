@@ -57,7 +57,7 @@ namespace gpstk
       try
       {
             // allocate memory
-         oData.pObsStream = new RinexObsStream();
+         oData.pObsStream = new Rinex3ObsStream();
          oData.pSynchro = new Synchronize();
          if(!oData.pObsStream || !oData.pSynchro)
          {
@@ -97,7 +97,7 @@ namespace gpstk
 
          // We have to deallocate the memory here
          delete oData.pObsStream;
-         oData.pObsStream = (RinexObsStream*)0;
+         oData.pObsStream = (Rinex3ObsStream*)0;
 
          return false;
       }
@@ -114,7 +114,7 @@ namespace gpstk
       gdsMap.clear();
 
 
-      RinexObsStream* pRefObsStream = mapSourceStream[referenceSource];
+      Rinex3ObsStream* pRefObsStream = mapSourceStream[referenceSource];
 
       gnssRinex gRef;
   
@@ -122,7 +122,7 @@ namespace gpstk
       {
          gdsMap.addGnssRinex(gRef);
 
-         std::map<SourceID, RinexObsStream*>::iterator it;
+         std::map<SourceID, Rinex3ObsStream*>::iterator it;
          for( it = mapSourceStream.begin();
               it != mapSourceStream.end();
             ++it)
@@ -178,7 +178,7 @@ namespace gpstk
          {
             it->pObsStream->close();
             delete it->pObsStream;
-            it->pObsStream = (RinexObsStream*)0;
+            it->pObsStream = (Rinex3ObsStream*)0;
          }
          
          if(it->pSynchro)

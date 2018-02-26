@@ -53,7 +53,7 @@ namespace pod
         tropModel = NeillTropModel(nominalPos.getAltitude(), nominalPos.getGeodeticLatitude(),opts().DoY);
 
         solverPR = unique_ptr<CodeSolverBase>(new CodeSolver(tropModel, data));
-        fName = "ppp_sln.txt";
+      
     }
     
     bool  PPPSolution::processCore()
@@ -260,7 +260,7 @@ namespace pod
 
         i = 1;
         cout << "First forward processing part started." << endl;
-        for (auto& obsFile : data->rinexObsFiles)
+        for (auto& obsFile : data->getObsFiles(data->SiteRover))
         {
             cout << obsFile << endl;
             //Input observation file stream
@@ -465,11 +465,11 @@ namespace pod
 
         auto defeq = solver.getDefaultEqDefinition();
 
-        auto itcdtGLO = defeq.body.find(TypeID::recCdtGLO);
-        if (defeq.body.find(TypeID::recCdtGLO) != defeq.body.end())
+        auto itcdtGLO = defeq.body.find(TypeID::recISB_GLN);
+        if (defeq.body.find(TypeID::recISB_GLN) != defeq.body.end())
         {
-            double cdtGLO = solver.getSolution(TypeID::recCdtGLO);
-            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdtGLO, cdtGLO));
+            double cdtGLO = solver.getSolution(TypeID::recISB_GLN);
+            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recISB_GLN, cdtGLO));
 
             outfile << cdtGLO << " ";
         }

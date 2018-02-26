@@ -1528,6 +1528,30 @@ namespace gpstk
 
    };  // End of 'gnssEquationDefinition'
 
+       /// Object defining the structure of a GNSS equation. The header is the
+       /// prefit and the body is a TypeIDSet containing the unknowns.
+       /// prefit residuals can contain several type
+   struct  gnssEquationDefinition2 : gnssData<TypeIDSet, TypeIDSet>
+   {
+
+       /// Default constructor.
+       gnssEquationDefinition2() {};
+
+
+       /// Common constructor.
+       gnssEquationDefinition2(const TypeIDSet& h,
+           const TypeIDSet& b)
+       {
+           header = h;
+           body = b;
+       }
+
+
+       /// Destructor.
+       virtual ~gnssEquationDefinition2() {};
+
+
+   };  // End of 'gnssEquationDefinition'
 
 
       /// Object defining the structure of a GNSS linear combination. The

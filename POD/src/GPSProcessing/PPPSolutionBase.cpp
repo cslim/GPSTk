@@ -66,7 +66,7 @@ namespace pod
         int sampl(1);
         double tol(0.1);
 
-        for (auto obsFile : data->rinexObsFiles)
+        for (auto obsFile : data->getObsFiles(data->SiteRover))
         {
             int badSol(0);
             cout << obsFile << endl;

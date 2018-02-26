@@ -765,34 +765,16 @@ namespace gpstk
       // This method returns zero if a given satellite does not have this type.
    Vector<double> satTypeValueMap::getVectorOfTypeID(const TypeID& type) const
    {
+       Vector<double> result(this->size());
+       int i = 0;
+       for (const auto& it : *this)
+       {
+           const auto& itObs(it.second.find(type));
+           result[i] = (itObs != (it).second.end()) ? (*itObs).second : 0.0;
+           ++i;
+       }
 
-         // Let's declare a STL vector
-      std::vector<double> temp;
-
-      for( satTypeValueMap::const_iterator it = (*this).begin();
-           it != (*this).end();
-           ++it )
-      {
-
-         typeValueMap::const_iterator itObs( (*it).second.find(type) );
-         if ( itObs != (*it).second.end() )
-         {
-            temp.push_back( (*itObs).second );
-         }
-         else
-         {
-            temp.push_back( 0.0 );
-         }
-
-      }
-
-         // Let's declare a GPSTk Vector
-      Vector<double> result;
-
-         // Transform STL vector into GPSTk Vector
-      result = temp;
-
-      return result;
+       return result;
 
    }  // End of method 'satTypeValueMap::getVectorOfTypeID()'
 
@@ -2982,68 +2964,68 @@ in matrix and number of types do not match") );
 
 
       // Stream input for gnssRinex
-   std::istream& operator>>( std::istream& i, gnssRinex& f )
+   std::istream& operator >> (std::istream& i, gnssRinex& f)
    {
+       if (Rinex3ObsStream::isRinex3ObsStream(i))     // Rinex3
+       {
+           Rinex3ObsStream& strm = dynamic_cast<Rinex3ObsStream&>(i);
 
-      if( RinexObsStream::isRinexObsStream(i) )    // Rinex2
-      {
-         try
-         {
-            RinexObsStream& strm = dynamic_cast<RinexObsStream&>(i);
+           // If the header hasn't been read, read it...
+           if (!strm.headerRead) strm >> strm.header;
 
-            // If the header hasn't been read, read it...
-            if(!strm.headerRead) strm >> strm.header;
+           // Clear out this object
+           Rinex3ObsHeader& roh = strm.header;
 
-            // Clear out this object
-            RinexObsHeader& roh = strm.header;
+           Rinex3ObsData rod;
+           strm >> rod;
 
-            RinexObsData rod;
-            strm >> rod;
+           // Fill data
+           f.header.source.type = SatIDsystem2SourceIDtype(roh.fileSysSat);
+           f.header.source.sourceName = roh.markerName;
+           f.header.antennaType = roh.antType;
+           f.header.antennaPosition = roh.antennaPosition;
+           f.header.epochFlag = rod.epochFlag;
+           f.header.epoch = rod.time;
 
-            // Fill data
-            f.header.source.type = SatIDsystem2SourceIDtype(roh.system);
-            f.header.source.sourceName = roh.markerName;
-            f.header.antennaType = roh.antType;
-            f.header.antennaPosition = roh.antennaPosition;
-            f.header.epochFlag = rod.epochFlag;
-            f.header.epoch = rod.time;
+           f.body = satTypeValueMapFromRinex3ObsData(roh, rod);
 
-            f.body = satTypeValueMapFromRinexObsData(roh, rod);
+           return i;
+       }
 
-            return i;
-         }
-         catch (...)
-         {
-            return i;
-         }
-      }
-      if( Rinex3ObsStream::isRinex3ObsStream(i) )     // Rinex3
-      {
-         Rinex3ObsStream& strm = dynamic_cast<Rinex3ObsStream&>(i);
+       if (RinexObsStream::isRinexObsStream(i))    // Rinex2
+       {
+           try
+           {
+               RinexObsStream& strm = dynamic_cast<RinexObsStream&>(i);
 
-         // If the header hasn't been read, read it...
-         if(!strm.headerRead) strm >> strm.header;
+               // If the header hasn't been read, read it...
+               if (!strm.headerRead) strm >> strm.header;
 
-         // Clear out this object
-         Rinex3ObsHeader& roh = strm.header;
+               // Clear out this object
+               RinexObsHeader& roh = strm.header;
 
-         Rinex3ObsData rod;
-         strm >> rod;
+               RinexObsData rod;
+               strm >> rod;
 
-         // Fill data
-         f.header.source.type = SatIDsystem2SourceIDtype(roh.fileSysSat);
-         f.header.source.sourceName = roh.markerName;
-         f.header.antennaType = roh.antType;
-         f.header.antennaPosition = roh.antennaPosition;
-         f.header.epochFlag = rod.epochFlag;
-         f.header.epoch = rod.time;
+               // Fill data
+               f.header.source.type = SatIDsystem2SourceIDtype(roh.system);
+               f.header.source.sourceName = roh.markerName;
+               f.header.antennaType = roh.antType;
+               f.header.antennaPosition = roh.antennaPosition;
+               f.header.epochFlag = rod.epochFlag;
+               f.header.epoch = rod.time;
 
-         f.body = satTypeValueMapFromRinex3ObsData(roh, rod);
+               f.body = satTypeValueMapFromRinexObsData(roh, rod);
 
-         return i;
-      }
+               return i;
+           }
+           catch (...)
+           {
+               return i;
+           }
+       }
 
-      return i;
+       return i;
 
    }  // End of stream input for gnssRinex
 

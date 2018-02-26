@@ -10,7 +10,10 @@ namespace pod
 
     public: PODSolution(GnssDataStore_sptr confData);
     public: virtual ~PODSolution(){};
-    
+    public: virtual std::string  fileName() const override
+    {
+        return data->SiteRover + "_pod.txt";
+    }
     protected: virtual bool processCore() override;
     protected: virtual double mapSNR(double  value) override;
     protected: virtual void updateRequaredObs() override;

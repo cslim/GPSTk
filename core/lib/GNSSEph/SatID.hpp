@@ -84,16 +84,6 @@ namespace gpstk
            systemUnknown
        };
 
-       /// empty constructor, creates an invalid object
-       SatID() { id = -1; system = systemGPS; }
-
-       /// explicit constructor, no defaults
-       /// @note if s is given a default value here,
-       /// some compilers will silently cast int to SatID.
-       SatID(int p, const SatelliteSystem& s) { id = p; system = s; }
-
-       // operator=, copy constructor and destructor built by compiler
-
        /// Convenience method used by dump().
        static std::string convertSatelliteSystemToString(const SatelliteSystem& s)
        {
@@ -116,6 +106,19 @@ namespace gpstk
        }
 
        static std::map<SatID, int> glonassFcn;
+       
+       static SatID dummy;
+
+       /// empty constructor, creates an invalid object
+       SatID() { id = -1; system = systemGPS; }
+
+       /// explicit constructor, no defaults
+       /// @note if s is given a default value here,
+       /// some compilers will silently cast int to SatID.
+       SatID(int p, const SatelliteSystem& s) { id = p; system = s; }
+
+       // operator=, copy constructor and destructor built by compiler
+
        /// Convenience output method.
        void dump(std::ostream& s) const
        {

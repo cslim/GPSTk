@@ -84,7 +84,7 @@ namespace pod
 
        keepTypeSet.insert(TypeID::cdt);
        keepTypeSet.insert(TypeID::recCdtdot);
-       keepTypeSet.insert(TypeID::recCdtGLO);
+       keepTypeSet.insert(TypeID::recISB_GLN);
        
        keepTypeSet.insert(TypeID::L1);
        keepTypeSet.insert(TypeID::L2);

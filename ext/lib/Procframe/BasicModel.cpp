@@ -222,7 +222,7 @@ namespace gpstk
             if (useCdtDot)
                 (*stv).second[TypeID::recCdtdot] = dt;
 
-            (*stv).second[TypeID::recCdtGLO] = cdtGLO;
+            (*stv).second[TypeID::recISB_GLN] = cdtGLO;
                // Now we have to add the new values to the data structure
             (*stv).second[TypeID::rho] = cerange.rawrange;
             (*stv).second[TypeID::rel] = -cerange.relativity;
@@ -275,7 +275,7 @@ namespace gpstk
          if (numGLN < 2)
          {
              gData.removeSatSyst(SatID::SatelliteSystem::systemGlonass);
-             gData.removeTypeID(TypeID::recCdtGLO);
+             gData.removeTypeID(TypeID::recISB_GLN);
          }
 
          isFirstTime = false;

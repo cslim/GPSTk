@@ -12,7 +12,12 @@ namespace pod
     {
     public:
         PPPSolution(GnssDataStore_sptr  confReader);
-        virtual ~PPPSolution(){};
+        virtual ~PPPSolution() {};
+
+    public: virtual std::string  fileName() const override
+    {
+        return data->SiteRover + "_ppp.txt";
+    }
 
     protected:
         virtual bool processCore() override;

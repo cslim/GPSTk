@@ -15,6 +15,10 @@ namespace pod
     public:
         ProcessLinear() {};
        virtual ~ProcessLinear() {};
+       void setUseC1(bool useC1);
+
+       bool getUseC1() const
+       { return useC1; }
 
        virtual gpstk::gnssSatTypeValue& Process(gpstk::gnssSatTypeValue& gData) override;
 
@@ -38,6 +42,8 @@ namespace pod
         std::list<linear_ptr> combs;
 
         gpstk::satTypeValueMap& Process(gpstk::satTypeValueMap& gData) ;
+
+        bool useC1;
 
     };
 }

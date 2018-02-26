@@ -46,6 +46,8 @@ namespace gpstk
 {
     std::map<SatID, int> SatID::glonassFcn;
 
+    SatID SatID::dummy;
+
     int SatID::getGloFcn() const
     {
         if (system != SatelliteSystem::systemGlonass)

@@ -173,6 +173,7 @@ namespace pod
          Matrix<double>J2k2ECEF = getJ2k2Ecef00(TAI);
 
          os << setprecision(18) << J2k2ECEF <<endl;
+         return true;
      }
 
 };

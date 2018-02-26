@@ -46,7 +46,7 @@ namespace pod
     private: void addSlnData(const gpstk::typeValueMap& slnData);
     private: void addSvData(const gpstk::satTypeValueMap& svData);
     private: void addNewEpoch(const std::pair<gpstk::CommonTime, pod::GnssEpoch>& epoch);
-    private: void addSV(const gpstk::SatID& sv);
+    private: int  addSV(const gpstk::SatID& sv);
 
 #pragma endregion
 

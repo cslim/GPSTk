@@ -30,7 +30,7 @@ namespace pod
         {
             auto ge = GnssEpoch(gRin);
             ge.slnData[TypeID::recSlnType] =0;
-            eMap.data.insert(pair<CommonTime, GnssEpoch>(gRin.header.epoch, ge));
+            eMap.data.insert(make_pair(gRin.header.epoch, ge));
         }
 
         eMap.updateMetadata();
@@ -100,9 +100,47 @@ namespace pod
 
         lastFileID =  tryExecuteNonQueryAndGetRowId(comm);
 
+        // fill the  SV metadata
         tryExecuteNonQuery("BEGIN TRANSACTION;");
-        for (auto& it : eMap.svs)
-            addSV(it);
+        for (const auto& it : eMap.svs)
+        {
+            //add sv to table of all SV
+           int svid  = addSV(it);
+
+           //add sv to table of SV by file
+           char* sql = "INSERT INTO `SvByFiles`(`FileId`,`SvId`) VALUES( @FileId, @SvId);";
+           sqlite3_stmt *comm;
+           sqlite3_prepare_v2(db, sql, -1, &comm, NULL);
+           sqlite3_bind_int(comm, 1, lastFileID);
+           sqlite3_bind_int(comm, 2, svid);
+           tryExecuteNonQuery(comm);
+        }
+        tryExecuteNonQuery("COMMIT;");
+     
+        // fill the  solution types metadata
+        tryExecuteNonQuery("BEGIN TRANSACTION;");
+        for (const auto it : eMap.slnTypes)
+        {
+            char* sql = "INSERT INTO `StByFiles`(`FileId`,`SlnType`) VALUES( @FileId, @SlnType);";
+            sqlite3_stmt *comm;
+            sqlite3_prepare_v2(db, sql, -1, &comm, NULL);
+            sqlite3_bind_int(comm, 1, lastFileID);
+            sqlite3_bind_int(comm, 2, it);
+            tryExecuteNonQuery(comm);
+        }
+        tryExecuteNonQuery("COMMIT;");
+
+        // fill the  TypeId's metadata
+        tryExecuteNonQuery("BEGIN TRANSACTION;");
+        for (const auto it : eMap.types)
+        {
+            char* sql = "INSERT INTO `TypeIDsByFiles`(`FileId`,`TypeId`) VALUES( @FileId, @TypeId);";
+            sqlite3_stmt *comm;
+            sqlite3_prepare_v2(db, sql, -1, &comm, NULL);
+            sqlite3_bind_int(comm, 1, lastFileID);
+            sqlite3_bind_int(comm, 2, it.type);
+            tryExecuteNonQuery(comm);
+        }
         tryExecuteNonQuery("COMMIT;");
 
         for (auto& it : eMap.data)
@@ -176,10 +214,13 @@ namespace pod
         lastEpochID = tryExecuteNonQueryAndGetRowId(comm);
 
         addSlnData(epoch.second.slnData);
-        addSvData(epoch.second.satData);
+        //TypeIDSet typeSet;// { TypeID::postfitC };
+        //typeSet.insert(TypeID::postfitC);
+
+       addSvData(epoch.second.satData.extractTypeID(TypeIDSet{ TypeID::postfitC ,TypeID:: elevation,TypeID::weight}));
     }
 
-    void SQLiteAdapter::addSV(const gpstk::SatID & sv)
+    int SQLiteAdapter::addSV(const gpstk::SatID & sv)
     {
         char* sql = "INSERT OR IGNORE INTO `SVS`(`SVID`,`SSID`) VALUES (@SVID, @SSID);";
         sqlite3_stmt *comm;
@@ -187,7 +228,7 @@ namespace pod
         sqlite3_bind_int(comm, 1, sv.id);
         sqlite3_bind_int(comm, 2, (int)sv.system);
 
-        tryExecuteNonQuery(comm);
+        return tryExecuteNonQueryAndGetRowId(comm);
     }
 
 #pragma endregion
@@ -399,6 +440,22 @@ namespace pod
           "	FOREIGN KEY(`SSID`) REFERENCES `SVS`(`SSID`),"
           "	FOREIGN KEY(`FileID`) REFERENCES `GnssObsFile`(`ID`)"
           ");"
+             "CREATE TABLE IF NOT EXISTS `TypeIDsByFiles` ("
+             "	`FileId`	INTEGER NOT NULL,"
+             "	`TypeId`	INTEGER NOT NULL,"
+             "	FOREIGN KEY(`FileId`) REFERENCES `GnssObsFile`(`ID`)"
+             ");"
+             "CREATE TABLE IF NOT EXISTS `SvByFiles` ("
+             "	`FileId`	INTEGER NOT NULL,"
+             "	`SvId`	INTEGER NOT NULL,"
+             "	FOREIGN KEY(`SvId`) REFERENCES `SVS`(`ID`),"
+             "	FOREIGN KEY(`FileId`) REFERENCES `GnssObsFile`(`ID`)"
+             ");"
+             "CREATE TABLE IF NOT EXISTS `StByFiles` ("
+             "	`FileId`	INTEGER NOT NULL,"
+             "	`SlnType`	INTEGER NOT NULL,"
+             "	FOREIGN KEY(`FileId`) REFERENCES `GnssObsFile`(`ID`)"
+             ");"
          "CREATE UNIQUE INDEX IF NOT EXISTS `SlnTypesColors_Type_File_Unique` ON `ColorsSt` ("
          "	`SolType`,"
          "	`FileID`"

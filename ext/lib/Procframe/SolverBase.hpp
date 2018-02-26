@@ -51,53 +51,86 @@
 namespace gpstk
 {
 
-      /// Thrown when some problem appeared when solving a given
-      /// equation set
-      /// @ingroup exceptiongroup
-   NEW_EXCEPTION_CLASS(InvalidSolver, gpstk::Exception);
+    /// Thrown when some problem appeared when solving a given
+    /// equation set
+    /// @ingroup exceptiongroup
+    NEW_EXCEPTION_CLASS(InvalidSolver, gpstk::Exception);
 
 
-      /// @ingroup GPSsolutions 
-      /// @ingroup math
-      //@{
+    /// @ingroup GPSsolutions 
+    /// @ingroup math
+    //@{
 
-      /**
-       * Abstract base class for solver algorithms.
-       */
-   class SolverBase
-   {
-   public:
-
-
-         /// Implicit constructor
-      SolverBase() : valid(false) {};
-
-         /// Return validity of results
-      bool isValid(void)
-      { return valid; }
-
-         /// Solution
-      Vector<double> solution;
-
-         /// Postfit-residuals.
-      Vector<double> postfitResiduals;
-
-         /// Covariance matrix
-      Matrix<double> covMatrix;
-
-         /// Destructor
-      virtual ~SolverBase() {};
+    /**
+     * Abstract base class for solver algorithms.
+     */
+    class SolverBase
+    {
+    public:
 
 
-   protected:
+        /// Implicit constructor
+        SolverBase() : valid(false) {};
 
+        /// Return validity of results
+        bool isValid(void)
+        {
+            return valid;
+        }
+
+        /// Solution
+        virtual  Vector<double>& Solution()
+        {
+            return solution;
+        }
+
+        virtual const Vector<double>& Solution() const
+        {
+            return solution;
+        }
+
+        /// Postfit-residuals.
+        virtual Vector<double>& PostfitResiduals()
+        {
+            return postfitResiduals;
+        }
+
+        virtual const Vector<double>& PostfitResiduals() const
+        {
+            return postfitResiduals;
+        }
+
+        /// Covariance matrix
+        virtual Matrix<double>& CovMatrix()
+        {
+            return covMatrix;
+        }
+
+        virtual const Matrix<double>& CovMatrix() const
+        {
+            return covMatrix;
+        }
+        /// Destructor
+        virtual ~SolverBase() {};
+
+
+    protected:
 
         bool valid;         // true only if results are valid
 
+        /// Solution
+        Vector<double> solution;
 
-   }; // End of class 'SolverBase'
+        /// Postfit-residuals.
+        Vector<double> postfitResiduals;
 
-      //@}
+        /// Covariance matrix
+        Matrix<double> covMatrix;
+
+
+    }; // End of class 'SolverBase'
+
+       //@}
 
 }  // End of namespace gpstk
 #endif   // SOLVERBASE_HPP

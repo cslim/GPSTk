@@ -303,6 +303,7 @@ namespace gpstk
       CommonTime prevTime;
 
       double defInterval;
+
          /** Method to set the initial (a priori) position of receiver.
           * @return
           *  0 if OK

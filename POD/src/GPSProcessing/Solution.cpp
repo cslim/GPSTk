@@ -22,30 +22,29 @@ namespace pod
         data->LoadData(path);
 
         solver.setConfigData(data);
-
     }
 
     void Solution::process()
     {
         solver.process();
-
     }
+
     void Solution::saveToDb()
     {
-
-        auto gMap = solver.getData();
+        auto fName = solver.fileName();
+        auto& gMap = solver.getData();
+        gMap.title = fName;
         gMap.updateMetadata();
 
-        fs::path dbPath(data->workingDir + "\\" + solver.fileName());
-
+        fs::path dbPath(data->workingDir + "\\" + fName);
         dbPath.replace_extension("db");
 
-        //delete curtrent db file if exists
+        //delete curtrent solution database file, if exists
         string cmd = "del \"" + dbPath.string() + "\"";
         system(cmd.c_str());
 
+        //insert solution data into DB 
         SQLiteAdapter db(dbPath.string());
-        gMap.title = confReader.filename;
         db.addNewFile(gMap);
     }
 

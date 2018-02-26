@@ -20,7 +20,7 @@ namespace pod
 
 #pragma region Methods
 
-    public: virtual std::string&  fileName()
+    public: virtual std::string  fileName() const override
     {
         return ptr->fileName();
     }

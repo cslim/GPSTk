@@ -354,7 +354,11 @@ namespace gpstk
          recZ,      ///< Receiver position, Z component
          recCdt,    ///< Receiver Clock offset 
          recCdtdot, ///< Receiver Clock offset 1-st derivative
-         recCdtGLO, ///< Receiver Clock offset to GLONASS sydyem time or intersystem GLONASS bias
+
+         recISB_GLN, ///< GPS - GLONASS intersystem bias
+         recISB_GAL, ///< GPS - GALILEO intersystem bias
+         recISB_BDS, ///< GPS - BEIDOU intersystem bias 
+
          recZTropo,  ///< full ZTD
          recZTropoWet,  ///< Wet component of ZTD
          recZTropoDry,  ///< Dry component of ZTD
@@ -559,8 +563,6 @@ namespace gpstk
          /// convert this object to a string representation
       std::string asString(const TypeID& p);
    }
-
-
 
       /// stream output for TypeID
    std::ostream& operator<<(std::ostream& s, const TypeID& p);

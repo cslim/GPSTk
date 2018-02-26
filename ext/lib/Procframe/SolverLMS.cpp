@@ -280,7 +280,7 @@ of designMatrix");
        if (numGLN < 2)
            gRin.keepOnlySatSystem(SatID::SatelliteSystem::systemGPS);
        else
-           defaultEqDef.body.insert(TypeID::recCdtGLO);
+           defaultEqDef.body.insert(TypeID::recISB_GLN);
    }
 
 

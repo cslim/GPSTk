@@ -393,7 +393,7 @@ namespace pod
             qMatrix(4, 4) = pClockStoModel->getQ();
         }
 
-        if (defaultEqDef.body.find(TypeID::recCdtGLO) != defaultEqDef.body.end())
+        if (defaultEqDef.body.find(TypeID::recISB_GLN) != defaultEqDef.body.end())
         {
             pInterSysBiasStoModel->Prepare(dummySat, gData);
             phiMatrix(numVar - 1, numVar - 1) = pInterSysBiasStoModel->getPhi();
@@ -401,15 +401,14 @@ namespace pod
         }
 
         // Finally, the phase biases
-        int count2(numVar);     // Note that for PPP, 'numVar' is always 5!!!
+        int count2(numVar);    
         for (SatIDSet::const_iterator itSat = satSet.begin();
             itSat != satSet.end();
             ++itSat)
         {
 
             // Prepare stochastic model
-            pBiasStoModel->Prepare(*itSat,
-                gData);
+            pBiasStoModel->Prepare(*itSat, gData);
 
             // Get values into phi and q matrices
             phiMatrix(count2, count2) = pBiasStoModel->getPhi();
@@ -601,7 +600,7 @@ namespace pod
                     // Third, the receiver clock
                     initialErrorCovariance(4, 4) = 9.0e10;        // (300 km)**2
                 }
-                if (defaultEqDef.body.find(TypeID::recCdtGLO) != defaultEqDef.body.end())
+                if (defaultEqDef.body.find(TypeID::recISB_GLN) != defaultEqDef.body.end())
                 {
                     initialErrorCovariance(numVar - 1, numVar - 1) = 9.0e9;
                 }

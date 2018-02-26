@@ -9,7 +9,7 @@ namespace pod
 
      const double ComputeWeightSimple::sin0 = (std::sin(elev0 * DEG_TO_RAD));
 
-     const double ComputeWeightSimple::glnSigmaFactor = 1;
+     const double ComputeWeightSimple::glnSigmaFactor = 2;
 
     ComputeWeightSimple::ComputeWeightSimple()
     {
@@ -47,13 +47,14 @@ namespace pod
 
                 double factor = (it.first.system == SatID::systemGlonass) ? glnSigmaFactor : 1;
                 
-                it.second[TypeID::weight] = invsig*invsig*factor;
+                it.second[TypeID::weight] = invsig*invsig/factor;
             }
             else
             {
                 rejSatSet.insert(it.first);
             } 
         }
+        
         return gData;
     }
 
