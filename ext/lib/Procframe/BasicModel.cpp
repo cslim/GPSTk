@@ -182,9 +182,9 @@ namespace gpstk
                continue;    // Skip this SV if problems arise
 
             }
-
+            double el = rxPos.elevationGeodetic(cerange.svPosVel);
                // Let's test if satellite has enough elevation over horizon
-            if ( rxPos.elevationGeodetic(cerange.svPosVel) < minElev )
+            if (el < minElev )
             {
 
                   // Mark this satellite if it doesn't have enough elevation

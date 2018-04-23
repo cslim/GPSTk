@@ -160,31 +160,39 @@ namespace gpstk
       //  0 if OK
       //  -1 if problems arose
       //
-   int SimpleKalmanFilter::Compute( const Matrix<double>& phiMatrix,
-                                 const Matrix<double>& processNoiseCovariance,
-                                    const Vector<double>& measurements,
-                                    const Matrix<double>& measurementsMatrix,
-                            const Matrix<double>& measurementsNoiseCovariance )
-      throw(InvalidSolver)
+   int SimpleKalmanFilter::Compute(const Matrix<double>& phiMatrix,
+       const Matrix<double>& processNoiseCovariance,
+       const Vector<double>& measurements,
+       const Matrix<double>& measurementsMatrix,
+       const Matrix<double>& measurementsNoiseCovariance)
+       throw(InvalidSolver)
    {
 
-      try
-      {
-         Predict( phiMatrix,
-                  xhat,
-                  processNoiseCovariance );
+       try
+       {
+           Predict(phiMatrix,
+               xhat,
+               processNoiseCovariance);
+       }
+       catch (InvalidSolver e)
+       {
+           GPSTK_THROW(e);
+           return -1;
+       }
 
-         Correct( measurements,
-                  measurementsMatrix,
-                  measurementsNoiseCovariance );
-      }
-      catch(InvalidSolver e)
-      {
-         GPSTK_THROW(e);
-         return -1;
-      }
+       try
+       {
+           Correct(measurements,
+               measurementsMatrix,
+               measurementsNoiseCovariance);
+       }
+       catch (InvalidSolver e)
+       {
+           GPSTK_THROW(e);
+           return -1;
+       }
 
-      return 0;
+       return 0;
 
    }  // End of method 'SimpleKalmanFilter::Compute()'
 

@@ -178,7 +178,10 @@ namespace gpstk
       /// Set containing TypeID objects.
    typedef std::set<TypeID> TypeIDSet;
 
-      /// Set containing SatID objects.
+   /// Set containing TypeID objects.
+   typedef std::list<TypeID> TypeIDList;
+   
+   /// Set containing SatID objects.
    typedef std::set<SatID> SatIDSet;
    
    /// Set containing SatSyst objects.

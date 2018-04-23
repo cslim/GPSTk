@@ -8,7 +8,6 @@ namespace pod
 {
     void SQLiteAdapter::testSQLite(const char* path2obs, const char* path2GlnNav)
     {
-
         SatID::loadGloFcn(path2GlnNav);
 
         namespace fs = std::experimental::filesystem;
@@ -107,26 +106,6 @@ namespace pod
             //add sv to table of all SV
            int svid  = addSV(it);
 
-           //add sv to table of SV by file
-           char* sql = "INSERT INTO `SvByFiles`(`FileId`,`SvId`) VALUES( @FileId, @SvId);";
-           sqlite3_stmt *comm;
-           sqlite3_prepare_v2(db, sql, -1, &comm, NULL);
-           sqlite3_bind_int(comm, 1, lastFileID);
-           sqlite3_bind_int(comm, 2, svid);
-           tryExecuteNonQuery(comm);
-        }
-        tryExecuteNonQuery("COMMIT;");
-     
-        // fill the  solution types metadata
-        tryExecuteNonQuery("BEGIN TRANSACTION;");
-        for (const auto it : eMap.slnTypes)
-        {
-            char* sql = "INSERT INTO `StByFiles`(`FileId`,`SlnType`) VALUES( @FileId, @SlnType);";
-            sqlite3_stmt *comm;
-            sqlite3_prepare_v2(db, sql, -1, &comm, NULL);
-            sqlite3_bind_int(comm, 1, lastFileID);
-            sqlite3_bind_int(comm, 2, it);
-            tryExecuteNonQuery(comm);
         }
         tryExecuteNonQuery("COMMIT;");
 
@@ -216,8 +195,8 @@ namespace pod
         addSlnData(epoch.second.slnData);
         //TypeIDSet typeSet;// { TypeID::postfitC };
         //typeSet.insert(TypeID::postfitC);
-
-       addSvData(epoch.second.satData.extractTypeID(TypeIDSet{ TypeID::postfitC ,TypeID:: elevation,TypeID::weight}));
+        
+       addSvData(epoch.second.satData.extractTypeID(requaredTypes));
     }
 
     int SQLiteAdapter::addSV(const gpstk::SatID & sv)
@@ -337,8 +316,30 @@ namespace pod
          return CivilTime(t).printf(fmt);
      }
 #pragma endregion
+    const  gpstk::TypeIDSet SQLiteAdapter::requaredTypes{
+         TypeID::C1 ,
+         TypeID::P2 ,
+         TypeID::L1 ,
+         TypeID::L2 ,
+         TypeID::S1 ,
+         TypeID::LI          ,
+         TypeID::MWubbena          ,
+         TypeID::rho               ,
+         TypeID::dtSat             ,
+         TypeID::elevation         ,
+         TypeID::azimuth           ,
+         TypeID::CSL1              ,
+         TypeID::CSL2              ,
+         TypeID::prefitC           ,
+         TypeID::prefitL          ,
+         TypeID::prefitL1          ,
+         TypeID::postfitC          ,
+         TypeID::postfitL         ,
+         TypeID::postfitL1          ,
+     };
 
      const unsigned SQLiteAdapter:: SCHEMA_VERSION = 1;
+
       const std::string SQLiteAdapter:: createSchemaCommand =
          "BEGIN TRANSACTION;"
          "CREATE TABLE IF NOT EXISTS `SvDataItems` ("
@@ -443,17 +444,6 @@ namespace pod
              "CREATE TABLE IF NOT EXISTS `TypeIDsByFiles` ("
              "	`FileId`	INTEGER NOT NULL,"
              "	`TypeId`	INTEGER NOT NULL,"
-             "	FOREIGN KEY(`FileId`) REFERENCES `GnssObsFile`(`ID`)"
-             ");"
-             "CREATE TABLE IF NOT EXISTS `SvByFiles` ("
-             "	`FileId`	INTEGER NOT NULL,"
-             "	`SvId`	INTEGER NOT NULL,"
-             "	FOREIGN KEY(`SvId`) REFERENCES `SVS`(`ID`),"
-             "	FOREIGN KEY(`FileId`) REFERENCES `GnssObsFile`(`ID`)"
-             ");"
-             "CREATE TABLE IF NOT EXISTS `StByFiles` ("
-             "	`FileId`	INTEGER NOT NULL,"
-             "	`SlnType`	INTEGER NOT NULL,"
              "	FOREIGN KEY(`FileId`) REFERENCES `GnssObsFile`(`ID`)"
              ");"
          "CREATE UNIQUE INDEX IF NOT EXISTS `SlnTypesColors_Type_File_Unique` ON `ColorsSt` ("

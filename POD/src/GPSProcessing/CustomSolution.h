@@ -25,6 +25,11 @@ namespace pod
         return ptr->fileName();
     }
 
+    public: virtual SlnType desiredSlnType() const override
+    {
+        return ptr->desiredSlnType();
+    }
+
     public: virtual GnssSolution& setConfigData(GnssDataStore_sptr dataStore)
     {
         ptr = Factory(dataStore);

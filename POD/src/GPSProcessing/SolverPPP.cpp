@@ -43,6 +43,8 @@
 #include "SolverPPP.hpp"
 #include "MatrixFunctors.hpp"
 #include"FsUtils.h"
+#include"WinUtils.h"
+
 using namespace std;
 
 namespace pod
@@ -556,7 +558,7 @@ namespace pod
                 // Find in which position of 'satSet' is the current '(*itSat)'
                 // Please note that 'currSatSet' is a subset of 'satSet'
                 int j(0);
-                auto itSat2 = satSet.begin();
+                auto& itSat2 = satSet.begin();
                 while ((*itSat2) != (itSat))
                 {
                     ++j;
@@ -570,72 +572,65 @@ namespace pod
 
             }  // End of 'for( itSat = satSet.begin(); ... )'
 
-            Matrix<double> cov;
-            Matrix<double> state;
+            Matrix<double> currentCovariance;
+            Vector<double> currState;
             // Feed the filter with the correct state and covariance matrix
             if (firstTime)
             {
                 cout << "first time!" << endl;
-                Vector<double> initialState(numUnknowns, 0.0);
-                Matrix<double> initialErrorCovariance(numUnknowns, numUnknowns, 0.0);
+                currState.resize(numUnknowns, 0.0);
+                currentCovariance.resize(numUnknowns, numUnknowns, 0.0);
 
                 // Fill the initialErrorCovariance matrix
 
                 // First, the zenital wet tropospheric delay
-                initialErrorCovariance(0, 0) = 0.25;          // (0.5 m)**2
+                currentCovariance(0, 0) = 0.25;          // (0.5 m)**2
 
                    // Second, the coordinates
                 for (int i = 1; i < 4; i++)
                 {
-                    initialErrorCovariance(i, i) = 10000.0;    // (100 m)**2
+                    currentCovariance(i, i) = 10000.0;    // (100 m)**2
                 }
 
                 if (useAdvClkModel)
                 {
-                    initialErrorCovariance(4, 4) = 9.0e10;
-                    initialErrorCovariance(5, 5) = 9.0e3;
+                    currentCovariance(4, 4) = 9.0e10;
+                    currentCovariance(5, 5) = 9.0e3;
                 }
                 else
                 {
                     // Third, the receiver clock
-                    initialErrorCovariance(4, 4) = 9.0e10;        // (300 km)**2
+                    currentCovariance(4, 4) = 9.0e10;        // (300 km)**2
                 }
                 if (defaultEqDef.body.find(TypeID::recISB_GLN) != defaultEqDef.body.end())
                 {
-                    initialErrorCovariance(numVar - 1, numVar - 1) = 9.0e9;
+                    currentCovariance(numVar - 1, numVar - 1) = 9.0e9;
                 }
 
                 // Finally, the phase biases
                 for (int i = numVar; i < numUnknowns; i++)
                 {
-                    initialErrorCovariance(i, i) = 4.0e14;     // (20000 km)**2
+                    currentCovariance(i, i) = 4.0e14;     // (20000 km)**2
                 }
-
-
-                // Reset Kalman filter
-                kFilter.Reset(initialState, initialErrorCovariance);
-
                 // No longer first time
                 firstTime = false;
-                state = initialState;
-                cov = initialErrorCovariance;
 
             }
             else
             {
                 // Adapt the size to the current number of unknowns
-                Vector<double> currentState(numUnknowns, 0.0);
-                Matrix<double> currentErrorCov(numUnknowns, numUnknowns, 0.0);
+                currState.resize(numUnknowns, 0.0);
+                currentCovariance.resize(numUnknowns, numUnknowns, 0.0);
 
                 // Set first part of current state vector and covariance matrix
                 for (int i = 0; i < numVar; i++)
                 {
-                    currentState(i) = solution(i);
+                    currState(i) = solution(i);
 
                     // This fills the upper left quadrant of covariance matrix
                     for (int j = 0; j < numVar; j++)
                     {
-                        currentErrorCov(i, j) = covMatrix(i, j);
+                        currentCovariance(i, j) = covMatrix(i, j);
                     }
                 }
 
@@ -645,7 +640,7 @@ namespace pod
                 for (const auto& itSat : satSet)
                 {
                     // Put ambiguities into state vector
-                    currentState(c1) = KalmanData[itSat].ambiguity;
+                    currState(c1) = KalmanData[itSat].ambiguity;
 
                     // Put ambiguities covariance values into covariance matrix
                     // This fills the lower right quadrant of covariance matrix
@@ -653,8 +648,8 @@ namespace pod
 
                     for (const auto& itSat2 : satSet)
                     {
-                        currentErrorCov(c1, c2) = KalmanData[itSat].aCovMap[itSat2];
-                        currentErrorCov(c2, c1) = KalmanData[itSat].aCovMap[itSat2];
+                        currentCovariance(c1, c2) = KalmanData[itSat].aCovMap[itSat2];
+                        currentCovariance(c2, c1) = KalmanData[itSat].aCovMap[itSat2];
 
                         ++c2;
                     }
@@ -665,8 +660,8 @@ namespace pod
                     int c3(0);
                     for (const auto& itType : defaultEqDef.body)
                     {
-                        currentErrorCov(c1, c3) = KalmanData[itSat].vCovMap[itType];
-                        currentErrorCov(c3, c1) = KalmanData[itSat].vCovMap[itType];
+                        currentCovariance(c1, c3) = KalmanData[itSat].vCovMap[itType];
+                        currentCovariance(c3, c1) = KalmanData[itSat].vCovMap[itType];
 
                         ++c3;
                     }
@@ -674,19 +669,23 @@ namespace pod
                     ++c1;
                 }
 
-                cov = currentErrorCov;
-
-                // Reset Kalman filter to current state and covariance matrix
-                kFilter.Reset(currentState, currentErrorCov);
-
             }  // End of 'if(firstTime)'
-           // static int n = 1;
 
-               // Call the Compute() method with the defined equation model.
-               // This equation model MUST HAS BEEN previously set, usually when
-               // creating the SolverPPP object with the appropriate
-               // constructor.
+            kFilter.Reset(currState, currentCovariance);
+            DBOUT_LINE("----------------------------------------------------------------------------------------");
+            DBOUT_LINE(CivilTime(gData.header.epoch));
+            auto svset = gData.getSatID();
+            for (auto& it : svset)
+                DBOUT(it << " ");
+            DBOUT_LINE("\ncovPre\n" << currentCovariance);
+            //DBOUT_LINE("H\n" << hMatrix);
+            DBOUT_LINE("Fi\n" << phiMatrix.diagCopy());
+            
             Compute(measVector, hMatrix, rMatrix);
+
+            //DBOUT_LINE("Solution\n" << solution);
+            //DBOUT_LINE("postfitResiduals\n" << postfitResiduals);
+            //DBOUT_LINE("CovPost\n" << covMatrix);
 
             // Store those values of current state and covariance matrix
             // that depend on satellites currently in view

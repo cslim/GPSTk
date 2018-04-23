@@ -26,10 +26,10 @@ namespace pod
         virtual std::string getClassName(void) const
         { return "KalmanSolver"; }
        
-        virtual gnssEquationDefinition getDefaultEqDefinition() const override
-        {
-            return gnssEquationDefinition(equations->measType(), equations->currentUnkNowns());
-        }
+        //virtual gnssEquationDefinition getDefaultEqDefinition() const override
+        //{
+        //    return gnssEquationDefinition(equations->measTypes(), equations->currentUnkNowns());
+        //}
 
         virtual EquationComposer& eqComposer() 
         {
@@ -43,12 +43,12 @@ namespace pod
     protected:
 
         virtual int check(gnssRinex& gData);
-        virtual gnssRinex& reject(gnssRinex& gData, const TypeID& typeOfResid);
+        virtual gnssRinex& reject(gnssRinex& gData, const TypeIDList& typeOfResid);
 
-        virtual int Compute(const Vector<double>& prefitResiduals,
-            const Matrix<double>& designMatrix,
-            const Matrix<double>& rMatrix)
-            throw(InvalidSolver);
+        //virtual int Compute(const Vector<double>& prefitResiduals,
+        //    const Matrix<double>& designMatrix,
+        //    const Matrix<double>& rMatrix)
+        //    throw(InvalidSolver);
 
 
         bool firstTime;
@@ -62,14 +62,14 @@ namespace pod
         /// Geometry matrix
         Matrix<double> hMatrix;
 
-        /// Inverse observations weights matrix
-        Matrix<double> rMatrix;
+        /// weights matrix
+        Matrix<double> weigthMatrix;
 
         /// Measurements vector (Prefit-residuals)
         Vector<double> measVector;
 
         /// General Kalman filter object
-        SimpleKalmanFilter kFilter;
+        //SimpleKalmanFilter kFilter;
 
         ///object to prepare Matrix for filter
         eqComposer_sptr equations;

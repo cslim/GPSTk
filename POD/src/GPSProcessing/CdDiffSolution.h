@@ -11,20 +11,25 @@ namespace pod
     public:
         CdDiffSolution(GnssDataStore_sptr prt);
         virtual ~CdDiffSolution();
-    public: virtual std::string  fileName() const
-    {
-        return data->SiteBase+ "-"+ data->SiteRover + "_cd.txt";
-    }
-    public: virtual void process() override;
+        virtual std::string  fileName() const
+        {
+            return data->SiteBase + "-" + data->SiteRover + "_cd.txt";
+        }
 
-    protected: virtual void updateRequaredObs() override;
+        virtual SlnType desiredSlnType() const override
+        {
+            return SlnType::CODE_DIFF;
+        }
 
-    protected: void configureSolver() override;
+        virtual void process() override;
 
-               //code smoothers for Ref. receiver obseravtions
-    protected: CodeSmoother2 codeSmootherRef;
+    protected:
+        virtual void updateRequaredObs() override;
 
-    //protected: gpstk::Position refPos;
+        void configureSolver() override;
+
+        //code smoothers for Ref. receiver obseravtions
+        CodeSmoother2 codeSmootherRef;
 
     };
 }

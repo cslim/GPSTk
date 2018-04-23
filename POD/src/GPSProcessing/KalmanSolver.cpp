@@ -14,88 +14,9 @@ namespace pod
     KalmanSolver::KalmanSolver(eqComposer_sptr eqs) 
         :firstTime(true),equations(eqs)
     {}
-  /*  KalmanSolver::KalmanSolver(const EquationComposer& eqs)
-        :equations(eqs),firstTime(true)
-    {}*/
+
     KalmanSolver::~KalmanSolver()
     { }
-
-    int KalmanSolver::Compute(const Vector<double>& prefitResiduals,
-        const Matrix<double>& designMatrix,
-        const Matrix<double>& rMatrix)
-        throw(InvalidSolver)
-    {
-
-        // By default, results are invalid
-        valid = false;
-
-        if (!(rMatrix.isSquare()))
-        {
-            InvalidSolver e("Weight matrix is not square");
-            GPSTK_THROW(e);
-        }
-
-        int wRow = static_cast<int>(rMatrix.rows());
-        int pRow = static_cast<int>(prefitResiduals.size());
-        if (!(wRow == pRow))
-        {
-            InvalidSolver e("prefitResiduals size does not match dimension of weightMatrix");
-
-            GPSTK_THROW(e);
-        }
-
-        int gRow = static_cast<int>(designMatrix.rows());
-        if (!(gRow == pRow))
-        {
-            InvalidSolver e("prefitResiduals size does not match dimension of designMatrix");
-
-            GPSTK_THROW(e);
-        }
-
-        if (!(phiMatrix.isSquare()))
-        {
-            InvalidSolver e("phiMatrix is not square");
-
-            GPSTK_THROW(e);
-        }
-
-        if (!(qMatrix.isSquare()))
-        {
-            InvalidSolver e("qMatrix is not square");
-
-            GPSTK_THROW(e);
-        }
-
-
-        try
-        {
-            // Call the Kalman filter object.
-            kFilter.Compute(phiMatrix,
-                qMatrix,
-                prefitResiduals,
-                designMatrix,
-                rMatrix);
-        }
-        catch (InvalidSolver& e)
-        {
-            GPSTK_RETHROW(e);
-        }
-
-        // Store the solution
-        solution = kFilter.xhat;
-
-        // Store the covariance matrix of the solution
-        covMatrix = kFilter.P;
-
-        // Compute the postfit residuals Vector
-        postfitResiduals = prefitResiduals - designMatrix * solution;
-
-        // If everything is fine so far, then the results should be valid
-        valid = true;
-
-        return 0;
-
-    }  // End of method 'CodeKalmanSolver::Compute()'
 
     gnssRinex& KalmanSolver::Process(gnssRinex& gData)
     {
@@ -105,7 +26,7 @@ namespace pod
         {
             equations->updateH(gData, hMatrix);
             equations->updateMeas(gData, measVector);
-            equations->updateR(gData, rMatrix);
+            equations->updateW(gData, weigthMatrix);
 
             equations->updatePhi(phiMatrix);
             equations->updateQ(qMatrix);
@@ -118,24 +39,40 @@ namespace pod
             firstTime = false;
 
 
-            kFilter.Reset(solution, covMatrix);
-
-            Compute(measVector, hMatrix, rMatrix);
-
-            equations->saveResiduals(gData, TypeID::postfitC, postfitResiduals);
-
-            DBOUT_LINE("Epoch: ");
+            //kFilter.Reset(solution, covMatrix);
+            DBOUT_LINE("----------------------------------------------------------------------------------------");
             DBOUT_LINE(CivilTime(gData.header.epoch));
-            DBOUT_LINE("measVector");
-            DBOUT_LINE(measVector);
-            DBOUT_LINE("sln");
-            DBOUT_LINE(solution);
-            DBOUT_LINE("postfit");
-            DBOUT_LINE(PostfitResiduals());
+            auto svset = gData.getSatID();
+            for (auto& it:svset)
+                DBOUT(it<<" ");
+
+            DBOUT_LINE("measVector\n" << setprecision(10) << measVector);
+            DBOUT_LINE("H\n" << hMatrix);
+           
+            //prepare
+            Matrix<double> hMatrixTr = transpose(hMatrix);
+            Matrix<double> phiMatrixTr = transpose(phiMatrix);
+            Matrix<double> hTrTimesW = hMatrixTr*weigthMatrix;
+
+            //predict
+            Matrix<double> Pminus = phiMatrix*covMatrix*phiMatrixTr + qMatrix;
+            Vector<double> xminus = phiMatrix*solution;
+            
+            //correct
+            Matrix<double> invPminus = inverseChol(Pminus);
+            covMatrix = inverseChol(hTrTimesW*hMatrix + invPminus);
+            solution = covMatrix*(hTrTimesW*measVector + (invPminus*xminus));
+
+            postfitResiduals = measVector - hMatrix * solution;
+            DBOUT_LINE("Solution\n" << solution);
+            DBOUT_LINE("postfitResiduals\n" << postfitResiduals);
+            DBOUT_LINE("CovPost\n" << covMatrix);
+ 
+            equations->saveResiduals(gData, postfitResiduals);
 
             if (!check(gData))
                 break;
-            reject(gData, TypeID::postfitC);
+            reject(gData, eqComposer().residTypes());
 
             if (gData.body.size() < equations->getNumUnknowns())
             {
@@ -147,7 +84,6 @@ namespace pod
         equations->storeKfState(solution, covMatrix);
         return gData;
     }
-
 
     int KalmanSolver::check(gnssRinex& gData)
     {
@@ -161,39 +97,48 @@ namespace pod
         double varZ = getVariance(TypeID::dz);     // Cov dz    - #10
         double stDev3D = sqrt(varX + varY + varZ);
 
-        if (sigma / stDev3D > 10)
+        if (sigma / stDev3D > 3)
+        {
+            cout << "Epoch: " << CivilTime(gData.header.epoch) << " catched " << endl;
+            cout << "sigma: " << sigma << " sigma: " << stDev3D << endl;
             return 1;
+        }
         else
             return 0;
-
     }
-
-
+    
     //reject by code postfit residual 
-    gnssRinex& KalmanSolver::reject(gnssRinex& gData, const TypeID&  typeId)
+    gnssRinex& KalmanSolver::reject(gnssRinex& gData, const TypeIDList&  typeIds)
     {
         using type = decltype(gnssRinex::body)::value_type;
-
-        int imax = 0;
-
-        auto svWithMaxResidual = std::max_element
-        (
-            gData.body.begin(), gData.body.end(),
-            [&](const type& it1, const type& it2)-> bool
+        SatIDSet rejSat;
+        for (const auto & id : typeIds)
         {
-            double val1 = ::abs(it1.second.at(typeId));
-            double val2 = ::abs(it2.second.at(typeId));
-            return(val1 < val2);
+            //get the sv - typeMap pair with largest residual value
+            
+            auto svWithMaxResidual = std::max_element(
+                gData.body.begin(), gData.body.end(),
+                [&](const type& it1, const type& it2)-> bool
+            {
+                double val1 = ::abs(it1.second.at(id));
+                double val2 = ::abs(it2.second.at(id));
+                return(val1 < val2);
+            }
+            );
+
+            //report detection
+            DBOUT("Removed SV: " << svWithMaxResidual->first);
+            DBOUT(" with " << TypeID::tStrings[id.type] << " = ");
+            DBOUT_LINE(svWithMaxResidual->second[id]);
+            //report detection
+            cout<<"Removed SV: " << svWithMaxResidual->first;
+            cout << " with " << TypeID::tStrings[id.type] << " = ";
+            cout << svWithMaxResidual->second[id]<<endl;
+            //remove sv
+            rejSat.insert(svWithMaxResidual->first);
         }
-        );
-        DBOUT("Removed SV: ");
-        DBOUT(svWithMaxResidual->first);
-        DBOUT(" with " + TypeID::tStrings[typeId.type] + " = ");
-        DBOUT_LINE(svWithMaxResidual->second[typeId]);
-
-        gData.removeSatID(svWithMaxResidual->first);
-
-
+        
+        gData.removeSatID(rejSat);
 
         return gData;
     }
@@ -231,7 +176,7 @@ namespace pod
         // Define counter
         int counter(0);
 
-        for (const auto it2 : equations->currentUnkNowns())
+        for (const auto it2 : equations->currentUnknowns())
         {
             if (it2 == type)
                 return solution(counter);
@@ -247,7 +192,7 @@ namespace pod
     {
         int counter(0);
 
-        for (const auto it2 : equations->currentUnkNowns())
+        for (const auto it2 : equations->currentUnknowns())
         {
             if (it2 == type)
                 return covMatrix(counter, counter);

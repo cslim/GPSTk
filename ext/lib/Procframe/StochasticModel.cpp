@@ -106,7 +106,7 @@ namespace gpstk
 
 
       // Get element of the state transition matrix Phi
-   double PhaseAmbiguityModel::getPhi()
+   double PhaseAmbiguityModel::getPhi() const
    {
 
          // Check if there is a cycle slip
@@ -124,7 +124,7 @@ namespace gpstk
 
 
       // Get element of the process noise matrix Q
-   double PhaseAmbiguityModel::getQ()
+   double PhaseAmbiguityModel::getQ() const 
    {
 
          // Check if there is a cycle slip

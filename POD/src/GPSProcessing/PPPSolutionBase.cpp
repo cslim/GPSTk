@@ -22,7 +22,7 @@
 namespace pod
 {
 
-    PPPSolutionBase::PPPSolutionBase(GnssDataStore_sptr procData ) :GnssSolution(procData)
+    PPPSolutionBase::PPPSolutionBase(GnssDataStore_sptr procData ) :GnssSolution(procData,1.0)
     {
     } 
     PPPSolutionBase:: ~PPPSolutionBase()
@@ -157,52 +157,6 @@ namespace pod
             cout << "Number of bad solutions for file " << badSol << endl;
         }
     }
-    //
-    void PPPSolutionBase::process()
-    {
-
-        if (opts().isComputeApprPos)
-        {
-            PRProcess();
-        }
-        else
-        {
-            cout << "Approximate Positions loading from \n" + data->workingDir + "\\" + data->apprPosFile + "\n... ";
-
-            data->loadApprPos();
-            cout << "\nComplete." << endl;
-        }
-        try
-        {
-            processCore();
-
-            gMap.updateMetadata();
-        }
-        catch (ConfigurationException &conf_exp)
-        {
-            cerr << conf_exp.what() << endl;
-            throw;
-        }
-        catch (Exception &gpstk_e)
-        {
-            GPSTK_RETHROW(gpstk_e);
-        }
-        catch (std::exception &std_e)
-        {
-            cerr << std_e.what() << endl;
-            throw;
-        }
-    }
-
-    
-    void PPPSolutionBase::updateNomPos(const CommonTime& time, Position &nominalPos)
-    {
-        if (opts().dynamics != GnssDataStore::Dynamics::Static)
-        {
-            auto it_pos = data->apprPos.find(time);
-            if (it_pos != data->apprPos.end())
-                nominalPos = it_pos->second;
-        }
-    }
-
+   
+  
 }

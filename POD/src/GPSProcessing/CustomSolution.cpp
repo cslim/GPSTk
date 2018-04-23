@@ -2,6 +2,7 @@
 
 #include"SingleSolution.h"
 #include"CdDiffSolution.h"
+#include"PdFloatSolution.h"
 #include"PPPSolutionBase.h"
 #include"PODSolution.h"
 #include"PPPSolution.h"
@@ -17,6 +18,7 @@ namespace pod
         case pod::CODE_DIFF:
             return std::make_unique<CdDiffSolution>(dataStore);
         case pod::PD_Float:
+            return std::make_unique<PdFloatSolution>(dataStore);
             break;
         case pod::PD_Fixed:
             break;
@@ -24,7 +26,7 @@ namespace pod
             if (dataStore->opts.isSpaceborneRcv)
                 return std::make_unique<PODSolution>(dataStore);
             else
-                return std::make_unique<PODSolution>(dataStore);
+                return std::make_unique<PPPSolution>(dataStore);
             break;
         case pod::PPP_Fixed:
             break;
@@ -37,11 +39,11 @@ namespace pod
 
     }
     
-    CustomSolution::CustomSolution() :GnssSolution(nullptr), ptr(nullptr)
+    CustomSolution::CustomSolution() :GnssSolution(nullptr, .0), ptr(nullptr)
     {
     }
 
-    CustomSolution::CustomSolution(GnssDataStore_sptr dataStore):GnssSolution(nullptr)
+    CustomSolution::CustomSolution(GnssDataStore_sptr dataStore):GnssSolution(nullptr, .0)
     {
         ptr = Factory(dataStore);
     }

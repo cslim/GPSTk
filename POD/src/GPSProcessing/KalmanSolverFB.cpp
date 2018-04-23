@@ -110,7 +110,7 @@ namespace pod
         {
             for (auto &it : ObsData)
             {
-                checkLimits(it, TypeID::postfitC, limit);
+                checkLimits(it, *solver.eqComposer().residTypes().begin(), limit);
 
                 solver.Process(it);
             }

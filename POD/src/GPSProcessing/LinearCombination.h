@@ -98,6 +98,23 @@ namespace pod
         virtual bool getCombination(const SatID & sv, typeValueMap tvMap, double & value) const override;
         virtual TypeID getType() const override;
     };
+
+    class PrefitL1 :public LinearCombination
+    {
+    public:
+        PrefitL1() {};
+        virtual ~PrefitL1() {};
+        virtual bool getCombination(const SatID & sv, typeValueMap tvMap, double & value) const override;
+        virtual TypeID getType() const override;
+    };
+    class PrefitLC :public LinearCombination
+    {
+    public:
+        PrefitLC() {};
+        virtual ~PrefitLC() {};
+        virtual bool getCombination(const SatID & sv, typeValueMap tvMap, double & value) const override;
+        virtual TypeID getType() const override;
+    };
 }
 
 #endif // !POD_LINEAR_COMBINATIONS_H

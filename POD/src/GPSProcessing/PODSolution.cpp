@@ -161,16 +161,16 @@ namespace pod
         {
             Antenna receiverAntenna;
             // Get receiver antenna parameters
-            string aModel(confReader().getValue("antennaModel"));
+            string aModel(confReader().getValue("antennaModel", data->SiteRover));
             receiverAntenna = antexReader.getAntenna(aModel);
 
             // Check if we want to use Antex patterns
-            bool usepatterns(confReader().getValueAsBoolean("usePCPatterns"));
+            bool usepatterns(confReader().getValueAsBoolean("usePCPatterns",  data->SiteRover));
             if (usepatterns)
             {
                 corr.setAntenna(receiverAntenna);
                 // Should we use elevation/azimuth patterns or just elevation?
-                corr.setUseAzimuth(confReader().getValueAsBoolean("useAzim"));
+                corr.setUseAzimuth(confReader().getValueAsBoolean("useAzim", data->SiteRover));
             }
         }
         else
@@ -505,5 +505,47 @@ namespace pod
 
         outfile << gEpoch.satData.size() << endl;    // Number of satellites - #12
 
+    }
+    void PODSolution::updateNomPos(const CommonTime & time, Position & pos)
+    {
+        auto it_pos = data->apprPos.find(time);
+        if (it_pos != data->apprPos.end())
+            nominalPos = it_pos->second;
+    }
+
+    //
+    void PODSolution::process()
+    {
+        if (opts().isComputeApprPos)
+        {
+            PRProcess();
+        }
+        else
+        {
+            cout << "Approximate Positions loading from \n" + data->workingDir + "\\" + data->apprPosFile + "\n... ";
+
+            data->loadApprPos();
+            cout << "\nComplete." << endl;
+        }
+        try
+        {
+            processCore();
+
+            gMap.updateMetadata();
+        }
+        catch (ConfigurationException &conf_exp)
+        {
+            cerr << conf_exp.what() << endl;
+            throw;
+        }
+        catch (Exception &gpstk_e)
+        {
+            GPSTK_RETHROW(gpstk_e);
+        }
+        catch (std::exception &std_e)
+        {
+            cerr << std_e.what() << endl;
+            throw;
+        }
     }
 }

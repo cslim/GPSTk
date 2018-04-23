@@ -364,7 +364,7 @@ namespace gpstk
       tStrings[sigma]      = "sigma";
 
       tStrings[snrL1P]     = "SNR_L1P";
-      tStrings[snrL2C]     = "SNR_L1C";
+      tStrings[snrL2C]     = "SNR_L2C";
 
       tStrings[LP1]        = "Phase_L1P";
       tStrings[LC2]        = "Phase_L2C";
@@ -374,11 +374,13 @@ namespace gpstk
       tStrings[vrms]       = "VRMS";
       tStrings[heading]    = "heading";
       tStrings[pitch]      = "pitch";
-      tStrings[correctionAge] = "Corr.Age";
-      tStrings[recVel3D]  = "RxVelocity3D";
-      tStrings[recAntDyn] = "RxAntennaDynamics";
-      tStrings[satStatus] = "SvStatusCode";
+      tStrings[correctionAge] = "Correction age";
+      tStrings[recVel3D]  = "RxVelocity 3D";
+      tStrings[recAntDyn] = "Rx Antenna Dynamics";
+      tStrings[satStatus] = "SV status code";
       tStrings[recSiteID] = "RxSiteId";
+      tStrings[SvStatus] = "Satellite status code";
+      tStrings[Baseline] = "Baseleine length ";
 
       tStrings[iura]       = "iura";
       tStrings[Action]     = "Action";

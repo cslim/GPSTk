@@ -26,18 +26,24 @@ namespace pod
     public: virtual ~PPPSolutionBase();
 
 #pragma region Methods
+    public: virtual SlnType desiredSlnType() const override
+    {
+        return SlnType::PPP_Float;
+    }
+    public: virtual std::string  fileName() const override
+    {
+        return data->SiteRover + "_ppp_float.txt";
+    }
 
-    public: void process() override;
-
-    protected: void PRProcess();
+    protected: virtual void PRProcess();
 
     protected: virtual bool processCore() = 0;
 
-    protected: void mapSNR(gnssRinex& value);
+    protected: virtual void mapSNR(gnssRinex& value);
 
     protected: virtual double mapSNR(double value) { return value; };
 
-    protected: void updateNomPos(const CommonTime& time, Position& nominalPos);
+    protected: virtual void updateNomPos(const CommonTime& time, Position& nominalPos) = 0;
 
 #pragma endregion
 

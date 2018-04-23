@@ -5,6 +5,9 @@
 
 #include"GnssDataStore.hpp"
 #include"GnssEpochMap.h"
+#include"EquationComposer.h"
+#include"ComputeLinear.hpp"
+#include"ProcessLinear.h"
 #include"SQLiteAdapter.h"
 
 namespace pod
@@ -16,7 +19,7 @@ namespace pod
 
 #pragma region Constructors
 
-    public: GnssSolution(GnssDataStore_sptr dataStore);
+    public: GnssSolution(GnssDataStore_sptr dataStore, double maxsigma );
     public: virtual ~GnssSolution();
 
 #pragma endregion
@@ -32,11 +35,18 @@ namespace pod
     };
 
     public: virtual std::string  fileName() const = 0;
- 
+
+    public: virtual SlnType desiredSlnType() const = 0;
+
+    public: virtual double getMaxSigma() const
+            { return maxSigma; }
+    
+    public: virtual GnssSolution& setMaxSigma(double sigma) 
+            { maxSigma = sigma; return (*this); }
+
     public: virtual GnssSolution& setConfigData(GnssDataStore_sptr dataStore)
     {
-        data = dataStore;
-        return (*this);
+        data = dataStore; return (*this);
     };
 
     protected: virtual  gpstk::ConfDataReader& confReader()
@@ -48,10 +58,19 @@ namespace pod
     {
         return data->opts;
     }
-              //Print current solution  to a file end fill the parameter "gEpoch" 
-    protected: virtual void printSolution(std::ofstream& of, const gpstk::SolverLMS& solver, const gpstk::CommonTime& time, GnssEpoch& gEpoch) =0;
 
     protected: virtual void updateRequaredObs() = 0;
+
+    protected: virtual int computeApprPos(
+                           const gpstk::gnssRinex & gRin,
+                           const gpstk::XvtStore<gpstk::SatID>& Eph,
+                           gpstk::Position& pos);
+
+    protected: virtual void printSolution(std::ofstream& os,
+                            const gpstk::SolverLMS& solver,
+                            const gpstk::CommonTime& time,
+                            GnssEpoch& gEpoch);
+
 #pragma endregion
 
 
@@ -75,8 +94,20 @@ namespace pod
               //number of decimal places for output
     protected: int outputPrec = 3;
 
-              //adapter for SQLite3 database
-    //protected: SQLiteAdapter db;
+               // object to compute prefit residuals 
+    protected: gpstk::ComputeLinear oMinusC;
+
+               //equation System composer
+    protected: eqComposer_sptr Equations;
+
+               //number of forward-backward cycles
+    protected: int forwardBackwardCycles;
+
+               //object to compute linear combinations
+    protected: ProcessLinear computeLinear;
+               
+               //max sigma 
+    protected: double maxSigma;
 
 #pragma endregion
 

@@ -58,10 +58,10 @@ namespace pod
         {
             return solver.getVariance(type);
         }
-        gpstk::gnssEquationDefinition getDefaultEqDefinition() const override
-        {
-            return solver.getDefaultEqDefinition();
-        }
+        //gpstk::gnssEquationDefinition getDefaultEqDefinition() const override
+        //{
+        //    return solver.getDefaultEqDefinition();
+        //}
         KalmanSolverFB& setCodeLims(const std::list<double>& codeLims)
         {
             codeLimits = codeLims;

@@ -85,9 +85,9 @@ namespace pod
             cout << "Ephemeris Loading... ";
             cout << loadEphemeris() << endl;
 
-            opts.isComputeApprPos = confReader->getValueAsBoolean("calcApprPos");
-            if (opts.isComputeApprPos)
-                apprPosFile = confReader->getValue("apprPosFile");
+            //opts.isComputeApprPos = confReader->getValueAsBoolean("calcApprPos");
+            //if (opts.isComputeApprPos)
+            //    apprPosFile = confReader->getValue("apprPosFile");
 
             opts.dynamics = (Dynamics)confReader->getValueAsInt("Dynamics");
 

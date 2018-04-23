@@ -17,8 +17,7 @@ namespace pod
         ss2isb[SatID::SatelliteSystem::systemBeiDou] =  TypeID::recISB_BDS;
 
         for (const auto& it : ss2isb)
-            isb2ss[it.second] = it.first;
-        
+            isb2ss[it.second] = it.first; 
     }
 
     InterSystemBias::InterSystemBias()
@@ -26,7 +25,6 @@ namespace pod
         for (auto& it : isb2ss)
             stochasticModels[it.first] = std::make_unique<StochasticModel>();
     }
-
 
     void InterSystemBias::Prepare(gnssRinex& gData)
     {
@@ -79,22 +77,29 @@ namespace pod
     
     void InterSystemBias::updateEquationTypes(gpstk::gnssRinex& gData, TypeIDSet& eq)
     {
-        //for (const auto &ss : types)
-        //    eq.insert(ss2isb[ss]);
+        
+        TypeIDSet availableTypes, typeToRemove;
+        auto allSats = gData.getVectorOfSatID();
+        
+        //find all ISB types which can be estimated from current observations set (gData)
+        for (const auto& it : allSats)
+            if (it.system != SatID::systemGPS)
+                availableTypes.insert(ss2isb.at(it.system));
 
-    
-        // remove the satellite system with less then 2 entrees from 'gData'
-       auto allTypes =  gData.body.getTypeID();
-       TypeIDSet newTypes;
-       std::set_difference
-       (
-           types.begin(), types.end(), 
-           allTypes.begin(), allTypes.end(),
-           std::inserter(newTypes, newTypes.begin())
-       );
-
-       types = newTypes;
-
+        //than, find the ISB types, which exist in current ISB set, but can't be observable 
+        std::set_difference
+        (
+            types.begin(), types.end(),
+            availableTypes.begin(), availableTypes.end(),
+            std::inserter(typeToRemove, typeToRemove.begin())
+        );
+        //remove unobservable ISB types from current set of TypeID 
+        for (const auto& it : typeToRemove)
+            types.erase(it);
+        
+        //finally, let's add current ISB types to the overall equation set
+        for (const auto& it : types)
+            eq.insert(it);
     }
 
     InterSystemBias& InterSystemBias::setStochasicModel(

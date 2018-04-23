@@ -388,6 +388,8 @@ namespace gpstk
          recVel3D,
          recAntDyn,
          satStatus,
+         SvStatus, 
+         Baseline,
          
          recVX,     ///< Receiver velocity, X component
          recVY,     ///< Receiver velocity, Y component

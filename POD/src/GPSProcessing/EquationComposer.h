@@ -12,82 +12,135 @@ namespace pod
     {
 
     public:
-        EquationComposer() 
-        {}
-
+        EquationComposer() {}
 
         virtual ~EquationComposer() {};
 
+        ///prepare equations according current data set 'gData'
         virtual void Prepare(gpstk::gnssRinex& gData) ;
 
+        /// compose design matrix
         virtual void updateH(gpstk::gnssRinex& gData, gpstk::Matrix<double>& H);
-
+        
+        /// compose state transition matrix
         virtual void updatePhi(gpstk::Matrix<double>& Phi) const;
-
+       
+        /// compose process noise matrix
         virtual void updateQ(gpstk::Matrix<double>& Q) const;
         
-        virtual void updateR(const gpstk::gnssRinex& gData,  gpstk::Matrix<double>& R);
+        /// compose measurments errors matrix
+        virtual void updateW(const gpstk::gnssRinex& gData,  gpstk::Matrix<double>& R);
 
+        /// compose vector of measurements (prefit residuals)
         virtual void updateMeas(const gpstk::gnssRinex& gData, gpstk::Vector<double>& prefitResiduas);
 
+        /// compose current state vector and covariance matrix
         virtual void updateKfState(gpstk::Vector<double>& state, gpstk::Matrix<double>& cov) const;
 
+        /// store current state vector and covariance matrix
         virtual void storeKfState(const gpstk::Vector<double>& state, const gpstk::Matrix<double>& cov);
-
+       
+        /// compose current state vector and covariance matrix with default values
         virtual void initKfState(gpstk::Vector<double>& state, gpstk::Matrix<double>& cov) const;
+        
+        /// insert current residuals vector into GNSS data structure
+        virtual void saveResiduals(gpstk::gnssRinex& gData, gpstk::Vector<double>& postfitResiduals) const;
 
-        virtual void saveResiduals(gpstk::gnssRinex& gData, gpstk::TypeID type, gpstk::Vector<double>& postfitResiduals);
-
+        /// get curent number of unknowns
         virtual int getNumUnknowns() const;
         
-        virtual gpstk::TypeIDSet & currentUnkNowns()
+        /// get current set unknowns TypeID's
+        virtual gpstk::TypeIDSet & currentUnknowns()
         {
-            return currUnknowns;
+            return coreUnknowns;
         }
 
-        virtual gpstk::TypeID & measType()
+        virtual gpstk::TypeIDList & measTypes()
         {
-            return measurmentsType;
+            return measurmentsTypes;
         }
-
+        virtual const gpstk::TypeIDList & measTypes() const
+        {
+            return measurmentsTypes;
+        }
+        virtual gpstk::TypeIDList & residTypes()
+        {
+            return residualsTypes;
+        }
+        virtual const gpstk::TypeIDList & residTypes() const 
+        {
+            return residualsTypes;
+        }
+        /// add new equation to equation list
         virtual EquationComposer& addEquation(std::unique_ptr<EquationBase> eq)
         {
             equations.push_back(std::move(eq));
             return *this;
         }
-
+        
+        /// erase equation list
         virtual void clear()
         {
             equations.clear();
         }
 
-        //virtual int getNumMeasurments() const ;
-
     protected: 
 
-        //values and its covariance processed so far
-        struct filterData
+        ///values and its covariance processed so far
+        struct coreFilterData
         {
             // Default constructor initializing the data in the structure
-            filterData() : value(0.0) {};
+            coreFilterData() : value(0.0) {};
             
             //value
             double value = 0.0;
             std::map<gpstk::TypeID, double> valCov;
         };
-        /// Map holding the information regarding every variable
-        std::map<gpstk::TypeID, filterData> coreData;
 
+        struct ambiguityFilterData
+        {
+            // Default constructor initializing the data in the structure
+            ambiguityFilterData() : ambiguity(0.0) {};
+
+            //ambiguity value
+            double ambiguity;
+
+            //covarince with 'core' parameters
+            std::map<gpstk::TypeID, double> coreCov;
+
+            //covarince with other ambiguity
+            std::map<gpstk::SatID, double> ambCov;
+
+        };
+
+        /// Map holding the information regarding every 'core' variable
+        std::map<gpstk::TypeID, coreFilterData> coreData;
+
+        /// Map holding the information regarding every ambiguity variable
+        std::map<gpstk::SatID, ambiguityFilterData> ambiguityData;
+
+        /// is equation system composes first time?
         bool firstTime;
 
+        /// list of equations
         equationsList equations;
-
-        gpstk::TypeIDSet currUnknowns;
-
-        gpstk::TypeID measurmentsType;
         
+        /// current set of unknowns
+        gpstk::TypeIDSet coreUnknowns;
+
+        /// current set of ambiguities
+        gpstk::SatIDSet currAmb;
+        
+        /// type of measurements
+        gpstk::TypeIDList measurmentsTypes;
+
+        /// type ID of postfit residuals
+        gpstk::TypeIDList residualsTypes;
+        
+        /// number of unknowns
         int numUnknowns;
 
+        /// number of measurments
         int numMeas;
 
     };

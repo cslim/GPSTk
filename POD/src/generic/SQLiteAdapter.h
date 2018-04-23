@@ -13,7 +13,7 @@ namespace pod
     public: static void   testSQLite(const char *f1, const char *f2);
     public: static const unsigned  SCHEMA_VERSION;
     public: static const std::string createSchemaCommand;
-
+    public: static const gpstk::TypeIDSet requaredTypes;
 #pragma endregion
 
 #pragma region Create methods

@@ -72,12 +72,12 @@ namespace gpstk
 
 
          /// Get element of the state transition matrix Phi
-      virtual double getPhi()
+      virtual double getPhi() const 
       { return 1.0; };
 
 
          /// Get element of the process noise matrix Q
-      virtual double getQ()
+      virtual double getQ() const 
       { return 0.0; };
 
 
@@ -261,12 +261,12 @@ namespace gpstk
 
 
          /// Get element of the state transition matrix Phi
-      virtual double getPhi()
+      virtual double getPhi() const override
       { return 0.0; };
 
 
          /// Get element of the process noise matrix Q
-      virtual double getQ()
+      virtual double getQ() const override
       { return variance; };
 
 
@@ -327,6 +327,11 @@ namespace gpstk
       virtual PhaseAmbiguityModel& setCS(bool cs)
       { cycleSlip = cs; return (*this); };
 
+      /** get the information about current cycle slip state.
+      *
+      */
+      virtual bool  getCS() const
+      { return cycleSlip; };
 
          /// Set whether satellite arc will be used instead of cycle slip flag
       virtual PhaseAmbiguityModel& setWatchSatArc(bool watchArc)
@@ -350,11 +355,11 @@ namespace gpstk
 
 
          /// Get element of the state transition matrix Phi
-      virtual double getPhi();
+      virtual double getPhi() const override;
 
 
          /// Get element of the process noise matrix Q
-      virtual double getQ();
+      virtual double getQ()const override;
 
 
          /** This method provides the stochastic model with all the available
@@ -509,7 +514,7 @@ namespace gpstk
           * method).
           *
           */
-      virtual double getQ()
+      virtual double getQ() const override
       { return variance; };
 
 

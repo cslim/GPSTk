@@ -42,49 +42,33 @@ namespace pod
     PPPSolution::PPPSolution(GnssDataStore_sptr gnssData)
         :PPPSolutionBase (gnssData)
     {
-        nominalPos.asECEF();
-        int i = 0;
-        for (auto& it: confReader().getListValueAsDouble("nominalPosition"))
-            nominalPos[i++] = it;
+
      
-       opts().DoY = confReader().getValueAsInt("dayOfYear");
+       //opts().DoY = confReader().getValueAsInt("dayOfYear");
 
         //initialize troposhperic model
-        tropModel = NeillTropModel(nominalPos.getAltitude(), nominalPos.getGeodeticLatitude(),opts().DoY);
+       // tropModel = NeillTropModel(nominalPos.getAltitude(), nominalPos.getGeodeticLatitude(),opts().DoY);
 
-        solverPR = unique_ptr<CodeSolverBase>(new CodeSolver(tropModel, data));
+        //solverPR = unique_ptr<CodeSolverBase>(new CodeSolver(tropModel, data));
       
     }
     
     bool  PPPSolution::processCore()
     {
-        string stationName = confReader().fetchListValue("stationName");
+        Triple pos;
+        int i = 0;
+        for (auto& it : confReader().getListValueAsDouble("nominalPosition", data->SiteRover))
+            pos[i++] = it;
+        nominalPos = Position(pos);
 
         updateRequaredObs();
         
         // This object will check that code observations are within
         // reasonable limits
-        SimpleFilter PRFilter; 
-        PRFilter.setFilteredType(TypeID::P2);
-        PRFilter.addFilteredType(codeL1);
+        SimpleFilter PRFilter(TypeIDSet{ codeL1,TypeID::P2 });
+        SimpleFilter SNRFilter(TypeID::S1, confReader().getValueAsInt("SNRmask"), DBL_MAX);
 
-        SimpleFilter SNRFilter(TypeID::S1, 30, DBL_MAX);
-
-        // IMPORTANT NOTE:
-        // It turns out that some receivers don't correct their clocks
-        // from drift.
-        // When this happens, their code observations may drift well beyond
-        // what it is usually expected from a pseudorange. In turn, this
-        // effect causes that "SimpleFilter" objects start to reject a lot of
-        // satellites.
-        // Thence, the "filterCode" option allows you to deactivate the
-        // "SimpleFilter" object that filters out C1, P1 and P2, in case you
-        // need to.
-        //bool filterCode(confReader().getValueAsBoolean("filterCode"));
-
-        // Object to compute linear combinations for cycle slip detection
         ProcessLinear linear1;
-
         linear1.add(make_unique<PDelta>());
         linear1.add(make_unique<MWoubenna>());
 
@@ -124,8 +108,8 @@ namespace pod
 
         // Vector from monument to antenna ARP [UEN], in meters
         Triple offsetARP;
-        int i = 0;
-        for(auto &it:confReader().getListValueAsDouble("offsetARP"))
+        i = 0;
+        for(auto &it:confReader().getListValueAsDouble("offsetARP", data->SiteRover))
             offsetARP[i++] = it;
 
         AntexReader antexReader;
@@ -138,7 +122,7 @@ namespace pod
         antexReader.open(afile);
 
         // Get receiver antenna parameters
-        receiverAntenna = antexReader.getAntenna(confReader().getValue("antennaModel"));
+        receiverAntenna = antexReader.getAntenna(confReader().getValue("antennaModel", data->SiteRover));
 
         // Object to compute satellite antenna phase center effect
         ComputeSatPCenter svPcenter(nominalPos);
@@ -152,22 +136,19 @@ namespace pod
         corr.setMonument(offsetARP);
 
         // Check if we want to use Antex patterns
-        bool usepatterns(confReader().getValueAsBoolean("usePCPatterns"));
+        bool usepatterns(confReader().getValueAsBoolean("usePCPatterns", data->SiteRover));
         if (usepatterns)
         {
             corr.setAntenna(receiverAntenna);
             // Should we use elevation/azimuth patterns or just elevation?
-            corr.setUseAzimuth(confReader().getValueAsBoolean("useAzim"));
+            corr.setUseAzimuth(confReader().getValueAsBoolean("useAzim", data->SiteRover));
         }
 
         // Object to compute wind-up effect
         ComputeWindUp windup(data->SP3EphList, nominalPos, data->genericFilesDirectory + confReader().getValue("satDataFile"));
       
-        // Declare a NeillTropModel object, setting its parameters
-        NeillTropModel neillTM(nominalPos.getAltitude(), nominalPos.getGeodeticLatitude(), opts().DoY);
-
         // Object to compute the tropospheric data
-        ComputeTropModel computeTropo(neillTM);
+        ComputeTropModel computeTropo(tropModel);
 
         // Object to compute ionosphere-free combinations to be used
         // as observables in the PPP processing
@@ -301,9 +282,9 @@ namespace pod
                 svPcenter.setNominalPosition(nominalPos);
                 windup.setNominalPosition(nominalPos);
                 XYZ2NEU baseChange(nominalPos);
-
+                tropModel.setAllParameters(time, nominalPos);
                 // Compute solid, oceanic and pole tides effects at this epoch
-                Triple tides(solid.getSolidTide(time, nominalPos) + ocean.getOceanLoading(stationName, time) + pole.getPoleTide(time, nominalPos));
+                Triple tides(solid.getSolidTide(time, nominalPos) + ocean.getOceanLoading(data->SiteRover, time) + pole.getPoleTide(time, nominalPos));
 
                 // Update observable correction object with tides information
                 corr.setExtraBiases(tides);
@@ -330,7 +311,7 @@ namespace pod
                     gRin >> pcFilter;
                     // gRin >> phaseAlign;
                     gRin >> linear3;
-                    gRin >> baseChange;
+                    //gRin >> baseChange;
                     gRin >> cDOP;
 
                     if (cycles < 1)
@@ -369,7 +350,7 @@ namespace pod
         {
             outfile.close();
             // We are done with this station. Let's show a message
-            cout << "Processing finished for station: '" << stationName <<"'." << endl;
+            cout << "Processing finished for station: '" << data->SiteRover <<"'." << endl;
 
             return true;
         }
@@ -384,7 +365,7 @@ namespace pod
         {
             // If problems arose, issue an message and skip receiver
             cerr << "Exception at reprocessing phase: " << e << endl;
-            cerr << "Station '" << stationName << "'." << endl;
+            cerr << "Station '" << data->SiteRover << "'." << endl;
 
             // Close output file for this station
             outfile.close();
@@ -405,7 +386,7 @@ namespace pod
 
         }  // End of 'while( fbpppSolver.LastProcess(gRin) )'
 
-        cout << "Processing finished for station: '" << stationName << "'." << endl;
+        cout << "Processing finished for station: '" << data->SiteRover << "'." << endl;
         cout << "Num. of rejected meas. " << fbpppSolver.getRejectedMeasurements() << endl;
        
         outfile.close();
@@ -488,5 +469,32 @@ namespace pod
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recSlnType, 16));
 
         outfile << gEpoch.satData.size() << endl;
+    }
+
+    void PPPSolution::updateNomPos(const CommonTime& t, Position &pos)
+    {
+        //
+    }
+    void PPPSolution::process()
+    {
+        try
+        {
+            processCore();
+            gMap.updateMetadata();
+        }
+        catch (ConfigurationException &conf_exp)
+        {
+            cerr << conf_exp.what() << endl;
+            throw;
+        }
+        catch (Exception &gpstk_e)
+        {
+            GPSTK_RETHROW(gpstk_e);
+        }
+        catch (std::exception &std_e)
+        {
+            cerr << std_e.what() << endl;
+            throw;
+        }
     }
 }

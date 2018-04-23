@@ -14,17 +14,19 @@ namespace pod
         PPPSolution(GnssDataStore_sptr  confReader);
         virtual ~PPPSolution() {};
 
-    public: virtual std::string  fileName() const override
-    {
-        return data->SiteRover + "_ppp.txt";
-    }
+
+        void process() override;
 
     protected:
         virtual bool processCore() override;
         NeillTropModel tropModel;
         virtual void updateRequaredObs() override;
 
-    protected: virtual void printSolution( ofstream& of, const SolverLMS& solver, const CommonTime& time, GnssEpoch& gEpoch ) override;
+    protected: virtual void printSolution(ofstream& of, const SolverLMS& solver, const CommonTime& time, GnssEpoch& gEpoch) override;
+
+    protected: virtual void updateNomPos(const CommonTime & t, Position & pos) override;
+
+
 
     };
 }

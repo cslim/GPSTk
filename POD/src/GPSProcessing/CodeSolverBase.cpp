@@ -13,7 +13,6 @@ namespace pod
         maskEl(data->opts.maskEl), maskSNR(data->opts.maskSNR), maxIter(15), Sol(5),
         sigmaMax(25), ionoType(ComputeIonoModel::DualFreq), RMS3D(DBL_MAX), PDOP(DBL_MAX), sigma(0)
     {
-       
         Sol = 0.0;
     };
     void CodeSolverBase::refreshSolution(Vector<double> &Sol, Vector<double> &dSol)

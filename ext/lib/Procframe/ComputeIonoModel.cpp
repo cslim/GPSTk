@@ -173,22 +173,23 @@ namespace gpstk
              // TODO: more frequency later
 
              //apply correction to pseudorange measurements, if required
-             if (applyToCode)
-             {
-                 if (stv->second.find(TypeID::C1) != stv->second.end())
-                     (*stv).second[TypeID::C1] -= ionL1;
-                 if (stv->second.find(TypeID::P1) != stv->second.end())
-                     (*stv).second[TypeID::P1] -= ionL1;
-                 if (stv->second.find(TypeID::P2) != stv->second.end())
-                     (*stv).second[TypeID::P2] -= ionL2;
-             }
-             //  add the new values to the data structure otherwise
-             else
-             {
-                 (*stv).second[TypeID::ionoL1] = ionL1;
-                 (*stv).second[TypeID::ionoL2] = ionL2;
-             }
+             //if (true)
+             //{
+             //    if (stv->second.find(TypeID::C1) != stv->second.end())
+             //        (*stv).second[TypeID::C1] -= ionL1;
+             //    if (stv->second.find(TypeID::P1) != stv->second.end())
+             //        (*stv).second[TypeID::P1] -= ionL1;
+             //    if (stv->second.find(TypeID::P2) != stv->second.end())
+             //        (*stv).second[TypeID::P2] -= ionL2;
+             //}
+             ////  add the new values to the data structure otherwise
+             //else
+             //{
+             (*stv).second[TypeID::ionoL1] = ionL1;
+             (*stv).second[TypeID::ionoL2] = ionL2;
              //(*stv).second[TypeID::ionoL5] = ionL5;
+             //}
+
 
 
          }  // End of loop 'for(stv = gData.begin()...'

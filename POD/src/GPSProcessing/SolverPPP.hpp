@@ -589,10 +589,10 @@ namespace pod
 
 
          /// A structure used to store Kalman filter data.
-      struct filterData
+      struct coreFilterData
       {
             // Default constructor initializing the data in the structure
-         filterData() : ambiguity(0.0) {};
+         coreFilterData() : ambiguity(0.0) {};
 
          double ambiguity;                  ///< Ambiguity value.
          std::map<TypeID, double> vCovMap;  ///< Variables covariance values.
@@ -601,7 +601,7 @@ namespace pod
 
 
          /// Map holding the information regarding every satellite
-      std::map<SatID, filterData> KalmanData;
+      std::map<SatID, coreFilterData> KalmanData;
 
 
          /// General Kalman filter object
