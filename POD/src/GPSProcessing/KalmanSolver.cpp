@@ -87,10 +87,14 @@ namespace pod
 
     int KalmanSolver::check(gnssRinex& gData)
     {
-        PowerSum psum;
-        for (auto it : PostfitResiduals())
-            psum.add(it);
-        double sigma = sqrt(psum.variance());
+        Matrix<double> res(PostfitResiduals().size(), 1, 0.0);
+
+        res = res.assignFrom(PostfitResiduals());
+        
+        //compute vtpv
+        auto vpv = transpose(res)*weigthMatrix*res;
+
+        double sigma = sqrt(vpv(0,0));
 
         double varX = getVariance(TypeID::dx);     // Cov dx    - #8
         double varY = getVariance(TypeID::dy);     // Cov dy    - #9
@@ -112,32 +116,33 @@ namespace pod
     {
         using type = decltype(gnssRinex::body)::value_type;
         SatIDSet rejSat;
-        for (const auto & id : typeIds)
-        {
-            //get the sv - typeMap pair with largest residual value
-            
-            auto svWithMaxResidual = std::max_element(
-                gData.body.begin(), gData.body.end(),
-                [&](const type& it1, const type& it2)-> bool
-            {
-                double val1 = ::abs(it1.second.at(id));
-                double val2 = ::abs(it2.second.at(id));
-                return(val1 < val2);
-            }
-            );
+        ///!!!
+        ///here we use only last type of postfit residuals, because in case of
+        ///combined code/phase measurements processing this part contans carrier phase residuals
+        //in case code/phase only processing we have only one element in @typeIds, which one will be used
+        ///!!!
+        const auto& id = typeIds.rbegin();
 
-            //report detection
-            DBOUT("Removed SV: " << svWithMaxResidual->first);
-            DBOUT(" with " << TypeID::tStrings[id.type] << " = ");
-            DBOUT_LINE(svWithMaxResidual->second[id]);
-            //report detection
-            cout<<"Removed SV: " << svWithMaxResidual->first;
-            cout << " with " << TypeID::tStrings[id.type] << " = ";
-            cout << svWithMaxResidual->second[id]<<endl;
-            //remove sv
-            rejSat.insert(svWithMaxResidual->first);
+        //get the sv - typeMap pair with largest residual value
+
+        auto svWithMaxResidual = std::max_element(
+            gData.body.begin(), gData.body.end(),
+            [&](const type& it1, const type& it2)-> bool
+        {
+            double val1 = ::abs(it1.second.at(*id));
+            double val2 = ::abs(it2.second.at(*id));
+            return(val1 < val2);
         }
-        
+        );
+
+        //report detection
+        cout << "Removed SV: " << svWithMaxResidual->first;
+        cout << " with " << TypeID::tStrings[id->type] << " = ";
+        cout << svWithMaxResidual->second[*id] << endl;
+        //remove sv
+        rejSat.insert(svWithMaxResidual->first);
+
+
         gData.removeSatID(rejSat);
 
         return gData;

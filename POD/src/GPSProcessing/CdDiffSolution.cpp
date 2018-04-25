@@ -304,7 +304,6 @@ namespace pod
             codeL1 = TypeID::P1;
             oMinusC.addLinear(comm.p1Prefit);
             Equations->measTypes() = TypeIDList{ TypeID::prefitP1 };
-
         }
 
         requireObs.addRequiredType(codeL1);
