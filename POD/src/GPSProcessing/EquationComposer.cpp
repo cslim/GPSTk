@@ -9,7 +9,7 @@ namespace pod
         currAmb.clear();
         for (auto& eq : equations)
         {
-            //prepare equations objectes state
+            //prepare equations objects state
             eq->Prepare(gData);
 
             // update current set of ambiguities

@@ -249,7 +249,6 @@ namespace pod
                 windupRover.setNominalPosition(nominalPos);
                 svPcenterRover.setNominalPosition(nominalPos);
 
-                ostream << gRin.header.epoch << "\t" << gRin.header.epoch << endl;
 
                 gRin >> requireObs;
                 gRin >> CodeFilter;
@@ -307,6 +306,7 @@ namespace pod
                     gRef >> corrBase;
                     gRef >> windupBase;
                     data->ionoCorrector.setNominalPosition(refPos);
+                    
                     //gRef >> data->ionoCorrector;
                     gRef >> computeTropoBase;
                     gRef >> linearIonoFree;
@@ -348,6 +348,21 @@ namespace pod
                 }
             }
         }
+        if (forwardBackwardCycles > 0)
+        {
+            cout << "Fw-Bw part started" << endl;
+            solverFb.reProcess();
+            gnssRinex gRin;
+            cout << "Last process part started" << endl;
+            while (solverFb.lastProcess(gRin))
+            {
+                GnssEpoch ep(gRin);
+                //updateNomPos(solverFB);
+                printSolution(ostream, solverFb, gRin.header.epoch, ep);
+                gMap.data.insert(std::make_pair(gRin.header.epoch, ep));
+            }
+            cout << "Measurments rejected: " << solverFb.rejectedMeasurements << endl;
+        }
     }
 
     void PdFloatSolution::updateRequaredObs()
@@ -365,8 +380,7 @@ namespace pod
 
         configureSolver();
 
-        Equations->measTypes() = TypeIDList{ TypeID::prefitC,TypeID::prefitL };
- 
+      
         Equations->residTypes() = TypeIDList{ TypeID::postfitC, TypeID::postfitL };
 
         requireObs.addRequiredType(codeL1);
@@ -380,17 +394,17 @@ namespace pod
         ///
         if (data->ionoCorrector.getType() == IonoModelType::DualFreq )
         {
-          /*  computeLinear.add(std::make_unique<PCCombimnation>());
-            computeLinear.add(std::make_unique<LCCombimnation>());*/
+            Equations->measTypes() = TypeIDList{ TypeID::prefitC,TypeID::prefitL };
+
             oMinusC.addLinear(comm.pcPrefit);
             oMinusC.addLinear(comm.lcPrefit);
         }
         else
         {
-            if (useC1)
-                oMinusC.addLinear(comm.c1Prefit);
-            else
-                oMinusC.addLinear(comm.l1Prefit);
+            Equations->measTypes() = TypeIDList{ TypeID::prefitC,TypeID::prefitL1 };
+
+            oMinusC.addLinear(useC1 ? comm.c1Prefit : comm.p1Prefit);
+            oMinusC.addLinear(comm.l1Prefit);
         }
     }
 
@@ -399,8 +413,8 @@ namespace pod
         Equations->clear();
         
         //tropo
-        double qPrime = confReader().getValueAsDouble("tropoQ");
-        Equations->addEquation( make_unique<TropoEquations>(qPrime));
+        //double qPrime = confReader().getValueAsDouble("tropoQ");
+        //Equations->addEquation( make_unique<TropoEquations>(qPrime));
 
         // White noise stochastic models
         auto  coord = make_unique<PositionEquations>();
@@ -429,8 +443,35 @@ namespace pod
         
         Equations->addEquation(/*std::move(bias)*/std::make_unique<InterSystemBias>());
         
-        Equations->addEquation(std::make_unique<AmbiguitySdEquations>());
+        
+        if(data->ionoCorrector.getType() == IonoModelType::DualFreq)
+            Equations->addEquation(std::make_unique<AmbiguitySdEquations>(AmbiguitySdEquations::L1L2_IF));
+        else 
+            Equations->addEquation(std::make_unique<AmbiguitySdEquations>(AmbiguitySdEquations::L1));
 
         forwardBackwardCycles = confReader().getValueAsInt("forwardBackwardCycles");
+    }
+
+    void PdFloatSolution::printSolution(std::ofstream& os, const SolverLMS& solver, const CommonTime& time, GnssEpoch& gEpoch)
+    {
+        GnssSolution::printSolution(os, solver, time, gEpoch);
+        const auto & params = Equations->currentUnknowns();
+        const auto & it_tropo = params.find(TypeID::wetMap);
+        
+        if (it_tropo != params.end())
+        {
+            //double wetMap = solver.getSolution(TypeID::wetMap) + 0.1 + this->tropModel.dry_zenith_delay();
+            gEpoch.slnData.insert(std::make_pair(TypeID::recZTropo, solver.getSolution(TypeID::wetMap)));
+        }
+        auto ambType = (data->ionoCorrector.getType() == IonoModelType::DualFreq) ? TypeID::BLC : TypeID::BL1;
+
+        const auto svs = gEpoch.satData.getSatID();
+        
+        int i(0);
+        for (const auto & it : svs)
+        {
+            gEpoch.satData[it][ambType] = solver.Solution()(params.size() + i);
+            ++i;
+        }
     }
 }

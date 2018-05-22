@@ -3,6 +3,19 @@
 
 namespace pod
 {
+    /* Iono-Free wavelength according to equation 20.47 (pg. 591) in 
+       "Peter J.G. Teunissen, Oliver Montenbruck (Eds.) 
+       Springer Handbook of Global Navigation Satellite Systems"
+     */
+    double LinearCombination::getIonoFreeWaveLength(const gpstk::SatID &sv, int band1, int band2)
+    {
+        int fcn = sv.getGloFcn();
+        double wlL1 = getWavelength(sv, 1, fcn);
+        double wlL2 = getWavelength(sv, 2, fcn);
+
+        return C_MPS / (wlL1 + wlL2);
+    }
+
     bool MWoubenna::getCombination(const SatID & sv, typeValueMap tvMap, double & value) const
     {
         value = NAN;
@@ -304,15 +317,7 @@ namespace pod
             return false;
         else
         {
-            int fcn = sv.getGloFcn();
-            double wlL1 = getWavelength(sv, 1, fcn);
-            double wlL2 = getWavelength(sv, 2, fcn);
-            
-            //Iono-Free wavelength according to equation 20.47 (pg. 591)
-            // in "Peter J.G. Teunissen, Oliver Montenbruck (Eds.)  
-            // Springer Handbook of Global Navigation Satellite Systems"
-            double wu_wl = C_MPS / (wlL1 + wlL2);
-
+           double wu_wl =  getIonoFreeWaveLength(sv, 1, 2);
             value -= it->second*wu_wl / TWO_PI;
         }
         return true;

@@ -1,4 +1,8 @@
 #include "AmbiguitySdEquations.h"
+#include"GNSSconstants.hpp"
+#include"LinearCombination.h"
+
+using namespace gpstk;
 
 namespace pod
 {
@@ -86,9 +90,26 @@ namespace pod
                 ++itSat2;
             }
 
-            // Put coefficient in the right place
-            H(row_0 , j + col_0) = 1.0;
+            double wavelength(0);
+            int fcn = itSat.getGloFcn();
+            switch (obsType)
+            {
+            case AmbiguitySdEquations::L1:
+                wavelength = getWavelength(itSat, 1, fcn);
+                break;
+            case AmbiguitySdEquations::L2:
+                wavelength = getWavelength(itSat, 2, fcn);
+                break;
+            case AmbiguitySdEquations::L1L2_IF:
+                wavelength = LinearCombination::getIonoFreeWaveLength(itSat, 1, 2);
+                break;
+            default:
+                break;
+            }
 
+            // Put coefficient in the right place
+            H(row_0, j + col_0) = wavelength;
+           
             ++row_0;
         } 
 

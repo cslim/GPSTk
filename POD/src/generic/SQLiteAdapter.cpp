@@ -335,7 +335,10 @@ namespace pod
          TypeID::prefitL1          ,
          TypeID::postfitC          ,
          TypeID::postfitL         ,
-         TypeID::postfitL1          ,
+         TypeID::postfitL1        ,
+         TypeID::codeBias         ,
+         TypeID::BL1              ,
+         TypeID::BLC              ,
      };
 
      const unsigned SQLiteAdapter:: SCHEMA_VERSION = 1;

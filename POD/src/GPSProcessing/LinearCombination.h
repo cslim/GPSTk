@@ -10,6 +10,8 @@ namespace pod
     class LinearCombination
     {
     public:
+        static double getIonoFreeWaveLength(const gpstk::SatID &sv, int band1, int band2);
+
         LinearCombination() {};
         virtual ~LinearCombination() {};
 
@@ -107,6 +109,7 @@ namespace pod
         virtual bool getCombination(const SatID & sv, typeValueMap tvMap, double & value) const override;
         virtual TypeID getType() const override;
     };
+
     class PrefitLC :public LinearCombination
     {
     public:

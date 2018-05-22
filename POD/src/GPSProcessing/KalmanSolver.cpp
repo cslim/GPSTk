@@ -42,12 +42,12 @@ namespace pod
             //kFilter.Reset(solution, covMatrix);
             DBOUT_LINE("----------------------------------------------------------------------------------------");
             DBOUT_LINE(CivilTime(gData.header.epoch));
-            auto svset = gData.getSatID();
-            for (auto& it:svset)
-                DBOUT(it<<" ");
+            //auto svset = gData.getSatID();
+            //for (auto& it:svset)
+            //    DBOUT(it<<" ");
 
-            DBOUT_LINE("measVector\n" << setprecision(10) << measVector);
-            DBOUT_LINE("H\n" << hMatrix);
+            //DBOUT_LINE("measVector\n" << setprecision(10) << measVector);
+            //DBOUT_LINE("H\n" << hMatrix);
            
             //prepare
             Matrix<double> hMatrixTr = transpose(hMatrix);
@@ -66,9 +66,10 @@ namespace pod
             postfitResiduals = measVector - hMatrix * solution;
             DBOUT_LINE("Solution\n" << solution);
             DBOUT_LINE("postfitResiduals\n" << postfitResiduals);
-            DBOUT_LINE("CovPost\n" << covMatrix);
+            //DBOUT_LINE("CovPost\n" << covMatrix);
  
             equations->saveResiduals(gData, postfitResiduals);
+            break;
 
             if (!check(gData))
                 break;

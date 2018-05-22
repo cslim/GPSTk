@@ -1,13 +1,24 @@
 #pragma once
 #include "EquationBase.h"
 #include"StochasticModel.hpp"
+
 namespace pod
 {
     class AmbiguitySdEquations :
         public EquationBase
     {
     public:
-        AmbiguitySdEquations() {};
+        enum MeasurementsType
+        {
+            L1,
+            L2,
+            L1L2_IF,
+
+        } obsType;
+
+        AmbiguitySdEquations():obsType(MeasurementsType::L1){};
+        AmbiguitySdEquations(MeasurementsType obsType) :obsType(obsType) {};
+
         virtual ~AmbiguitySdEquations() {};
 
         // Inherited via EquationBase
