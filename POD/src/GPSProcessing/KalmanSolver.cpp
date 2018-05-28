@@ -1,6 +1,8 @@
 #include "KalmanSolver.h"
 #include"WinUtils.h"
 #include"PowerSum.hpp"
+#include"ARSimple.hpp"
+#include"ARMLambda.hpp"
 #include <algorithm>
 
 using namespace std;
@@ -16,7 +18,7 @@ namespace pod
     {}
 
     KalmanSolver::~KalmanSolver()
-    { }
+    {}
 
     gnssRinex& KalmanSolver::Process(gnssRinex& gData)
     {
@@ -69,6 +71,10 @@ namespace pod
             //DBOUT_LINE("CovPost\n" << covMatrix);
  
             equations->saveResiduals(gData, postfitResiduals);
+            //
+            fixAmbiguities(gData);
+            storeAmbiguities(gData);
+
             break;
 
             if (!check(gData))
@@ -85,6 +91,95 @@ namespace pod
         equations->storeKfState(solution, covMatrix);
         return gData;
     }
+    SatID KalmanSolver::chooseRefSv(gnssRinex& gData) const
+    {
+        using type = decltype(gnssRinex::body)::value_type;
+        auto svWithMaxEl = std::max_element(
+            gData.body.begin(), gData.body.end(),
+            [&](const type& it1, const type& it2)-> bool
+        {
+            double val1 = ::abs(it1.second.at(TypeID::elevation));
+            double val2 = ::abs(it2.second.at(TypeID::elevation));
+            return(val1 < val2);
+        }
+        );
+        return svWithMaxEl->first;
+    }
+    
+    void  KalmanSolver::fixAmbiguities(gnssRinex& gData)
+    {
+        int amb_num = equations->currentAmb().size();
+        if (amb_num < 5) return;
+
+        int core_num = equations->currentUnknowns().size();
+        
+        // find the reference SV
+        SatID refSv = chooseRefSv(gData);
+        const auto refSv_it = equations->currentAmb().find(refSv);
+        // and it index
+        int resv_index = std::distance(equations->currentAmb().begin(), refSv_it);
+       
+        Vector<double> coreParamsFloat(core_num, .0);
+        for (int k = 0; k < core_num; k++)
+            coreParamsFloat(k) = solution(k);
+
+       
+        Vector<double> DDfloatAmb(amb_num - 1, .0);
+        Matrix<double> DDambCov(amb_num - 1, amb_num - 1, .0);
+        Matrix<double> parDDAmbCov(core_num, amb_num - 1, .0);
+
+        Matrix<double> SD2DD (covMatrix.rows() - 1, covMatrix.rows(), .0);
+        for (int j = 0; j < core_num; j++)
+            SD2DD(j, j) = 1.0;
+
+        for (int j = core_num; j< SD2DD.rows(); j++)
+        {
+            SD2DD(j, resv_index + core_num) = -1.0;
+            if (j<resv_index + core_num) SD2DD(j, j) = 1.0;
+            else    SD2DD(j, j + 1) = 1.0;
+        }
+        DBOUT_LINE("SD2DD\n" << SD2DD);
+
+        DBOUT_LINE("covSD\n"<<covMatrix)
+
+
+        auto DDfloatSolution = SD2DD*solution;
+        auto trSD2DD = transpose(SD2DD);
+        auto DDCov = SD2DD*covMatrix*trSD2DD;
+        DBOUT_LINE("covDD\n" << DDCov)
+
+        ARMLambda ar;   
+
+        for (int i = 0; i < amb_num-1; i++)
+        {
+            DDfloatAmb(i) = DDfloatSolution(core_num + i);
+            for (int j = 0; j < amb_num-1; j++)
+                DDambCov(i, j) = DDCov(core_num + i, core_num + j);
+
+            for (int k = 0; k < core_num; k++)
+                parDDAmbCov(k, i) = DDCov(k, core_num + i);
+        }
+
+        auto DDfixedAmb = ar.resolveIntegerAmbiguity(DDfloatAmb, DDambCov);
+        DBOUT_LINE("float DD amb\n" << DDfloatAmb)
+        DBOUT_LINE("fixed DD amb\n"<< DDfixedAmb)
+        auto coreParamsFixed = coreParamsFloat - parDDAmbCov*inverseChol(DDambCov)*(DDfloatAmb - DDfixedAmb);
+
+        for (int k = 0; k < core_num; k++)
+             solution(k) = coreParamsFixed(k);
+    }
+
+    void  KalmanSolver::storeAmbiguities(gnssRinex& gData) const
+    {
+        int i(0);
+        for (const auto & sv : equations->currentAmb())
+        {
+            auto & it = gData.body.find(sv);
+            if (it != gData.body.end())
+                gData.body[sv][TypeID::BL1] = solution(equations->currentUnknowns().size() + i);
+            ++i;
+        }
+    }
 
     int KalmanSolver::check(gnssRinex& gData)
     {
@@ -92,7 +187,7 @@ namespace pod
 
         res = res.assignFrom(PostfitResiduals());
         
-        //compute vtpv
+        //compute v'pv
         auto vpv = transpose(res)*weigthMatrix*res;
 
         double sigma = sqrt(vpv(0,0));

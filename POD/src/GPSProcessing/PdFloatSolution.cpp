@@ -379,7 +379,6 @@ namespace pod
         computeLinear.add(make_unique<LICombimnation>());
 
         configureSolver();
-
       
         Equations->residTypes() = TypeIDList{ TypeID::postfitC, TypeID::postfitL };
 
@@ -441,7 +440,7 @@ namespace pod
         auto bias = make_unique<InterSystemBias>();
         bias->setStochasicModel(SatID::systemGlonass, make_unique<WhiteNoiseModel>());
         
-        Equations->addEquation(/*std::move(bias)*/std::make_unique<InterSystemBias>());
+        //Equations->addEquation(/*std::move(bias)*/std::make_unique<InterSystemBias>());
         
         
         if(data->ionoCorrector.getType() == IonoModelType::DualFreq)
@@ -463,15 +462,6 @@ namespace pod
             //double wetMap = solver.getSolution(TypeID::wetMap) + 0.1 + this->tropModel.dry_zenith_delay();
             gEpoch.slnData.insert(std::make_pair(TypeID::recZTropo, solver.getSolution(TypeID::wetMap)));
         }
-        auto ambType = (data->ionoCorrector.getType() == IonoModelType::DualFreq) ? TypeID::BLC : TypeID::BL1;
-
-        const auto svs = gEpoch.satData.getSatID();
-        
-        int i(0);
-        for (const auto & it : svs)
-        {
-            gEpoch.satData[it][ambType] = solver.Solution()(params.size() + i);
-            ++i;
-        }
+      
     }
 }

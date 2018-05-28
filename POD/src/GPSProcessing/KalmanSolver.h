@@ -41,7 +41,9 @@ namespace pod
         double getVariance(const TypeID& type) const override;
 
     protected:
-
+        virtual SatID chooseRefSv(gnssRinex& gData) const;
+        virtual void fixAmbiguities(gnssRinex& gData);
+        virtual void storeAmbiguities(gnssRinex& gData) const;
         virtual int check(gnssRinex& gData);
         virtual gnssRinex& reject(gnssRinex& gData, const TypeIDList& typeOfResid);
 

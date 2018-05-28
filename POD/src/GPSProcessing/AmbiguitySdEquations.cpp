@@ -111,7 +111,7 @@ namespace pod
             H(row_0, j + col_0) = wavelength;
            
             ++row_0;
-        } 
+        }
 
         col_0 += csFlags.size();
         satSet = currentSatSet;

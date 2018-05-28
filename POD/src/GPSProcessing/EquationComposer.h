@@ -63,14 +63,22 @@ namespace pod
         {
             return measurmentsTypes;
         }
+
         virtual gpstk::TypeIDList & residTypes()
         {
             return residualsTypes;
         }
+
         virtual const gpstk::TypeIDList & residTypes() const 
         {
             return residualsTypes;
         }
+
+        virtual const gpstk::SatIDSet & currentAmb() const
+        {
+            return currAmb;
+        }
+
         /// add new equation to equation list
         virtual EquationComposer& addEquation(std::unique_ptr<EquationBase> eq)
         {
