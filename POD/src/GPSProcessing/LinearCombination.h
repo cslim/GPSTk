@@ -39,7 +39,7 @@ namespace pod
             return getCombination(sv, tvm->second, value);
         }
 
-        virtual bool getCombination(const SatID & sv, typeValueMap tvMap, double & value) const = 0;
+        virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const = 0;
 
         virtual TypeID getType() const = 0;
 
@@ -52,7 +52,7 @@ namespace pod
     public:
         MWoubenna() {};
        virtual ~MWoubenna() {};
-       virtual bool getCombination(const SatID & sv, typeValueMap tvMap, double & value) const override;
+       virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
        virtual TypeID getType() const override;
     };
 
@@ -61,7 +61,7 @@ namespace pod
     public:
         PDelta() {};
         virtual ~PDelta() {};
-        virtual bool getCombination(const SatID & sv, typeValueMap tvMap, double & value) const override;
+        virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
         virtual TypeID getType() const override;
     };
 
@@ -70,7 +70,7 @@ namespace pod
     public:
         LDelta() {};
         virtual ~LDelta() {};
-        virtual bool getCombination(const SatID & sv, typeValueMap tvMap, double & value) const override;
+        virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
         virtual TypeID getType() const override;
     };
 
@@ -79,7 +79,7 @@ namespace pod
     public:
         PCCombimnation() {};
         virtual ~PCCombimnation() {};
-        virtual bool getCombination(const SatID & sv, typeValueMap tvMap, double & value) const override;
+        virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
         virtual TypeID getType() const override;
     };
 
@@ -88,7 +88,7 @@ namespace pod
     public:
         LCCombimnation() {};
         virtual ~LCCombimnation() {};
-        virtual bool getCombination(const SatID & sv, typeValueMap tvMap, double & value) const override;
+        virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
         virtual TypeID getType() const override;
     };
 
@@ -97,25 +97,58 @@ namespace pod
     public:
         LICombimnation() {};
         virtual ~LICombimnation() {};
-        virtual bool getCombination(const SatID & sv, typeValueMap tvMap, double & value) const override;
+        virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
         virtual TypeID getType() const override;
     };
 
+    class PrefitC1 :public LinearCombination
+    {
+    public:
+        PrefitC1() {};
+        virtual ~PrefitC1() {};
+        virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
+        virtual TypeID getType() const override;
+    };
+
+    class PrefitP1 :public LinearCombination
+    {
+    public:
+        PrefitP1() {};
+        virtual ~PrefitP1() {};
+        virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
+        virtual TypeID getType() const override;
+    };
+    class PrefitP2 :public LinearCombination
+    {
+    public:
+        PrefitP2() {};
+        virtual ~PrefitP2() {};
+        virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
+        virtual TypeID getType() const override;
+    };
     class PrefitL1 :public LinearCombination
     {
     public:
         PrefitL1() {};
         virtual ~PrefitL1() {};
-        virtual bool getCombination(const SatID & sv, typeValueMap tvMap, double & value) const override;
+        virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
         virtual TypeID getType() const override;
     };
 
+    class PrefitL2 :public LinearCombination
+    {
+    public:
+        PrefitL2() {};
+        virtual ~PrefitL2() {};
+        virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
+        virtual TypeID getType() const override;
+    };
     class PrefitLC :public LinearCombination
     {
     public:
         PrefitLC() {};
         virtual ~PrefitLC() {};
-        virtual bool getCombination(const SatID & sv, typeValueMap tvMap, double & value) const override;
+        virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
         virtual TypeID getType() const override;
     };
 }
