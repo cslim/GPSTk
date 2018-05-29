@@ -80,6 +80,17 @@ namespace gpstk
       p1Prefit.body[TypeID::instC1]       = -1.0;
       p1Prefit.body[TypeID::mpC1]         = -1.0;
 
+      // Definition to compute prefit residual of P2
+      p2Prefit.header = TypeID::prefitP2;
+      p2Prefit.body[TypeID::P2] = +1.0;
+      p2Prefit.body[TypeID::rho] = -1.0;
+      p2Prefit.body[TypeID::dtSat] = +1.0;
+      p2Prefit.body[TypeID::rel] = -1.0;
+      p2Prefit.body[TypeID::gravDelay] = -1.0;
+      p2Prefit.body[TypeID::satPCenter] = -1.0;
+      p2Prefit.body[TypeID::tropoSlant] = -1.0;
+      p2Prefit.body[TypeID::ionoL2] = -1.0;
+
          // Definition to compute prefit residual of L1
       l1Prefit.header                     = TypeID::prefitL1;
       l1Prefit.body[TypeID::L1]           = +1.0;
@@ -93,6 +104,20 @@ namespace gpstk
          // Coefficient for L1 windUp is L1 wavelength/2*PI
       l1Prefit.body[TypeID::windUp]       = -L1_WAVELENGTH_GPS/TWO_PI;
       l1Prefit.body[TypeID::mpL1]         = -1.0;
+
+        // Definition to compute prefit residual of L2
+      l2Prefit.header = TypeID::prefitL2;
+      l2Prefit.body[TypeID::L2] = +1.0;
+      l2Prefit.body[TypeID::rho] = -1.0;
+      l2Prefit.body[TypeID::dtSat] = +1.0;
+      l2Prefit.body[TypeID::rel] = -1.0;
+      l2Prefit.body[TypeID::gravDelay] = -1.0;
+      l2Prefit.body[TypeID::satPCenter] = -1.0;
+      l2Prefit.body[TypeID::tropoSlant] = -1.0;
+      l2Prefit.body[TypeID::ionoL2] = +1.0;
+      // Coefficient for L1 windUp is L1 wavelength/2*PI
+      l2Prefit.body[TypeID::windUp] = -L2_WAVELENGTH_GPS / TWO_PI;
+      l2Prefit.body[TypeID::mpL2] = -1.0;
 
          // Definition to compute PC combination
       pcCombination.header                = TypeID::PC;

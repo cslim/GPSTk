@@ -127,8 +127,14 @@ namespace gpstk
          /// Definition to compute prefit residual of P1
       gnssLinearCombination p1Prefit;
 
+         /// Definition to compute prefit residual of P2
+      gnssLinearCombination p2Prefit;
+
          /// Definition to compute prefit residual of L1
       gnssLinearCombination l1Prefit;
+
+        /// Definition to compute prefit residual of L2
+      gnssLinearCombination l2Prefit;
 
          /// Definition to compute PC combination
       gnssLinearCombination pcCombination;
