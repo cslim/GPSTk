@@ -2,6 +2,7 @@
 
 #include"EquationBase.h"
 #include<memory>
+#include"Ambiguity.h"
 
 namespace pod
 {
@@ -12,6 +13,9 @@ namespace pod
     {
 
     public:
+        ///to map opbservables TypeID to weight factor
+        static const std::map<gpstk::TypeID, double> weigthFactors;
+
         EquationComposer() {}
 
         virtual ~EquationComposer() {};
@@ -74,7 +78,7 @@ namespace pod
             return residualsTypes;
         }
 
-        virtual const gpstk::SatIDSet & currentAmb() const
+        virtual const AmbiguitySet & currentAmb() const
         {
             return currAmb;
         }
@@ -117,7 +121,7 @@ namespace pod
             std::map<gpstk::TypeID, double> coreCov;
 
             //covarince with other ambiguity
-            std::map<gpstk::SatID, double> ambCov;
+            std::map<Ambiguity, double> ambCov;
 
         };
 
@@ -125,7 +129,7 @@ namespace pod
         std::map<gpstk::TypeID, coreFilterData> coreData;
 
         /// Map holding the information regarding every ambiguity variable
-        std::map<gpstk::SatID, ambiguityFilterData> ambiguityData;
+        std::map<Ambiguity, ambiguityFilterData> ambiguityData;
 
         /// is equation system composes first time?
         bool firstTime;
@@ -137,7 +141,7 @@ namespace pod
         gpstk::TypeIDSet coreUnknowns;
 
         /// current set of ambiguities
-        gpstk::SatIDSet currAmb;
+        AmbiguitySet currAmb;
         
         /// type of measurements
         gpstk::TypeIDList measurmentsTypes;

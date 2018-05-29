@@ -54,6 +54,8 @@ namespace pod
 
         virtual InterSystemBias& setStochasicModel(const gpstk::SatID::SatelliteSystem& system, gpstk::StochasticModel_uptr newModel);
 
+        virtual void updateH(gpstk::gnssRinex& gData, gpstk::Matrix<double>& H, int& col_0, int& row_0) override;
+
     private:
 
         std::map< gpstk::TypeID, gpstk::StochasticModel_uptr> stochasticModels;

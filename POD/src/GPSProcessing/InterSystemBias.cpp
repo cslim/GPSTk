@@ -98,8 +98,9 @@ namespace pod
             types.erase(it);
         
         //finally, let's add current ISB types to the overall equation set
-        for (const auto& it : types)
-            eq.insert(it);
+        ///
+        //for (const auto& it : types)
+        //    eq.insert(it);
     }
 
     InterSystemBias& InterSystemBias::setStochasicModel(
@@ -127,7 +128,13 @@ namespace pod
             ++index;
         }
     }
+    void InterSystemBias::updateH(gpstk::gnssRinex& gData, gpstk::Matrix<double>& H, int& col_0, int& row_0) 
+    {
+        for (const auto& it: gData.body)
+        {
 
+        }
+    };
     int InterSystemBias::getNumUnknowns() const
     {
        return types.size();

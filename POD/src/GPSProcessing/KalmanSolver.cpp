@@ -40,8 +40,6 @@ namespace pod
 
             firstTime = false;
 
-
-            //kFilter.Reset(solution, covMatrix);
             DBOUT_LINE("----------------------------------------------------------------------------------------");
             DBOUT_LINE(CivilTime(gData.header.epoch));
             //auto svset = gData.getSatID();
@@ -50,7 +48,8 @@ namespace pod
 
             //DBOUT_LINE("measVector\n" << setprecision(10) << measVector);
             //DBOUT_LINE("H\n" << hMatrix);
-           
+            DBOUT_LINE("weigthMatrix\n" << weigthMatrix);
+
             //prepare
             Matrix<double> hMatrixTr = transpose(hMatrix);
             Matrix<double> phiMatrixTr = transpose(phiMatrix);
@@ -72,8 +71,8 @@ namespace pod
  
             equations->saveResiduals(gData, postfitResiduals);
             //
-            fixAmbiguities(gData);
-            storeAmbiguities(gData);
+            //fixAmbiguities(gData);
+            //storeAmbiguities(gData);
 
             break;
 
@@ -114,8 +113,8 @@ namespace pod
         int core_num = equations->currentUnknowns().size();
         
         // find the reference SV
-        SatID refSv = chooseRefSv(gData);
-        const auto refSv_it = equations->currentAmb().find(refSv);
+        auto refSv = chooseRefSv(gData);
+        const auto refSv_it = equations->currentAmb().find(Ambiguity(TypeID::L1, refSv));
         // and it index
         int resv_index = std::distance(equations->currentAmb().begin(), refSv_it);
        
@@ -172,11 +171,11 @@ namespace pod
     void  KalmanSolver::storeAmbiguities(gnssRinex& gData) const
     {
         int i(0);
-        for (const auto & sv : equations->currentAmb())
+        for (const auto & amb : equations->currentAmb())
         {
-            auto & it = gData.body.find(sv);
+            auto & it = gData.body.find(amb.sv);
             if (it != gData.body.end())
-                gData.body[sv][TypeID::BL1] = solution(equations->currentUnknowns().size() + i);
+                gData.body[amb.sv][amb.type] = solution(equations->currentUnknowns().size() + i);
             ++i;
         }
     }

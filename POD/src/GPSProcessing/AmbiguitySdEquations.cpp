@@ -6,12 +6,12 @@ using namespace gpstk;
 
 namespace pod
 {
-    gpstk::SatIDSet AmbiguitySdEquations::getSvSet() const
+    AmbiguitySet AmbiguitySdEquations::getAmbSet() const
     {
-        gpstk::SatIDSet svSet;
+        AmbiguitySet ambSet;
         for (const auto& it : csFlags)
-            svSet.insert(it.first);
-        return svSet;
+            ambSet.insert(Ambiguity(type, it.first));
+        return ambSet;
     }
 
     void AmbiguitySdEquations::Prepare(gpstk::gnssRinex & gData)
@@ -92,15 +92,15 @@ namespace pod
 
             double wavelength(0);
             int fcn = itSat.getGloFcn();
-            switch (obsType)
+            switch (type.type)
             {
-            case AmbiguitySdEquations::L1:
+            case TypeID::BL1:
                 wavelength = getWavelength(itSat, 1, fcn);
                 break;
-            case AmbiguitySdEquations::L2:
+            case TypeID::BL2:
                 wavelength = getWavelength(itSat, 2, fcn);
                 break;
-            case AmbiguitySdEquations::L1L2_IF:
+            case TypeID::BLC:
                 wavelength = LinearCombination::getIonoFreeWaveLength(itSat, 1, 2);
                 break;
             default:

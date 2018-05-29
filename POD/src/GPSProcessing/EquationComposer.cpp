@@ -3,6 +3,19 @@ using namespace gpstk;
 
 namespace pod
 {
+   const std::map<gpstk::TypeID, double> EquationComposer::weigthFactors{
+
+        //code pseudorange weight factor
+        { TypeID::prefitC, 1.0  }      ,
+        { TypeID::prefitP1, 1.0 }      ,
+        { TypeID::prefitP2, 1.0 }      ,
+
+        //carrier phase weight factor
+        { TypeID::prefitL,  10000.0 },
+        { TypeID::prefitL1, 10000.0 },
+        { TypeID::prefitL2, 10000.0 },
+    };
+
     void EquationComposer::Prepare(gnssRinex& gData)
     {
         //clear ambiguities set
@@ -13,8 +26,8 @@ namespace pod
             eq->Prepare(gData);
 
             // update current set of ambiguities
-            auto  svs = eq->getSvSet();
-            currAmb.insert(svs.cbegin(), svs.cend());
+            auto  ambs = eq->getAmbSet();
+            currAmb.insert(ambs.cbegin(), ambs.cend());
         }
     }
 
@@ -22,7 +35,7 @@ namespace pod
     {
         int numSVs = gData.body.size();
         int numMeasTypes = measTypes().size();
-        //number of Unknowns are equals number of Satellites times observation types number 
+        //number of measurements are equals number of Satellites times observation types number 
         numMeas = numSVs*numMeasTypes;
 
         coreUnknowns.clear();
@@ -38,6 +51,27 @@ namespace pod
 
         //get the 'core' variables part of design matrix 
         auto hCore = gData.body.getMatrixOfTypes(coreUnknowns);
+        
+        /*
+        form the design martix H:
+
+             core          N1         N2     
+           | d(core)/ |          |          | 
+        P1 |  d(ro)   |    0     |     0    |
+           |          |          |          |
+           ----------------------------------
+           | d(core)/ |          |          |
+        P2 |  d(ro)   |    0     |     0    |
+           |          |          |          |
+           ----------------------------------
+           | d(core)/ |          |          |
+        L1 |  d(ro)   |lambda_1*E|     0    |
+           |          |          |          |
+           ----------------------------------
+           | d(core)/ |          |          |
+        L2 |  d(ro)   |    0     |lambda_2*E|
+           |          |          |          |
+        */
 
         //fill the core part of design matix
         for (size_t i = 0; i < numSVs; i++)
@@ -46,7 +80,7 @@ namespace pod
                     H(i + k*numSVs, j) = hCore(i, j);
 
         //fill the satellites dependent part of design matrix
-        int row(numSVs);
+        int row(numSVs*2);
         int col(numCoreUnknowns);
         for (auto& eq : equations)
             eq->updateH(gData, H, row, col);
@@ -91,10 +125,22 @@ namespace pod
         }
         else
         {
-            if (measTypes().size() > 1)
+            size_t n(0);
+            for (const auto& observable : measTypes())
             {
+                const auto weigthFactor = weigthFactors.find(observable);
+                if (weigthFactor == weigthFactors.end())
+                {
+                    std::string msg = "Can't find weigth factor for TypeID:: " 
+                        + TypeID::tStrings[observable.type];
+
+                    InvalidRequest e(msg);
+                    GPSTK_THROW(e)
+                }
+
                 for (size_t i = 0; i < numsv; i++)
-                    weigthMatrix(i+ numsv, i+ numsv) *= 10000.0;
+                    weigthMatrix(i+ numsv*n, i+ numsv*n) *= weigthFactor->second;
+                n++;
             }
         }
     }
@@ -149,10 +195,11 @@ namespace pod
         }
 
         int i_amb1(0);
-        for (const auto& sv : currAmb)
+        //for each current ambiguity
+        for (const auto& amb : currAmb)
         {
             //try to find ambiguity data, processed before
-            const auto& it = ambiguityData.find(sv);
+            const auto& it = ambiguityData.find(amb);
 
             //if found
             if (it != ambiguityData.end())
@@ -214,7 +261,7 @@ namespace pod
             ++row;
         }
 
-        //store 'ambiguities' variables data  
+        //store 'ambiguities' variables data
         int i_amb1(0);
         for (const auto& amb : currAmb)
         {

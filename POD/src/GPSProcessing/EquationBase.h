@@ -1,5 +1,6 @@
 #pragma once
 #include"DataStructures.hpp"
+#include"Ambiguity.h"
 
 namespace pod
 {
@@ -25,8 +26,8 @@ namespace pod
          return empty 'SatIDSet' by default should be overrided in classes,
          handled satellite-specific parameters (phase ambiguities, for example)
          */
-        virtual  gpstk::SatIDSet getSvSet() const
-        { return gpstk::SatIDSet(); } ;
+        virtual  AmbiguitySet getAmbSet() const
+        { return AmbiguitySet(); } ;
         
         /* Put the values in state tarnsition matrix, starting with specific index,
            index will be incremented inside this method

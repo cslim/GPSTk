@@ -324,20 +324,26 @@ namespace pod
          TypeID::S1 ,
          TypeID::LI          ,
          TypeID::MWubbena          ,
-         TypeID::rho               ,
-         TypeID::dtSat             ,
+         //TypeID::rho             ,
+         //TypeID::dtSat           ,
          TypeID::elevation         ,
          TypeID::azimuth           ,
          TypeID::CSL1              ,
          TypeID::CSL2              ,
+         TypeID::satArc            ,
+         /* 
          TypeID::prefitC           ,
          TypeID::prefitL          ,
-         TypeID::prefitL1          ,
-         TypeID::postfitC          ,
+         TypeID::prefitL1         ,
+  
+         */
+         TypeID::postfitC         ,
+         TypeID::postfitP2        ,
          TypeID::postfitL         ,
          TypeID::postfitL1        ,
-         TypeID::codeBias         ,
+         TypeID::postfitL2        ,
          TypeID::BL1              ,
+         TypeID::BL2              ,
          TypeID::BLC              ,
      };
 

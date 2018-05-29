@@ -95,7 +95,7 @@ namespace pod
     protected: int outputPrec = 3;
 
                // object to compute prefit residuals 
-    protected: gpstk::ComputeLinear oMinusC;
+    protected: ProcessLinear oMinusC;
 
                //equation System composer
     protected: eqComposer_sptr Equations;

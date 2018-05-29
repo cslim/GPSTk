@@ -8,16 +8,10 @@ namespace pod
         public EquationBase
     {
     public:
-        enum MeasurementsType
-        {
-            L1,
-            L2,
-            L1L2_IF,
+        
 
-        } obsType;
-
-        AmbiguitySdEquations():obsType(MeasurementsType::L1){};
-        AmbiguitySdEquations(MeasurementsType obsType) :obsType(obsType) {};
+        AmbiguitySdEquations():type(gpstk::TypeID::BL1){};
+        AmbiguitySdEquations(const gpstk::TypeID& obsType) :type(obsType) {};
 
         virtual ~AmbiguitySdEquations() {};
 
@@ -36,11 +30,14 @@ namespace pod
 
         virtual int getNumUnknowns() const override;
 
-        virtual  gpstk::SatIDSet getSvSet() const override;
+        virtual  AmbiguitySet getAmbSet() const override;
 
         virtual void updateH(gpstk::gnssRinex& gData, gpstk::Matrix<double>& H, int& col_0, int& row_0) override;
 
     private:
+
+        /// type ID of carrier phase measurements (or combination of measurements) 
+        gpstk::TypeID type;
 
         ///salellites set to be preocessed
         gpstk::SatIDSet satSet;
@@ -51,7 +48,7 @@ namespace pod
         ///cycle slip flags for satellites in 'satSet' 
         std::map<gpstk::SatID, bool> csFlags;
 
-        ///
+        /// phase ambiguity stochasic model
         mutable gpstk::PhaseAmbiguityModel stochModel;
 
     };

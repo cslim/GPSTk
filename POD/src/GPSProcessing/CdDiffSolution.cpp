@@ -296,13 +296,13 @@ namespace pod
         if (useC1)
         {
             codeL1 = TypeID::C1;
-            oMinusC.addLinear(comm.c1Prefit);
+            oMinusC.add(make_unique<PrefitC1>());
             Equations->measTypes() = TypeIDList{ TypeID::prefitC };
         }
         else
         {
             codeL1 = TypeID::P1;
-            oMinusC.addLinear(comm.p1Prefit);
+            oMinusC.add(make_unique<PrefitP1>());
             Equations->measTypes() = TypeIDList{ TypeID::prefitP1 };
         }
 

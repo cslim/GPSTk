@@ -177,6 +177,7 @@ namespace pod
         ProcessLinear linearIonoFree;
         linearIonoFree.add(make_unique<PCCombimnation>());
         linearIonoFree.add(make_unique<LCCombimnation>());
+
         //Compute single differenceses opreator
         DeltaOp delta;
         for (const auto& it : Equations->measTypes())
@@ -380,37 +381,33 @@ namespace pod
 
         configureSolver();
       
-        Equations->residTypes() = TypeIDList{ TypeID::postfitC, TypeID::postfitL };
+        Equations->residTypes() = TypeIDList{ TypeID::postfitC, TypeID::postfitP2, TypeID::postfitL1,TypeID::postfitL2 };
 
         requireObs.addRequiredType(codeL1);
+        requireObs.addRequiredType(TypeID::P2);
         requireObs.addRequiredType(TypeID::L1);
         requireObs.addRequiredType(TypeID::L2);
         requireObs.addRequiredType(TypeID::LLI1);
         requireObs.addRequiredType(TypeID::LLI2);
-        requireObs.addRequiredType(TypeID::P2);
+
         requireObs.addRequiredType(TypeID::S1);
         
-        ///
-        if (data->ionoCorrector.getType() == IonoModelType::DualFreq )
-        {
-            Equations->measTypes() = TypeIDList{ TypeID::prefitC,TypeID::prefitL };
-
-            oMinusC.addLinear(comm.pcPrefit);
-            oMinusC.addLinear(comm.lcPrefit);
-        }
+        Equations->measTypes() = TypeIDList{ TypeID::prefitC,TypeID::prefitP2, TypeID::prefitL1, TypeID::prefitL2 };
+       
+        if (useC1)
+            oMinusC.add(make_unique<PrefitC1>());
         else
-        {
-            Equations->measTypes() = TypeIDList{ TypeID::prefitC,TypeID::prefitL1 };
-
-            oMinusC.addLinear(useC1 ? comm.c1Prefit : comm.p1Prefit);
-            oMinusC.addLinear(comm.l1Prefit);
-        }
+            oMinusC.add(make_unique<PrefitP1>());
+       
+        oMinusC.add(make_unique<PrefitP2>());
+        oMinusC.add(make_unique<PrefitL1>());
+        oMinusC.add(make_unique<PrefitL2>());
     }
 
     void PdFloatSolution::configureSolver()
     {
         Equations->clear();
-        
+
         //tropo
         //double qPrime = confReader().getValueAsDouble("tropoQ");
         //Equations->addEquation( make_unique<TropoEquations>(qPrime));
@@ -439,14 +436,12 @@ namespace pod
         Equations->addEquation(make_unique<ClockBiasEquations>());
         auto bias = make_unique<InterSystemBias>();
         bias->setStochasicModel(SatID::systemGlonass, make_unique<WhiteNoiseModel>());
-        
-        //Equations->addEquation(/*std::move(bias)*/std::make_unique<InterSystemBias>());
-        
-        
-        if(data->ionoCorrector.getType() == IonoModelType::DualFreq)
-            Equations->addEquation(std::make_unique<AmbiguitySdEquations>(AmbiguitySdEquations::L1L2_IF));
-        else 
-            Equations->addEquation(std::make_unique<AmbiguitySdEquations>(AmbiguitySdEquations::L1));
+
+        Equations->addEquation(/*std::move(bias)*/std::make_unique<InterSystemBias>());
+
+        Equations->addEquation(std::make_unique<AmbiguitySdEquations>(TypeID::BL1));
+
+        Equations->addEquation(std::make_unique<AmbiguitySdEquations>(TypeID::BL2));
 
         forwardBackwardCycles = confReader().getValueAsInt("forwardBackwardCycles");
     }
