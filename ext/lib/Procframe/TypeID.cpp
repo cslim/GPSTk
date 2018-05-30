@@ -322,8 +322,13 @@ namespace gpstk
       tStrings[recCdtdot]  = "RxCdtdot";
 
       tStrings[recISB_GLN]  = "Rx ISB GLONASS";
-      tStrings[recISB_GAL] = "Rx ISB GALILEO";
+      //tStrings[recISB_GAL] = "Rx ISB GALILEO";
       tStrings[recISB_BDS] = "Rx ISB BEIDOU";
+
+      tStrings[recIFB_GPS_L2] = "Rx IFB GPS L2";
+      tStrings[recIFB_GLN_L2] = "Rx IFB GLONASS L2";
+      tStrings[recIFB_GAL_E5] = "Rx IFB GALILEO E5";
+      tStrings[recIFB_BDS_B2] = "Rx IFB BEIDOU B2";
 
       tStrings[recZTropo]  = "RxZenithTropo";
       tStrings[recZTropoWet] = "RxZenithTropoWet";

@@ -355,9 +355,14 @@ namespace gpstk
          recCdt,    ///< Receiver Clock offset 
          recCdtdot, ///< Receiver Clock offset 1-st derivative
 
-         recISB_GLN, ///< GPS - GLONASS intersystem bias
-         recISB_GAL, ///< GPS - GALILEO intersystem bias
-         recISB_BDS, ///< GPS - BEIDOU intersystem bias 
+         recISB_GLN, ///< GPS L1 - GLONASS L1 intersystem bias
+       //recISB_GAL, ///< GPS L1- GALILEO E1 intersystem bias
+         recISB_BDS, ///< GPS  L1- BEIDOU B1 intersystem bias 
+
+         recIFB_GPS_L2, ///< GPS L1 - GPS L2 inter frequency bias
+         recIFB_GLN_L2, ///< GPS L1 - GLONASS L2 inter frequency bias
+         recIFB_GAL_E5, ///< GPS L1 - GALILEO E5 inter frequency bias
+         recIFB_BDS_B2, ///< GPS L1 - BEIDOU B2 inter frequency bias
 
          recZTropo,  ///< full ZTD
          recZTropoWet,  ///< Wet component of ZTD
