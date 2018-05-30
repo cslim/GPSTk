@@ -6,6 +6,24 @@ using namespace std;
 
 namespace pod
 {
+    //set of all possible TypeID for code pseudorange postfit residuals 
+    const std::set<gpstk::TypeID> KalmanSolverFB::codeResTypes
+    {
+        TypeID::postfitC,
+        TypeID::postfitP1,
+        TypeID::postfitP2,
+    };
+
+    //set of all possible TypeID for  carrier phase postfit residuals 
+    const std::set<gpstk::TypeID> KalmanSolverFB::phaseResTypes
+    {
+        TypeID::postfitL,
+        TypeID::postfitL1,
+        TypeID::postfitL2,
+    };
+
+
+
     KalmanSolverFB::KalmanSolverFB()
         :firstIteration(true), processedMeasurements(0), rejectedMeasurements(0)
     {
@@ -81,7 +99,7 @@ namespace pod
         }
 
         // If 'cycles > 1', let's do the other iterations
-        for (int i = 0; i<(cycles - 1); i++)
+        for (int i = 0; i < (cycles - 1); i++)
         {
 
             // Forwards iteration
@@ -106,12 +124,11 @@ namespace pod
         for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
             solver.Process((*rpos));
 
-        for (auto limit : codeLimits)
+        for (size_t cycle = 0; cycle < cyclesNumber; cycle++)
         {
             for (auto &it : ObsData)
             {
-                checkLimits(it, *solver.eqComposer().residTypes().begin(), limit);
-
+                checkLimits(it, cycle);
                 solver.Process(it);
             }
 
@@ -119,29 +136,62 @@ namespace pod
                 solver.Process((*rpos));
         }
     }
+    KalmanSolverFB& KalmanSolverFB::setLimits(const std::list<double>& codeLims, const std::list<double>& phaseLims)
+    {
+        size_t i = 0;
+        tresholds.codeLimits.resize(codeLims.size());
+        for (auto val : codeLims)
+            tresholds.codeLimits[i] = val;
 
-    void KalmanSolverFB::checkLimits(gnssRinex& gData, const TypeID& type, double limit)
+        i = 0;
+        tresholds.phaseLimits.resize(phaseLims.size());
+        for (auto val : phaseLims)
+            tresholds.phaseLimits[i] = val;
+
+        return *this;
+    }
+
+    double KalmanSolverFB::getLimit(const gpstk::TypeID& type, int cycleNumber)
+    {
+        if (codeResTypes.find(type) != codeResTypes.end())
+            if (cycleNumber < tresholds.codeLimits.size())
+                return tresholds.codeLimits[cycleNumber];
+        if (phaseResTypes.find(type) != codeResTypes.end())
+            if (cycleNumber < tresholds.phaseLimits.size())
+                return tresholds.phaseLimits[cycleNumber];
+
+        string msg = "Can't get observables treshold for type: '"
+            + TypeID::tStrings[type.type] +
+            "' with reprocess cycle number: '"
+            + StringUtils::asString(cycleNumber) + "'.";
+
+        InvalidRequest e(msg);
+        GPSTK_THROW(e);
+
+    }
+    void KalmanSolverFB::checkLimits(gnssRinex& gData, int cycleNumber)
     {
         // Set to store rejected satellites
         SatIDSet satRejectedSet;
 
         // Let's check limits
-        for (const auto& it :gData.body)
+        for (const auto& type : solver.eqComposer().residTypes())
         {
-            // Check postfit values and mark satellites as rejected
-            if (std::abs(it.second.at(type)) > limit)
-                satRejectedSet.insert(it.first);
-        }
+            double limit = getLimit(type, cycleNumber);
+            for (const auto& it : gData.body)
+            {
+                // Check postfit values and mark satellites as rejected
+                if (std::abs(it.second.at(type)) > limit)
+                    satRejectedSet.insert(it.first);
 
-           // Update the number of rejected measurements
+            }
+        }
+        // Update the number of rejected measurements
         rejectedMeasurements += satRejectedSet.size();
 
         // Remove satellites with missing data
         gData.removeSatID(satRejectedSet);
 
     }
-
-   
-
 
 }

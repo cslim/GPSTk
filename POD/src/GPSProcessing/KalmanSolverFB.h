@@ -7,6 +7,14 @@ namespace pod
     class KalmanSolverFB :
         public gpstk::SolverLMS
     {
+    private:
+        //set of all possible TypeID for code pseudorange postfit residuals 
+        static const std::set<gpstk::TypeID> codeResTypes;
+
+        //set of all possible TypeID for  carrier phase postfit residuals 
+        static const std::set<gpstk::TypeID> phaseResTypes;
+
+
     public:
         KalmanSolverFB();
         KalmanSolverFB(eqComposer_sptr eqs);
@@ -28,7 +36,7 @@ namespace pod
         {
             return solver.Solution();
         }
-     
+
         /// Postfit-residuals.
         virtual const Vector<double>& PostfitResiduals() const override
         {
@@ -58,13 +66,12 @@ namespace pod
         {
             return solver.getVariance(type);
         }
-        //gpstk::gnssEquationDefinition getDefaultEqDefinition() const override
-        //{
-        //    return solver.getDefaultEqDefinition();
-        //}
-        KalmanSolverFB& setCodeLims(const std::list<double>& codeLims)
+
+        KalmanSolverFB& setLimits(const std::list<double>& codeLims, const std::list<double>& phaseLims);
+
+        KalmanSolverFB& setCyclesNumber(size_t number)
         {
-            codeLimits = codeLims;
+            cyclesNumber = number;
             return *this;
         }
 
@@ -81,9 +88,16 @@ namespace pod
 
         //This method checks the residuals and modifies 'gData' accordingly.
     private:
-        void checkLimits(gpstk::gnssRinex& gData, const TypeID& type, double codeLimit);
+        void checkLimits(gpstk::gnssRinex& gData, int cycleNumber);
+        double getLimit(const gpstk::TypeID& type, int cycleNumber);
 
 #pragma region Fields
+
+        struct limits
+        {
+            std::vector<double> codeLimits;
+            std::vector<double> phaseLimits;
+        }tresholds;
 
         // Number of processed measurements.
     public: int processedMeasurements;
@@ -91,16 +105,15 @@ namespace pod
             //Number of measurements rejected because they were off limits.
     public: int rejectedMeasurements;
 
-            //List storing the limits for postfit residuals in code.
-    protected: std::list<double> codeLimits;
-
-               //Number of measurements rejected because they were off limits.
+            //Number of measurements rejected because they were off limits.
     private: std::list<gpstk::gnssRinex> ObsData;
 
              // is current iteration first
     private: bool firstIteration;
 
     private: KalmanSolver solver;
+
+    private: size_t cyclesNumber;
 
 #pragma endregion
 

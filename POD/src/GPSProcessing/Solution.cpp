@@ -26,7 +26,18 @@ namespace pod
 
     void Solution::process()
     {
-        solver.process();
+        try
+        {
+            solver.process();
+        }
+        catch (gpstk::Exception & e)
+        {
+            cerr << "An exception has occured. Processing stopped." << endl;
+            cerr << e.getLocation() << endl;
+            cerr << e.getText() << endl;
+
+            GPSTK_RETHROW(e);
+        }
     }
 
     void Solution::saveToDb()

@@ -68,7 +68,10 @@ namespace pod
         KalmanSolver solver(Equations);
         KalmanSolverFB solverFb(Equations);
         if (forwardBackwardCycles > 0)
-            solverFb.setCodeLims(confReader().getListValueAsDouble("codeLimList"));
+        {
+            solverFb.setCyclesNumber(forwardBackwardCycles);
+            solverFb.setLimits(confReader().getListValueAsDouble("codeLimList"), confReader().getListValueAsDouble("phaseLimList"));
+        }
 
         ofstream ostream;
         ostream.open(data->workingDir + "\\" + fileName(), ios::out);

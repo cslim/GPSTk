@@ -11,6 +11,7 @@
 #include"ClockBiasEquations.h"
 #include"PositionEquations.h"
 #include"InterSystemBias.h"
+#include"InterFrequencyBiases.h"
 #include"AmbiguitySdEquations.h"
 
 #include"LinearCombinations.hpp"
@@ -186,8 +187,10 @@ namespace pod
         KalmanSolver solver(Equations);
         KalmanSolverFB solverFb(Equations);
         if (forwardBackwardCycles > 0)
-            solverFb.setCodeLims(confReader().getListValueAsDouble("codeLimList"));
-
+        {
+            solverFb.setCyclesNumber(forwardBackwardCycles);
+            solverFb.setLimits(confReader().getListValueAsDouble("codeLimList"), confReader().getListValueAsDouble("phaseLimList"));
+        }
         ofstream ostream;
         ostream.open(data->workingDir + "\\" + fileName(), ios::out);
 
@@ -409,8 +412,8 @@ namespace pod
         Equations->clear();
 
         //tropo
-        //double qPrime = confReader().getValueAsDouble("tropoQ");
-        //Equations->addEquation( make_unique<TropoEquations>(qPrime));
+        double qPrime = confReader().getValueAsDouble("tropoQ");
+        Equations->addEquation( make_unique<TropoEquations>(qPrime));
 
         // White noise stochastic models
         auto  coord = make_unique<PositionEquations>();
@@ -438,6 +441,8 @@ namespace pod
         bias->setStochasicModel(SatID::systemGlonass, make_unique<WhiteNoiseModel>());
 
         Equations->addEquation(/*std::move(bias)*/std::make_unique<InterSystemBias>());
+        
+        Equations->addEquation(std::make_unique<InterFrequencyBiases>());
 
         Equations->addEquation(std::make_unique<AmbiguitySdEquations>(TypeID::BL1));
 

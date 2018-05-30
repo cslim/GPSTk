@@ -13,7 +13,7 @@ namespace pod
     InterSystemBias::Initilizer:: Initilizer()
     {
         ss2isb[SatID::SatelliteSystem::systemGlonass] = TypeID::recISB_GLN;
-        ss2isb[SatID::SatelliteSystem::systemGalileo] = TypeID::recISB_GAL;
+        //ss2isb[SatID::SatelliteSystem::systemGalileo] = TypeID::recISB_GAL;
         ss2isb[SatID::SatelliteSystem::systemBeiDou] =  TypeID::recISB_BDS;
 
         for (const auto& it : ss2isb)
@@ -98,9 +98,8 @@ namespace pod
             types.erase(it);
         
         //finally, let's add current ISB types to the overall equation set
-        ///
-        //for (const auto& it : types)
-        //    eq.insert(it);
+        for (const auto& it : types)
+            eq.insert(it);
     }
 
     InterSystemBias& InterSystemBias::setStochasicModel(
@@ -128,13 +127,7 @@ namespace pod
             ++index;
         }
     }
-    void InterSystemBias::updateH(gpstk::gnssRinex& gData, gpstk::Matrix<double>& H, int& col_0, int& row_0) 
-    {
-        for (const auto& it: gData.body)
-        {
 
-        }
-    };
     int InterSystemBias::getNumUnknowns() const
     {
        return types.size();

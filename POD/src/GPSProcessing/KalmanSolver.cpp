@@ -47,8 +47,8 @@ namespace pod
             //    DBOUT(it<<" ");
 
             //DBOUT_LINE("measVector\n" << setprecision(10) << measVector);
-            //DBOUT_LINE("H\n" << hMatrix);
-            DBOUT_LINE("weigthMatrix\n" << weigthMatrix);
+            DBOUT_LINE("H\n" << hMatrix);
+            //DBOUT_LINE("weigthMatrix\n" << weigthMatrix);
 
             //prepare
             Matrix<double> hMatrixTr = transpose(hMatrix);
@@ -72,7 +72,7 @@ namespace pod
             equations->saveResiduals(gData, postfitResiduals);
             //
             //fixAmbiguities(gData);
-            //storeAmbiguities(gData);
+            storeAmbiguities(gData);
 
             break;
 

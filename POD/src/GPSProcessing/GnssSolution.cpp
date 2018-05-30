@@ -73,6 +73,11 @@ namespace pod
         const auto& types = Equations->currentUnknowns();
         if (types.find(TypeID::recISB_GLN) != types.end())
             gEpoch.slnData.insert(make_pair(TypeID::recISB_GLN, solver.getSolution(TypeID::recISB_GLN)));
+        if (types.find(TypeID::recIFB_GPS_L2) != types.end())
+            gEpoch.slnData.insert(make_pair(TypeID::recIFB_GPS_L2, solver.getSolution(TypeID::recIFB_GPS_L2)));
+        if (types.find(TypeID::recIFB_GLN_L2) != types.end())
+            gEpoch.slnData.insert(make_pair(TypeID::recIFB_GLN_L2, solver.getSolution(TypeID::recIFB_GLN_L2)));
+
 
         os << setprecision(6) << CivilTime(time).printf("%02Y %02m %02d %02H %02M %02S %P") << " " << slnType << " ";
         os << setprecision(10) << newPos.X() << "  " << newPos.Y() << "  " << newPos.Z() << "  " << cdt << " ";

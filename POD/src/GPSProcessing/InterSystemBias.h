@@ -22,18 +22,14 @@ namespace pod
     class InterSystemBias :
         public  EquationBase
     {
-    protected:
+    private:
         static std::map< gpstk::SatID::SatelliteSystem, gpstk::TypeID> ss2isb;
         static std::map<gpstk::TypeID, gpstk::SatID::SatelliteSystem> isb2ss;
+
     public:
 
         InterSystemBias();
         virtual ~InterSystemBias() {};
-
-        /**  It returns a modified gnnsRinex object.
-        *
-        * @param gData    Data object holding the data.
-        */
 
         virtual  void Prepare(gpstk::gnssRinex& gData);
 
@@ -54,7 +50,6 @@ namespace pod
 
         virtual InterSystemBias& setStochasicModel(const gpstk::SatID::SatelliteSystem& system, gpstk::StochasticModel_uptr newModel);
 
-        virtual void updateH(gpstk::gnssRinex& gData, gpstk::Matrix<double>& H, int& col_0, int& row_0) override;
 
     private:
 
