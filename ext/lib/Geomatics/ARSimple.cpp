@@ -27,7 +27,7 @@ namespace gpstk
 
          if( std::abs(upperValue-lowerValue) <= 1.0 )
          {
-            ambFixed(i) = double( std::floor(ambFloat(i)+0.5) );
+            ambFixed(i) = double( std::round(ambFloat(i)) );
          }
          else
          {

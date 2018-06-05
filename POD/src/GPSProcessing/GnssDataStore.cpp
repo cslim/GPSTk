@@ -58,9 +58,10 @@ namespace pod
             opts.slnType = (SlnType)confReader->getValueAsInt("slnType");
             opts.isSpaceborneRcv = confReader->getValueAsBoolean("IsSpaceborneRcv");
             opts.isSmoothCode = confReader->getValueAsBoolean("IsSmoothCode");
-
+            opts.computeTropo = confReader->getValueAsBoolean("computeTropo");
             opts.maskEl = confReader->getValueAsDouble("ElMask");
             opts.maskSNR = confReader->getValueAsDouble("SNRmask");
+            opts.numberOfBands = confReader->getValueAsInt("numberOfBands");
 
             opts.systems.insert(SatID::SatelliteSystem::systemGPS);
             bool useGLN = confReader->getValueAsBoolean("useGLN");

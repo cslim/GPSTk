@@ -1,8 +1,11 @@
 #pragma once
 
 #include"EquationBase.h"
-#include<memory>
 #include"Ambiguity.h"
+#include"GnssDataStore.hpp"
+
+#include<memory>
+
 
 namespace pod
 {
@@ -16,8 +19,8 @@ namespace pod
         ///to map opbservables TypeID to weight factor
         static const std::map<gpstk::TypeID, double> weigthFactors;
 
-        EquationComposer() {}
-
+        EquationComposer() {};
+        EquationComposer(SlnType st): slnType(st) {};
         virtual ~EquationComposer() {};
 
         ///prepare equations according current data set 'gData'
@@ -82,7 +85,18 @@ namespace pod
         {
             return currAmb;
         }
+        
+        virtual SlnType  getSlnType() const
+        {
+            return slnType;
+        }
 
+        virtual EquationComposer&  setSlnType(SlnType sType)
+        {
+             slnType = sType;
+             return *this;
+        }
+        
         /// add new equation to equation list
         virtual EquationComposer& addEquation(std::unique_ptr<EquationBase> eq)
         {
@@ -154,6 +168,8 @@ namespace pod
 
         /// number of measurments
         int numMeas;
+
+        SlnType slnType;
 
     };
     typedef std::shared_ptr<EquationComposer> eqComposer_sptr;

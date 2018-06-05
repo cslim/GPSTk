@@ -105,7 +105,7 @@ namespace pod
         if (type2 != coreUnknowns.end())
             setIFB.insert(*type2);
 
-        //жуть какая то:
+        //жуть какая-то:
         if (setIFB.size()!=0)
         {
             for (size_t k = 0; k < numMeasTypes; k++)
@@ -120,7 +120,7 @@ namespace pod
         }
 
         //fill the satellites dependent part of design matrix
-        int row(numSVs*2);
+        int row(numSVs*numMeasTypes/2);
         int col(numCoreUnknowns);
         for (auto& eq : equations)
             eq->updateH(gData, H, row, col);

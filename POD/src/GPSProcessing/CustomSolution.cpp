@@ -3,6 +3,7 @@
 #include"SingleSolution.h"
 #include"CdDiffSolution.h"
 #include"PdFloatSolution.h"
+#include"PdFixedSolution.h"
 #include"PPPSolutionBase.h"
 #include"PODSolution.h"
 #include"PPPSolution.h"
@@ -19,9 +20,8 @@ namespace pod
             return std::make_unique<CdDiffSolution>(dataStore);
         case pod::PD_Float:
             return std::make_unique<PdFloatSolution>(dataStore);
-            break;
         case pod::PD_Fixed:
-            break;
+            return std::make_unique<PdFixedSolution>(dataStore);
         case pod::PPP_Float:
             if (dataStore->opts.isSpaceborneRcv)
                 return std::make_unique<PODSolution>(dataStore);

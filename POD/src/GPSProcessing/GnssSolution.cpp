@@ -13,9 +13,10 @@ namespace pod
         return( cout << "Epoch: " << CivilTime(time) << " "<< msg << endl);
      }
    
-    GnssSolution::GnssSolution(GnssDataStore_sptr gnssData, double sigma = 50.0)
-        :data(gnssData), Equations(make_shared<EquationComposer>()), maxSigma(sigma)
-    { }
+     GnssSolution::GnssSolution(GnssDataStore_sptr gnssData, double sigma = 50.0)
+         :data(gnssData), Equations(make_shared<EquationComposer>()), maxSigma(sigma)
+     {
+     }
 
     GnssSolution::~GnssSolution() {}
 
@@ -29,7 +30,7 @@ namespace pod
         Matrix<double> svp;
         if (PRSolution2::PrepareAutonomousSolution(gRin.header.epoch, svs, meas, Eph, svp))
             return -1;
-
+       
         Bancroft ban;
         Vector<double> res;
         if (ban.Compute(svp, res))

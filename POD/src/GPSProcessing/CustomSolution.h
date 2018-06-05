@@ -58,7 +58,6 @@ namespace pod
 
     protected: virtual void updateRequaredObs() override
     {
-
     }
 
 #pragma endregion

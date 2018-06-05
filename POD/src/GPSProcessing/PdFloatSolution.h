@@ -7,6 +7,7 @@ namespace pod
     {
     public:
         PdFloatSolution(GnssDataStore_sptr data_ptr);
+        PdFloatSolution(GnssDataStore_sptr data_ptr, double  max_sigma);
         virtual ~PdFloatSolution();
 
         virtual std::string  fileName() const override

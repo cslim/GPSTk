@@ -49,7 +49,9 @@ namespace pod
     PdFloatSolution::PdFloatSolution(GnssDataStore_sptr data_ptr)
         :GnssSolution(data_ptr,50.0)
     { }
-
+    PdFloatSolution::PdFloatSolution(GnssDataStore_sptr data_ptr, double max_sigma)
+        : GnssSolution(data_ptr, max_sigma)
+    { }
     PdFloatSolution::~PdFloatSolution()
     { }
 
@@ -383,8 +385,6 @@ namespace pod
         computeLinear.add(make_unique<LICombimnation>());
 
         configureSolver();
-      
-        Equations->residTypes() = TypeIDList{ TypeID::postfitC, TypeID::postfitP2, TypeID::postfitL1,TypeID::postfitL2 };
 
         requireObs.addRequiredType(codeL1);
         requireObs.addRequiredType(TypeID::P2);
@@ -394,17 +394,27 @@ namespace pod
         requireObs.addRequiredType(TypeID::LLI2);
 
         requireObs.addRequiredType(TypeID::S1);
-        
-        Equations->measTypes() = TypeIDList{ TypeID::prefitC,TypeID::prefitP2, TypeID::prefitL1, TypeID::prefitL2 };
-       
+
         if (useC1)
             oMinusC.add(make_unique<PrefitC1>());
         else
             oMinusC.add(make_unique<PrefitP1>());
-       
-        oMinusC.add(make_unique<PrefitP2>());
+        
         oMinusC.add(make_unique<PrefitL1>());
-        oMinusC.add(make_unique<PrefitL2>());
+
+        if (opts().numberOfBands == 1)
+        {
+
+            Equations->measTypes() = TypeIDList{ TypeID::prefitC, TypeID::prefitL1 };
+            Equations->residTypes() = TypeIDList{ TypeID::postfitC, TypeID::postfitL1 };
+        }
+        else if (opts().numberOfBands == 2)
+        {
+            oMinusC.add(make_unique<PrefitP2>());
+            oMinusC.add(make_unique<PrefitL2>());
+            Equations->measTypes() = TypeIDList{ TypeID::prefitC, TypeID::prefitP2, TypeID::prefitL1, TypeID::prefitL2 };
+            Equations->residTypes() = TypeIDList{ TypeID::postfitC, TypeID::postfitP2, TypeID::postfitL1,TypeID::postfitL2 };
+        }
     }
 
     void PdFloatSolution::configureSolver()
@@ -412,8 +422,11 @@ namespace pod
         Equations->clear();
 
         //tropo
-        double qPrime = confReader().getValueAsDouble("tropoQ");
-        Equations->addEquation( make_unique<TropoEquations>(qPrime));
+        if (opts().computeTropo)
+        {
+            double qPrime = confReader().getValueAsDouble("tropoQ");
+            Equations->addEquation(make_unique<TropoEquations>(qPrime));
+        }
 
         // White noise stochastic models
         auto  coord = make_unique<PositionEquations>();
@@ -441,12 +454,14 @@ namespace pod
         bias->setStochasicModel(SatID::systemGlonass, make_unique<WhiteNoiseModel>());
 
         Equations->addEquation(/*std::move(bias)*/std::make_unique<InterSystemBias>());
-        
-        Equations->addEquation(std::make_unique<InterFrequencyBiases>());
+
+        if (opts().numberOfBands == 2)
+            Equations->addEquation(std::make_unique<InterFrequencyBiases>());
 
         Equations->addEquation(std::make_unique<AmbiguitySdEquations>(TypeID::BL1));
 
-        Equations->addEquation(std::make_unique<AmbiguitySdEquations>(TypeID::BL2));
+        if (opts().numberOfBands == 2)
+            Equations->addEquation(std::make_unique<AmbiguitySdEquations>(TypeID::BL2));
 
         forwardBackwardCycles = confReader().getValueAsInt("forwardBackwardCycles");
     }

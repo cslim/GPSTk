@@ -131,6 +131,11 @@ namespace pod
             //pocessing-spacific options
     public: struct ProcessOpts
     {
+        // Estimate zenith troposperic delay?
+        bool computeTropo = false;
+
+        //number of frequences to be processed
+        int numberOfBands = 1;
 
         // Is data relate to the spacecraft-based receiver?
         bool isSpaceborneRcv = false;
