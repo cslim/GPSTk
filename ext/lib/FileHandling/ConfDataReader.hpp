@@ -387,6 +387,22 @@ namespace gpstk
           double defaultVal = 0.0)
           throw(ConfigurationException);
 
+      /** Method to get (as integer) the all values of a given
+      *  variable list.
+      *
+      * In this context, a variable list is the same as a variable but
+      * it is composed of several parts (words), separated by spaces.
+      *
+      * @param variableList   Variable list name.
+      * @param section        Section the variable list belongs to.
+      *
+      * \warning This method will MODIFY the original content of
+      * 'variableList'.
+      */
+      virtual std::list<int> getListValueAsInt(std::string variableList,
+          std::string section = "DEFAULT",
+          int defaultVal = 0.0)
+          throw(ConfigurationException);
 
 
       virtual int getNumItem( std::string variableList,

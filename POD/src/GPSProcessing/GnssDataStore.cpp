@@ -63,10 +63,8 @@ namespace pod
             opts.maskSNR = confReader->getValueAsDouble("SNRmask");
             opts.numberOfBands = confReader->getValueAsInt("numberOfBands");
 
-            opts.systems.insert(SatID::SatelliteSystem::systemGPS);
-            bool useGLN = confReader->getValueAsBoolean("useGLN");
-            if (useGLN)
-                opts.systems.insert(SatID::SatelliteSystem::systemGlonass);
+            for (auto it : confReader->getListValueAsInt("satSystems"))
+                opts.systems.insert(static_cast<SatID::SatelliteSystem>(it));
 
             cout << "Used Sat. Systems: ";
             for (auto& ss : opts.systems)

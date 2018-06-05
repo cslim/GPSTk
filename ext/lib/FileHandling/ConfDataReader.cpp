@@ -603,6 +603,21 @@ namespace gpstk
        return dblVal;
    }
 
+   std::list<int> ConfDataReader::getListValueAsInt(std::string variableList,
+       std::string section,
+       int defaultVal)
+
+   {
+       auto strVal = getListValue(variableList,
+           section,
+           StringUtils::asString(defaultVal));
+       std::list<int> dblVal;
+       for (const auto &it : strVal)
+           dblVal.push_back(StringUtils::asInt(it));
+
+       return dblVal;
+   }
+
    string ConfDataReader::getVariableDescription( string variable,
                                                   string section )
       throw(ConfigurationException)

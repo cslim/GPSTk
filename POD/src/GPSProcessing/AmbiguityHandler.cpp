@@ -52,7 +52,7 @@ namespace pod
        
         //ambiguities part of DD to SD transition matrix
         const auto SD2DDamb = refSatsHandler.getSD2DDMatrix(gData, *pAmbs);
-        DBOUT_LINE("SD2DDamb\n" << SD2DDamb);
+       // DBOUT_LINE("SD2DDamb\n" << SD2DDamb.diagCopy());
 
         //put the ambiguities part of DD to SD into main DD to SD transition matrix
         for (int i = 0; i < types.size(); i++)
@@ -66,14 +66,14 @@ namespace pod
                 }
         }
 
-        DBOUT_LINE("SD2DD\n" << SD2DD);
+        //DBOUT_LINE("SD2DD\n" << SD2DD);
 
         //transform float solution and its covarince into DD form
         auto DDfloatSolution = SD2DD*(*pSdFloatSolution);
         auto trSD2DD = transpose(SD2DD);
         auto DDCov = SD2DD*(*pSdCov)*trSD2DD;
         
-        DBOUT_LINE("covDD\n" << DDCov)
+        DBOUT_LINE("covDD\n" << DDCov.diagCopy())
 
         for (int i = 0; i < dd_num; i++)
         {

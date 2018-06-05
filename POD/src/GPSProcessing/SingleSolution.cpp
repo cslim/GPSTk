@@ -237,9 +237,9 @@ namespace pod
 
         Equations->addEquation(make_unique<ClockBiasEquations>());
 
-        //auto bias = make_unique<InterSystemBias>();
-        //bias->setStochasicModel(SatID::systemGlonass, make_unique<WhiteNoiseModel>());
-        Equations->addEquation(make_unique<InterSystemBias>());
+        if (opts().systems.size() > 1)
+            Equations->addEquation(/*std::move(bias)*/std::make_unique<InterSystemBias>());
+
         Equations->residTypes() = TypeIDList{ TypeID::postfitC };
         forwardBackwardCycles = confReader().getValueAsInt("forwardBackwardCycles");
     }
