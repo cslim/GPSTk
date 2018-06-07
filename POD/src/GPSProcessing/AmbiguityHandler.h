@@ -46,6 +46,11 @@ namespace pod
 
     private:
         
+        void storeDDAmbiguities(
+            gpstk::gnssRinex & gData, 
+            const gpstk::Vector<double> &ddFixedAmb, 
+            const gpstk::SatIDSet &refSVs) const;
+
         //pointer to current set of ambiguites
         const AmbiguitySet *pAmbs;
 

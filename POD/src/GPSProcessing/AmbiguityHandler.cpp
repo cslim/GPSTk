@@ -11,7 +11,7 @@ namespace pod
         const  gpstk::Matrix<double> &cov,
         int n_core)
         :pAmbs(&ambiguites), pSdFloatSolution(&state), pSdCov(&cov), coreNum(n_core),
-        pAR(std::make_unique<gpstk::ARSimple>())
+        pAR(std::make_unique<gpstk::ARMLambda>())
     {
         assert(coreNum + pAmbs->size() == pSdFloatSolution->size());
         assert(pSdCov->rows() == pSdCov->cols());
@@ -24,9 +24,9 @@ namespace pod
         Vector<double> coreParamsFloat(coreNum, .0);
         for (int k = 0; k < coreNum; k++)
             coreParamsFloat(k) = (*pSdFloatSolution)(k);
-        
+
         //fill sets of satellite systems and observation types,
-        //presented in current set of carrier phase measurements set
+        //presented in current set of carrier phase measurements
         SatSystSet ss;
         TypeIDSet types;
         for (const auto &it : *pAmbs)
@@ -45,16 +45,18 @@ namespace pod
         Matrix<double> parDDAmbCov(coreNum, dd_num, .0);
 
         Matrix<double> SD2DD(dd_num + coreNum, sd_num + coreNum, .0);
-       
+
         // core part of DD to SD transition matrix -  identity matrix
         for (int j = 0; j < coreNum; j++)
             SD2DD(j, j) = 1.0;
-       
-        //ambiguities part of DD to SD transition matrix
-        const auto SD2DDamb = refSatsHandler.getSD2DDMatrix(gData, *pAmbs);
-       // DBOUT_LINE("SD2DDamb\n" << SD2DDamb.diagCopy());
 
-        //put the ambiguities part of DD to SD into main DD to SD transition matrix
+        //set of reference satellites
+        SatIDSet refSVs;
+        //ambiguities part of DD to SD transition matrix
+        const auto SD2DDamb = refSatsHandler.getSD2DDMatrix(gData, *pAmbs, refSVs);
+        // DBOUT_LINE("SD2DDamb\n" << SD2DDamb.diagCopy());
+
+         //put the ambiguities part of DD to SD into main DD to SD transition matrix
         for (int i = 0; i < types.size(); i++)
         {
             for (int j = 0; j < SD2DDamb.rows(); j++)
@@ -72,37 +74,58 @@ namespace pod
         auto DDfloatSolution = SD2DD*(*pSdFloatSolution);
         auto trSD2DD = transpose(SD2DD);
         auto DDCov = SD2DD*(*pSdCov)*trSD2DD;
-        
+
         DBOUT_LINE("covDD\n" << DDCov.diagCopy())
 
-        for (int i = 0; i < dd_num; i++)
-        {
-            //extract float ambiguities DD  
-            DDfloatAmb(i) = DDfloatSolution(coreNum + i);
+            for (int i = 0; i < dd_num; i++)
+            {
+                //extract float ambiguities DD  
+                DDfloatAmb(i) = DDfloatSolution(coreNum + i);
 
-            //extract ambiguities - ambiguities part of DD covarince matrix
-            for (int j = 0; j < dd_num; j++)
-                ddAmbCov(i, j) = DDCov(coreNum + i, coreNum + j);
-            
-            //extract core - ambiguities part of DD covarince matrix
-            for (int k = 0; k < coreNum; k++)
-                parDDAmbCov(k, i) = DDCov(k, coreNum + i);
-        }
-        
+                //extract ambiguities - ambiguities part of DD covarince matrix
+                for (int j = 0; j < dd_num; j++)
+                    ddAmbCov(i, j) = DDCov(coreNum + i, coreNum + j);
+
+                //extract core - ambiguities part of DD covarince matrix
+                for (int k = 0; k < coreNum; k++)
+                    parDDAmbCov(k, i) = DDCov(k, coreNum + i);
+            }
+
         //select ambiguities resolution method
-        setArMethod<ARMLambda>();
+        //setArMethod<ARMLambda>();
 
         //resolve the carrier-phas ambiguities as integer
         ddFixedAmb = pAR->resolveIntegerAmbiguity(DDfloatAmb, ddAmbCov);
 
         DBOUT_LINE("float DD amb\n" << DDfloatAmb);
         DBOUT_LINE("fixed DD amb\n" << ddFixedAmb);
-        
+
         //update core parameters values with integer ambiguities
         coreParamFixed = coreParamsFloat - parDDAmbCov*inverseChol(ddAmbCov)*(DDfloatAmb - ddFixedAmb);
+
+
         DBOUT_LINE("float Params\n" << coreParamsFloat);
         DBOUT_LINE("fixed Params\n" << coreParamFixed);
+        
+        storeDDAmbiguities(gData, ddFixedAmb, refSVs);
 
     }
-
+    void AmbiguityHandler::storeDDAmbiguities(
+        gpstk::gnssRinex & gData,
+        const Vector<double> &ddFixedAmb, 
+        const gpstk::SatIDSet &refSVs) const
+    {
+        int i(0);
+        for (const auto & amb : *pAmbs)
+        {
+            auto  &it = gData.body.find(amb.sv);
+            if (it != gData.body.end())
+            {
+                if (refSVs.find(amb.sv) == refSVs.end())
+                    gData.body[amb.sv][amb.type] = ddFixedAmb(i++);
+                else
+                    gData.body[amb.sv][amb.type] = 0.0;
+            }
+        }
+    }
 }

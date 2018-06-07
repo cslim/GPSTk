@@ -75,7 +75,7 @@ namespace pod
             equations->saveResiduals(gData, postfitResiduals);
                        
             fixAmbiguities(gData);
-            storeAmbiguities(gData);
+           // storeAmbiguities(gData);
 
             break;
 
@@ -96,17 +96,18 @@ namespace pod
     
     void  KalmanSolver::fixAmbiguities(gnssRinex& gData)
     {
-        if (equations->getSlnType() == SlnType::PD_Fixed)
+        if (equations->getSlnType() == SlnType::PD_Fixed && equations->currentAmb().size() > 5)
+        {
+            int core_num = equations->currentUnknowns().size();
+            AmbiguityHandler ar(equations->currentAmb(), solution, covMatrix, core_num);
+            ar.fixL1L2(gData);
 
-            if (equations->currentAmb().size() > 5)
-            {
-                int core_num = equations->currentUnknowns().size();
-                AmbiguityHandler ar(equations->currentAmb(), solution, covMatrix, core_num);
-                ar.fixL1L2(gData);
-
-                for (int k = 0; k < core_num; k++)
-                    solution(k) = ar.CoreParamFixed()(k);
-            }
+            for (int k = 0; k < core_num; k++)
+                solution(k) = ar.CoreParamFixed()(k);
+        }
+        else
+            storeAmbiguities(gData);
+            
     }
 
     void  KalmanSolver::storeAmbiguities(gnssRinex& gData) const

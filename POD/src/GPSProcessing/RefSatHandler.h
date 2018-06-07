@@ -15,7 +15,7 @@ namespace pod
         gpstk::SatIDSet  getRefSats(gpstk::gnssRinex & gRin);
         
         //return DD to SD transition matrix
-        gpstk::Matrix<double> getSD2DDMatrix(gpstk::gnssRinex & gData, const AmbiguitySet& ambs);
+        gpstk::Matrix<double> getSD2DDMatrix(gpstk::gnssRinex & gData, const AmbiguitySet& ambs, gpstk::SatIDSet &svSet);
     };
 }
 
