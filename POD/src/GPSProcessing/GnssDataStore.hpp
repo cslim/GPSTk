@@ -18,6 +18,14 @@
 namespace pod
 { 
     typedef gpstk::ComputeIonoModel::IonoModelType IonoModelType;
+    
+    //
+    enum CarrierBand
+    {
+        L1 = 1,
+        L2,
+        L5
+    };
 
     // desired type of GNSS solution
     enum SlnType
@@ -31,7 +39,9 @@ namespace pod
 
         NONE_SOLUTION = 0,
     };
+
     extern std::map<SlnType, std::string>  slnType2Str;
+    extern std::map<CarrierBand, std::string> carrierBand2Str;
 
     //class to store processing configuration and input data  
     struct GnssDataStore
@@ -134,9 +144,6 @@ namespace pod
         // Estimate zenith troposperic delay?
         bool computeTropo = false;
 
-        //number of frequences to be processed
-        int numberOfBands = 1;
-
         // Is data relate to the spacecraft-based receiver?
         bool isSpaceborneRcv = false;
 
@@ -148,6 +155,9 @@ namespace pod
 
         // Satellite systems used for position computation 
         gpstk::SatSystSet systems;
+
+        // Satellite systems used for position computation 
+        std::set<CarrierBand> carrierBands;
 
         // Use C1 pseudoranges  for position computation instead of P1
         bool useC1 = false;

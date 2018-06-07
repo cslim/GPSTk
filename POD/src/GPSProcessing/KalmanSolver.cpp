@@ -44,14 +44,14 @@ namespace pod
             firstTime = false;
 
             DBOUT_LINE("----------------------------------------------------------------------------------------");
-            DBOUT_LINE(CivilTime(gData.header.epoch));
+            //DBOUT_LINE(CivilTime(gData.header.epoch));
             //auto svset = gData.getSatID();
             //for (auto& it:svset)
             //    DBOUT(it<<" ");
 
             //DBOUT_LINE("measVector\n" << setprecision(10) << measVector);
              DBOUT_LINE("H\n" << hMatrix);
-           // DBOUT_LINE("weigthMatrix\n" << weigthMatrix);
+             DBOUT_LINE("weigthMatrix\n" << weigthMatrix);
 
             //prepare
             Matrix<double> hMatrixTr = transpose(hMatrix);
@@ -148,7 +148,7 @@ namespace pod
     }
     
     //reject by code postfit residual 
-    gnssRinex& KalmanSolver::reject(gnssRinex& gData, const TypeIDList&  typeIds)
+    gnssRinex& KalmanSolver::reject(gnssRinex& gData, const TypeIDSet&  typeIds)
     {
         using type = decltype(gnssRinex::body)::value_type;
         SatIDSet rejSat;

@@ -274,18 +274,25 @@ namespace gpstk
          instL7,    ///< Instrumental delay, L7
          instL8,    ///< Instrumental delay, L8
             // Equation system-related types
+         prefitC,   ///< Prefit residual, code
          prefitP1,  ///< Prefit residual, code P1
          prefitP2,  ///< Prefit residual, code P2
+         prefitC5,  ///< Prefit residual, code C5
+         prefitL,   ///< Prefit residual, phase
          prefitL1,  ///< Prefit residual, phase L1
          prefitL2,  ///< Prefit residual, phase L2
+         prefitL5,  ///< Prefit residual, phase L5
+
+         postfitC,  ///< Postfit residual, code
          postfitP1, ///< Postfit residual, code P1
          postfitP2, ///< Postfit residual, code P2
+         postfitC5, ///< Postfit residual, code C5
+
+         postfitL,  ///< Postfit residual, phase
          postfitL1, ///< Postfit residual, phase L1
          postfitL2, ///< Postfit residual, phase L2
-         prefitC5,  ///< Prefit residual, code C5
-         prefitL5,  ///< Prefit residual, phase L5
-         postfitC5, ///< Postfit residual, code C5
          postfitL5, ///< Postfit residual, phase L5
+
          prefitGRAPHIC1,   ///< Prefit residual, GRAPHIC1
          prefitGRAPHIC2,   ///< Prefit residual, GRAPHIC2
          postfitGRAPHIC1,  ///< Postfit residual, GRAPHIC1
@@ -299,10 +306,7 @@ namespace gpstk
          postfitWL2,///< Postfit residual, WL2
          postfitWL3,///< Postfit residual, WL3
          postfitWL4,///< Postfit residual, WL4
-         prefitC,   ///< Prefit residual, code
-         prefitL,   ///< Prefit residual, phase
-         postfitC,  ///< Postfit residual, code
-         postfitL,  ///< Postfit residual, phase
+
          dx,        ///< In the position domain: Position bias, X component; in the range domain: dx coefficient
          dy,        ///< In the position domain: Position bias, Y component; in the range domain: dy coefficient
          dz,        ///< In the position domain: Position bias, Z component; in the range domain: dz coefficient

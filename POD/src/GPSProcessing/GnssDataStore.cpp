@@ -9,7 +9,7 @@ using namespace gpstk;
 namespace pod
 {
     std::map<SlnType, std::string> pod::slnType2Str;
-
+    std::map<CarrierBand, std::string> pod::carrierBand2Str;
     GnssDataStore::Initializer::Initializer()
     {
         slnType2Str[SlnType::Standalone] = "Standalone";
@@ -19,6 +19,10 @@ namespace pod
         slnType2Str[SlnType::PPP_Float] = "PPP_Float";
         slnType2Str[SlnType::PPP_Fixed] = "PPP_Fixed";
         slnType2Str[SlnType::NONE_SOLUTION] = "NONE_SOLUTION";
+
+        carrierBand2Str[CarrierBand::L1] = "L1";
+        carrierBand2Str[CarrierBand::L2] = "L2";
+        carrierBand2Str[CarrierBand::L5] = "L5";
     }
 
     GnssDataStore::Initializer GnssDataStore::GnssDataInitializer;
@@ -61,7 +65,14 @@ namespace pod
             opts.computeTropo = confReader->getValueAsBoolean("computeTropo");
             opts.maskEl = confReader->getValueAsDouble("ElMask");
             opts.maskSNR = confReader->getValueAsDouble("SNRmask");
-            opts.numberOfBands = confReader->getValueAsInt("numberOfBands");
+
+            for (auto it : confReader->getListValueAsInt("carrierBands"))
+                opts.carrierBands.insert(static_cast<CarrierBand>(it));
+           
+            cout << "Used Carrier bands: ";
+            for (auto& it : opts.carrierBands)
+                cout << carrierBand2Str[it] << " ";
+            cout << endl;
 
             for (auto it : confReader->getListValueAsInt("satSystems"))
                 opts.systems.insert(static_cast<SatID::SatelliteSystem>(it));
@@ -70,6 +81,8 @@ namespace pod
             for (auto& ss : opts.systems)
                 cout << SatID::convertSatelliteSystemToString(ss) << " ";
             cout << endl;
+
+            cout << "Solution Type: " << slnType2Str[opts.slnType] << endl;
 
             //set BCE files direcory 
             bceDir = confReader->getValue("RinexNavFilesDir");

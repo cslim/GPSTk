@@ -62,21 +62,21 @@ namespace pod
             return coreUnknowns;
         }
 
-        virtual gpstk::TypeIDList & measTypes()
+        virtual gpstk::TypeIDSet & measTypes()
         {
             return measurmentsTypes;
         }
-        virtual const gpstk::TypeIDList & measTypes() const
+        virtual const gpstk::TypeIDSet & measTypes() const
         {
             return measurmentsTypes;
         }
 
-        virtual gpstk::TypeIDList & residTypes()
+        virtual gpstk::TypeIDSet & residTypes()
         {
             return residualsTypes;
         }
 
-        virtual const gpstk::TypeIDList & residTypes() const 
+        virtual const gpstk::TypeIDSet & residTypes() const
         {
             return residualsTypes;
         }
@@ -158,10 +158,10 @@ namespace pod
         AmbiguitySet currAmb;
         
         /// type of measurements
-        gpstk::TypeIDList measurmentsTypes;
+        gpstk::TypeIDSet measurmentsTypes;
 
         /// type ID of postfit residuals
-        gpstk::TypeIDList residualsTypes;
+        gpstk::TypeIDSet residualsTypes;
         
         /// number of unknowns
         int numUnknowns;

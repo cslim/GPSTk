@@ -240,7 +240,7 @@ namespace pod
         if (opts().systems.size() > 1)
             Equations->addEquation(/*std::move(bias)*/std::make_unique<InterSystemBias>());
 
-        Equations->residTypes() = TypeIDList{ TypeID::postfitC };
+        Equations->residTypes() = TypeIDSet{ TypeID::postfitC };
         forwardBackwardCycles = confReader().getValueAsInt("forwardBackwardCycles");
     }
 
@@ -256,12 +256,12 @@ namespace pod
         {
             codeL1 = TypeID::C1;
             oMinusC.add(make_unique<PrefitC1>());
-            Equations->measTypes() = TypeIDList{ TypeID::prefitC };
+            Equations->measTypes() = TypeIDSet{ TypeID::prefitC };
         }
         else
         {
             codeL1 = TypeID::P1;
-            Equations->measTypes() = TypeIDList{ TypeID::prefitP1 };
+            Equations->measTypes() = TypeIDSet{ TypeID::prefitP1 };
             oMinusC.add(make_unique<PrefitP1>());
         }
 

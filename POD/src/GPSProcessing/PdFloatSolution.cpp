@@ -181,10 +181,13 @@ namespace pod
         linearIonoFree.add(make_unique<PCCombimnation>());
         linearIonoFree.add(make_unique<LCCombimnation>());
 
-        //Compute single differenceses opreator
+        //Compute single differences opreator
         DeltaOp delta;
+        //configure single differences operator with appropriate measurements types
+        TypeIDSet diffTypeSet;
         for (const auto& it : Equations->measTypes())
-            delta.addDiffType(it);
+            diffTypeSet.insert(it);
+        delta.setDiffTypeSet(diffTypeSet);
 
         KalmanSolver solver(Equations);
         KalmanSolverFB solverFb(Equations);
@@ -395,25 +398,30 @@ namespace pod
 
         requireObs.addRequiredType(TypeID::S1);
 
-        if (useC1)
-            oMinusC.add(make_unique<PrefitC1>());
-        else
-            oMinusC.add(make_unique<PrefitP1>());
-        
-        oMinusC.add(make_unique<PrefitL1>());
-
-        if (opts().numberOfBands == 1)
+        if (opts().carrierBands.find(CarrierBand::L1) != opts().carrierBands.end())
         {
+            if (useC1)
+                oMinusC.add(make_unique<PrefitC1>());
+            else
+                oMinusC.add(make_unique<PrefitP1>());
 
-            Equations->measTypes() = TypeIDList{ TypeID::prefitC, TypeID::prefitL1 };
-            Equations->residTypes() = TypeIDList{ TypeID::postfitC, TypeID::postfitL1 };
+            oMinusC.add(make_unique<PrefitL1>());
+            
+            Equations->measTypes().insert(TypeID::prefitC);
+            Equations->measTypes().insert(TypeID::prefitL1);
+            Equations->residTypes().insert(TypeID::postfitC);
+            Equations->residTypes().insert(TypeID::postfitL1);
+
         }
-        else if (opts().numberOfBands == 2)
+        if (opts().carrierBands.find(CarrierBand::L2) != opts().carrierBands.end())
         {
             oMinusC.add(make_unique<PrefitP2>());
             oMinusC.add(make_unique<PrefitL2>());
-            Equations->measTypes() = TypeIDList{ TypeID::prefitC, TypeID::prefitP2, TypeID::prefitL1, TypeID::prefitL2 };
-            Equations->residTypes() = TypeIDList{ TypeID::postfitC, TypeID::postfitP2, TypeID::postfitL1,TypeID::postfitL2 };
+
+            Equations->measTypes().insert(TypeID::prefitP2);
+            Equations->measTypes().insert(TypeID::prefitL2);
+            Equations->residTypes().insert(TypeID::postfitP2);
+            Equations->residTypes().insert(TypeID::postfitL2);
         }
     }
 
@@ -452,14 +460,15 @@ namespace pod
         Equations->addEquation(make_unique<ClockBiasEquations>());
 
         if (opts().systems.size() > 1)
-            Equations->addEquation(/*std::move(bias)*/std::make_unique<InterSystemBias>());
+            Equations->addEquation(std::make_unique<InterSystemBias>());
 
-        if (opts().numberOfBands == 2)
+        if (opts().carrierBands.size() > 1)
             Equations->addEquation(std::make_unique<InterFrequencyBiases>());
 
-        Equations->addEquation(std::make_unique<AmbiguitySdEquations>(TypeID::BL1));
+        if (opts().carrierBands.find(CarrierBand::L1) != opts().carrierBands.end())
+            Equations->addEquation(std::make_unique<AmbiguitySdEquations>(TypeID::BL1));
 
-        if (opts().numberOfBands == 2)
+        if (opts().carrierBands.find(CarrierBand::L2) != opts().carrierBands.end())
             Equations->addEquation(std::make_unique<AmbiguitySdEquations>(TypeID::BL2));
 
         forwardBackwardCycles = confReader().getValueAsInt("forwardBackwardCycles");

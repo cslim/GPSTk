@@ -44,7 +44,7 @@ namespace pod
         virtual void fixAmbiguities(gnssRinex& gData);
         virtual void storeAmbiguities(gnssRinex& gData) const;
         virtual int check(gnssRinex& gData);
-        virtual gnssRinex& reject(gnssRinex& gData, const TypeIDList& typeOfResid);
+        virtual gnssRinex& reject(gnssRinex& gData, const TypeIDSet& typeOfResid);
 
         //virtual int Compute(const Vector<double>& prefitResiduals,
         //    const Matrix<double>& designMatrix,
