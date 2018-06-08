@@ -13,6 +13,7 @@
 #include"InterSystemBias.h"
 #include"InterFrequencyBiases.h"
 #include"AmbiguitySdEquations.h"
+#include"SNRCatcher.h"
 
 #include"LinearCombinations.hpp"
 #include"LICSDetector.hpp"
@@ -107,16 +108,25 @@ namespace pod
 #pragma region CS detectors
 
         // Objects to mark cycle slips
-        LICSDetector2 markCSLI2Base, markCSLI2Rover; // Checks LI cycle slips
+        // Checks LI cycle slips
+        LICSDetector2 markCSLI2Base, markCSLI2Rover; 
         markCSLI2Base.setSatThreshold(confReader().getValueAsDouble("LISatThreshold"));
         markCSLI2Rover.setSatThreshold(confReader().getValueAsDouble("LISatThreshold"));
-        MWCSDetector  markCSMW2Base, markCSMW2Rover;          // Checks Merbourne-Wubbena cycle slips
+
+        // Checks Merbourne-Wubbena cycle slips
+        MWCSDetector  markCSMW2Base, markCSMW2Rover;        
         markCSMW2Base.setMaxNumLambdas(confReader().getValueAsDouble("MWNLambdas"));
         markCSMW2Rover.setMaxNumLambdas(confReader().getValueAsDouble("MWNLambdas"));
-
+        
+        // check sharp SNR drops 
+        SNRCatcher snrCatcherL1Base;
+        SNRCatcher snrCatcherL1Rover;
+        
         // Object to keep track of satellite arcs
         SatArcMarker markArcBase(TypeID::CSL1, true, 31.0);
         SatArcMarker markArcRover(TypeID::CSL1, true, 31.0);
+
+
 
 #pragma endregion
 
@@ -272,6 +282,7 @@ namespace pod
                 gRin >> computeLinear;
                 gRin >> markCSLI2Rover;
                 gRin >> markCSMW2Rover;
+                //gRin >> snrCatcherL1Rover;
                 gRin >> markArcRover;
 
                 auto eop = data->eopStore.getEOP(MJD(t).mjd, IERSConvention::IERS2010);
@@ -299,6 +310,7 @@ namespace pod
                     gRef >> computeLinear;
                     gRef >> markCSLI2Base;
                     gRef >> markCSMW2Base;
+                    //gRef >> snrCatcherL1Base;
                     gRef >> markArcBase;
 
                     if (decimateData.check(gRef))
