@@ -18,7 +18,6 @@ namespace pod
         for (const auto& sv : gData.body)
             satSystems.insert(sv.first.system);
 
-
         for (const auto& ss : satSystems)
         {
             double maxEl = DBL_MIN;
@@ -45,16 +44,10 @@ namespace pod
         //get reference satellites for each satellite systems
         svSet = getRefSats(gData);
 
-
         std::list<int> indeces;
         auto curr_sv = svSet.begin();
-        std::map<SatID::SatelliteSystem, SatIDSet> svs_by_ss;
-        SatIDSet svs;
-        for (const auto& amb : ambs)
-        {
-            svs.insert(amb.sv);
-            svs_by_ss[amb.sv.system].insert(amb.sv);
-        }
+        auto svs_by_ss = Ambiguity::get_sv_by_ss(ambs);
+        SatIDSet svs = Ambiguity::get_all_sv(ambs);
 
         //prepare single to double differences transition matrix
         Matrix<double> SD2DD(svs.size() - svSet.size(), svs.size(), .0);

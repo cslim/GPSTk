@@ -75,7 +75,7 @@ namespace pod
         auto trSD2DD = transpose(SD2DD);
         auto DDCov = SD2DD*(*pSdCov)*trSD2DD;
 
-        DBOUT_LINE("covDD\n" << DDCov.diagCopy())
+        DBOUT_LINE("covDD\n" << DDCov)
 
             for (int i = 0; i < dd_num; i++)
             {
@@ -92,11 +92,11 @@ namespace pod
             }
 
         //select ambiguities resolution method
-        //setArMethod<ARMLambda>();
+        setArMethod<ARMLambda>();
 
         //resolve the carrier-phas ambiguities as integer
         ddFixedAmb = pAR->resolveIntegerAmbiguity(DDfloatAmb, ddAmbCov);
-
+        //ddFixedAmb = fixDDAmbSeparately(DDfloatAmb, ddAmbCov);
         DBOUT_LINE("float DD amb\n" << DDfloatAmb);
         DBOUT_LINE("fixed DD amb\n" << ddFixedAmb);
 
@@ -127,5 +127,40 @@ namespace pod
                     gData.body[amb.sv][amb.type] = 0.0;
             }
         }
+    }
+    gpstk::Vector<double>  AmbiguityHandler::fixDDAmbSeparately(
+        const gpstk::Vector<double> & ddAmbFloat,
+        const gpstk::Matrix<double> & ddCov) const
+    {
+        Vector<double> ddAmbFixed(ddAmbFloat.size(), .0);
+
+        const auto types = Ambiguity::get_all_types(*pAmbs);
+        const auto sv_by_ss = Ambiguity::get_sv_by_ss(*pAmbs);
+        int n_sv = pAmbs->size() / types.size();
+
+        int i(0);
+        for (const auto &t : types)
+            for (const auto &ss : sv_by_ss)
+            {
+
+                int currNumDD(ss.second.size() - 1);
+                Vector<double> currDdAmbFloat(currNumDD, .0);
+                Matrix<double> currDdAmbCov(currNumDD, currNumDD, .0);
+
+                for (size_t k = 0; k < currNumDD; k++)
+                {
+                    currDdAmbFloat(k) = ddAmbFloat(i + k);
+                    for (size_t m = 0; m < currNumDD; m++)
+                        currDdAmbCov(k, m) = currDdAmbCov(m, k) = ddCov(i + k, i + m);
+                }
+
+                auto currDdAmbFixed = pAR->resolveIntegerAmbiguity(currDdAmbFloat, currDdAmbCov);
+
+                for (size_t k = 0; k < currNumDD; k++)
+                    ddAmbFixed(i + k) = currDdAmbFixed(k);
+                DBOUT_LINE("ddAmbFixed\n" << ddAmbFixed);
+                i += currNumDD;
+            }
+        return ddAmbFixed;
     }
 }

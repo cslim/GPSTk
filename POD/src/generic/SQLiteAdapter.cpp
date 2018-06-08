@@ -227,7 +227,6 @@ namespace pod
         }
         if ((rc | OK_DONE)  != OK_DONE)
         {
-            
             sqlite3_finalize(comm);
             errorHandler(rc, "Can't execute SQL command.");
         }

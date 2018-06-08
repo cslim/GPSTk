@@ -26,6 +26,7 @@ namespace pod
     gnssRinex& KalmanSolver::Process(gnssRinex& gData)
     {
         equations->Prepare(gData);
+        Vector<double> floatSolution;
 
         while (true)
         {
@@ -44,14 +45,14 @@ namespace pod
             firstTime = false;
 
             DBOUT_LINE("----------------------------------------------------------------------------------------");
-            //DBOUT_LINE(CivilTime(gData.header.epoch));
+            DBOUT_LINE(CivilTime(gData.header.epoch));
             //auto svset = gData.getSatID();
             //for (auto& it:svset)
             //    DBOUT(it<<" ");
 
             //DBOUT_LINE("measVector\n" << setprecision(10) << measVector);
              DBOUT_LINE("H\n" << hMatrix);
-             DBOUT_LINE("weigthMatrix\n" << weigthMatrix);
+             //DBOUT_LINE("weigthMatrix\n" << weigthMatrix);
 
             //prepare
             Matrix<double> hMatrixTr = transpose(hMatrix);
@@ -73,7 +74,7 @@ namespace pod
             //DBOUT_LINE("CovPost\n" << covMatrix);
  
             equations->saveResiduals(gData, postfitResiduals);
-                       
+            floatSolution = solution;
             fixAmbiguities(gData);
            // storeAmbiguities(gData);
 
@@ -90,7 +91,7 @@ namespace pod
             }
         }
 
-        equations->storeKfState(solution, covMatrix);
+        equations->storeKfState(floatSolution, covMatrix);
         return gData;
     }
     

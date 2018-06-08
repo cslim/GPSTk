@@ -51,6 +51,10 @@ namespace pod
             const gpstk::Vector<double> &ddFixedAmb, 
             const gpstk::SatIDSet &refSVs) const;
 
+        gpstk::Vector<double>  fixDDAmbSeparately(
+            const gpstk::Vector<double> & ddAmbFloat,
+            const gpstk::Matrix<double> & ddCov) const;
+
         //pointer to current set of ambiguites
         const AmbiguitySet *pAmbs;
 
