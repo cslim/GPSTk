@@ -252,7 +252,7 @@ namespace pod
     }
     void CdDiffSolution::configureSolver()
     {
-        Equations->clear();
+        Equations->clearEquations();
         // White noise stochastic models
         auto  coord = make_unique<PositionEquations>();
 

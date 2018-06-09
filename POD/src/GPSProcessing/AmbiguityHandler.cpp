@@ -75,7 +75,7 @@ namespace pod
         auto trSD2DD = transpose(SD2DD);
         auto DDCov = SD2DD*(*pSdCov)*trSD2DD;
 
-        DBOUT_LINE("covDD\n" << DDCov)
+        //DBOUT_LINE("covDD\n" << DDCov)
 
             for (int i = 0; i < dd_num; i++)
             {
@@ -104,8 +104,8 @@ namespace pod
         coreParamFixed = coreParamsFloat - parDDAmbCov*inverseChol(ddAmbCov)*(DDfloatAmb - ddFixedAmb);
 
 
-        DBOUT_LINE("float Params\n" << coreParamsFloat);
-        DBOUT_LINE("fixed Params\n" << coreParamFixed);
+        //DBOUT_LINE("float Params\n" << coreParamsFloat);
+        //DBOUT_LINE("fixed Params\n" << coreParamFixed);
         
         storeDDAmbiguities(gData, ddFixedAmb, refSVs);
 
@@ -142,7 +142,6 @@ namespace pod
         for (const auto &t : types)
             for (const auto &ss : sv_by_ss)
             {
-
                 int currNumDD(ss.second.size() - 1);
                 Vector<double> currDdAmbFloat(currNumDD, .0);
                 Matrix<double> currDdAmbCov(currNumDD, currNumDD, .0);
@@ -158,7 +157,7 @@ namespace pod
 
                 for (size_t k = 0; k < currNumDD; k++)
                     ddAmbFixed(i + k) = currDdAmbFixed(k);
-                DBOUT_LINE("ddAmbFixed\n" << ddAmbFixed);
+              
                 i += currNumDD;
             }
         return ddAmbFixed;

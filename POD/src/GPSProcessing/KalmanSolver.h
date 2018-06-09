@@ -12,6 +12,9 @@ namespace pod
         public gpstk::SolverLMS
     {
     public:
+        //maximum time interval without data
+        static double maxGap;
+
         KalmanSolver();
         KalmanSolver(eqComposer_sptr eqs);
         virtual ~KalmanSolver();
@@ -37,20 +40,24 @@ namespace pod
         }
 
         double getSolution(const TypeID& type) const override;
-
         double getVariance(const TypeID& type) const override;
 
     protected:
+
         virtual void fixAmbiguities(gnssRinex& gData);
         virtual void storeAmbiguities(gnssRinex& gData) const;
         virtual int check(gnssRinex& gData);
         virtual gnssRinex& reject(gnssRinex& gData, const TypeIDSet& typeOfResid);
 
+        void reset()
+        {
+            equations->clearData();
+        }
         //virtual int Compute(const Vector<double>& prefitResiduals,
         //    const Matrix<double>& designMatrix,
         //    const Matrix<double>& rMatrix)
         //    throw(InvalidSolver);
-
+        CommonTime t_pre = CommonTime::BEGINNING_OF_TIME;
 
         bool firstTime;
 
@@ -68,9 +75,6 @@ namespace pod
 
         /// Measurements vector (Prefit-residuals)
         Vector<double> measVector;
-
-        /// General Kalman filter object
-        //SimpleKalmanFilter kFilter;
 
         ///object to prepare Matrix for filter
         eqComposer_sptr equations;

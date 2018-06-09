@@ -105,9 +105,16 @@ namespace pod
         }
         
         /// erase equation list
-        virtual void clear()
+        virtual void clearEquations()
         {
             equations.clear();
+        }
+
+        /// erase stored data
+        virtual void clearData()
+        {
+            coreData.clear();
+            ambiguityData.clear();
         }
 
     protected: 

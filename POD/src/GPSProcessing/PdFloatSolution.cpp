@@ -230,6 +230,7 @@ namespace pod
             //read all epochs
             while (rin >> gRin)
             {
+                DBOUT_LINE(">>"<<CivilTime(gRin.header.epoch));
                 if (gRin.body.size() == 0)
                 {
                     printMsg(gRin.header.epoch, "Empty epoch record in Rinex file");
@@ -443,7 +444,7 @@ namespace pod
 
     void PdFloatSolution::configureSolver()
     {
-        Equations->clear();
+        Equations->clearEquations();
 
         //tropo
         if (opts().computeTropo)

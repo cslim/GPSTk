@@ -13,7 +13,9 @@ using namespace gpstk;
 
 namespace pod
 {
-
+    //maximum time interval (in seconds) without data
+    double KalmanSolver::maxGap = 3600.0
+        ;
     KalmanSolver::KalmanSolver():firstTime(true)
     { }
     KalmanSolver::KalmanSolver(eqComposer_sptr eqs) 
@@ -25,6 +27,13 @@ namespace pod
 
     gnssRinex& KalmanSolver::Process(gnssRinex& gData)
     {
+        double dt = abs(t_pre - gData.header.epoch);
+        t_pre = gData.header.epoch;
+        if (dt > maxGap)
+        {
+            reset();
+            DBOUT_LINE("dt= "<<dt<<"->RESET")
+        }
         equations->Prepare(gData);
         Vector<double> floatSolution;
 
@@ -36,8 +45,9 @@ namespace pod
 
             equations->updatePhi(phiMatrix);
             equations->updateQ(qMatrix);
-
-            if (firstTime)
+            
+          
+            if (dt > maxGap)
                 equations->initKfState(solution, covMatrix);
             else
                 equations->updateKfState(solution, covMatrix);
@@ -45,15 +55,16 @@ namespace pod
             firstTime = false;
 
             DBOUT_LINE("----------------------------------------------------------------------------------------");
-            DBOUT_LINE(CivilTime(gData.header.epoch));
+            
             //auto svset = gData.getSatID();
             //for (auto& it:svset)
             //    DBOUT(it<<" ");
 
             //DBOUT_LINE("measVector\n" << setprecision(10) << measVector);
              DBOUT_LINE("H\n" << hMatrix);
-             //DBOUT_LINE("weigthMatrix\n" << weigthMatrix);
-
+             DBOUT_LINE("Cov\n" << covMatrix);
+             DBOUT_LINE("phiMatrix\n" << phiMatrix);
+             DBOUT_LINE("qMatrix\n" << qMatrix);
             //prepare
             Matrix<double> hMatrixTr = transpose(hMatrix);
             Matrix<double> phiMatrixTr = transpose(phiMatrix);
@@ -75,6 +86,7 @@ namespace pod
  
             equations->saveResiduals(gData, postfitResiduals);
             floatSolution = solution;
+            
             fixAmbiguities(gData);
            // storeAmbiguities(gData);
 
@@ -82,7 +94,7 @@ namespace pod
 
             if (!check(gData))
                 break;
-            reject(gData, eqComposer().residTypes());
+            //reject(gData, eqComposer().residTypes());
 
             if (gData.body.size() < equations->getNumUnknowns())
             {
@@ -97,7 +109,12 @@ namespace pod
     
     void  KalmanSolver::fixAmbiguities(gnssRinex& gData)
     {
-        if (equations->getSlnType() == SlnType::PD_Fixed && equations->currentAmb().size() > 5)
+      /*  auto summ = Ambiguity::get_sv_by_ss( equations->currentAmb());
+        for (auto &it : summ)
+            std::cout << SatID::convertSatelliteSystemToString(it.first)
+            << ": " << it.second.size() << endl;
+*/
+        if (equations->getSlnType() == SlnType::PD_Fixed && gData.body.size() > 5)
         {
             int core_num = equations->currentUnknowns().size();
             AmbiguityHandler ar(equations->currentAmb(), solution, covMatrix, core_num);
