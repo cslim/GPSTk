@@ -54,17 +54,19 @@ namespace pod
             toNextFile();
         }
 
-        try
+        while (true)
         {
-            Synchronize::Process(gData);
+            try
+            {
+                Synchronize::Process(gData);
+            }
+            catch (gpstk::SynchronizeException &e)
+            {
+                toNextFile();
+                continue;
+            }
+            break;
         }
-        catch (gpstk::SynchronizeException &e )
-        {
-            toNextFile();
-            Synchronize::Process(gData);
-        }
-
         return gData;
     }
-
 }

@@ -55,7 +55,7 @@ namespace gpstk
       /// Thrown when synchronization was not possible at a given epoch
       /// @ingroup exceptiongroup
    NEW_EXCEPTION_CLASS(SynchronizeException, gpstk::Exception);
-
+   NEW_EXCEPTION_CLASS(SyncNextRoverEpoch, gpstk::Exception);
 
       /// @ingroup DataStructures 
       //@{

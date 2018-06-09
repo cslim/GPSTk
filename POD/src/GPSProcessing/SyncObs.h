@@ -21,14 +21,20 @@ namespace pod
         virtual gpstk::gnssRinex& Process(gpstk::gnssRinex& gData);
 
     private:
-        void toNextFile();
 
+        //move to next reference station data file
+        void toNextFile();
+        
+        // current reference station data stream
         gpstk::Rinex3ObsStream rin;
         
+        //reference station data files
         std::list<std::string> rinFiles;
         
+        //eference station file name
         std::string curFile;
-
+        
+        // current reference station data header 
         gpstk::Rinex3ObsHeader header;
     };
 }

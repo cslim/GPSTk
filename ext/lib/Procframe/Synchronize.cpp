@@ -123,12 +123,12 @@ namespace gpstk
       }
 
       gData = gnssRinexBuffer.front();
-
+      //std::cout << CivilTime(gData.header.epoch).asString() << " " << CivilTime(time).asString() << std::endl;
       if( (gData.header.epoch > time) && 
          (std::abs( gData.header.epoch - time ) > tolerance ))
       {
          // If synchronization is not possible, we issue an exception
-         SynchronizeException e( "Unable to synchronize data at epoch "
+          SyncNextRoverEpoch e( "Unable to synchronize data at epoch "
             + time.asString() );
          GPSTK_THROW(e);
       }

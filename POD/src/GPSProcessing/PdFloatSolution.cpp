@@ -335,6 +335,10 @@ namespace pod
 
                     delta.setRefData(gRef.body);
                 }
+                catch (gpstk::SyncNextRoverEpoch &e)
+                {
+                    continue;
+                }
                 catch (SynchronizeException &e)
                 {
                     break;
