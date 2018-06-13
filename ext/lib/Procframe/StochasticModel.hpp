@@ -161,7 +161,19 @@ namespace gpstk
       virtual RandomWalkModel& setPreviousTime(const CommonTime& prevTime)
       { previousTime = prevTime; return (*this); }
 
+      /** Get the value of previous epoch
+           */
+      virtual CommonTime getPreviousTime() const
+      {
+          return previousTime;
+      }
 
+      /** Get the value of current epoch
+      */
+      virtual CommonTime getCurrentTime() const
+      {
+          return currentTime;
+      }
          /** Set the value of current epoch
           *
           * @param currTime   Value of current epoch
