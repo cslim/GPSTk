@@ -658,4 +658,72 @@ namespace pod
     }
     #pragma endregion
 
+    #pragma region CodeIonoDelayL1
+
+    bool CodeIonoDelayL1::getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const
+    {
+        value = NAN;
+
+        const auto&  tC1 = useC1 ? TypeID::C1 : TypeID::P1;
+
+        const auto&  itC1 = tvMap.find(tC1);
+        if (itC1 == tvMap.end()) return false;
+
+        const auto& itP2 = tvMap.find(TypeID::P2);
+        if (itP2 == tvMap.end()) return false;
+
+        int fcn = sv.getGloFcn();
+        double F1 = C_MPS / getWavelength(sv, 1, fcn);
+        double F2 = C_MPS / getWavelength(sv, 2, fcn);
+
+        F1 = F1 * F1;
+        F2 = F2 * F2;
+
+        double dF = F1 - F2;
+        value = (1.0 - F1 / dF)*itC1->second + (F2 / dF)*itP2->second;
+
+        return true;
+    }
+
+    TypeID CodeIonoDelayL1::getType() const
+    {
+        return TypeID::ionoL1;
+    }
+
+
+   #pragma endregion
+
+    #pragma region PhaseIonoDelayL1
+
+
+    bool PhaseIonoDelayL1::getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const
+    {
+        value = NAN;
+
+        const auto&  itC1 = tvMap.find(TypeID::L1);
+        if (itC1 == tvMap.end()) return false;
+
+        const auto& itP2 = tvMap.find(TypeID::L2);
+        if (itP2 == tvMap.end()) return false;
+
+        int fcn = sv.getGloFcn();
+        double F1 = C_MPS / getWavelength(sv, 1, fcn);
+        double F2 = C_MPS / getWavelength(sv, 2, fcn);
+
+        F1 = F1 * F1;
+        F2 = F2 * F2;
+
+        double dF = F1 - F2;
+        value = (1.0 - F1 / dF)*itC1->second + (F2 / dF)*itP2->second;
+
+        return true;
+    }
+
+    TypeID PhaseIonoDelayL1::getType() const
+    {
+        return TypeID::ionoL1;
+    }
+
+#pragma endregion
+
 }

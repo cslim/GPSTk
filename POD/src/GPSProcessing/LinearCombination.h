@@ -143,11 +143,30 @@ namespace pod
         virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
         virtual TypeID getType() const override;
     };
+
     class PrefitLC :public LinearCombination
     {
     public:
         PrefitLC() {};
         virtual ~PrefitLC() {};
+        virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
+        virtual TypeID getType() const override;
+    };
+
+    class CodeIonoDelayL1 :public LinearCombination
+    {
+    public:
+        CodeIonoDelayL1() {};
+        virtual ~CodeIonoDelayL1() {};
+        virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
+        virtual TypeID getType() const override;
+    };
+
+    class PhaseIonoDelayL1 :public LinearCombination
+    {
+    public:
+        PhaseIonoDelayL1() {};
+        virtual ~PhaseIonoDelayL1() {};
         virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
         virtual TypeID getType() const override;
     };
