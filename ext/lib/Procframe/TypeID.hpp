@@ -235,77 +235,7 @@ namespace gpstk
          CSL8,      ///< Cycle slip in L8
             // Satellite 'arcs'
          satArc,    ///< Satellite arc number
-            // Phase-ambiguity types
-         BL1,       ///< Phase ambiguity in L1
-         BL2,       ///< Phase ambiguity in L2
-         BL5,       ///< Phase ambiguity in L5
-         BL6,       ///< Phase ambiguity in L6
-         BL7,       ///< Phase ambiguity in L7
-         BL8,       ///< Phase ambiguity in L8
-         BLC,       ///< Phase ambiguity in LC
-         BWL,       ///< Phase ambiguity in WL
-         BWL2,      ///< Phase ambiguity in WL2
-         BWL3,      ///< Phase ambiguity in WL3
-         BWL4,      ///< Phase ambiguity in WL4
-            // Multipath-related types
-         mpC1,      ///< Multipath bias, C1
-         mpC2,      ///< Multipath bias, C2
-         mpC5,      ///< Multipath bias, C5
-         mpC6,      ///< Multipath bias, C6
-         mpC7,      ///< Multipath bias, C7
-         mpC8,      ///< Multipath bias, C8
-         mpL1,      ///< Multipath bias, L1
-         mpL2,      ///< Multipath bias, L2
-         mpL5,      ///< Multipath bias, L5
-         mpL6,      ///< Multipath bias, L6
-         mpL7,      ///< Multipath bias, L7
-         mpL8,      ///< Multipath bias, L8
-            // Instrumental delays types
-         instC1,    ///< Instrumental delay, C1
-         instC2,    ///< Instrumental delay, C2
-         instC5,    ///< Instrumental delay, C5
-         instC6,    ///< Instrumental delay, C6
-         instC7,    ///< Instrumental delay, C7
-         instC8,    ///< Instrumental delay, C8
-         instL1,    ///< Instrumental delay, L1
-         instL2,    ///< Instrumental delay, L2
-         instL5,    ///< Instrumental delay, L5
-         instL6,    ///< Instrumental delay, L6
-         instL7,    ///< Instrumental delay, L7
-         instL8,    ///< Instrumental delay, L8
-            // Equation system-related types
-         prefitC,   ///< Prefit residual, code
-         prefitP1,  ///< Prefit residual, code P1
-         prefitP2,  ///< Prefit residual, code P2
-         prefitC5,  ///< Prefit residual, code C5
-         prefitL,   ///< Prefit residual, phase
-         prefitL1,  ///< Prefit residual, phase L1
-         prefitL2,  ///< Prefit residual, phase L2
-         prefitL5,  ///< Prefit residual, phase L5
 
-         postfitC,  ///< Postfit residual, code
-         postfitP1, ///< Postfit residual, code P1
-         postfitP2, ///< Postfit residual, code P2
-         postfitC5, ///< Postfit residual, code C5
-
-         postfitL,  ///< Postfit residual, phase
-         postfitL1, ///< Postfit residual, phase L1
-         postfitL2, ///< Postfit residual, phase L2
-         postfitL5, ///< Postfit residual, phase L5
-
-         prefitGRAPHIC1,   ///< Prefit residual, GRAPHIC1
-         prefitGRAPHIC2,   ///< Prefit residual, GRAPHIC2
-         postfitGRAPHIC1,  ///< Postfit residual, GRAPHIC1
-         postfitGRAPHIC2,  ///< Postfit residual, GRAPHIC2
-         prefitMWubbena,   /// Prefit residual, MWubbena
-         prefitWL,  ///< Prefit residual, WL
-         prefitWL2, ///< Prefit residual, WL2
-         prefitWL3, ///< Prefit residual, WL3
-         prefitWL4, ///< Prefit residual, WL4
-         postfitWL, ///< Postfit residual, WL
-         postfitWL2,///< Postfit residual, WL2
-         postfitWL3,///< Postfit residual, WL3
-         postfitWL4,///< Postfit residual, WL4
 
          dx,        ///< In the position domain: Position bias, X component; in the range domain: dx coefficient
          dy,        ///< In the position domain: Position bias, Y component; in the range domain: dy coefficient
@@ -427,6 +357,78 @@ namespace gpstk
          sigma,     ///< Standard deviation
          iura,      ///< Index User Range Accuracy
          Action,    ///< Flag for quality control
+
+                    // Phase-ambiguity types
+             BL1,       ///< Phase ambiguity in L1
+             BL2,       ///< Phase ambiguity in L2
+             BL5,       ///< Phase ambiguity in L5
+             BL6,       ///< Phase ambiguity in L6
+             BL7,       ///< Phase ambiguity in L7
+             BL8,       ///< Phase ambiguity in L8
+             BLC,       ///< Phase ambiguity in LC
+             BWL,       ///< Phase ambiguity in WL
+             BWL2,      ///< Phase ambiguity in WL2
+             BWL3,      ///< Phase ambiguity in WL3
+             BWL4,      ///< Phase ambiguity in WL4
+                        // Multipath-related types
+             mpC1,      ///< Multipath bias, C1
+             mpC2,      ///< Multipath bias, C2
+             mpC5,      ///< Multipath bias, C5
+             mpC6,      ///< Multipath bias, C6
+             mpC7,      ///< Multipath bias, C7
+             mpC8,      ///< Multipath bias, C8
+             mpL1,      ///< Multipath bias, L1
+             mpL2,      ///< Multipath bias, L2
+             mpL5,      ///< Multipath bias, L5
+             mpL6,      ///< Multipath bias, L6
+             mpL7,      ///< Multipath bias, L7
+             mpL8,      ///< Multipath bias, L8
+                        // Instrumental delays types
+             instC1,    ///< Instrumental delay, C1
+             instC2,    ///< Instrumental delay, C2
+             instC5,    ///< Instrumental delay, C5
+             instC6,    ///< Instrumental delay, C6
+             instC7,    ///< Instrumental delay, C7
+             instC8,    ///< Instrumental delay, C8
+             instL1,    ///< Instrumental delay, L1
+             instL2,    ///< Instrumental delay, L2
+             instL5,    ///< Instrumental delay, L5
+             instL6,    ///< Instrumental delay, L6
+             instL7,    ///< Instrumental delay, L7
+             instL8,    ///< Instrumental delay, L8
+                        // Equation system-related types
+             prefitC,   ///< Prefit residual, code
+             prefitP1,  ///< Prefit residual, code P1
+             prefitP2,  ///< Prefit residual, code P2
+             prefitC5,  ///< Prefit residual, code C5
+             prefitL,   ///< Prefit residual, phase
+             prefitL1,  ///< Prefit residual, phase L1
+             prefitL2,  ///< Prefit residual, phase L2
+             prefitL5,  ///< Prefit residual, phase L5
+
+             postfitC,  ///< Postfit residual, code
+             postfitP1, ///< Postfit residual, code P1
+             postfitP2, ///< Postfit residual, code P2
+             postfitC5, ///< Postfit residual, code C5
+
+             postfitL,  ///< Postfit residual, phase
+             postfitL1, ///< Postfit residual, phase L1
+             postfitL2, ///< Postfit residual, phase L2
+             postfitL5, ///< Postfit residual, phase L5
+
+             prefitGRAPHIC1,   ///< Prefit residual, GRAPHIC1
+             prefitGRAPHIC2,   ///< Prefit residual, GRAPHIC2
+             postfitGRAPHIC1,  ///< Postfit residual, GRAPHIC1
+             postfitGRAPHIC2,  ///< Postfit residual, GRAPHIC2
+             prefitMWubbena,   /// Prefit residual, MWubbena
+             prefitWL,  ///< Prefit residual, WL
+             prefitWL2, ///< Prefit residual, WL2
+             prefitWL3, ///< Prefit residual, WL3
+             prefitWL4, ///< Prefit residual, WL4
+             postfitWL, ///< Postfit residual, WL
+             postfitWL2,///< Postfit residual, WL2
+             postfitWL3,///< Postfit residual, WL3
+             postfitWL4,///< Postfit residual, WL4
             // Handy dummy types for non-standard processing
          dummy0,    ///< Generic, undefined type #0
          dummy1,    ///< Generic, undefined type #1
