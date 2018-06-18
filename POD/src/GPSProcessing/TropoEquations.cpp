@@ -5,25 +5,27 @@ using namespace std;
 namespace pod
 {
     TropoEquations::TropoEquations(double qPrime)
-        :types({ gpstk::TypeID::wetMap }),
+        :type( gpstk::TypeID::wetMap ),
         pStochasticModel(std::make_unique<RandomWalkModel>(qPrime))
     {}
 
     void TropoEquations::Prepare(gpstk::gnssRinex & gData)
     {
+        
         pStochasticModel->Prepare(SatID::dummy, gData);
     }
 
-    void TropoEquations::updateEquationTypes(gpstk::gnssRinex & gData, gpstk::TypeIDSet & eqTypes)
+    void TropoEquations::updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet & obsTypes, gpstk::Matrix<double>& H, int & col_0)
     {
-        for (const auto& it : types)
-            eqTypes.insert(it);
-    }
+        int row(0);
+        for (const auto& t : obsTypes)
+            for (const auto& it : gData.body)
+                H(row++, col_0) = it.second.at(type.type);
 
-    gpstk::TypeIDSet TropoEquations::getEquationTypes() const
-    {
-        return types;
+        col_0++;
     }
+    
+
     void TropoEquations::updatePhi(gpstk::Matrix<double>& Phi, int & index) const
     {
         Phi(index, index) = pStochasticModel->getPhi();
@@ -46,6 +48,6 @@ namespace pod
 
     int TropoEquations::getNumUnknowns() const
     {
-        return types.size();
+        return 1;
     }
 }

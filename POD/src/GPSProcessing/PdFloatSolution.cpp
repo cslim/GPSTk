@@ -12,7 +12,7 @@
 #include"PositionEquations.h"
 #include"InterSystemBias.h"
 #include"InterFrequencyBiases.h"
-#include"AmbiguitySdEquations.h"
+#include"AmbiguitiesEquations.h"
 #include"SNRCatcher.h"
 #include"IonoEquations.h"
 #include"IonoEstimator.h"
@@ -475,7 +475,7 @@ namespace pod
         }
         else if (opts().dynamics == GnssDataStore::Dynamics::RandomWalk)
         {
-            for (const auto& it : coord->getEquationTypes())
+            for (const auto& it : coord->getParameters())
                 coord->setStochasicModel(it, make_shared<RandomWalkModel>(sigma));
         }
 
@@ -501,16 +501,17 @@ namespace pod
         forwardBackwardCycles = confReader().getValueAsInt("forwardBackwardCycles");
     }
 
-    void PdFloatSolution::printSolution(std::ofstream& os, const SolverLMS& solver, const CommonTime& time, GnssEpoch& gEpoch)
+    void PdFloatSolution::printSolution(std::ofstream& os, const KalmanSolver& solver, const CommonTime& time, GnssEpoch& gEpoch)
     {
         GnssSolution::printSolution(os, solver, time, gEpoch);
         const auto & params = Equations->currentUnknowns();
-        const auto & it_tropo = params.find(TypeID::wetMap);
+        FilterParameter wetMap(TypeID::wetMap);
+        const auto & it_tropo = params.find(wetMap);
         
         if (it_tropo != params.end())
         {
             //double wetMap = solver.getSolution(TypeID::wetMap) + 0.1 + this->tropModel.dry_zenith_delay();
-            gEpoch.slnData.insert(std::make_pair(TypeID::recZTropo, solver.getSolution(TypeID::wetMap)));
+            gEpoch.slnData.insert(std::make_pair(TypeID::recZTropo, solver.getSolution(wetMap)));
         }
       
     }

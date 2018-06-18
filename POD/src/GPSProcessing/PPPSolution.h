@@ -5,7 +5,6 @@
 #include "PPPSolutionBase.h"
 #include"NeillTropModel.hpp"
 
-using namespace gpstk;
 namespace pod
 {
     class PPPSolution : public PPPSolutionBase
@@ -19,12 +18,12 @@ namespace pod
 
     protected:
         virtual bool processCore() override;
-        NeillTropModel tropModel;
+        gpstk::NeillTropModel tropModel;
         virtual void updateRequaredObs() override;
 
-    protected: virtual void printSolution(ofstream& of, const SolverLMS& solver, const CommonTime& time, GnssEpoch& gEpoch) override;
+    protected:  void printSolution(ofstream& of, const gpstk::SolverLMS& solver, const gpstk::CommonTime& time, GnssEpoch& gEpoch) ;
 
-    protected: virtual void updateNomPos(const CommonTime & t, Position & pos) override;
+    protected: virtual void updateNomPos(const gpstk::CommonTime & t, gpstk::Position & pos) override;
 
 
 

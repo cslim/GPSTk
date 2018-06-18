@@ -4,28 +4,24 @@ using namespace gpstk;
 namespace pod
 {
     IonoEquations::IonoEquations()
-        : types({ gpstk::TypeID::ionoMap }),
-        pStochasticModel(std::make_unique<gpstk::RandomWalkModel>())
+       // : types( gpstk::TypeID::ionoMap }),
+       : pStochasticModel(std::make_unique<gpstk::RandomWalkModel>())
     {};
     IonoEquations::IonoEquations(double qPrime)
-    : types({ gpstk::TypeID::ionoMap }),
-        pStochasticModel(std::make_unique<gpstk::RandomWalkModel>(qPrime))
+    //: types({ gpstk::TypeID::ionoMap }),
+        :pStochasticModel(std::make_unique<gpstk::RandomWalkModel>(qPrime))
     {};
 
     void IonoEquations::Prepare(gpstk::gnssRinex & gData)
     {
         pStochasticModel->Prepare(SatID::dummy, gData);
     }
-    void IonoEquations::updateEquationTypes(gpstk::gnssRinex & gData, gpstk::TypeIDSet & eqTypes)
+    void IonoEquations::updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0)
     {
-        for (const auto& it : types)
-            eqTypes.insert(it);
+
     }
 
-    gpstk::TypeIDSet IonoEquations::getEquationTypes() const
-    {
-        return types;
-    }
+
     void IonoEquations::updatePhi(gpstk::Matrix<double>& Phi, int & index) const
     {
         Phi(index, index) = pStochasticModel->getPhi();

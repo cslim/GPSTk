@@ -9,51 +9,74 @@ namespace pod
     typedef std::map<gpstk::SatID::SatelliteSystem, gpstk::SatIDSet> System2SatSetMap;
 
 
-    struct FilterParameter
+    class FilterParameter
     {
     public:
-       // static bool operator < (const FilterParameter& amb1, const FilterParameter& amb2);
 
+        static System2SatSetMap get_sv_by_ss(const std::set<FilterParameter>& parameters);
+        
+        static gpstk::SatIDSet get_all_sv(const std::set<FilterParameter>& parameters);
 
-        static System2SatSetMap get_sv_by_ss(const std::set<FilterParameter>& ambs);
-        static gpstk::SatIDSet get_all_sv(const std::set<FilterParameter>& ambs);
-        static gpstk::SatSystSet get_all_ss(const std::set<FilterParameter>& ambs);
-        static gpstk::TypeIDSet get_all_types(const std::set<FilterParameter>& ambs);
+        static gpstk::SatSystSet get_all_ss(const std::set<FilterParameter>& parameters);
+        
+        static gpstk::TypeIDSet get_all_types(const std::set<FilterParameter>& parameters);
+
+        FilterParameter()
+            :type(gpstk::TypeID::Unknown), sv(gpstk::SatID::dummy)
+        { };
 
         FilterParameter(const gpstk::TypeID &obsType, const gpstk::SatID &sat) 
             :type(obsType), sv(sat)
         { };
 
-        FilterParameter(const FilterParameter& amb)
-            :type(amb.type), sv(amb.sv)
+        FilterParameter(const gpstk::TypeID &obsType)
+            :type(obsType), sv(gpstk::SatID::dummy)
+        { };
+
+        FilterParameter(const FilterParameter& parameter)
+            :type(parameter.type), sv(parameter.sv)
         { };
 
         ~FilterParameter() 
         {};
 
-        FilterParameter operator = (const FilterParameter& amb)
+        FilterParameter& operator = (const FilterParameter& other)
         {
-            return FilterParameter(amb);
+            // check for self-assignment
+            if (&other == this)
+                return *this;
+
+            this->sv = other.sv;
+            this->type = other.type;
+
+            return *this;
         }
 
-        inline bool operator == (const FilterParameter& amb)
+        inline bool operator == (const FilterParameter& parameter) const
         {
-            return (this->type == amb.type && this->sv == sv);
+            return (this->type == parameter.type && this->sv == sv);
         }
 
         gpstk::TypeID type;
 
         gpstk::SatID sv;
+
     };
 
-    inline bool operator < (const FilterParameter& amb1, const FilterParameter& amb2)
+    inline bool operator < (const FilterParameter& parameter1, const FilterParameter& parameter2)
     {
         //first, compare the types
         //then, compare the satellites
-        if (amb1.type == amb2.type)
-            return amb1.sv < amb2.sv;
+        if (parameter1.type == parameter2.type)
+            return parameter1.sv < parameter2.sv;
         else
-            return amb1.type < amb2.type;
+            return parameter1.type < parameter2.type;
+    }
+    inline std::ostream& operator<<(std::ostream& os, const FilterParameter& parameter1)
+    {
+        os << parameter1.type << ' ' << parameter1.sv ;
+
+        return os;
     }
 
     typedef std::set<FilterParameter> ParametersSet;

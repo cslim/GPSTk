@@ -55,16 +55,16 @@ namespace pod
             firstTime = false;
 
             DBOUT_LINE("----------------------------------------------------------------------------------------");
-            
-            //auto svset = gData.getSatID();
-            //for (auto& it:svset)
-            //    DBOUT(it<<" ");
 
+            for (auto& it: equations->currentUnknowns())
+                DBOUT(it<<" ");
+             DBOUT_LINE("")
             //DBOUT_LINE("measVector\n" << setprecision(10) << measVector);
              DBOUT_LINE("H\n" << hMatrix);
              DBOUT_LINE("Cov\n" << covMatrix);
-             DBOUT_LINE("phiMatrix\n" << phiMatrix);
-             DBOUT_LINE("qMatrix\n" << qMatrix);
+             DBOUT_LINE("phiMatrix\n" << phiMatrix.diagCopy());
+             DBOUT_LINE("qMatrix\n" << qMatrix.diagCopy());
+             DBOUT_LINE("weigthMatrix\n" << weigthMatrix.diagCopy());
             //prepare
             Matrix<double> hMatrixTr = transpose(hMatrix);
             Matrix<double> phiMatrixTr = transpose(phiMatrix);
@@ -82,7 +82,7 @@ namespace pod
             postfitResiduals = measVector - hMatrix * solution;
             DBOUT_LINE("Solution\n" << solution);
             DBOUT_LINE("postfitResiduals\n" << postfitResiduals);
-            //DBOUT_LINE("CovPost\n" << covMatrix);
+            DBOUT_LINE("CovPost\n" << covMatrix);
  
             equations->saveResiduals(gData, postfitResiduals);
             floatSolution = solution;
@@ -116,7 +116,8 @@ namespace pod
 */
         if (equations->getSlnType() == SlnType::PD_Fixed && gData.body.size() > 5)
         {
-            int core_num = equations->currentUnknowns().size();
+            int core_num = equations->currentUnknowns().size() - equations->currentAmb().size();
+
             AmbiguityHandler ar(equations->currentAmb(), solution, covMatrix, core_num);
             ar.fixL1L2(gData);
 
@@ -135,7 +136,7 @@ namespace pod
         {
             auto & it = gData.body.find(amb.sv);
             if (it != gData.body.end())
-                gData.body[amb.sv][amb.type] = solution(equations->currentUnknowns().size() + i);
+                gData.body[amb.sv][amb.type] = getSolution(amb);
             ++i;
         }
     }
@@ -151,9 +152,9 @@ namespace pod
 
         double sigma = sqrt(vpv(0,0));
 
-        double varX = getVariance(TypeID::dx);     // Cov dx    - #8
-        double varY = getVariance(TypeID::dy);     // Cov dy    - #9
-        double varZ = getVariance(TypeID::dz);     // Cov dz    - #10
+        double varX = getVariance(FilterParameter(TypeID::dx));     // Cov dx    - #8
+        double varY = getVariance(FilterParameter(TypeID::dy));     // Cov dy    - #9
+        double varZ = getVariance(FilterParameter(TypeID::dz));     // Cov dz    - #10
         double stDev3D = sqrt(varX + varY + varZ);
 
         if (sigma / stDev3D > 3)
@@ -231,35 +232,35 @@ namespace pod
         }
     }
 
-    double KalmanSolver::getSolution(const TypeID& type) const
+    double KalmanSolver::getSolution(const FilterParameter& parameter) const
     {
         // Define counter
         int counter(0);
 
-        for (const auto it2 : equations->currentUnknowns())
+        for (const auto& it2 : equations->currentUnknowns())
         {
-            if (it2 == type)
+            if (it2 == parameter)
                 return solution(counter);
             counter++;
         }
 
-        InvalidRequest e("Type: '" + TypeID::tStrings.at(type.type) + "' not found in  current set of unknowns.");
+        InvalidRequest e("Type: '" + TypeID::tStrings.at(parameter.type.type) + "' not found in  current set of unknowns.");
         GPSTK_THROW(e);
 
     }  // End of method 'SolverLMS::getSolution()'
 
-    double KalmanSolver::getVariance(const TypeID& type) const
+    double KalmanSolver::getVariance(const FilterParameter& parameter) const
     {
         int counter(0);
 
-        for (const auto it2 : equations->currentUnknowns())
+        for (const auto& it2 : equations->currentUnknowns())
         {
-            if (it2 == type)
+            if (it2 == parameter)
                 return covMatrix(counter, counter);
             ++counter;
         }
 
-        InvalidRequest e("Type: '" + TypeID::tStrings.at(type.type)+"' not found in current set of unknowns.");
+        InvalidRequest e("Type: '" + TypeID::tStrings.at(parameter.type.type)+"' not found in current set of unknowns.");
         GPSTK_THROW(e);
 
     }  // End of method 'SolverLMS::getVariance()'

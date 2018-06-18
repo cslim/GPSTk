@@ -5,7 +5,7 @@
 namespace pod
 {
     class KalmanSolverFB :
-        public gpstk::SolverLMS
+        public KalmanSolver
     {
     private:
         //set of all possible TypeID for code pseudorange postfit residuals 
@@ -57,12 +57,12 @@ namespace pod
         {
             return solver.CovMatrix();
         }
-        double getSolution(const TypeID& type) const override
+        double getSolution(const FilterParameter& type) const override
         {
             return solver.getSolution(type);
         }
 
-        double getVariance(const TypeID& type) const override
+        double getVariance(const FilterParameter& type) const override
         {
             return solver.getVariance(type);
         }

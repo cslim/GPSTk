@@ -1,4 +1,5 @@
 #include "EquationComposer.h"
+
 using namespace gpstk;
 
 namespace pod
@@ -36,14 +37,16 @@ namespace pod
         int numSVs = gData.body.size();
         int numMeasTypes = measTypes().size();
 
-        //number of measurements are equals number of Satellites times observation types number 
+        //number of measurements are equals number of satellites times observation types number 
         numMeas = numSVs*numMeasTypes;
 
-        coreUnknowns.clear();
-        for (auto& eq : equations)
-            eq->updateEquationTypes(gData, coreUnknowns);
-
-        int numCoreUnknowns = coreUnknowns.size();
+        unknowns.clear();
+        for (auto&& eq : equations)
+        {
+            auto&& t = eq->getParameters();
+            unknowns.insert(t.cbegin(), t.cend());
+        }
+          
 
         numUnknowns = getNumUnknowns();
 
@@ -60,86 +63,32 @@ namespace pod
         |     |          |     |         |         |         |
         ------------------------------------------------------
         */
-        auto hCore = gData.body.getMatrixOfTypes(coreUnknowns);
 
         /*
         form the design martix H:
-           |  T  | dX dY dZ | cdt | cdt(R1) | cdt(G2) | cdt(R2) |     N1     |     N2     |
-           --------------------------------------------------------------------------------
-           |     |          |     |         |         |         |            |            |
-        P1 |  m  | ax,ay,az |  1  |  R?1:0  |    0    |    0    |     0      |      0     |
-           |     |          |     |         |         |         |            |            |
-           --------------------------------------------------------------------------------
-           |     |          |     |         |         |         |            |            |
-        P2 |  m  | ax,ay,az |  1  |    0    |  G?1:0  |  R?1:0  |     0      |      0     |
-           |     |          |     |         |         |         |            |            |
-           --------------------------------------------------------------------------------
-           |     |          |     |         |         |         |            |            |
-        L1 |  m  | ax,ay,az |  1  |  R?1:0  |    0    |    0    | lambda_1*E |      0     |
-           |     |          |     |         |         |         |            |            |
-           --------------------------------------------------------------------------------
-           |     |          |     |         |         |         |            |            |
-        L2 |  m  | ax,ay,az |  1  |    0    |  G?1:0  |  R?1:0  |     0      | lambda_2*E |
-           |     |          |     |         |         |         |            |            |
+           | Tropo | dX dY dZ | cdt | cdt(R1) | cdt(G2) | cdt(R2) |     N1     |     N2     |
+           ---------------------------------------------------------------------------------
+           |       |          |     |         |         |         |            |            |
+        P1 |   m   | ax,ay,az |  1  |  R?1:0  |    0    |    0    |     0      |      0     |
+           |       |          |     |         |         |         |            |            |
+           ----------------------------------------------------------------------------------
+           |       |          |     |         |         |         |            |            |
+        P2 |   m   | ax,ay,az |  1  |    0    |  G?1:0  |  R?1:0  |     0      |      0     |
+           |       |          |     |         |         |         |            |            |
+           ----------------------------------------------------------------------------------
+           |       |          |     |         |         |         |            |            |
+        L1 |   m   | ax,ay,az |  1  |  R?1:0  |    0    |    0    | lambda_1*E |      0     |
+           |       |          |     |         |         |         |            |            |
+           ----------------------------------------------------------------------------------
+           |       |          |     |         |         |         |            |            |
+        L2 |   m   | ax,ay,az |  1  |    0    |  G?1:0  |  R?1:0  |     0      | lambda_2*E |
+           |       |          |     |         |         |         |            |            |
+           ----------------------------------------------------------------------------------
         */
-
-        //fill the core part of design matix
-        for (size_t i = 0; i < numSVs; i++)
-            for (size_t j = 0; j < numCoreUnknowns; j++)
-                for (size_t k = 0; k < numMeasTypes; k++)
-                    H(i + k*numSVs, j) = hCore(i, j);
-
-        /*clear the follow parts of design matrix:
-
-        d(cdt(R1))   d(cdt(R1))    d(cdt(G2))   d(cdt(G2))  d(cdt(R2))   d(cdt(R2))
-        --------- ,  ---------- ,  --------- ,  --------- ,  --------- ,  ---------
-        d(P2),         d(L2),        d(P1),       d(L1),       d(P1),       d(L1),
-        */
-
-        const auto type1 = coreUnknowns.find(TypeID::recIFB_GPS_L2);
-        const auto type2 = coreUnknowns.find(TypeID::recIFB_GLN_L2);
-
-        TypeIDSet setIFB;
-        if (type1 != coreUnknowns.end())
-            setIFB.insert(*type1);
-        if (type2 != coreUnknowns.end())
-            setIFB.insert(*type2);
-
-        //жуть какая-то:
-        if (setIFB.size() != 0)
-        {
-            for (size_t k = 0; k < numMeasTypes; k++)
-                for (size_t i = 0; i < numSVs; i++)
-                {
-                    if (k % 2 == 0)
-                        for (size_t j = 1; j <= setIFB.size(); j++)
-                            H(i + k*numSVs, numCoreUnknowns - j) = .0;
-                    else if (setIFB.size() > 1)
-                        H(i + k*numSVs, numCoreUnknowns - setIFB.size() - 1) = .0;
-                }
-        }
-
-        //// iono delay maping functions
-        //const auto it = coreUnknowns.find(TypeID::ionoMap);
-        //int col_ion = (it == coreUnknowns.end()) ? -1 : std::distance(coreUnknowns.begin(), it);
-        //double refWl2 = L1_WAVELENGTH_GPS*L1_WAVELENGTH_GPS;
-        ////for code and carrier observaions equations
-        //int row(0);
-        //if (col_ion >= 0)
-        //    for (int i = 0; i < numMeasTypes; i++)
-        //        for (const auto &it : gData.body)
-        //        {                 
-        //            int band = i % 2 ? 1 : 2;
-        //            double wl = getWavelength(it.first, band, it.first.getGloFcn());
-        //            
-        //            H(row++, col_ion) *= (wl*wl / refWl2);
-        //        }
-
-        //fill the satellites dependent part of design matrix
-        int row = (numSVs*numMeasTypes / 2);
-        int col(numCoreUnknowns);
+     
+        int col(0);
         for (auto& eq : equations)
-            eq->updateH(gData, H, row, col);
+            eq->updateH(gData, measTypes(), H, col);
     }
 
     void EquationComposer::updatePhi(Matrix<double>& Phi) const
@@ -226,19 +175,17 @@ namespace pod
     {
         initKfState(currState, currErrorCov);
 
-        int numCoreUnks = coreUnknowns.size();
-
         int row = 0;
 
-        //update 'core' state and 'core' X 'core' covarince
-        for (const auto& it_row : coreUnknowns)
+        //update state and covarince
+        for (const auto& it_row : unknowns)
         {
-            const auto& typeRow = coreData.find(it_row);
-            if (typeRow != coreData.end())
+            const auto& typeRow = filterData.find(it_row);
+            if (typeRow != filterData.end())
             {
-                currState(row) = coreData.at(it_row).value;
+                currState(row) = filterData.at(it_row).value;
                 int col = 0;
-                for (const auto& it_col : coreUnknowns)
+                for (const auto& it_col : unknowns)
                 {
                     const auto& typeCol = (typeRow->second).valCov.find(it_col);
                     if (typeCol != (typeRow->second).valCov.end())
@@ -248,92 +195,22 @@ namespace pod
             }
             ++row;
         }
-
-        int i_amb1(0);
-        //for each current ambiguity
-        for (const auto& amb : currAmb)
-        {
-            //try to find ambiguity data, processed before
-            const auto& it = ambiguityData.find(amb);
-
-            //if found
-            if (it != ambiguityData.end())
-            {
-                // first, update ambiguity value
-                currState(i_amb1 + numCoreUnks) = it->second.ambiguity;
-
-                // update ambiguities vs 'core' variables covariance
-                int i_core = 0;
-                for (const auto& core_var : coreUnknowns)
-                {
-                    const auto& amb_sv_core = it->second.coreCov.find(core_var);
-                    //if found
-                    if (amb_sv_core != it->second.coreCov.end())
-                    {
-                        currErrorCov(i_core, i_amb1 + numCoreUnks) =
-                            currErrorCov(i_amb1 + numCoreUnks, i_core) = amb_sv_core->second;
-                    }
-                    i_core++;
-                }
-
-                int i_amb2(0);
-                // update ambiguity vs ambiguity covariance
-                for (const auto& sv2 : currAmb)
-                {
-                    //try to find ambiguity vs ambiguity covarince in data processed before
-                    const auto& amb_sv_amb = it->second.ambCov.find(sv2);
-
-                    //if found
-                    if (amb_sv_amb != it->second.ambCov.end())
-                    {
-                        currErrorCov(numCoreUnks + i_amb1, numCoreUnks + i_amb2) =
-                            currErrorCov(numCoreUnks + i_amb2, numCoreUnks + i_amb1) = amb_sv_amb->second;
-                    }
-                    i_amb2++;
-                }
-            }
-            i_amb1++;
-        }
     }
 
     void EquationComposer::storeKfState(const gpstk::Vector<double>& currState, const gpstk::Matrix<double>& currErrorCov)
     {
-        int numCoreUnkns(coreUnknowns.size());
-        //store 'core' variables data  
         int row = 0;
-        for (const auto& it_row : coreUnknowns)
+        for (const auto& it_row : unknowns)
         {
-            coreData[it_row].value = currState(row);
+            filterData[it_row].value = currState(row);
 
             int col = 0;
-            for (const auto& it_col : coreUnknowns)
+            for (const auto& it_col : unknowns)
             {
-                coreData[it_row].valCov[it_col] = currErrorCov(row, col);
+                filterData[it_row].valCov[it_col] = currErrorCov(row, col);
                 ++col;
             }
             ++row;
-        }
-
-        //store 'ambiguities' variables data
-        int i_amb1(0);
-        for (const auto& amb : currAmb)
-        {
-            ambiguityData[amb].ambiguity = currState(numCoreUnkns+ i_amb1);
-
-            int i_core(0);
-            for (const auto& it_col : coreUnknowns)
-            {
-                ambiguityData[amb].coreCov[it_col] = currErrorCov(i_core, numCoreUnkns + i_amb1);
-                i_core++;
-            }
-
-            int i_amb2(0);
-            for (const auto& amb2 : currAmb)
-            {
-                ambiguityData[amb].ambCov[amb2] = currErrorCov(numCoreUnkns + i_amb1, numCoreUnkns + i_amb2);
-                i_amb2++;
-            }
-            i_amb1++;
         }
     }
 

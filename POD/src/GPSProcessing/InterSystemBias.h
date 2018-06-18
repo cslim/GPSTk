@@ -23,8 +23,10 @@ namespace pod
         public  EquationBase
     {
     private:
-        static std::map< gpstk::SatID::SatelliteSystem, gpstk::TypeID> ss2isb;
-        static std::map<gpstk::TypeID, gpstk::SatID::SatelliteSystem> isb2ss;
+        static std::map< gpstk::SatID::SatelliteSystem, FilterParameter> ss2isb;
+        static std::map<FilterParameter, gpstk::SatID::SatelliteSystem> isb2ss;
+
+        static const  gpstk::TypeIDSet l1Types;
 
     public:
 
@@ -33,9 +35,9 @@ namespace pod
 
         virtual  void Prepare(gpstk::gnssRinex& gData);
 
-        virtual void updateEquationTypes(gpstk::gnssRinex& gData, gpstk::TypeIDSet& eq)  override;
+        virtual void updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0)  override;
 
-        virtual gpstk::TypeIDSet getEquationTypes() const override
+        virtual ParametersSet getParameters() const override
         {
             return types;
         }
@@ -43,7 +45,7 @@ namespace pod
         virtual void updatePhi(gpstk::Matrix<double>& Phi, int& index) const override;
 
         virtual void updateQ(gpstk::Matrix<double>& Q, int& index) const override;
-        
+
         virtual void defStateAndCovariance(gpstk::Vector<double>& x, gpstk::Matrix<double>& P, int& index) const override;
 
         virtual int getNumUnknowns() const override;
@@ -53,10 +55,10 @@ namespace pod
 
     private:
 
-        std::map< gpstk::TypeID, gpstk::StochasticModel_uptr> stochasticModels;
-        
+        std::map< FilterParameter, gpstk::StochasticModel_uptr> stochasticModels;
+
         //current set of satellite systems
-        gpstk::TypeIDSet types;
+        ParametersSet types;
 
         class Initilizer
         {

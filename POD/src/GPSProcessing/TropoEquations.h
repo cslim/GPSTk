@@ -9,7 +9,7 @@ namespace pod
     {
     public:
         TropoEquations() 
-            :types({ gpstk::TypeID::wetMap }),
+            :type(gpstk::TypeID::wetMap),
             pStochasticModel(std::make_unique<gpstk::RandomWalkModel>())
         {};
         TropoEquations(double qPrime) ;
@@ -19,10 +19,13 @@ namespace pod
 
         virtual void Prepare(gpstk::gnssRinex & gData) override;
 
-        virtual void updateEquationTypes(gpstk::gnssRinex & gData, gpstk::TypeIDSet & eqTypes) override;
-
-        virtual gpstk::TypeIDSet getEquationTypes() const override;
-
+        virtual void updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0) override;
+        
+        virtual  ParametersSet getParameters() const override
+        {
+            return ParametersSet{ type };
+        }
+        
         virtual void updatePhi(gpstk::Matrix<double>& Phi, int & index) const override;
 
         virtual void updateQ(gpstk::Matrix<double>& Q, int & index) const override;
@@ -43,7 +46,7 @@ namespace pod
 
         gpstk::StochasticModel_uptr pStochasticModel;
 
-        gpstk::TypeIDSet types;
+        FilterParameter type;
 
 #pragma endregion
 

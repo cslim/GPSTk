@@ -57,9 +57,9 @@ namespace pod
         virtual int getNumUnknowns() const;
         
         /// get current set unknowns TypeID's
-        virtual gpstk::TypeIDSet & currentUnknowns()
+        virtual ParametersSet & currentUnknowns()
         {
-            return coreUnknowns;
+            return unknowns;
         }
 
         virtual gpstk::TypeIDSet & measTypes()
@@ -113,44 +113,24 @@ namespace pod
         /// erase stored data
         virtual void clearData()
         {
-            coreData.clear();
-            ambiguityData.clear();
+            filterData.clear();
         }
 
     protected: 
 
         ///values and its covariance processed so far
-        struct coreFilterData
+        struct FilterData
         {
             // Default constructor initializing the data in the structure
-            coreFilterData() : value(0.0) {};
+            FilterData() : value(0.0) {};
             
             //value
             double value = 0.0;
-            std::map<gpstk::TypeID, double> valCov;
+            std::map<FilterParameter, double> valCov;
         };
 
-        struct ambiguityFilterData
-        {
-            // Default constructor initializing the data in the structure
-            ambiguityFilterData() : ambiguity(0.0) {};
-
-            //ambiguity value
-            double ambiguity;
-
-            //covarince with 'core' parameters
-            std::map<gpstk::TypeID, double> coreCov;
-
-            //covarince with other ambiguity
-            std::map<FilterParameter, double> ambCov;
-
-        };
-
-        /// Map holding the information regarding every 'core' variable
-        std::map<gpstk::TypeID, coreFilterData> coreData;
-
-        /// Map holding the information regarding every ambiguity variable
-        std::map<FilterParameter, ambiguityFilterData> ambiguityData;
+        /// Map holding the information regarding every variable
+        std::map<FilterParameter, FilterData> filterData;
 
         /// is equation system composes first time?
         bool firstTime;
@@ -159,7 +139,7 @@ namespace pod
         equationsList equations;
         
         /// current set of unknowns
-        gpstk::TypeIDSet coreUnknowns;
+        ParametersSet unknowns;
 
         /// current set of ambiguities
         ParametersSet currAmb;

@@ -15,12 +15,11 @@ namespace pod
 
         // Inherited via EquationBase
         virtual void Prepare(gpstk::gnssRinex & gData) override;
-
-        virtual void updateEquationTypes(gpstk::gnssRinex& gData, gpstk::TypeIDSet & eqTypes) override;
-
-        virtual gpstk::TypeIDSet getEquationTypes() const override
+        virtual void updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0) override;
+      
+        virtual ParametersSet getParameters() const override
         {
-            return gpstk::TypeIDSet({ type });
+            return ParametersSet({ type });
         }
         virtual void updatePhi(gpstk::Matrix<double>& Phi, int & index) const override;
         
@@ -31,7 +30,7 @@ namespace pod
         virtual int getNumUnknowns() const override;
     protected:
 
-        gpstk::TypeID type;
+        FilterParameter type;
         gpstk::StochasticModel_sptr stochModel;
     };
 }

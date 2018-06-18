@@ -14,16 +14,16 @@ namespace pod
 
         virtual PositionEquations& setStochasicModel(gpstk::StochasticModel_sptr newModel);
 
-        virtual PositionEquations& setStochasicModel(gpstk::TypeID, gpstk::StochasticModel_sptr newModel);
+        virtual PositionEquations& setStochasicModel(FilterParameter, gpstk::StochasticModel_sptr newModel);
        
-        virtual gpstk::TypeIDSet getEquationTypes() const override
+        virtual ParametersSet getParameters() const override
         {
             return types;
         }
 
         virtual void Prepare(gpstk::gnssRinex& gData);
 
-        virtual void updateEquationTypes(gpstk::gnssRinex& gData, gpstk::TypeIDSet& eq) override;
+        virtual void updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0) override;
 
         virtual void updatePhi(gpstk::Matrix<double>& Phi, int& index) const override;
 
@@ -35,9 +35,9 @@ namespace pod
 
     protected:
 
-        std::map<gpstk::TypeID, gpstk::StochasticModel_sptr> stochasticModels;
+        std::map<FilterParameter, gpstk::StochasticModel_sptr> stochasticModels;
 
-        gpstk::TypeIDSet types;
+        ParametersSet types;
 
     };
 }

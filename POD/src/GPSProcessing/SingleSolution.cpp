@@ -200,9 +200,9 @@ namespace pod
         Position newPos;
         if (numSats >= 4 && sigma < getMaxSigma())
         {
-            newPos[0] = nominalPos.X() + solver.getSolution(TypeID::dx);    // dx    - #4
-            newPos[1] = nominalPos.Y() + solver.getSolution(TypeID::dy);    // dy    - #5
-            newPos[2] = nominalPos.Z() + solver.getSolution(TypeID::dz);    // dz    - #6
+            newPos[0] = nominalPos.X() + solver.getSolution(FilterParameter( TypeID::dx));   // dx    - #4
+            newPos[1] = nominalPos.Y() + solver.getSolution(FilterParameter(TypeID::dy));    // dy    - #5
+            newPos[2] = nominalPos.Z() + solver.getSolution(FilterParameter(TypeID::dz));    // dz    - #6
 
             nominalPos = newPos;
         }
@@ -226,7 +226,7 @@ namespace pod
         else if (opts().dynamics == GnssDataStore::Dynamics::RandomWalk)
         {
             
-            for (const auto& it : coord->getEquationTypes())
+            for (const auto& it : coord->getParameters())
             {
                 coord->setStochasicModel(it, make_shared<RandomWalkModel>(sigma));
             }

@@ -26,7 +26,7 @@ namespace pod
         virtual void updateRequaredObs() override;
 
         virtual void printSolution(std::ofstream& os,
-            const gpstk::SolverLMS& solver,
+            const KalmanSolver& solver,
             const gpstk::CommonTime& time,
             GnssEpoch& gEpoch) override;
 

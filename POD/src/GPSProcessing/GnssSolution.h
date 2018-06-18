@@ -1,6 +1,6 @@
 #ifndef POD_GNSS_SOLUTION_H
 #define POD_GNSS_SOLUTION_H
-#include"SolverLMS.hpp"
+#include"KalmanSolver.h"
 #include"RequireObservables.hpp"
 
 #include"GnssDataStore.hpp"
@@ -67,7 +67,7 @@ namespace pod
                            gpstk::Position& pos);
 
     protected: virtual void printSolution(std::ofstream& os,
-                            const gpstk::SolverLMS& solver,
+                            const KalmanSolver& solver,
                             const gpstk::CommonTime& time,
                             GnssEpoch& gEpoch);
 

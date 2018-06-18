@@ -679,7 +679,7 @@ namespace pod
         F1 *= F1;
         F2 *= F2;
 
-        value = F2 / (F2 - F1)*(itC1->second - itP2->second);
+        value =(itC1->second - itP2->second) * F2  / (F2 - F1);
 
         return true;
     }
@@ -712,7 +712,7 @@ namespace pod
         F1 *= F1;
         F2 *= F2;
 
-        value = F2 / (F2 - F1)*(itC1->second - itP2->second);
+        value = (itC1->second - itP2->second)* F2 / (F2 - F1);
 
         return true;
     }

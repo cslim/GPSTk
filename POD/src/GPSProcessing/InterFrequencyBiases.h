@@ -8,8 +8,9 @@ namespace pod
         public EquationBase
     {
     private:
-        static std::map< gpstk::SatID::SatelliteSystem, gpstk::TypeID> ss2ifb;
-        static std::map<gpstk::TypeID, gpstk::SatID::SatelliteSystem> ifb2ss;
+        static std::map< gpstk::SatID::SatelliteSystem, FilterParameter> ss2ifb;
+        static std::map<FilterParameter, gpstk::SatID::SatelliteSystem> ifb2ss;
+        static const  gpstk::TypeIDSet l2Types;
 
     public:
         InterFrequencyBiases();
@@ -17,9 +18,9 @@ namespace pod
 
         virtual  void Prepare(gpstk::gnssRinex& gData);
 
-        virtual void updateEquationTypes(gpstk::gnssRinex& gData, gpstk::TypeIDSet& eq)  override;
+        void updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0);
 
-        virtual gpstk::TypeIDSet getEquationTypes() const override
+        virtual ParametersSet getParameters() const override
         {
             return types;
         }
@@ -37,10 +38,10 @@ namespace pod
     
     private:
 
-        std::map< gpstk::TypeID, gpstk::StochasticModel_uptr> stochasticModels;
+        std::map< FilterParameter, gpstk::StochasticModel_uptr> stochasticModels;
 
         //current set of satellite systems
-        gpstk::TypeIDSet types;
+        ParametersSet types;
 
         class Initilizer
         {

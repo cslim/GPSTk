@@ -19,11 +19,13 @@ namespace pod
         /*Check, if unknown parameters currently observable, if so,
         put the corresponding TypeID into 'TypeIDSet'
         */
-        virtual void updateEquationTypes(gpstk::gnssRinex& gData, gpstk::TypeIDSet& eqTypes) override;
+        virtual void updateH(const gpstk::gnssRinex& gData,  const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0) override;
 
         /* return set of TypeID, corresponding unknown parameters  for given equations */
-        virtual  gpstk::TypeIDSet getEquationTypes() const override;
-
+        virtual  ParametersSet getParameters() const override
+        {
+            return types;
+        }
 
         /* Put the values in state tarnsition matrix, starting with specific index,
         index will be incremented inside this method
@@ -53,7 +55,7 @@ namespace pod
 
         gpstk::StochasticModel_uptr pStochasticModel;
 
-        gpstk::TypeIDSet types;
+        ParametersSet types;
 
 #pragma endregion
     };

@@ -13,22 +13,10 @@ namespace pod
        
         /* update state of equations with new observational data */
         virtual  void Prepare(gpstk::gnssRinex& gData) = 0;
-        
-        /*Check, if unknown parameters currently observable, if so,
-        put the corresponding TypeID into 'TypeIDSet'
-        */
-        virtual void updateEquationTypes(gpstk::gnssRinex& gData, gpstk::TypeIDSet& eqTypes) = 0;
-        
-        /* return set of TypeID, corresponding unknown parameters  for given equations */
-        virtual  gpstk::TypeIDSet getEquationTypes() const = 0;
-
-        /*return set of  satellite  currently used in processing, 
-         return empty 'SatIDSet' by default should be overrided in classes,
-         handled satellite-specific parameters (phase ambiguities, for example)
-         */
-        virtual  ParametersSet getAmbSet() const
-        { return ParametersSet(); } ;
-        
+      
+        /* return set of FilerParameters, corresponding unknown parameters  for given equations */
+        virtual  ParametersSet getParameters() const = 0;
+         
         /* Put the values in state tarnsition matrix, starting with specific index,
            index will be incremented inside this method
         */
@@ -47,10 +35,12 @@ namespace pod
         /* Put  partials of the measurements with respect to the unknowns into the design (geometry) matrix 
         starting with specific indices, indices will be incremented inside this method
         */
-        virtual void updateH(gpstk::gnssRinex& gData, gpstk::Matrix<double>& H, int& col_0, int& row_0)
-        {
-        };
+        virtual void updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0) = 0;
 
+        virtual ParametersSet getAmbSet() const
+        {
+            return ParametersSet();
+        }
         /* return number of unknowns
         */
         virtual int getNumUnknowns() const = 0;

@@ -267,7 +267,7 @@ namespace pod
         }
         else if (opts().dynamics == GnssDataStore::Dynamics::RandomWalk)
         {
-            for (const auto& it : coord->getEquationTypes())
+            for (const auto& it : coord->getParameters())
             {
                 coord->setStochasicModel(it, make_shared<RandomWalkModel>(sigma));
             }

@@ -51,7 +51,7 @@ namespace pod
         return data->opts;
     };
 
-    protected: virtual void printSolution(std::ofstream& of, const gpstk::SolverLMS& solver, const gpstk::CommonTime& time, GnssEpoch& gEpoch) override
+    protected: virtual void printSolution(std::ofstream& of, const KalmanSolver& solver, const gpstk::CommonTime& time, GnssEpoch& gEpoch) override
     {
         //ptr->printSolution(of, solver, time, gEpoch)
     };

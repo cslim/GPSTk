@@ -5,7 +5,7 @@ using namespace gpstk;
 namespace pod
 {
     ClockBiasEquations::ClockBiasEquations() 
-        : type(TypeID::cdt), stochModel(std::make_unique<WhiteNoiseModel>())
+        : type( TypeID::cdt), stochModel(std::make_unique<WhiteNoiseModel>())
     {
     }
     
@@ -17,13 +17,15 @@ namespace pod
 
     void ClockBiasEquations::Prepare(gnssRinex & gData)
     {
-
         stochModel->Prepare(SatID::dummy, gData);
     }
-    
-    void ClockBiasEquations::updateEquationTypes(gpstk::gnssRinex& gData,TypeIDSet & eqTypes) 
+
+    void ClockBiasEquations::updateH(const gpstk::gnssRinex& svs, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0)
     {
-        eqTypes.insert(type);
+        for (size_t i = 0; i < H.rows(); i++)
+            H(i, col_0) = 1.0;
+        
+        col_0++;
     }
     
     void ClockBiasEquations::updatePhi( Matrix<double>& Phi, int & index) const

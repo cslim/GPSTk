@@ -1,5 +1,5 @@
 #pragma once
-#include "SolverLMS.hpp"
+#include "SolverBase.hpp"
 #include"SimpleKalmanFilter.hpp"
 #include"EquationComposer.h"
 
@@ -9,7 +9,7 @@ namespace pod
 {
 
     class KalmanSolver :
-        public gpstk::SolverLMS
+        public gpstk::SolverBase, public gpstk::ProcessingClass
     {
     public:
         //maximum time interval without data
@@ -39,8 +39,8 @@ namespace pod
             return *equations;
         }
 
-        double getSolution(const TypeID& type) const override;
-        double getVariance(const TypeID& type) const override;
+        virtual double getSolution(const FilterParameter& type) const ;
+        virtual double getVariance(const FilterParameter& type) const ;
 
     protected:
 
@@ -49,7 +49,7 @@ namespace pod
         virtual int check(gnssRinex& gData);
         virtual gnssRinex& reject(gnssRinex& gData, const TypeIDSet& typeOfResid);
 
-        void reset()
+        virtual void reset()
         {
             equations->clearData();
         }

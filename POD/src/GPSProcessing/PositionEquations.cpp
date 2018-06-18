@@ -13,7 +13,7 @@ namespace pod
     //        stochasticModels[it] = std::make_unique<WhiteNoiseModel>(100);
     //}
     PositionEquations::PositionEquations(double sigma)
-        :types({ TypeID::dx,TypeID::dy,TypeID::dz })
+        :types({ FilterParameter(TypeID::dx), FilterParameter(TypeID::dy), FilterParameter(TypeID::dz) })
     {
         for (const auto &it : types)
             stochasticModels[it] = std::make_unique<WhiteNoiseModel>(sigma);
@@ -26,29 +26,36 @@ namespace pod
         return *this;
     }
 
-    PositionEquations& PositionEquations::setStochasicModel(TypeID id, StochasticModel_sptr newModel)
+    PositionEquations& PositionEquations::setStochasicModel(FilterParameter param, StochasticModel_sptr newModel)
     {
-        stochasticModels[id] = newModel;
+        stochasticModels[param] = newModel;
         return *this;
     }
 
     void PositionEquations::Prepare(gpstk::gnssRinex& gData)
     {
-        //do nothing
         for (const auto& it : stochasticModels)
             it.second->Prepare(SatID::dummy, gData);
-
     }
 
-    void PositionEquations::updateEquationTypes(gpstk::gnssRinex& gData, gpstk::TypeIDSet& eq) 
+    void PositionEquations::updateH(const gpstk::gnssRinex & gData, const gpstk::TypeIDSet & obsTypes, gpstk::Matrix<double>& H, int & col_0)
     {
-        for (const auto& it : types)
-            eq.insert(it);
+        int row(0);
+
+        for (auto&& obs : obsTypes)
+            for (auto&& it : gData.body)
+            {
+                int j(0);
+                for (auto&& t : types)
+                    H(row, col_0 + j++) = it.second.at(t.type);
+                row++;
+            }
+        col_0 += 3;
     }
 
     void PositionEquations::updatePhi(gpstk::Matrix<double>& Phi, int& index) const
     {
-      
+
         for (const auto &it : types)
         {
             Phi(index, index) = stochasticModels.at(it)->getPhi();

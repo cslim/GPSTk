@@ -8,19 +8,19 @@ namespace pod
         public EquationBase
     {
     public:
-        
+  
+        AmbiguitySdEquations()
+            :type(gpstk::TypeID::BL1), obsType(typeMap[gpstk::TypeID::BL1])
+        {};
 
-        AmbiguitySdEquations():type(gpstk::TypeID::BL1){};
-        AmbiguitySdEquations(const gpstk::TypeID& obsType) :type(obsType) {};
+        AmbiguitySdEquations(const gpstk::TypeID& obsType)
+            :type(obsType), obsType(typeMap[obsType])
+        {};
 
         virtual ~AmbiguitySdEquations() {};
 
         // Inherited via EquationBase
         virtual void Prepare(gpstk::gnssRinex & gData) override;
-
-        virtual void updateEquationTypes(gpstk::gnssRinex & gData, gpstk::TypeIDSet & eqTypes) override;
-
-        virtual gpstk::TypeIDSet getEquationTypes() const override;
 
         virtual void updatePhi(gpstk::Matrix<double>& Phi, int & index) const override;
 
@@ -30,15 +30,23 @@ namespace pod
 
         virtual int getNumUnknowns() const override;
 
-        virtual  ParametersSet getAmbSet() const override;
+        virtual  ParametersSet getParameters() const override;
 
-        virtual void updateH(gpstk::gnssRinex& gData, gpstk::Matrix<double>& H, int& col_0, int& row_0) override;
+        virtual void updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0) override;
+
+        virtual ParametersSet getAmbSet() const override
+        {
+            return getParameters();
+        }
 
     private:
 
-        /// type ID of carrier phase measurements (or combination of measurements) 
+        /// type ID of unknown values 
         gpstk::TypeID type;
 
+        /// type ID of carrier phase measurements (or combination of measurements) 
+        gpstk::TypeID obsType;
+        
         ///salellites set to be preocessed
         gpstk::SatIDSet satSet;
 
@@ -51,5 +59,13 @@ namespace pod
         /// phase ambiguity stochasic model
         mutable gpstk::PhaseAmbiguityModel stochModel;
 
+        static std::map< gpstk::TypeID, gpstk::TypeID> typeMap;
+
+        class Initializer
+        {
+        public:
+            Initializer();
+        };
+        static Initializer initializer;
     };
 }
