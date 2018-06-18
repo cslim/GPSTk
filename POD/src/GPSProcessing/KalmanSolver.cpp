@@ -61,10 +61,10 @@ namespace pod
              DBOUT_LINE("")
             //DBOUT_LINE("measVector\n" << setprecision(10) << measVector);
              DBOUT_LINE("H\n" << hMatrix);
-             DBOUT_LINE("Cov\n" << covMatrix);
+             //DBOUT_LINE("Cov\n" << covMatrix);
              DBOUT_LINE("phiMatrix\n" << phiMatrix.diagCopy());
              DBOUT_LINE("qMatrix\n" << qMatrix.diagCopy());
-             DBOUT_LINE("weigthMatrix\n" << weigthMatrix.diagCopy());
+             //DBOUT_LINE("weigthMatrix\n" << weigthMatrix.diagCopy());
             //prepare
             Matrix<double> hMatrixTr = transpose(hMatrix);
             Matrix<double> phiMatrixTr = transpose(phiMatrix);
@@ -124,21 +124,8 @@ namespace pod
             for (int k = 0; k < core_num; k++)
                 solution(k) = ar.CoreParamFixed()(k);
         }
-        else
-            storeAmbiguities(gData);
             
-    }
-
-    void  KalmanSolver::storeAmbiguities(gnssRinex& gData) const
-    {
-        int i(0);
-        for (const auto & amb : equations->currentAmb())
-        {
-            auto & it = gData.body.find(amb.sv);
-            if (it != gData.body.end())
-                gData.body[amb.sv][amb.type] = getSolution(amb);
-            ++i;
-        }
+            
     }
 
     int KalmanSolver::check(gnssRinex& gData)

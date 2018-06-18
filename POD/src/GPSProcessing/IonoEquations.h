@@ -1,6 +1,8 @@
 #pragma once
 #include "EquationBase.h"
 #include"StochasticModel.hpp"
+#include <type_traits>
+#include<memory>
 
 namespace pod
 {
@@ -8,6 +10,8 @@ namespace pod
     class IonoEquations :
         public EquationBase
     {
+        typedef gpstk::StochasticModel_uptr (IonoEquations::*StochModelInitialazer)(double qprime) ;
+        static const double SQR_L1_WL_GPS;
     public:
         IonoEquations();
         IonoEquations(double qPrime);
@@ -24,7 +28,7 @@ namespace pod
         /* return set of TypeID, corresponding unknown parameters  for given equations */
         virtual  ParametersSet getParameters() const override
         {
-            return types;
+            return currParameters;
         }
 
         /* Put the values in state tarnsition matrix, starting with specific index,
@@ -42,20 +46,50 @@ namespace pod
         */
         virtual void defStateAndCovariance(gpstk::Vector<double>& x, gpstk::Matrix<double>& P, int& index) const override;
 
-        /* Put  partials of the measurements with respect to the unknowns into the design (geometry) matrix
-        starting with specific indices, indices will be incremented inside this method
-        */
-
-
         /* return number of unknowns
         */
         virtual int getNumUnknowns() const override;
 
+        template<class T , typename = std::enable_if_t<std::is_base_of<gpstk::StochasticModel, T>::value> >
+        IonoEquations& setStocModel()
+        {
+            if (std::is_same<T, gpstk::StochasticModel>::value)
+                stModelInitializer = &IonoEquations::constantModel;
+            else if(std::is_same<T, gpstk::RandomWalkModel>::value)
+                stModelInitializer = &IonoEquations::rWalkModel;
+            else if (std::is_same<T, gpstk::WhiteNoiseModel>::value)
+                stModelInitializer = &IonoEquations::whiteNoiseModel;
+            
+            return *this;
+        }
+
+        IonoEquations& setSigma(double sigma)
+        {
+            this->sigma = sigma;
+            return *this;
+        }
+
+    private:
+
+        gpstk::StochasticModel_uptr constantModel(double sigma);
+        gpstk::StochasticModel_uptr rWalkModel(double qPrime);
+        gpstk::StochasticModel_uptr whiteNoiseModel(double sigma);
+
 #pragma region Fields
 
-        gpstk::StochasticModel_uptr pStochasticModel;
+        gpstk::TypeID eqType;
+        
+        //current parameters - iono delay along lines of sight for each satellites
+        ParametersSet currParameters;
 
-        ParametersSet types;
+        StochModelInitialazer stModelInitializer;
+
+        std::map<gpstk::SatID, gpstk::StochasticModel_uptr> stochModels;
+
+        double sigma;
+
+        static std::map<gpstk::TypeID, int> obsType2Band;
+        static std::map<gpstk::TypeID, int> obsType2Sign;
 
 #pragma endregion
     };

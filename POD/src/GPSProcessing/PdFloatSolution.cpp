@@ -235,7 +235,7 @@ namespace pod
             //read all epochs
             while (rin >> gRin)
             {
-                DBOUT_LINE(">>"<<CivilTime(gRin.header.epoch));
+                DBOUT_LINE(">>"<<CivilTime(gRin.header.epoch).asString());
                 if (gRin.body.size() == 0)
                 {
                     printMsg(gRin.header.epoch, "Empty epoch record in Rinex file");
@@ -464,31 +464,48 @@ namespace pod
         // White noise stochastic models
         auto  coord = make_unique<PositionEquations>();
 
-        double sigma = confReader().getValueAsDouble("posSigma");
+        double posSigma = confReader().getValueAsDouble("posSigma");
         if (opts().dynamics == GnssDataStore::Dynamics::Static)
         {
             coord->setStochasicModel(make_shared<StochasticModel>());
         }
         else  if (opts().dynamics == GnssDataStore::Dynamics::Kinematic)
         {
-            coord->setStochasicModel(make_shared<WhiteNoiseModel>(sigma));
+            coord->setStochasicModel(make_shared<WhiteNoiseModel>(posSigma));
         }
         else if (opts().dynamics == GnssDataStore::Dynamics::RandomWalk)
         {
             for (const auto& it : coord->getParameters())
-                coord->setStochasicModel(it, make_shared<RandomWalkModel>(sigma));
+                coord->setStochasicModel(it, make_shared<RandomWalkModel>(posSigma));
         }
 
         //add position equations
         Equations->addEquation(std::move(coord));
 
-        Equations->addEquation(make_unique<ClockBiasEquations>());
+        Equations->addEquation(std::make_unique<ClockBiasEquations>());
 
         if (opts().systems.size() > 1)
             Equations->addEquation(std::make_unique<InterSystemBias>());
 
         if (opts().carrierBands.size() > 1)
             Equations->addEquation(std::make_unique<InterFrequencyBiases>());
+
+        if (confReader().getValueAsBoolean("computeIono"))
+        {
+            auto  ionoEq = make_unique<IonoEquations>();
+
+            int ionoModelType= confReader().getValueAsInt("ionoModelType");
+
+            if (ionoModelType == 0)
+                ionoEq->setStocModel<WhiteNoiseModel>();
+            else if (ionoModelType == 1)
+                ionoEq->setStocModel<RandomWalkModel>();
+
+            double ionoSigma = confReader().getValueAsDouble("ionoSigma");
+            ionoEq->setSigma(ionoSigma);
+            Equations->addEquation(std::move(ionoEq));
+        }
+
 
         if (opts().carrierBands.find(CarrierBand::L1) != opts().carrierBands.end())
             Equations->addEquation(std::make_unique<AmbiguitySdEquations>(TypeID::BL1));
@@ -499,20 +516,5 @@ namespace pod
        
 
         forwardBackwardCycles = confReader().getValueAsInt("forwardBackwardCycles");
-    }
-
-    void PdFloatSolution::printSolution(std::ofstream& os, const KalmanSolver& solver, const CommonTime& time, GnssEpoch& gEpoch)
-    {
-        GnssSolution::printSolution(os, solver, time, gEpoch);
-        const auto & params = Equations->currentUnknowns();
-        FilterParameter wetMap(TypeID::wetMap);
-        const auto & it_tropo = params.find(wetMap);
-        
-        if (it_tropo != params.end())
-        {
-            //double wetMap = solver.getSolution(TypeID::wetMap) + 0.1 + this->tropModel.dry_zenith_delay();
-            gEpoch.slnData.insert(std::make_pair(TypeID::recZTropo, solver.getSolution(wetMap)));
-        }
-      
     }
 }

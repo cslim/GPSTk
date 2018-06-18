@@ -50,7 +50,7 @@ namespace pod
         // We MUST mark cycle slips
         std::list<OneFreqCSDetector> csList;
 
-        cout << "Obs. types for smoothing: " << endl;
+        cout << "Obs. currParameters for smoothing: " << endl;
         for (auto &it : codes)
         {
             cout << TypeID::tStrings[it.type] << endl;

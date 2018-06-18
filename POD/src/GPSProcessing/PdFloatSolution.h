@@ -25,11 +25,6 @@ namespace pod
     protected:
         virtual void updateRequaredObs() override;
 
-        virtual void printSolution(std::ofstream& os,
-            const KalmanSolver& solver,
-            const gpstk::CommonTime& time,
-            GnssEpoch& gEpoch) override;
-
         void configureSolver();
 
         ProcessLinear OminusC;

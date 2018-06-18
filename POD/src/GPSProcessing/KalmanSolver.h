@@ -45,7 +45,7 @@ namespace pod
     protected:
 
         virtual void fixAmbiguities(gnssRinex& gData);
-        virtual void storeAmbiguities(gnssRinex& gData) const;
+
         virtual int check(gnssRinex& gData);
         virtual gnssRinex& reject(gnssRinex& gData, const TypeIDSet& typeOfResid);
 

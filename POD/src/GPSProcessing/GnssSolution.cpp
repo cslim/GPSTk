@@ -46,13 +46,29 @@ namespace pod
         for (auto it : solver.PostfitResiduals())
             psum.add(it);
         double sigma = sqrt(psum.variance());
+        
+        for (auto && it : Equations->currentUnknowns())
+        {
+            if (it.type == TypeID::dx || it.type == TypeID::dy || it.type == TypeID::dz)
+                continue;
+
+            if (it.sv == SatID::dummy)
+            {
+                if (it.type == TypeID::cdt)
+                    gEpoch.slnData[TypeID::recCdt] = solver.getSolution(it);
+                else if (it.type == TypeID::wetMap)
+                    gEpoch.slnData[TypeID::recZTropo] = solver.getSolution(it);
+                else
+                    gEpoch.slnData[it.type] = solver.getSolution(it);
+            }
+            else
+                gEpoch.satData[it.sv][it.type] = solver.getSolution(it);
+        }
 
         Position newPos;
         newPos[0] = nominalPos.X() + solver.getSolution(FilterParameter(TypeID::dx));    // dx    - #4
         newPos[1] = nominalPos.Y() + solver.getSolution(FilterParameter(TypeID::dy));    // dy    - #5
         newPos[2] = nominalPos.Z() + solver.getSolution(FilterParameter(TypeID::dz));    // dz    - #6
-
-        double cdt = solver.getSolution(FilterParameter(TypeID::cdt));
 
         double varX = solver.getVariance(FilterParameter(TypeID::dx));     // Cov dx    - #8
         double varY = solver.getVariance(FilterParameter(TypeID::dy));     // Cov dy    - #9
@@ -69,25 +85,11 @@ namespace pod
         gEpoch.slnData.insert(make_pair(TypeID::recZ, newPos.Z()));
 
         gEpoch.slnData.insert(make_pair(TypeID::recStDev3D, stDev3D));
-        gEpoch.slnData.insert(make_pair(TypeID::recCdt, cdt));
+
         gEpoch.slnData.insert(make_pair(TypeID::sigma, sigma));
-        
-        const auto& types = Equations->currentUnknowns();
-
-        FilterParameter  ISB_GLN(TypeID::recISB_GLN);
-        if (types.find(ISB_GLN) != types.end())
-            gEpoch.slnData.insert(make_pair(TypeID::recISB_GLN, solver.getSolution(ISB_GLN)));
-
-        FilterParameter IFB_GPS_L2(TypeID::recIFB_GPS_L2);
-        if (types.find(IFB_GPS_L2) != types.end())
-            gEpoch.slnData.insert(make_pair(TypeID::recIFB_GPS_L2, solver.getSolution(IFB_GPS_L2)));
-
-        FilterParameter IFB_GLN_L2(TypeID::recIFB_GLN_L2);
-        if (types.find(IFB_GLN_L2) != types.end())
-            gEpoch.slnData.insert(make_pair(TypeID::recIFB_GLN_L2, solver.getSolution(IFB_GLN_L2)));
 
         os << setprecision(6) << CivilTime(time).printf("%02Y %02m %02d %02H %02M %02S %P") << " " << slnType << " ";
-        os << setprecision(10) << newPos.X() << "  " << newPos.Y() << "  " << newPos.Z() << "  " << cdt << " ";
+        os << setprecision(10) << newPos.X() << "  " << newPos.Y() << "  " << newPos.Z() << "  " << " ";
         os << setprecision(3) << sigma << " " << stDev3D << " " << numSats;
         os << endl;
     };
