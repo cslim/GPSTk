@@ -178,54 +178,7 @@ namespace gpstk
          LIdot2,    ///< Phase-based ionospheric combination 2nd derivative
          Ldeltadot, ///< Wide-lane combination 1st derivative
          Ldeltadot2,///< Wide-lane combination 2nd derivative
-            // Model-related types
-         transmit,  ///< Transmit time of the signal
-         rho,       ///< Geometric distance satellite-receiver
-         rhodot,    ///< First derivative of geometric distance SV-RX
-         rhodot2,   ///< Second derivative of geometric distance SV-RX
-         dtSat,     ///< Satellite clock offset
-         dtSatdot,  ///< Satellite clock offset drift
-         dtSatdot2, ///< Satellite clock offset drift rate
-         rel,       ///< Relativistic delay
-         gravDelay, ///< Gravitational delay
-         tropo,     ///< Vertical tropospheric delay, total
-         dryTropo,  ///< Vertical tropospheric delay, dry component
-         dryMap,    ///< Tropospheric mapping function, dry component
-         wetTropo,  ///< Vertical tropospheric delay, wet component
-         wetMap,    ///< Tropospheric mapping function, wet component
-         tropoSlant, ///< Slant tropospheric delay, total
-         iono,      ///< Vertical ionospheric delay
-         ionoTEC,   ///< Total Electron Content (in TECU), 1TECU = 1e+16 electrons per m**2
-         ionoMap,   ///< Ionospheric mapping function
-         ionoMap2,  ///< Ionospheric mapping function for second order ionospheric delay
-         ionoL1,    ///< Slant ionospheric delay, frequency L1
-         ionoL2,    ///< Slant ionospheric delay, frequency L2
-         ionoL5,    ///< Slant ionospheric delay, frequency L5
-         ionoL6,    ///< Slant ionospheric delay, frequency L6
-         ionoL7,    ///< Slant ionospheric delay, frequency L7
-         ionoL8,    ///< Slant ionospheric delay, frequency L8
-         windUp,    ///< Wind-up effect (in radians)
-         satPCenter,///< Satellite antenna phase center correction
-         satX,      ///< Satellite position, X component
-         satY,      ///< Satellite position, Y component
-         satZ,      ///< Satellite position, Z component
-         satVX,     ///< Satellite velocity, X component
-         satVY,     ///< Satellite velocity, Y component
-         satVZ,     ///< Satellite velocity, Z component
-         satAX,     ///< Satellite acceleration, X component
-         satAY,     ///< Satellite acceleration, Y component
-         satAZ,     ///< Satellite acceleration, Z component
-         satJ2kX,   ///< Satellite position in J2000, X component
-         satJ2kY,   ///< Satellite position in J2000, Y component
-         satJ2kZ,   ///< Satellite position in J2000, Z component
-         satJ2kVX,  ///< Satellite velocity in J2000, X component
-         satJ2kVY,  ///< Satellite velocity in J2000, Y component
-         satJ2kVZ,  ///< Satellite velocity in J2000, Z component
-         satJ2kAX,  ///< Satellite acceleration in J2000, X component
-         satJ2kAY,  ///< Satellite acceleration in J2000, Y component
-         satJ2kAZ,  ///< Satellite acceleration in J2000, Z component
-         elevation, ///< Satellite elevation
-         azimuth,   ///< Satellite azimuth
+
             // Cycle slip flags
          CSL1,      ///< Cycle slip in L1
          CSL2,      ///< Cycle slip in L2
@@ -357,6 +310,55 @@ namespace gpstk
          sigma,     ///< Standard deviation
          iura,      ///< Index User Range Accuracy
          Action,    ///< Flag for quality control
+
+                    // Model-related types
+             transmit,  ///< Transmit time of the signal
+             rho,       ///< Geometric distance satellite-receiver
+             rhodot,    ///< First derivative of geometric distance SV-RX
+             rhodot2,   ///< Second derivative of geometric distance SV-RX
+             dtSat,     ///< Satellite clock offset
+             dtSatdot,  ///< Satellite clock offset drift
+             dtSatdot2, ///< Satellite clock offset drift rate
+             rel,       ///< Relativistic delay
+             gravDelay, ///< Gravitational delay
+             tropo,     ///< Vertical tropospheric delay, total
+             dryTropo,  ///< Vertical tropospheric delay, dry component
+             dryMap,    ///< Tropospheric mapping function, dry component
+             wetTropo,  ///< Vertical tropospheric delay, wet component
+             wetMap,    ///< Tropospheric mapping function, wet component
+             tropoSlant, ///< Slant tropospheric delay, total
+             iono,      ///< Vertical ionospheric delay
+             ionoTEC,   ///< Total Electron Content (in TECU), 1TECU = 1e+16 electrons per m**2
+             ionoMap,   ///< Ionospheric mapping function
+             ionoMap2,  ///< Ionospheric mapping function for second order ionospheric delay
+             ionoL1,    ///< Slant ionospheric delay, frequency L1
+             ionoL2,    ///< Slant ionospheric delay, frequency L2
+             ionoL5,    ///< Slant ionospheric delay, frequency L5
+             ionoL6,    ///< Slant ionospheric delay, frequency L6
+             ionoL7,    ///< Slant ionospheric delay, frequency L7
+             ionoL8,    ///< Slant ionospheric delay, frequency L8
+             windUp,    ///< Wind-up effect (in radians)
+             satPCenter,///< Satellite antenna phase center correction
+             satX,      ///< Satellite position, X component
+             satY,      ///< Satellite position, Y component
+             satZ,      ///< Satellite position, Z component
+             satVX,     ///< Satellite velocity, X component
+             satVY,     ///< Satellite velocity, Y component
+             satVZ,     ///< Satellite velocity, Z component
+             satAX,     ///< Satellite acceleration, X component
+             satAY,     ///< Satellite acceleration, Y component
+             satAZ,     ///< Satellite acceleration, Z component
+             satJ2kX,   ///< Satellite position in J2000, X component
+             satJ2kY,   ///< Satellite position in J2000, Y component
+             satJ2kZ,   ///< Satellite position in J2000, Z component
+             satJ2kVX,  ///< Satellite velocity in J2000, X component
+             satJ2kVY,  ///< Satellite velocity in J2000, Y component
+             satJ2kVZ,  ///< Satellite velocity in J2000, Z component
+             satJ2kAX,  ///< Satellite acceleration in J2000, X component
+             satJ2kAY,  ///< Satellite acceleration in J2000, Y component
+             satJ2kAZ,  ///< Satellite acceleration in J2000, Z component
+             elevation, ///< Satellite elevation
+             azimuth,   ///< Satellite azimuth
 
                     // Phase-ambiguity types
              BL1,       ///< Phase ambiguity in L1
