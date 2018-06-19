@@ -178,7 +178,22 @@ namespace gpstk
          LIdot2,    ///< Phase-based ionospheric combination 2nd derivative
          Ldeltadot, ///< Wide-lane combination 1st derivative
          Ldeltadot2,///< Wide-lane combination 2nd derivative
-
+                    // Model-related types
+                    transmit,  ///< Transmit time of the signal
+                    rho,       ///< Geometric distance satellite-receiver
+                    rhodot,    ///< First derivative of geometric distance SV-RX
+                    rhodot2,   ///< Second derivative of geometric distance SV-RX
+                    dtSat,     ///< Satellite clock offset
+                    dtSatdot,  ///< Satellite clock offset drift
+                    dtSatdot2, ///< Satellite clock offset drift rate
+                    rel,       ///< Relativistic delay
+                    gravDelay, ///< Gravitational delay
+                    tropo,     ///< Vertical tropospheric delay, total
+                    dryTropo,  ///< Vertical tropospheric delay, dry component
+                    dryMap,    ///< Tropospheric mapping function, dry component
+                    wetTropo,  ///< Vertical tropospheric delay, wet component
+                    wetMap,    ///< Tropospheric mapping function, wet component
+                    tropoSlant, ///< Slant tropospheric delay, total
             // Cycle slip flags
          CSL1,      ///< Cycle slip in L1
          CSL2,      ///< Cycle slip in L2
@@ -311,22 +326,7 @@ namespace gpstk
          iura,      ///< Index User Range Accuracy
          Action,    ///< Flag for quality control
 
-                    // Model-related types
-             transmit,  ///< Transmit time of the signal
-             rho,       ///< Geometric distance satellite-receiver
-             rhodot,    ///< First derivative of geometric distance SV-RX
-             rhodot2,   ///< Second derivative of geometric distance SV-RX
-             dtSat,     ///< Satellite clock offset
-             dtSatdot,  ///< Satellite clock offset drift
-             dtSatdot2, ///< Satellite clock offset drift rate
-             rel,       ///< Relativistic delay
-             gravDelay, ///< Gravitational delay
-             tropo,     ///< Vertical tropospheric delay, total
-             dryTropo,  ///< Vertical tropospheric delay, dry component
-             dryMap,    ///< Tropospheric mapping function, dry component
-             wetTropo,  ///< Vertical tropospheric delay, wet component
-             wetMap,    ///< Tropospheric mapping function, wet component
-             tropoSlant, ///< Slant tropospheric delay, total
+                   
              iono,      ///< Vertical ionospheric delay
              ionoTEC,   ///< Total Electron Content (in TECU), 1TECU = 1e+16 electrons per m**2
              ionoMap,   ///< Ionospheric mapping function
