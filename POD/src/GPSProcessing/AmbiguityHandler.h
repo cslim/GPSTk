@@ -1,5 +1,5 @@
 #pragma once
-#include"Ambiguity.h"
+#include"FilterParameter.h"
 #include"RefSatHandler.h"
 
 #include"ARSimple.hpp"
@@ -13,7 +13,7 @@ namespace pod
     {
     public:
         AmbiguityHandler(
-            const AmbiguitySet & ambiguites,
+            const ParametersSet & ambiguites,
             const gpstk::Vector<double> &state,
             const  gpstk::Matrix<double> &cov,
             int n_core);
@@ -56,7 +56,7 @@ namespace pod
             const gpstk::Matrix<double> & ddCov) const;
 
         //pointer to current set of ambiguites
-        const AmbiguitySet *pAmbs;
+        const ParametersSet *pAmbs;
 
         //pointer to single difference float solution
         const gpstk::Vector<double> *pSdFloatSolution;

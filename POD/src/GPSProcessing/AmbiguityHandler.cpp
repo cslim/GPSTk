@@ -6,7 +6,7 @@ using namespace gpstk;
 namespace pod
 {
     AmbiguityHandler:: AmbiguityHandler(
-        const AmbiguitySet & ambiguites,
+        const ParametersSet & ambiguites,
         const gpstk::Vector<double> &state,
         const  gpstk::Matrix<double> &cov,
         int n_core)
@@ -134,8 +134,8 @@ namespace pod
     {
         Vector<double> ddAmbFixed(ddAmbFloat.size(), .0);
 
-        const auto types = Ambiguity::get_all_types(*pAmbs);
-        const auto sv_by_ss = Ambiguity::get_sv_by_ss(*pAmbs);
+        const auto types = FilterParameter::get_all_types(*pAmbs);
+        const auto sv_by_ss = FilterParameter::get_sv_by_ss(*pAmbs);
         int n_sv = pAmbs->size() / types.size();
 
         int i(0);

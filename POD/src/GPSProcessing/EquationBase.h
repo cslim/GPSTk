@@ -1,6 +1,6 @@
 #pragma once
 #include"DataStructures.hpp"
-#include"Ambiguity.h"
+#include"FilterParameter.h"
 
 namespace pod
 {
@@ -26,8 +26,8 @@ namespace pod
          return empty 'SatIDSet' by default should be overrided in classes,
          handled satellite-specific parameters (phase ambiguities, for example)
          */
-        virtual  AmbiguitySet getAmbSet() const
-        { return AmbiguitySet(); } ;
+        virtual  ParametersSet getAmbSet() const
+        { return ParametersSet(); } ;
         
         /* Put the values in state tarnsition matrix, starting with specific index,
            index will be incremented inside this method

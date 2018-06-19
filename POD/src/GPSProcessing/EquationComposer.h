@@ -1,7 +1,7 @@
 #pragma once
 
 #include"EquationBase.h"
-#include"Ambiguity.h"
+#include"FilterParameter.h"
 #include"GnssDataStore.hpp"
 
 #include<memory>
@@ -81,7 +81,7 @@ namespace pod
             return residualsTypes;
         }
 
-        virtual const AmbiguitySet & currentAmb() const
+        virtual const ParametersSet & currentAmb() const
         {
             return currAmb;
         }
@@ -142,7 +142,7 @@ namespace pod
             std::map<gpstk::TypeID, double> coreCov;
 
             //covarince with other ambiguity
-            std::map<Ambiguity, double> ambCov;
+            std::map<FilterParameter, double> ambCov;
 
         };
 
@@ -150,7 +150,7 @@ namespace pod
         std::map<gpstk::TypeID, coreFilterData> coreData;
 
         /// Map holding the information regarding every ambiguity variable
-        std::map<Ambiguity, ambiguityFilterData> ambiguityData;
+        std::map<FilterParameter, ambiguityFilterData> ambiguityData;
 
         /// is equation system composes first time?
         bool firstTime;
@@ -162,7 +162,7 @@ namespace pod
         gpstk::TypeIDSet coreUnknowns;
 
         /// current set of ambiguities
-        AmbiguitySet currAmb;
+        ParametersSet currAmb;
         
         /// type of measurements
         gpstk::TypeIDSet measurmentsTypes;

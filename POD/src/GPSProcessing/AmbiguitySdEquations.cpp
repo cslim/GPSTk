@@ -6,11 +6,11 @@ using namespace gpstk;
 
 namespace pod
 {
-    AmbiguitySet AmbiguitySdEquations::getAmbSet() const
+    ParametersSet AmbiguitySdEquations::getAmbSet() const
     {
-        AmbiguitySet ambSet;
+        ParametersSet ambSet;
         for (const auto& it : csFlags)
-            ambSet.insert(Ambiguity(type, it.first));
+            ambSet.insert(FilterParameter(type, it.first));
         return ambSet;
     }
 

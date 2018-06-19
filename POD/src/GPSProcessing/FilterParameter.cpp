@@ -1,8 +1,8 @@
-#include "Ambiguity.h"
+#include "FilterParameter.h"
 using namespace gpstk;
 namespace pod
 {
-    System2SatSetMap Ambiguity::get_sv_by_ss(const std::set<Ambiguity>& ambs)
+    System2SatSetMap FilterParameter::get_sv_by_ss(const std::set<FilterParameter>& ambs)
     {
         System2SatSetMap svs_by_ss;
         SatIDSet svs;
@@ -15,7 +15,7 @@ namespace pod
 
     }
     
-    SatIDSet Ambiguity::get_all_sv(const std::set<Ambiguity>& ambs)
+    SatIDSet FilterParameter::get_all_sv(const std::set<FilterParameter>& ambs)
     {
         SatIDSet svs;
         for (const auto& amb : ambs)
@@ -24,7 +24,7 @@ namespace pod
         return svs;
     }
 
-    SatSystSet Ambiguity::get_all_ss(const std::set<Ambiguity>& ambs)
+    SatSystSet FilterParameter::get_all_ss(const std::set<FilterParameter>& ambs)
     {
         SatSystSet sss;
         for (const auto& amb : ambs)
@@ -33,7 +33,7 @@ namespace pod
         return sss;
     }
 
-    TypeIDSet Ambiguity::get_all_types(const std::set<Ambiguity>& ambs)
+    TypeIDSet FilterParameter::get_all_types(const std::set<FilterParameter>& ambs)
     {
         TypeIDSet types;
         for (const auto& amb : ambs)

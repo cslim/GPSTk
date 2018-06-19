@@ -61,7 +61,7 @@ namespace pod
         ------------------------------------------------------
         */
         auto hCore = gData.body.getMatrixOfTypes(coreUnknowns);
-        
+
         /*
         form the design martix H:
            |  T  | dX dY dZ | cdt | cdt(R1) | cdt(G2) | cdt(R2) |     N1     |     N2     |
@@ -88,17 +88,17 @@ namespace pod
             for (size_t j = 0; j < numCoreUnknowns; j++)
                 for (size_t k = 0; k < numMeasTypes; k++)
                     H(i + k*numSVs, j) = hCore(i, j);
-        
+
         /*clear the follow parts of design matrix:
 
         d(cdt(R1))   d(cdt(R1))    d(cdt(G2))   d(cdt(G2))  d(cdt(R2))   d(cdt(R2))
         --------- ,  ---------- ,  --------- ,  --------- ,  --------- ,  ---------
         d(P2),         d(L2),        d(P1),       d(L1),       d(P1),       d(L1),
         */
-       
+
         const auto type1 = coreUnknowns.find(TypeID::recIFB_GPS_L2);
         const auto type2 = coreUnknowns.find(TypeID::recIFB_GLN_L2);
-       
+
         TypeIDSet setIFB;
         if (type1 != coreUnknowns.end())
             setIFB.insert(*type1);
@@ -277,9 +277,7 @@ namespace pod
                 }
             }
             i_amb1++;
-
         }
-
     }
 
     void EquationComposer::storeKfState(const gpstk::Vector<double>& currState, const gpstk::Matrix<double>& currErrorCov)

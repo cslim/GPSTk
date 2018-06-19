@@ -30,7 +30,7 @@ namespace pod
 
         virtual int getNumUnknowns() const override;
 
-        virtual  AmbiguitySet getAmbSet() const override;
+        virtual  ParametersSet getAmbSet() const override;
 
         virtual void updateH(gpstk::gnssRinex& gData, gpstk::Matrix<double>& H, int& col_0, int& row_0) override;
 

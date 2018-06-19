@@ -109,7 +109,7 @@ namespace pod
     
     void  KalmanSolver::fixAmbiguities(gnssRinex& gData)
     {
-      /*  auto summ = Ambiguity::get_sv_by_ss( equations->currentAmb());
+      /*  auto summ = FilterParameter::get_sv_by_ss( equations->currentAmb());
         for (auto &it : summ)
             std::cout << SatID::convertSatelliteSystemToString(it.first)
             << ": " << it.second.size() << endl;

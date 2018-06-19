@@ -317,18 +317,20 @@ namespace pod
 #pragma endregion
     const  gpstk::TypeIDSet SQLiteAdapter::requaredTypes{
          TypeID::C1 ,
+         TypeID::P1 ,
          TypeID::P2 ,
          TypeID::L1 ,
          TypeID::L2 ,
          TypeID::S1 ,
          TypeID::LI          ,
          TypeID::MWubbena          ,
+         TypeID::ionoL1          ,
          //TypeID::rho             ,
          //TypeID::dtSat           ,
          TypeID::elevation         ,
          TypeID::azimuth           ,
-         TypeID::CSL1              ,
-         TypeID::CSL2              ,
+         //TypeID::CSL1              ,
+         //TypeID::CSL2              ,
          TypeID::satArc            ,
          /* 
          TypeID::prefitC           ,

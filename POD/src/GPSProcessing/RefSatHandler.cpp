@@ -39,15 +39,15 @@ namespace pod
     }
 
     //
-    Matrix<double> RefSatHandler::getSD2DDMatrix(gpstk::gnssRinex & gData, const AmbiguitySet& ambs, gpstk::SatIDSet &svSet)
+    Matrix<double> RefSatHandler::getSD2DDMatrix(gpstk::gnssRinex & gData, const ParametersSet& ambs, gpstk::SatIDSet &svSet)
     {
         //get reference satellites for each satellite systems
         svSet = getRefSats(gData);
 
         std::list<int> indeces;
         auto curr_sv = svSet.begin();
-        auto svs_by_ss = Ambiguity::get_sv_by_ss(ambs);
-        SatIDSet svs = Ambiguity::get_all_sv(ambs);
+        auto svs_by_ss = FilterParameter::get_sv_by_ss(ambs);
+        SatIDSet svs = FilterParameter::get_all_sv(ambs);
 
         //prepare single to double differences transition matrix
         Matrix<double> SD2DD(svs.size() - svSet.size(), svs.size(), .0);
