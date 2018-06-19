@@ -190,6 +190,8 @@ namespace pod
 
     bool  GnssDataStore::loadIono()
     {
+        bool isIonexLoaded = loadIonoMap();
+
         auto type = (ComputeIonoModel::IonoModelType)confReader->getValueAsInt("CodeIonoCorrType");
         switch (type)
         {
@@ -201,7 +203,9 @@ namespace pod
                 GPSTK_THROW(InvalidRequest("Can't load iono model from Rinex GPS Navigation files."));
             break;
         case gpstk::ComputeIonoModel::Ionex:
-            if (!loadIonoMap())
+            if (isIonexLoaded)
+                ionoCorrector.setIonosphereMap(ionexStore);
+            else
                 GPSTK_THROW(InvalidRequest("Can't load Ionosphere map from Ionex files."));
             break;
         case gpstk::ComputeIonoModel::DualFreq:
@@ -218,14 +222,14 @@ namespace pod
         list<string> files;
         string subdir = confReader->getValue("IonexDir");
         FsUtils::getAllFilesInDir(workingDir + "\\" + subdir, files);
-        IonexStore ionStore;
+        ionexStore.clear();
         for (auto& file : files)
         {
-            ionStore.loadFile(file);
+            ionexStore.loadFile(file);
            
         }
-        ionoCorrector.setIonosphereMap(ionStore);
-        return ionStore.size() > 0;
+      
+        return ionexStore.size() > 0;
     }
 
     bool  GnssDataStore::loadBceIonoModel()

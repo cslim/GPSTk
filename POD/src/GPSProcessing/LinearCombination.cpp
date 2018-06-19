@@ -676,11 +676,10 @@ namespace pod
         double F1 = C_MPS / getWavelength(sv, 1, fcn);
         double F2 = C_MPS / getWavelength(sv, 2, fcn);
 
-        F1 = F1 * F1;
-        F2 = F2 * F2;
+        F1 *= F1;
+        F2 *= F2;
 
-        double dF = F1 - F2;
-        value = (1.0 - F1 / dF)*itC1->second + (F2 / dF)*itP2->second;
+        value = F2 / (F2 - F1)*(itC1->second - itP2->second);
 
         return true;
     }
@@ -710,11 +709,10 @@ namespace pod
         double F1 = C_MPS / getWavelength(sv, 1, fcn);
         double F2 = C_MPS / getWavelength(sv, 2, fcn);
 
-        F1 = F1 * F1;
-        F2 = F2 * F2;
+        F1 *= F1;
+        F2 *= F2;
 
-        double dF = F1 - F2;
-        value = (1.0 - F1 / dF)*itC1->second + (F2 / dF)*itP2->second;
+        value = F2 / (F2 - F1)*(itC1->second - itP2->second);
 
         return true;
     }

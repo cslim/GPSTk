@@ -106,7 +106,7 @@ namespace pod
             setIFB.insert(*type2);
 
         //жуть какая-то:
-        if (setIFB.size()!=0)
+        if (setIFB.size() != 0)
         {
             for (size_t k = 0; k < numMeasTypes; k++)
                 for (size_t i = 0; i < numSVs; i++)
@@ -119,8 +119,24 @@ namespace pod
                 }
         }
 
+        //// iono delay maping functions
+        //const auto it = coreUnknowns.find(TypeID::ionoMap);
+        //int col_ion = (it == coreUnknowns.end()) ? -1 : std::distance(coreUnknowns.begin(), it);
+        //double refWl2 = L1_WAVELENGTH_GPS*L1_WAVELENGTH_GPS;
+        ////for code and carrier observaions equations
+        //int row(0);
+        //if (col_ion >= 0)
+        //    for (int i = 0; i < numMeasTypes; i++)
+        //        for (const auto &it : gData.body)
+        //        {                 
+        //            int band = i % 2 ? 1 : 2;
+        //            double wl = getWavelength(it.first, band, it.first.getGloFcn());
+        //            
+        //            H(row++, col_ion) *= (wl*wl / refWl2);
+        //        }
+
         //fill the satellites dependent part of design matrix
-        int row(numSVs*numMeasTypes/2);
+        int row = (numSVs*numMeasTypes / 2);
         int col(numCoreUnknowns);
         for (auto& eq : equations)
             eq->updateH(gData, H, row, col);

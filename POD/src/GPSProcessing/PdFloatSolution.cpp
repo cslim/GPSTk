@@ -14,6 +14,8 @@
 #include"InterFrequencyBiases.h"
 #include"AmbiguitySdEquations.h"
 #include"SNRCatcher.h"
+#include"IonoEquations.h"
+#include"IonoEstimator.h"
 
 #include"LinearCombinations.hpp"
 #include"LICSDetector.hpp"
@@ -38,6 +40,7 @@
 #include"OceanLoading.hpp"
 #include"PoleTides.hpp"
 #include"MJD.hpp"
+#include"IonexModel.hpp"
 
 #include<memory>
 
@@ -100,6 +103,9 @@ namespace pod
         ComputeTropModel computeTropoRover(tropoRovPtr);
 
 #pragma endregion
+
+        IonexModel ionoModel(nominalPos, data->ionexStore, TypeID::C1, false);
+        IonoEstimator ionoFilterRover, ionoFilterBase;
 
         // Object to compute gravitational delay effects
         GravitationalDelay grDelayBase(refPos);
@@ -168,7 +174,6 @@ namespace pod
         Antenna roverAnt(antexReader.getAntenna(confReader().getValue("antennaModel", data->SiteRover)));
         corrRover.setAntenna(roverAnt);
         corrRover.setUseAzimuth(confReader().getValueAsBoolean("useAzim", data->SiteRover));
-
 
 #pragma endregion
 
@@ -263,6 +268,7 @@ namespace pod
                 
                 tropoRovPtr.setAllParameters(t, nominalPos);
                 tropoBasePtr.setAllParameters(t, refPos);
+                ionoModel.setInitialRxPosition(nominalPos);
 
                 modelRover.rxPos = nominalPos;
                 corrRover.setNominalPosition(nominalPos);
@@ -329,14 +335,15 @@ namespace pod
                     gRef >> windupBase;
                     data->ionoCorrector.setNominalPosition(refPos);
                     
-                    //gRef >> data->ionoCorrector;
+
                     gRef >> computeTropoBase;
+                   // gRef >> ionoFilterBase;
                     gRef >> linearIonoFree;
                     gRef >> oMinusC;
 
                     delta.setRefData(gRef.body);
                 }
-                catch (gpstk::SyncNextRoverEpoch &e)
+                catch (SyncNextRoverEpoch &e)
                 {
                     continue;
                 }
@@ -356,6 +363,7 @@ namespace pod
                 
                 gRin >> windupRover;
                 gRin >> computeTropoRover;
+                //gRin >> ionoFilterRover;
                 gRin >> linearIonoFree;
                 gRin >> oMinusC;
                 gRin >> delta;
@@ -452,7 +460,7 @@ namespace pod
             double qPrime = confReader().getValueAsDouble("tropoQ");
             Equations->addEquation(make_unique<TropoEquations>(qPrime));
         }
-
+       //  Equations->addEquation(std::make_unique<IonoEquations>(confReader().getValueAsDouble("ionoQ")));
         // White noise stochastic models
         auto  coord = make_unique<PositionEquations>();
 
@@ -487,6 +495,8 @@ namespace pod
 
         if (opts().carrierBands.find(CarrierBand::L2) != opts().carrierBands.end())
             Equations->addEquation(std::make_unique<AmbiguitySdEquations>(TypeID::BL2));
+
+       
 
         forwardBackwardCycles = confReader().getValueAsInt("forwardBackwardCycles");
     }

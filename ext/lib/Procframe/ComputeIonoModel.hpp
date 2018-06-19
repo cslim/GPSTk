@@ -170,11 +170,9 @@ namespace gpstk
          /// Correct ionospheric delay with klobuchar model
       virtual ComputeIonoModel& setklobucharModel(const std::string& brdcFile);
 
-         /// Correct ionospheric delay with ionex file
-      virtual ComputeIonoModel& setIonosphereMap(const std::string& ionexFile);
 
       /// Correct ionospheric delay with ionex file
-      virtual ComputeIonoModel& setIonosphereMap(const IonexStore& ionexStore);
+      virtual ComputeIonoModel& setIonosphereMap(IonexStore& ionexStore);
 
          /// Correct ionospheric delay with dual frequency code 
       virtual ComputeIonoModel& setDualFreqModel()
@@ -217,7 +215,7 @@ namespace gpstk
       IonoModelStore klbStore;
 
          /// Object to calculate ionospheric delay with ionospheric map model
-      IonexStore gridStore;
+      IonexStore* pGridStore;
 
          /// Receiver position
       Position nominalPos;

@@ -121,12 +121,12 @@ namespace gpstk
                      Position pos(IPP);
                      pos.transformTo(Position::Geocentric);
 
-                     Triple val = gridStore.getIonexValue(time, pos);
+                     Triple val = pGridStore->getIonexValue(time, pos);
 
                      double tecval = val[0];
 
-                     (void)gridStore.iono_mapping_function(elevation, mapType);
-                     ionL1 = gridStore.getIonoL1(elevation, tecval, mapType);
+                     pGridStore->iono_mapping_function(elevation, mapType);
+                     ionL1 = pGridStore->getIonoL1(elevation, tecval, mapType);
                  }
                  catch (InvalidRequest& e)
                  {
@@ -274,19 +274,11 @@ namespace gpstk
       return (*this);
    }
 
-   ComputeIonoModel& ComputeIonoModel::setIonosphereMap(const string& ionexFile)
-   {
-      gridStore.clear();
-      gridStore.loadFile(ionexFile);
-      ionoType = Ionex;
 
-      return (*this);
-   }
-
-   ComputeIonoModel& ComputeIonoModel::setIonosphereMap(const IonexStore& ionexStore)
+   ComputeIonoModel& ComputeIonoModel::setIonosphereMap( IonexStore& ionexStore)
    {
-       gridStore.clear();
-       gridStore = ionexStore;
+
+       pGridStore = &ionexStore;
        ionoType = Ionex;
 
        return (*this);

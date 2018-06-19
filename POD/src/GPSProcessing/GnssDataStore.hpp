@@ -111,6 +111,9 @@ namespace pod
             //GPS Navigation Message based ionospheric models store
     public: gpstk::IonoModelStore bceIonoStore;
 
+            //ionosphere map store
+    public: gpstk::IonexStore ionexStore;
+
             // compute the  values related to a given GNSS ionospheric model.
     public: gpstk::ComputeIonoModel ionoCorrector;
             
