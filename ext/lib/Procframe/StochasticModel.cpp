@@ -49,7 +49,7 @@ namespace gpstk
 
 
       // Get element of the process noise matrix Q
-   double RandomWalkModel::getQ()
+   double RandomWalkModel::getQ() const
    {
 
          // Compute current variance

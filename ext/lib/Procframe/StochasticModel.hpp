@@ -199,7 +199,7 @@ namespace gpstk
 
 
          /// Get element of the process noise matrix Q
-      virtual double getQ();
+      virtual double getQ() const;
 
 
          /** This method provides the stochastic model with all the available
