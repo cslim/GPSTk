@@ -54,17 +54,18 @@ namespace pod
 
             firstTime = false;
 
-            DBOUT_LINE("----------------------------------------------------------------------------------------");
+           // DBOUT_LINE("----------------------------------------------------------------------------------------");
 
-            for (auto& it: equations->currentUnknowns())
+for (auto& it: equations->currentUnknowns())
                 DBOUT(it<<" ");
              DBOUT_LINE("")
             //DBOUT_LINE("measVector\n" << setprecision(10) << measVector);
              DBOUT_LINE("H\n" << hMatrix);
              //DBOUT_LINE("Cov\n" << covMatrix);
-             DBOUT_LINE("phiMatrix\n" << phiMatrix.diagCopy());
-             DBOUT_LINE("qMatrix\n" << qMatrix.diagCopy());
+ //            DBOUT_LINE("phiMatrix\n" << phiMatrix.diagCopy());
+//             DBOUT_LINE("qMatrix\n" << qMatrix.diagCopy());
              //DBOUT_LINE("weigthMatrix\n" << weigthMatrix.diagCopy());
+
             //prepare
             Matrix<double> hMatrixTr = transpose(hMatrix);
             Matrix<double> phiMatrixTr = transpose(phiMatrix);
@@ -80,16 +81,23 @@ namespace pod
             solution = covMatrix*(hTrTimesW*measVector + (invPminus*xminus));
 
             postfitResiduals = measVector - hMatrix * solution;
-            DBOUT_LINE("Solution\n" << solution);
-            DBOUT_LINE("postfitResiduals\n" << postfitResiduals);
-            DBOUT_LINE("CovPost\n" << covMatrix);
- 
+            // DBOUT_LINE("Solution\n" << solution);
+            // DBOUT_LINE("postfitResiduals\n" << postfitResiduals);
+            // DBOUT_LINE("CovPost\n" << covMatrix);
+            
             equations->saveResiduals(gData, postfitResiduals);
             floatSolution = solution;
             
             fixAmbiguities(gData);
-           // storeAmbiguities(gData);
+            //storeAmbiguities(gData);
 
+            auto vpv = postfitResiduals*weigthMatrix*postfitResiduals;
+            int numMeas = postfitResiduals.size();
+            int numPar = solution.size();
+
+            //sigma = sqrt(vpv(0) / (numMeas - numPar));
+            sigma = vpv(0);
+            //DBOUT_LINE(vpv(0)<<" "<<"sigma:" << getSigma() << " " << PostfitResiduals().size() << " " << Solution().size() << " ")
             break;
 
             if (!check(gData))

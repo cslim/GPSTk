@@ -42,11 +42,7 @@ namespace pod
     }
     void GnssSolution::printSolution(std::ofstream& os, const KalmanSolver& solver, const gpstk::CommonTime& time, GnssEpoch& gEpoch)
     {
-        PowerSum psum;
-        for (auto it : solver.PostfitResiduals())
-            psum.add(it);
-        double sigma = sqrt(psum.variance());
-        
+
         for (auto && it : Equations->currentUnknowns())
         {
             if (it.type == TypeID::dx || it.type == TypeID::dy || it.type == TypeID::dz)
@@ -76,9 +72,12 @@ namespace pod
         double stDev3D = sqrt(varX + varY + varZ);
 
         int numSats = gEpoch.satData.size();
-        int slnType = (sigma < getMaxSigma() && numSats >= 4) ? desiredSlnType() : 0;
-
-        gEpoch.slnData.insert(make_pair(TypeID::recSlnType, slnType));
+       // int slnType = ( solver.getSigma() < getMaxSigma() && numSats >= 4) ? desiredSlnType() : 0;
+        //if (solver.getSigma() > getMaxSigma())
+        //{
+         
+       // }
+        gEpoch.slnData.insert(make_pair(TypeID::recSlnType, desiredSlnType()));
 
         gEpoch.slnData.insert(make_pair(TypeID::recX, newPos.X()));
         gEpoch.slnData.insert(make_pair(TypeID::recY, newPos.Y()));
@@ -86,11 +85,11 @@ namespace pod
 
         gEpoch.slnData.insert(make_pair(TypeID::recStDev3D, stDev3D));
 
-        gEpoch.slnData.insert(make_pair(TypeID::sigma, sigma));
+        gEpoch.slnData.insert(make_pair(TypeID::sigma, solver.getSigma()));
 
-        os << setprecision(6) << CivilTime(time).printf("%02Y %02m %02d %02H %02M %02S %P") << " " << slnType << " ";
+        os << setprecision(6) << CivilTime(time).printf("%02Y %02m %02d %02H %02M %02S %P") << " " << desiredSlnType() << " ";
         os << setprecision(10) << newPos.X() << "  " << newPos.Y() << "  " << newPos.Z() << "  " << " ";
-        os << setprecision(3) << sigma << " " << stDev3D << " " << numSats;
+        os << setprecision(3) << solver.getSigma() << " " << stDev3D << " " << numSats;
         os << endl;
     };
 }

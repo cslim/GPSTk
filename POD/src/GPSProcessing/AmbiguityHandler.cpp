@@ -97,8 +97,8 @@ namespace pod
         //resolve the carrier-phas ambiguities as integer
         ddFixedAmb = pAR->resolveIntegerAmbiguity(DDfloatAmb, ddAmbCov);
         //ddFixedAmb = fixDDAmbSeparately(DDfloatAmb, ddAmbCov);
-        DBOUT_LINE("float DD amb\n" << DDfloatAmb);
-        DBOUT_LINE("fixed DD amb\n" << ddFixedAmb);
+        //DBOUT_LINE("float DD amb\n" << DDfloatAmb);
+        //DBOUT_LINE("fixed DD amb\n" << ddFixedAmb);
 
         //update core parameters values with integer ambiguities
         coreParamFixed = coreParamsFloat - parDDAmbCov*inverseChol(ddAmbCov)*(DDfloatAmb - ddFixedAmb);

@@ -39,6 +39,9 @@ namespace pod
             return *equations;
         }
 
+        virtual double getSigma() const
+        { return sigma; }
+
         virtual double getSolution(const FilterParameter& type) const ;
         virtual double getVariance(const FilterParameter& type) const ;
 
@@ -75,6 +78,9 @@ namespace pod
 
         /// Measurements vector (Prefit-residuals)
         Vector<double> measVector;
+
+        ///sqrt(vpv/(n-p))
+        double  sigma;
 
         ///object to prepare Matrix for filter
         eqComposer_sptr equations;

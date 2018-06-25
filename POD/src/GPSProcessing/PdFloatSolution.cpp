@@ -235,7 +235,7 @@ namespace pod
             //read all epochs
             while (rin >> gRin)
             {
-                DBOUT_LINE(">>"<<CivilTime(gRin.header.epoch).asString());
+                //DBOUT_LINE(">>"<<CivilTime(gRin.header.epoch).asString());
                 if (gRin.body.size() == 0)
                 {
                     printMsg(gRin.header.epoch, "Empty epoch record in Rinex file");
