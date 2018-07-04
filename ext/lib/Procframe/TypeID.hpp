@@ -403,20 +403,25 @@ namespace gpstk
              prefitP1,  ///< Prefit residual, code P1
              prefitP2,  ///< Prefit residual, code P2
              prefitC5,  ///< Prefit residual, code C5
+             prefitPC,  ///< Prefit residual, code iono-free
+
              prefitL,   ///< Prefit residual, phase
              prefitL1,  ///< Prefit residual, phase L1
              prefitL2,  ///< Prefit residual, phase L2
              prefitL5,  ///< Prefit residual, phase L5
+             prefitLC,  ///< Prefit residual, phase iono-free
 
              postfitC,  ///< Postfit residual, code
              postfitP1, ///< Postfit residual, code P1
              postfitP2, ///< Postfit residual, code P2
              postfitC5, ///< Postfit residual, code C5
+             postfitPC, ///< Postfit residual, code iono-free
 
              postfitL,  ///< Postfit residual, phase
              postfitL1, ///< Postfit residual, phase L1
              postfitL2, ///< Postfit residual, phase L2
              postfitL5, ///< Postfit residual, phase L5
+             postfitLC, ///< Postfit residual, phase iono-free
 
              prefitGRAPHIC1,   ///< Prefit residual, GRAPHIC1
              prefitGRAPHIC2,   ///< Prefit residual, GRAPHIC2
@@ -433,15 +438,7 @@ namespace gpstk
              postfitWL4,///< Postfit residual, WL4
             // Handy dummy types for non-standard processing
          dummy0,    ///< Generic, undefined type #0
-         dummy1,    ///< Generic, undefined type #1
-         dummy2,    ///< Generic, undefined type #2
-         dummy3,    ///< Generic, undefined type #3
-         dummy4,    ///< Generic, undefined type #4
-         dummy5,    ///< Generic, undefined type #5
-         dummy6,    ///< Generic, undefined type #6
-         dummy7,    ///< Generic, undefined type #7
-         dummy8,    ///< Generic, undefined type #8
-         dummy9,    ///< Generic, undefined type #9
+
 
          Last,      ///< used to extend this...
          Placeholder = Last+1000
