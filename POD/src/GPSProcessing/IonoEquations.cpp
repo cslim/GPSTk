@@ -39,6 +39,11 @@ namespace pod
         return std::make_unique<WhiteNoiseModel>(sigma);
     }
 
+    gpstk::StochasticModel_uptr  IonoEquations::ionoModel(double sigma)
+    {
+        return std::make_unique<IonoStochasticModel>(sigma);
+    }
+
     #pragma endregion
 
     IonoEquations::IonoEquations():
@@ -120,7 +125,7 @@ namespace pod
         for (const auto & it : currParameters)
         {
             x(index) = 0.0;
-            P(index, index) = 10000.0;
+            P(index, index) = 1000;
 
             ++index;
         }

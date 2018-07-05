@@ -15,7 +15,7 @@
 #include"AmbiguitiesEquations.h"
 #include"SNRCatcher.h"
 #include"IonoEquations.h"
-#include"IonoEstimator.h"
+#include"IonoStochasticModel.h"
 
 #include"LinearCombinations.hpp"
 #include"LICSDetector.hpp"
@@ -105,7 +105,6 @@ namespace pod
 #pragma endregion
 
         IonexModel ionoModel(nominalPos, data->ionexStore, TypeID::C1, false);
-        IonoEstimator ionoFilterRover, ionoFilterBase;
 
         // Object to compute gravitational delay effects
         GravitationalDelay grDelayBase(refPos);
@@ -235,7 +234,7 @@ namespace pod
             //read all epochs
             while (rin >> gRin)
             {
-                //DBOUT_LINE(">>"<<CivilTime(gRin.header.epoch).asString());
+               
                 if (gRin.body.size() == 0)
                 {
                     printMsg(gRin.header.epoch, "Empty epoch record in Rinex file");
@@ -282,7 +281,7 @@ namespace pod
 
                 if (gRin.body.size() == 0)
                 {
-                    printMsg(gRef.header.epoch, "Rover receiver: all SV has been rejected.");
+                    printMsg(gRin.header.epoch, "Rover receiver: all SV has been rejected.");
 
                     continue;
                 }
@@ -367,7 +366,7 @@ namespace pod
                 gRin >> linearIonoFree;
                 gRin >> oMinusC;
                 gRin >> delta;
-
+                DBOUT_LINE(">>" << CivilTime(gRin.header.epoch).asString());
                 if (forwardBackwardCycles > 0)
                 {
                     gRin >> solverFb;
@@ -499,8 +498,8 @@ namespace pod
             if (ionoModelType == 0)
                 ionoEq->setStocModel<WhiteNoiseModel>();
             else if (ionoModelType == 1)
-                ionoEq->setStocModel<RandomWalkModel>();
-
+                ionoEq->setStocModel<IonoStochasticModel>();
+            
             double ionoSigma = confReader().getValueAsDouble("ionoSigma");
             ionoEq->setSigma(ionoSigma);
             Equations->addEquation(std::move(ionoEq));

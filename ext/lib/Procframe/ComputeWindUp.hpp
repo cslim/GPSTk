@@ -118,6 +118,11 @@ namespace gpstk
            satData("PRN_GPS"), fileData("PRN_GPS")
       { };
 
+      ComputeWindUp(XvtStore<SatID>& ephem,
+          std::string filename = "PRN_GPS")
+          : pEphemeris(&ephem), nominalPos(0.0, 0.0, 0.0), satData(filename),
+          fileData(filename)
+      { };
 
          /** Common constructor
           *

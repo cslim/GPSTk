@@ -1,6 +1,7 @@
 #pragma once
 #include "EquationBase.h"
 #include"StochasticModel.hpp"
+#include"IonoStochasticModel.h"
 #include <type_traits>
 #include<memory>
 
@@ -59,7 +60,8 @@ namespace pod
                 stModelInitializer = &IonoEquations::rWalkModel;
             else if (std::is_same<T, gpstk::WhiteNoiseModel>::value)
                 stModelInitializer = &IonoEquations::whiteNoiseModel;
-            
+            else if (std::is_same<T, pod::IonoStochasticModel>::value)
+                stModelInitializer = &IonoEquations::ionoModel;
             return *this;
         }
 
@@ -74,6 +76,7 @@ namespace pod
         gpstk::StochasticModel_uptr constantModel(double sigma);
         gpstk::StochasticModel_uptr rWalkModel(double qPrime);
         gpstk::StochasticModel_uptr whiteNoiseModel(double sigma);
+        gpstk::StochasticModel_uptr ionoModel(double sigma);
 
 #pragma region Fields
 
