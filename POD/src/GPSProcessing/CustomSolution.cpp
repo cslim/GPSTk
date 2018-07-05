@@ -7,6 +7,7 @@
 #include"PPPSolutionBase.h"
 #include"PODSolution.h"
 #include"PPPSolution.h"
+#include"PppFloatSolution.h"
 
 namespace pod
 {
@@ -26,7 +27,8 @@ namespace pod
             if (dataStore->opts.isSpaceborneRcv)
                 return std::make_unique<PODSolution>(dataStore);
             else
-                return std::make_unique<PPPSolution>(dataStore);
+                //return std::make_unique<PPPSolution>(dataStore);
+                return std::make_unique<PppFloatSolution>(dataStore);
             break;
         case pod::PPP_Fixed:
             break;
@@ -39,16 +41,17 @@ namespace pod
 
     }
     
-    CustomSolution::CustomSolution() :GnssSolution(nullptr, .0), ptr(nullptr)
+    CustomSolution::CustomSolution() 
+        :GnssSolution(nullptr, .0), ptr(nullptr)
     {
     }
 
-    CustomSolution::CustomSolution(GnssDataStore_sptr dataStore):GnssSolution(nullptr, .0)
+    CustomSolution::CustomSolution(GnssDataStore_sptr dataStore)
+        :GnssSolution(nullptr, .0)
     {
         ptr = Factory(dataStore);
     }
 
     CustomSolution::~CustomSolution()
-    {
-    }
+    { }
 }

@@ -7,8 +7,9 @@ namespace pod
 {
     std::map< SatID::SatelliteSystem, FilterParameter> InterSystemBias::ss2isb;
     std::map< FilterParameter, SatID::SatelliteSystem> InterSystemBias::isb2ss;
-
-    const TypeIDSet InterSystemBias::l1Types{ TypeID::prefitC, TypeID::prefitL1 };
+    
+    // 
+    const TypeIDSet InterSystemBias::l1Types{ TypeID::prefitC, TypeID::prefitL1,TypeID::prefitPC, TypeID::prefitLC };
 
     InterSystemBias::Initilizer InterSystemBias::IsbSingleton;
 

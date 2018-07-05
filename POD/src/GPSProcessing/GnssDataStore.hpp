@@ -34,8 +34,8 @@ namespace pod
         CODE_DIFF,
         PD_Float,
         PD_Fixed,
-        PPP_Float,
-        PPP_Fixed,
+        PPP_Float=16,
+        PPP_Fixed=17,
 
         NONE_SOLUTION = 0,
     };

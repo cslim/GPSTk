@@ -13,9 +13,20 @@ using namespace gpstk;
 
 namespace pod
 {
+
     //maximum time interval (in seconds) without data
-    double KalmanSolver::maxGap = 3600.0
-        ;
+    double KalmanSolver::maxGap = 3600.0;
+
+    Matrix<double> corrMatrix(const  Matrix<double>& covar)
+    {
+        Matrix<double> corr(covar.rows(), covar.cols(), .0);
+
+        for (size_t i = 0; i < covar.rows(); i++)
+            for (size_t j = 0; j < covar.cols(); j++)
+                corr(i, j) = covar(i, j) / sqrt(covar(i, i)) / sqrt(covar(j, j));
+        return corr;
+    }
+
     KalmanSolver::KalmanSolver():firstTime(true)
     { }
     KalmanSolver::KalmanSolver(eqComposer_sptr eqs) 
@@ -56,15 +67,15 @@ namespace pod
 
            // DBOUT_LINE("----------------------------------------------------------------------------------------");
 
-for (auto& it: equations->currentUnknowns())
-                DBOUT(it<<" ");
-             DBOUT_LINE("")
-            //DBOUT_LINE("measVector\n" << setprecision(10) << measVector);
-             DBOUT_LINE("H\n" << hMatrix);
-             //DBOUT_LINE("Cov\n" << covMatrix);
- //            DBOUT_LINE("phiMatrix\n" << phiMatrix.diagCopy());
-//             DBOUT_LINE("qMatrix\n" << qMatrix.diagCopy());
-             //DBOUT_LINE("weigthMatrix\n" << weigthMatrix.diagCopy());
+//for (auto& it: equations->currentUnknowns())
+               // DBOUT(it<<" ");
+             //DBOUT_LINE("")
+            DBOUT_LINE("measVector\n" << setprecision(10) << measVector);
+            // DBOUT_LINE("H\n" << hMatrix);
+            // DBOUT_LINE("Cov\n" << covMatrix.diagCopy());
+            // DBOUT_LINE("phiMatrix\n" << phiMatrix.diagCopy());
+             //DBOUT_LINE("qMatrix\n" << qMatrix.diagCopy());
+             DBOUT_LINE("weigthMatrix\n" << weigthMatrix.diagCopy());
 
             //prepare
             Matrix<double> hMatrixTr = transpose(hMatrix);
@@ -74,17 +85,18 @@ for (auto& it: equations->currentUnknowns())
             //predict
             Matrix<double> Pminus = phiMatrix*covMatrix*phiMatrixTr + qMatrix;
             Vector<double> xminus = phiMatrix*solution;
-            
+           
+          //  DBOUT_LINE("Pminus\n" << Pminus.diagCopy());
             //correct
             Matrix<double> invPminus = inverseChol(Pminus);
             covMatrix = inverseChol(hTrTimesW*hMatrix + invPminus);
             solution = covMatrix*(hTrTimesW*measVector + (invPminus*xminus));
 
             postfitResiduals = measVector - hMatrix * solution;
-            // DBOUT_LINE("Solution\n" << solution);
-            // DBOUT_LINE("postfitResiduals\n" << postfitResiduals);
-            // DBOUT_LINE("CovPost\n" << covMatrix);
-            
+             DBOUT_LINE("Solution\n" << solution);
+             DBOUT_LINE("postfitResiduals\n" << postfitResiduals);
+            //DBOUT_LINE("CovPost\n" << covMatrix.diagCopy());
+            //DBOUT_LINE("CorrPost\n" << corrMatrix(covMatrix));
             equations->saveResiduals(gData, postfitResiduals);
             floatSolution = solution;
             

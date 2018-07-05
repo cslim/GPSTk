@@ -340,9 +340,11 @@ namespace pod
          */
          TypeID::postfitC         ,
          TypeID::postfitP2        ,
-         TypeID::postfitL         ,
+         TypeID::postfitPC        ,
          TypeID::postfitL1        ,
          TypeID::postfitL2        ,
+         TypeID::postfitLC       ,
+
          TypeID::BL1              ,
          TypeID::BL2              ,
          TypeID::BLC              ,

@@ -13,7 +13,7 @@ namespace pod
         double wlL1 = getWavelength(sv, 1, fcn);
         double wlL2 = getWavelength(sv, 2, fcn);
 
-        return C_MPS / (wlL1 + wlL2);
+        return  wlL1*wlL2*(wlL1 + wlL2);
     }
 
     #pragma region MWoubenna
@@ -586,6 +586,78 @@ namespace pod
 
     #pragma endregion
 
+    #pragma region PrefitPC
+    bool PrefitPC::getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const
+    {
+        value = NAN;
+
+        // L1 phase pseudorange
+        auto& it = tvMap.find(TypeID::PC);
+        if (it == tvMap.end())
+            return false;
+        else
+            value = it->second;
+
+        // calculated distance
+        it = tvMap.find(TypeID::rho);
+        if (it == tvMap.end())
+            return false;
+        else
+            value -= it->second;
+
+        //SV clock offset
+        it = tvMap.find(TypeID::dtSat);
+        if (it == tvMap.end())
+            return false;
+        else
+            value += it->second;
+
+        //rel 
+        it = tvMap.find(TypeID::rel);
+        if (it == tvMap.end())
+            return false;
+        else
+            value -= it->second;
+
+        //grav Delay
+        it = tvMap.find(TypeID::gravDelay);
+        if (it == tvMap.end())
+            return false;
+        else
+            value -= it->second;
+
+        //sv phase center 
+        it = tvMap.find(TypeID::satPCenter);
+        if (it == tvMap.end())
+            return false;
+        else
+            value -= it->second;
+
+        //tropo
+        it = tvMap.find(TypeID::tropoSlant);
+        if (it == tvMap.end())
+            return false;
+        else
+            value -= it->second;
+
+        //wind Up
+        it = tvMap.find(TypeID::windUp);
+        if (it == tvMap.end())
+            return false;
+        else
+        {
+            double wu_wl = getIonoFreeWaveLength(sv, 1, 2);
+            value -= it->second*wu_wl / TWO_PI;
+        }
+        return true;
+    }
+
+    TypeID PrefitPC::getType() const
+    {
+        return TypeID::prefitPC;
+    }
+    #pragma endregion
+
     #pragma region PrefitLC
     bool PrefitLC::getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const
     {
@@ -654,7 +726,7 @@ namespace pod
 
     TypeID PrefitLC::getType() const
     {
-        return TypeID::prefitL;
+        return TypeID::prefitLC;
     }
     #pragma endregion
 

@@ -54,7 +54,7 @@ namespace pod
 
         inline bool operator == (const FilterParameter& parameter) const
         {
-            return (this->type == parameter.type && this->sv == sv);
+            return (this->type == parameter.type && this->sv == parameter.sv);
         }
 
         gpstk::TypeID type;

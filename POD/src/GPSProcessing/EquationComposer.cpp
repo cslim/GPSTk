@@ -10,11 +10,13 @@ namespace pod
         { TypeID::prefitC, 1.0  }      ,
         { TypeID::prefitP1, 1.0 }      ,
         { TypeID::prefitP2, 1.0 }      ,
+        { TypeID::prefitPC, 1.0 }      ,
 
         //carrier phase weight factor
         { TypeID::prefitL,  10000.0 },
         { TypeID::prefitL1, 10000.0 },
         { TypeID::prefitL2, 10000.0 },
+        { TypeID::prefitLC, 10000.0 },
     };
 
     void EquationComposer::Prepare(gnssRinex& gData)

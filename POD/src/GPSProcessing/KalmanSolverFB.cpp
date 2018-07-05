@@ -12,6 +12,7 @@ namespace pod
         TypeID::postfitC,
         TypeID::postfitP1,
         TypeID::postfitP2,
+        TypeID::postfitPC,
     };
 
     //set of all possible TypeID for  carrier phase postfit residuals 
@@ -20,6 +21,7 @@ namespace pod
         TypeID::postfitL,
         TypeID::postfitL1,
         TypeID::postfitL2,
+        TypeID::postfitLC,
     };
 
 
@@ -156,7 +158,7 @@ namespace pod
         if (codeResTypes.find(type) != codeResTypes.end())
             if (cycleNumber < tresholds.codeLimits.size())
                 return tresholds.codeLimits[cycleNumber];
-        if (phaseResTypes.find(type) != codeResTypes.end())
+        if (phaseResTypes.find(type) != phaseResTypes.end())
             if (cycleNumber < tresholds.phaseLimits.size())
                 return tresholds.phaseLimits[cycleNumber];
 

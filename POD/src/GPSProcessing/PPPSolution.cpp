@@ -466,7 +466,7 @@ namespace pod
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::sigma, sigma));
         outfile << setprecision(6) << wetMap << "  " << sigma << "  ";
 
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recSlnType, 16));
+        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recSlnType, desiredSlnType()));
 
         outfile << gEpoch.satData.size() << endl;
     }

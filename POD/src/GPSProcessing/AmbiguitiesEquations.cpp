@@ -14,7 +14,7 @@ namespace pod
     {
         typeMap[TypeID::BL1] = TypeID::prefitL1;
         typeMap[TypeID::BL2] = TypeID::prefitL2;
-        //typeMap[TypeID::BLC] = TypeID::prefitL;
+        typeMap[TypeID::BLC] = TypeID::prefitLC;
     }
 
     ParametersSet AmbiguitySdEquations::getParameters() const
@@ -119,7 +119,7 @@ namespace pod
                     wavelength = getWavelength(itSat, 2, fcn);
                     break;
                 case TypeID::BLC:
-                    wavelength = LinearCombination::getIonoFreeWaveLength(itSat, 1, 2);
+                    wavelength = 1.0;// LinearCombination::getIonoFreeWaveLength(itSat, 1, 2);
                     break;
                 default:
                     break;
