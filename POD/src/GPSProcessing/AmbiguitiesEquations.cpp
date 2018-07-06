@@ -34,12 +34,11 @@ namespace pod
         
         csFlags.clear();
 
-        for (const auto& it :satSet)
+        for (const auto& it : satSet)
         {
             stochModel.Prepare(it, gData);
             csFlags[it] = stochModel.getCS();
         }
-
         satSet = currentSatSet;
     }
 

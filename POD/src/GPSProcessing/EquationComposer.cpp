@@ -231,4 +231,14 @@ namespace pod
                 i_res++;
             }
     }
+    void EquationComposer::clearSvData()
+    {
+        for (auto it = filterData.cbegin(); it != filterData.cend();)
+        {
+            if (it->first.sv != SatID::dummy)
+                it = filterData.erase(it);
+            else
+                ++it;
+        }
+    }
 }

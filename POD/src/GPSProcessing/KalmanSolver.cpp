@@ -40,11 +40,17 @@ namespace pod
     {
         double dt = abs(t_pre - gData.header.epoch);
         t_pre = gData.header.epoch;
-        if (dt > maxGap)
+
+        if (dt > maxGap )
         {
             reset();
             DBOUT_LINE("dt= "<<dt<<"->RESET")
         }
+
+        double  sec = gData.header.epoch.getSecondOfDay();
+        if ((int)sec % 86400 == 0)
+            equations->clearSvData();
+
         equations->Prepare(gData);
         Vector<double> floatSolution;
 
@@ -56,7 +62,6 @@ namespace pod
 
             equations->updatePhi(phiMatrix);
             equations->updateQ(qMatrix);
-            
           
             if (dt > maxGap)
                 equations->initKfState(solution, covMatrix);

@@ -115,6 +115,9 @@ namespace pod
         {
             filterData.clear();
         }
+        /// erase satellite-specific data 
+        virtual void clearSvData() ;
+     
 
     protected: 
 
