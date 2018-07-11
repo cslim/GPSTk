@@ -231,6 +231,27 @@ namespace pod
                 i_res++;
             }
     }
+    void EquationComposer::keepOnlySv(const SatIDSet& svs)
+    {
+        for (auto it = filterData.cbegin(); it != filterData.cend();)
+        {
+            if (svs.find(it->first.sv) == svs.end())
+                it = filterData.erase(it);
+            else
+                ++it;
+        }
+    }
+    void EquationComposer::clearSvData(const SatIDSet& svs )
+    {
+        for (auto it = filterData.cbegin(); it != filterData.cend();)
+        {
+            if (svs.find(it->first.sv) != svs.end())
+                it = filterData.erase(it);
+            else
+                ++it;
+        }
+    }
+
     void EquationComposer::clearSvData()
     {
         for (auto it = filterData.cbegin(); it != filterData.cend();)

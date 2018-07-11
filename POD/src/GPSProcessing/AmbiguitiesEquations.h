@@ -4,20 +4,20 @@
 
 namespace pod
 {
-    class AmbiguitySdEquations :
+    class AmbiguitiesEquations :
         public EquationBase
     {
     public:
   
-        AmbiguitySdEquations()
+        AmbiguitiesEquations()
             :type(gpstk::TypeID::BL1), obsType(typeMap[gpstk::TypeID::BL1])
         {};
 
-        AmbiguitySdEquations(const gpstk::TypeID& obsType)
+        AmbiguitiesEquations(const gpstk::TypeID& obsType)
             :type(obsType), obsType(typeMap[obsType])
         {};
 
-        virtual ~AmbiguitySdEquations() {};
+        virtual ~AmbiguitiesEquations() {};
 
         // Inherited via EquationBase
         virtual void Prepare(gpstk::gnssRinex & gData) override;

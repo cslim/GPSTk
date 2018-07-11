@@ -115,7 +115,9 @@ namespace pod
         {
             filterData.clear();
         }
-        /// erase satellite-specific data 
+        /// menage satellite-specific data 
+        virtual void keepOnlySv(const gpstk::SatIDSet& svs);
+        virtual void clearSvData(const gpstk::SatIDSet& svs);
         virtual void clearSvData() ;
      
 

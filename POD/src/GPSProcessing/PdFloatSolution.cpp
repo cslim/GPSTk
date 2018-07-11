@@ -507,10 +507,10 @@ namespace pod
 
 
         if (opts().carrierBands.find(CarrierBand::L1) != opts().carrierBands.end())
-            Equations->addEquation(std::make_unique<AmbiguitySdEquations>(TypeID::BL1));
+            Equations->addEquation(std::make_unique<AmbiguitiesEquations>(TypeID::BL1));
 
         if (opts().carrierBands.find(CarrierBand::L2) != opts().carrierBands.end())
-            Equations->addEquation(std::make_unique<AmbiguitySdEquations>(TypeID::BL2));
+            Equations->addEquation(std::make_unique<AmbiguitiesEquations>(TypeID::BL2));
 
        
 

@@ -10,16 +10,21 @@
 #include"ProcessLinear.h"
 #include"SQLiteAdapter.h"
 
+#define CATCH_TIME(t,Y,m,d,hh,mm,ss, flag)\
+    static auto desiredTime = (gpstk::CommonTime)gpstk::CivilTime(Y, m, d, hh, mm, ss, gpstk::TimeSystem::Any);\
+    flag = t == desiredTime;
+
 namespace pod
 {
     //base class for all GNSS post processing  classes
     class GnssSolution
     {
     public: static  std::ostream& printMsg(const gpstk::CommonTime& time, const char* msg);
+         
 
 #pragma region Constructors
 
-    public: GnssSolution(GnssDataStore_sptr dataStore, double maxsigma );
+    public: GnssSolution(GnssDataStore_sptr dataStore, double maxsigma);
     public: virtual ~GnssSolution();
 
 #pragma endregion
@@ -39,10 +44,14 @@ namespace pod
     public: virtual SlnType desiredSlnType() const = 0;
 
     public: virtual double getMaxSigma() const
-            { return maxSigma; }
-    
-    public: virtual GnssSolution& setMaxSigma(double sigma) 
-            { maxSigma = sigma; return (*this); }
+    {
+        return maxSigma;
+    }
+
+    public: virtual GnssSolution& setMaxSigma(double sigma)
+    {
+        maxSigma = sigma; return (*this);
+    }
 
     public: virtual GnssSolution& setConfigData(GnssDataStore_sptr dataStore)
     {
@@ -62,21 +71,21 @@ namespace pod
     protected: virtual void updateRequaredObs() = 0;
 
     protected: virtual int computeApprPos(
-                           const gpstk::gnssRinex & gRin,
-                           const gpstk::XvtStore<gpstk::SatID>& Eph,
-                           gpstk::Position& pos);
+        const gpstk::gnssRinex & gRin,
+        const gpstk::XvtStore<gpstk::SatID>& Eph,
+        gpstk::Position& pos);
 
     protected: virtual void printSolution(std::ofstream& os,
-                            const KalmanSolver& solver,
-                            const gpstk::CommonTime& time,
-                            GnssEpoch& gEpoch);
+        const KalmanSolver& solver,
+        const gpstk::CommonTime& time,
+        GnssEpoch& gEpoch);
 
 #pragma endregion
 
 
 #pragma region Fields
 
-              // Input processing data and configuration
+               // Input processing data and configuration
     protected:GnssDataStore_sptr data;
 
               // Nominal position
@@ -84,7 +93,7 @@ namespace pod
 
               // Processing result
     protected:GnssEpochMap gMap;
-              
+
               // This object will filter out satellites, which doesn't meet  predefined required observables set 
     protected:gpstk::RequireObservables requireObs;
 
@@ -105,7 +114,7 @@ namespace pod
 
                //object to compute linear combinations
     protected: ProcessLinear computeLinear;
-               
+
                //max sigma 
     protected: double maxSigma;
 

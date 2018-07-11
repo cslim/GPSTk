@@ -6,18 +6,18 @@ using namespace gpstk;
 
 namespace pod
 {
-    std::map< gpstk::TypeID, gpstk::TypeID> AmbiguitySdEquations::typeMap;
+    std::map< gpstk::TypeID, gpstk::TypeID> AmbiguitiesEquations::typeMap;
 
-    AmbiguitySdEquations::Initializer AmbiguitySdEquations::initializer;
+    AmbiguitiesEquations::Initializer AmbiguitiesEquations::initializer;
 
-    AmbiguitySdEquations::Initializer::Initializer()
+    AmbiguitiesEquations::Initializer::Initializer()
     {
         typeMap[TypeID::BL1] = TypeID::prefitL1;
         typeMap[TypeID::BL2] = TypeID::prefitL2;
         typeMap[TypeID::BLC] = TypeID::prefitLC;
     }
 
-    ParametersSet AmbiguitySdEquations::getParameters() const
+    ParametersSet AmbiguitiesEquations::getParameters() const
     {
         ParametersSet ambSet;
         for (const auto& it : csFlags)
@@ -25,7 +25,7 @@ namespace pod
         return ambSet;
     }
 
-    void AmbiguitySdEquations::Prepare(gpstk::gnssRinex & gData)
+    void AmbiguitiesEquations::Prepare(gpstk::gnssRinex & gData)
     {
         currentSatSet = gData.getSatID();
         
@@ -42,7 +42,7 @@ namespace pod
         satSet = currentSatSet;
     }
 
-    void AmbiguitySdEquations::updatePhi(gpstk::Matrix<double>& Phi, int & index) const
+    void AmbiguitiesEquations::updatePhi(gpstk::Matrix<double>& Phi, int & index) const
     {
         for (auto &it : csFlags)
         {
@@ -52,7 +52,7 @@ namespace pod
         }
     }
     
-    void AmbiguitySdEquations::updateQ(gpstk::Matrix<double>& Q, int & index) const
+    void AmbiguitiesEquations::updateQ(gpstk::Matrix<double>& Q, int & index) const
     {
         for (auto &it : csFlags)
         {
@@ -62,7 +62,7 @@ namespace pod
         }
     }
     
-    void AmbiguitySdEquations::defStateAndCovariance(gpstk::Vector<double>& x, gpstk::Matrix<double>& P, int & index) const
+    void AmbiguitiesEquations::defStateAndCovariance(gpstk::Vector<double>& x, gpstk::Matrix<double>& P, int & index) const
     {
         for (auto &it : csFlags)
         {
@@ -72,7 +72,7 @@ namespace pod
         }
     }
 
-    void AmbiguitySdEquations::updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0)
+    void AmbiguitiesEquations::updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0)
     {
         //total number of  ambiguities
         int numAmbs(csFlags.size());
@@ -135,7 +135,7 @@ namespace pod
         satSet = currentSatSet;
     }
 
-    int AmbiguitySdEquations::getNumUnknowns() const
+    int AmbiguitiesEquations::getNumUnknowns() const
     {
         return csFlags.size();
     }

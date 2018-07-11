@@ -352,7 +352,7 @@ namespace pod
         if (opts().systems.size() > 1)
             Equations->addEquation(std::make_unique<InterSystemBias>());
 
-        Equations->addEquation(std::make_unique<AmbiguitySdEquations>(TypeID::BLC));
+        Equations->addEquation(std::make_unique<AmbiguitiesEquations>(TypeID::BLC));
 
         forwardBackwardCycles = confReader().getValueAsInt("forwardBackwardCycles");
     }
