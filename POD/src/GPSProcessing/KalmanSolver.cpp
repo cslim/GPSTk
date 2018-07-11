@@ -8,6 +8,8 @@
 #include"ARMLambda.hpp"
 #include <algorithm>
 
+#define MIN_NUM_SV 5
+
 using namespace std;
 using namespace gpstk;
 
@@ -17,6 +19,7 @@ namespace pod
     //maximum time interval (in seconds) without data
     double KalmanSolver::maxGap = 3600.0;
 
+    //method to compute correlation matrix from variance-covariance one
     Matrix<double> corrMatrix(const  Matrix<double>& covar)
     {
         Matrix<double> corr(covar.rows(), covar.cols(), .0);
@@ -28,7 +31,8 @@ namespace pod
     }
 
     KalmanSolver::KalmanSolver():firstTime(true)
-    { }
+    {}
+
     KalmanSolver::KalmanSolver(eqComposer_sptr eqs) 
         :firstTime(true),equations(eqs)
     {}
@@ -47,12 +51,21 @@ namespace pod
             DBOUT_LINE("dt= "<<dt<<"->RESET")
         }
 
+        //workaround: reset PPP engine every day 
         double  sec = gData.header.epoch.getSecondOfDay();
-        if ((int)sec % 86400 == 0)
+        if ((int)sec % 86400 == 0 && equations->getSlnType()==SlnType::PPP_Float)
             equations->clearSvData();
 
         equations->Prepare(gData);
         Vector<double> floatSolution;
+        
+        //if number of satellies passed to processing is less than 'MIN_NUM_SV'
+        //clear all SV data except observable
+        if (gData.body.size() < MIN_NUM_SV)
+        {
+            equations->keepOnlySv(gData.getSatID());
+            return gData;
+        }
 
         while (true)
         {
@@ -62,7 +75,7 @@ namespace pod
 
             equations->updatePhi(phiMatrix);
             equations->updateQ(qMatrix);
-          
+
             if (dt > maxGap)
                 equations->initKfState(solution, covMatrix);
             else
@@ -70,17 +83,17 @@ namespace pod
 
             firstTime = false;
 
-           // DBOUT_LINE("----------------------------------------------------------------------------------------");
+            // DBOUT_LINE("----------------------------------------------------------------------------------------");
 
-//for (auto& it: equations->currentUnknowns())
-               // DBOUT(it<<" ");
+            for (auto& it: equations->currentUnknowns())
+            DBOUT(it<<" ");
              //DBOUT_LINE("")
-            DBOUT_LINE("measVector\n" << setprecision(10) << measVector);
+            DBOUT_LINE("meas Vector\n" << setprecision(10) << measVector);
             // DBOUT_LINE("H\n" << hMatrix);
             // DBOUT_LINE("Cov\n" << covMatrix.diagCopy());
             // DBOUT_LINE("phiMatrix\n" << phiMatrix.diagCopy());
-             //DBOUT_LINE("qMatrix\n" << qMatrix.diagCopy());
-             DBOUT_LINE("weigthMatrix\n" << weigthMatrix.diagCopy());
+            //DBOUT_LINE("qMatrix\n" << qMatrix.diagCopy());
+
 
             //prepare
             Matrix<double> hMatrixTr = transpose(hMatrix);
@@ -90,21 +103,21 @@ namespace pod
             //predict
             Matrix<double> Pminus = phiMatrix*covMatrix*phiMatrixTr + qMatrix;
             Vector<double> xminus = phiMatrix*solution;
-           
-          //  DBOUT_LINE("Pminus\n" << Pminus.diagCopy());
+
+            //DBOUT_LINE("Pminus\n" << Pminus.diagCopy());
             //correct
             Matrix<double> invPminus = inverseChol(Pminus);
             covMatrix = inverseChol(hTrTimesW*hMatrix + invPminus);
             solution = covMatrix*(hTrTimesW*measVector + (invPminus*xminus));
 
             postfitResiduals = measVector - hMatrix * solution;
-             DBOUT_LINE("Solution\n" << solution);
-             DBOUT_LINE("postfitResiduals\n" << postfitResiduals);
+            DBOUT_LINE("solution\n" << solution);
+            DBOUT_LINE("postfit Residuals\n" << postfitResiduals);
             //DBOUT_LINE("CovPost\n" << covMatrix.diagCopy());
             //DBOUT_LINE("CorrPost\n" << corrMatrix(covMatrix));
             equations->saveResiduals(gData, postfitResiduals);
             floatSolution = solution;
-            
+
             fixAmbiguities(gData);
             //storeAmbiguities(gData);
 
@@ -121,11 +134,6 @@ namespace pod
                 break;
             //reject(gData, eqComposer().residTypes());
 
-            if (gData.body.size() < equations->getNumUnknowns())
-            {
-                equations->initKfState(solution, covMatrix);
-                break;
-            }
         }
 
         equations->storeKfState(floatSolution, covMatrix);
@@ -134,11 +142,6 @@ namespace pod
     
     void  KalmanSolver::fixAmbiguities(gnssRinex& gData)
     {
-      /*  auto summ = FilterParameter::get_sv_by_ss( equations->currentAmb());
-        for (auto &it : summ)
-            std::cout << SatID::convertSatelliteSystemToString(it.first)
-            << ": " << it.second.size() << endl;
-*/
         if (equations->getSlnType() == SlnType::PD_Fixed && gData.body.size() > 5)
         {
             int core_num = equations->currentUnknowns().size() - equations->currentAmb().size();
@@ -148,9 +151,7 @@ namespace pod
 
             for (int k = 0; k < core_num; k++)
                 solution(k) = ar.CoreParamFixed()(k);
-        }
-            
-            
+        }   
     }
 
     int KalmanSolver::check(gnssRinex& gData)
