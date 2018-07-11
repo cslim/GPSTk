@@ -63,7 +63,7 @@ namespace pod
     {
         updateRequaredObs();
 
-        SimpleFilter CodeFilter(TypeIDSet{ codeL1,TypeID::P2 });
+        SimpleFilter CodePhaseFilter(TypeIDSet{ codeL1,TypeID::P2,TypeID::L1,TypeID::L2 });
         SimpleFilter SNRFilter(TypeID::S1, confReader().getValueAsInt("SNRmask"), DBL_MAX);
         // Object to remove eclipsed satellites
         EclipsedSatFilter eclipsedSV;
@@ -240,14 +240,18 @@ namespace pod
                     printMsg(gRin.header.epoch, "Empty epoch record in Rinex file");
                     continue;
                 }
-
+                
                 const auto& t = gRin.header.epoch;
+                bool b;
+                CATCH_TIME(t,2018,1,20,10,20,0,b)
+                if(b)
+                    DBOUT_LINE("catched")
 
                 //keep only satellites from satellites systems selecyted for processing
                 gRin.keepOnlySatSyst(opts().systems);
 
                 //keep only types used for processing
-               // gRin.keepOnlyTypeID(requireObs.getRequiredType());
+                // gRin.keepOnlyTypeID(requireObs.getRequiredType());
 
                 //compute approximate position
                 if (firstTime)
@@ -276,15 +280,15 @@ namespace pod
 
 
                 gRin >> requireObs;
-                gRin >> CodeFilter;
+                gRin >> CodePhaseFilter;
                 gRin >> SNRFilter;
 
                 if (gRin.body.size() == 0)
                 {
                     printMsg(gRin.header.epoch, "Rover receiver: all SV has been rejected.");
-
                     continue;
                 }
+
                 gRin >> computeLinear;
                 gRin >> markCSLI2Rover;
                 gRin >> markCSMW2Rover;
@@ -304,14 +308,9 @@ namespace pod
                     gRef.keepOnlyTypeID(requireObs.getRequiredType());
 
                     gRef >> requireObs;
-                    gRef >> CodeFilter;
+                    gRef >> CodePhaseFilter;
                     gRef >> SNRFilter;
 
-                    if (gRef.body.size() == 0)
-                    {
-                        printMsg(gRef.header.epoch, "Reference receiver: all SV has been rejected.");
-                        continue;
-                    }
 
                     gRef >> computeLinear;
                     gRef >> markCSLI2Base;
@@ -366,6 +365,7 @@ namespace pod
                 gRin >> linearIonoFree;
                 gRin >> oMinusC;
                 gRin >> delta;
+             
                 DBOUT_LINE(">>" << CivilTime(gRin.header.epoch).asString());
                 if (forwardBackwardCycles > 0)
                 {

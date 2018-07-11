@@ -59,7 +59,7 @@ namespace pod
         model.setDefaultObservable(codeL1);
         model.setMinElev(opts().maskEl);
 
-        SimpleFilter CodeFilter(TypeIDSet{ codeL1,TypeID::P2 });
+        SimpleFilter CodeFilter(TypeIDSet{ codeL1,TypeID::P2,TypeID::L1,TypeID::L2 });
         SimpleFilter SNRFilter(TypeID::S1, confReader().getValueAsInt("SNRmask"), DBL_MAX);
         // Object to remove eclipsed satellites
         EclipsedSatFilter eclipsedSV;
