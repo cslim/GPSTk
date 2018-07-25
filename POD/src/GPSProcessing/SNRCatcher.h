@@ -11,7 +11,14 @@ namespace pod
         public gpstk::ProcessingClass
     {
     public:
+
         SNRCatcher();
+        //
+        SNRCatcher(const gpstk::TypeID & type,
+            const gpstk::TypeID& resType,
+            double maxgap, 
+            double tresh,
+            int maxCount);
 
         virtual ~SNRCatcher() {};
 
@@ -46,8 +53,7 @@ namespace pod
         virtual double getDetection(const gpstk::CommonTime& epoch,
             const gpstk::SatID& sat,
             gpstk::typeValueMap& tvMap,
-            const double& snr);
-
+            double snr);
 
         /// Returns a string identifying this object.
         virtual std::string getClassName(void) const;
@@ -58,7 +64,6 @@ namespace pod
 
         /// Types of result.
         gpstk::TypeID resultType1;
-        gpstk::TypeID resultType2;
         
         /// Maximum buffer size.
         int maxBufferSize;
