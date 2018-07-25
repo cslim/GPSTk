@@ -8,8 +8,6 @@
 #include"ARMLambda.hpp"
 #include <algorithm>
 
-#define MIN_NUM_SV 5
-
 using namespace std;
 using namespace gpstk;
 
@@ -30,11 +28,12 @@ namespace pod
         return corr;
     }
 
-    KalmanSolver::KalmanSolver():firstTime(true)
+    KalmanSolver::KalmanSolver()
+        :firstTime(true), isValid_(false)
     {}
 
     KalmanSolver::KalmanSolver(eqComposer_sptr eqs) 
-        :firstTime(true),equations(eqs)
+        :firstTime(true),equations(eqs), isValid_(false)
     {}
 
     KalmanSolver::~KalmanSolver()
@@ -42,6 +41,9 @@ namespace pod
 
     gnssRinex& KalmanSolver::Process(gnssRinex& gData)
     {
+        //invalidate solution
+        isValid_ = false;
+
         double dt = abs(t_pre - gData.header.epoch);
         t_pre = gData.header.epoch;
 
@@ -61,9 +63,10 @@ namespace pod
         
         //if number of satellies passed to processing is less than 'MIN_NUM_SV'
         //clear all SV data except observable
-        if (gData.body.size() < MIN_NUM_SV)
+        if (gData.body.size() < minSatNumber)
         {
             equations->keepOnlySv(gData.getSatID());
+            
             return gData;
         }
 
@@ -82,8 +85,6 @@ namespace pod
                 equations->updateKfState(solution, covMatrix);
 
             firstTime = false;
-
-            // DBOUT_LINE("----------------------------------------------------------------------------------------");
 
             for (auto& it: equations->currentUnknowns())
             DBOUT(it<<" ");
@@ -137,6 +138,9 @@ namespace pod
         }
 
         equations->storeKfState(floatSolution, covMatrix);
+
+        //everything is OK => set solutiuon status to VALID
+        isValid_ = true;
         return gData;
     }
     
@@ -247,6 +251,7 @@ namespace pod
 
     double KalmanSolver::getSolution(const FilterParameter& parameter) const
     {
+        
         // Define counter
         int counter(0);
 
