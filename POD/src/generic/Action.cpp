@@ -6,13 +6,10 @@ namespace pod
     ///
     GnssEpochMap Action:: process()
     {
-        std::string  var = this->path;
-
-        Solution sol(var.c_str());
+        Solution sol(path.c_str());
 
         sol.process();
-        pod::GnssEpochMap map = sol.getData();
 
-        return map;
+        return sol.getData();
     }
 }

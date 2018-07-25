@@ -6,10 +6,12 @@
 #include"PPPSolutionBase.h"
 #include"GnssEpochMap.h"
 #include"CustomSolution.h"
-using namespace gpstk;
+#include"ComputeStatistic.h"
+
 namespace pod
 {
-    class Solution : public BasicFramework
+    class Solution 
+        : public gpstk::BasicFramework
     {
        
     public:
@@ -21,7 +23,7 @@ namespace pod
         virtual void process();
         void chekObs();
         void saveToDb();
-
+        void saveStatistic();
         GnssEpochMap  getData()
         {
             return solver.getData();
@@ -31,10 +33,10 @@ namespace pod
         
         GnssDataStore_sptr data;
 
-        CommandOptionWithArg confFile;
+        gpstk::CommandOptionWithArg confFile;
 
         // Configuration file reader
-        ConfDataReader confReader;
+        gpstk::ConfDataReader confReader;
 
         CustomSolution solver;
 

@@ -53,6 +53,8 @@ namespace pod
     GnssEpochMap::~GnssEpochMap()
     { }
 
+
+
     void GnssEpochMap::updateTypes(const TypeIDSet & newTypes)
     {
         types.insert(newTypes.begin(), newTypes.end());
@@ -65,9 +67,9 @@ namespace pod
         types.clear();
         types.insert(TypeID::recSlnType);
 
-        for (auto & epoch : data)
+        for (auto && epoch : data)
         {
-            for (const auto & svRcord : epoch.second.satData)
+            for (auto && svRcord : epoch.second.satData)
             {
                 //update list of SV 
                 svs.insert(svRcord.first);
@@ -77,7 +79,7 @@ namespace pod
             }
 
             //update list of  typeID
-            for (const auto & data : epoch.second.slnData)
+            for (auto && data : epoch.second.slnData)
                 types.insert(data.first);
             //update list of Solution types
             const auto& st = epoch.second.slnData.find(TypeID::recSlnType);
@@ -91,7 +93,6 @@ namespace pod
             else
                 slnTypes.insert(st->second);
         }
-
     }
 
     /// Method to print data values
