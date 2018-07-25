@@ -36,7 +36,7 @@
 #include"IonoEquations.h"
 #include"IonoStochasticModel.h"
 #include"KalmanSolverFB.h"
-
+#include"PrefitResCatcher.h"
 #include"WinUtils.h"
 
 using namespace std;
@@ -97,6 +97,7 @@ namespace pod
 
         // check sharp SNR drops 
         SNRCatcher snrCatcherL1Rover;
+        PrefitResCatcher resCatcher(Equations->measTypes());
 
         // Object to keep track of satellite arcs
         SatArcMarker markArcRover(TypeID::CSL1, true, 31.0);
@@ -247,6 +248,7 @@ namespace pod
 
                 gRin >> linearIonoFree;
                 gRin >> oMinusC;
+                gRin >> resCatcher;
 
                 DBOUT_LINE(">>" << CivilTime(gRin.header.epoch).asString());
 

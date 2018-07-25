@@ -16,6 +16,7 @@
 #include"SNRCatcher.h"
 #include"IonoEquations.h"
 #include"IonoStochasticModel.h"
+#include"PrefitResCatcher.h"
 
 #include"LinearCombinations.hpp"
 #include"LICSDetector.hpp"
@@ -124,9 +125,10 @@ namespace pod
         markCSMW2Rover.setMaxNumLambdas(confReader().getValueAsDouble("MWNLambdas"));
         
         // check sharp SNR drops 
-        SNRCatcher snrCatcherL1Base;
-        SNRCatcher snrCatcherL1Rover;
-        
+        SNRCatcher snrCatcherL1Base(TypeID::S1, TypeID::CSL1,901.0,5,30);
+        SNRCatcher snrCatcherL1Rover(TypeID::S1, TypeID::CSL1, 901.0, 5, 30);
+        PrefitResCatcher resCatcher(Equations->measTypes());
+
         // Object to keep track of satellite arcs
         SatArcMarker markArcBase(TypeID::CSL1, true, 31.0);
         SatArcMarker markArcRover(TypeID::CSL1, true, 31.0);
@@ -204,18 +206,18 @@ namespace pod
         delta.setDiffTypeSet(diffTypeSet);
 
         KalmanSolver solver(Equations);
+        solver.setMinSatNumber(4);
         KalmanSolverFB solverFb(Equations);
+        solverFb.setMinSatNumber(4);
         if (forwardBackwardCycles > 0)
         {
             solverFb.setCyclesNumber(forwardBackwardCycles);
             solverFb.setLimits(confReader().getListValueAsDouble("codeLimList"), confReader().getListValueAsDouble("phaseLimList"));
         }
-        ofstream ostream;
-        ostream.open(data->workingDir + "\\" + fileName(), ios::out);
-
+ 
         bool firstTime = true;
         //
-        for (auto &obsFile : data->getObsFiles(data->SiteRover))
+        for (auto &obsFile : data->getObsFiles(opts().SiteRover))
         {
             cout << obsFile << endl;
             //Input observation file stream
@@ -243,7 +245,7 @@ namespace pod
                 
                 const auto& t = gRin.header.epoch;
                 bool b;
-                CATCH_TIME(t,2018,1,20,10,20,0,b)
+                CATCH_TIME(t,2015,1,1,15,9,0,b)
                 if(b)
                     DBOUT_LINE("catched")
 
@@ -292,7 +294,7 @@ namespace pod
                 gRin >> computeLinear;
                 gRin >> markCSLI2Rover;
                 gRin >> markCSMW2Rover;
-                //gRin >> snrCatcherL1Rover;
+                gRin >> snrCatcherL1Rover;
                 gRin >> markArcRover;
 
                 auto eop = data->eopStore.getEOP(MJD(t).mjd, IERSConvention::IERS2010);
@@ -315,7 +317,7 @@ namespace pod
                     gRef >> computeLinear;
                     gRef >> markCSLI2Base;
                     gRef >> markCSMW2Base;
-                    //gRef >> snrCatcherL1Base;
+                    gRef >> snrCatcherL1Base;
                     gRef >> markArcBase;
 
                     if (decimateData.check(gRef))
@@ -365,7 +367,8 @@ namespace pod
                 gRin >> linearIonoFree;
                 gRin >> oMinusC;
                 gRin >> delta;
-             
+                gRin >> resCatcher;
+
                 DBOUT_LINE(">>" << CivilTime(gRin.header.epoch).asString());
                 if (forwardBackwardCycles > 0)
                 {
