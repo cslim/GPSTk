@@ -70,7 +70,7 @@ namespace pod
 
         Triple pos;
         int i = 0;
-        for (auto& it : confReader().getListValueAsDouble("nominalPosition", data->SiteBase))
+        for (auto& it : confReader().getListValueAsDouble("nominalPosition", opts().SiteBase))
             pos[i++] = it;
         Position refPos(pos);
 
@@ -85,7 +85,7 @@ namespace pod
         modelRef.rxPos = refPos;
 
         gnssRinex gRin, gRef;
-        SyncObs sync(data->getObsFiles(data->SiteBase), gRin);
+        SyncObs sync(data->getObsFiles(opts().SiteBase), gRin);
 
         //Object to decimate data
         Decimate decimateData(confReader().getValueAsDouble("decimationInterval"),
@@ -137,7 +137,7 @@ namespace pod
 
 #pragma region prepare ANTEX reader
 
-        string antxfile = data->genericFilesDirectory;
+        string antxfile = opts().genericFilesDirectory;
         antxfile += confReader().getValue("antexFile");
 
         AntexReader antexReader;
@@ -156,23 +156,23 @@ namespace pod
         //for base
         Triple offsetARP;
         i = 0;
-        for (auto &it : confReader().getListValueAsDouble("offsetARP", data->SiteBase))
+        for (auto &it : confReader().getListValueAsDouble("offsetARP", opts().SiteBase))
             offsetARP[i++] = it;
         corrBase.setMonument(offsetARP);
 
         //for rover
         i = 0;
-        for (auto &it : confReader().getListValueAsDouble("offsetARP", data->SiteRover))
+        for (auto &it : confReader().getListValueAsDouble("offsetARP", opts().SiteRover))
             offsetARP[i++] = it;
         corrRover.setMonument(offsetARP);
 
-        Antenna baseAnt(antexReader.getAntenna(confReader().getValue("antennaModel", data->SiteBase)));
+        Antenna baseAnt(antexReader.getAntenna(confReader().getValue("antennaModel", opts().SiteBase)));
         corrBase.setAntenna(baseAnt);
-        corrBase.setUseAzimuth(confReader().getValueAsBoolean("useAzim", data->SiteBase));
+        corrBase.setUseAzimuth(confReader().getValueAsBoolean("useAzim", opts().SiteBase));
 
-        Antenna roverAnt(antexReader.getAntenna(confReader().getValue("antennaModel", data->SiteRover)));
+        Antenna roverAnt(antexReader.getAntenna(confReader().getValue("antennaModel", opts().SiteRover)));
         corrRover.setAntenna(roverAnt);
-        corrRover.setUseAzimuth(confReader().getValueAsBoolean("useAzim", data->SiteRover));
+        corrRover.setUseAzimuth(confReader().getValueAsBoolean("useAzim", opts().SiteRover));
 
 #pragma endregion
 
@@ -181,10 +181,10 @@ namespace pod
         PoleTides pole;
         // Configure ocean loading model
         OceanLoading ocean;
-        ocean.setFilename(data->genericFilesDirectory + confReader().getValue("oceanLoadingFile"));
+        ocean.setFilename(opts().genericFilesDirectory + confReader().getValue("oceanLoadingFile"));
 
-        ComputeWindUp windupBase(data->SP3EphList, refPos, data->genericFilesDirectory + confReader().getValue("satDataFile"));
-        ComputeWindUp windupRover(data->SP3EphList, refPos, data->genericFilesDirectory + confReader().getValue("satDataFile"));
+        ComputeWindUp windupBase(data->SP3EphList, refPos, opts().genericFilesDirectory + confReader().getValue("satDataFile"));
+        ComputeWindUp windupRover(data->SP3EphList, refPos, opts().genericFilesDirectory + confReader().getValue("satDataFile"));
 
         ComputeSatPCenter svPcenterBase(refPos);
         svPcenterBase.setAntexReader(antexReader);
@@ -259,7 +259,7 @@ namespace pod
                    /* if (computeApprPos(gRin, data->SP3EphList, nominalPos))
                         continue;*/
                     i = 0;
-                    for (auto& it : confReader().getListValueAsDouble("nominalPosition", data->SiteRover))
+                    for (auto& it : confReader().getListValueAsDouble("nominalPosition", opts().SiteRover))
                         pos[i++] = it;
                     nominalPos = Position(pos);
 
@@ -326,7 +326,7 @@ namespace pod
                     gRef >> grDelayBase;
                     gRef >> svPcenterBase;
 
-                    Triple tides(solid.getSolidTide(t, refPos) + ocean.getOceanLoading(data->SiteBase, t) + pole.getPoleTide(t, refPos));
+                    Triple tides(solid.getSolidTide(t, refPos) + ocean.getOceanLoading(opts().SiteBase, t) + pole.getPoleTide(t, refPos));
                     corrBase.setExtraBiases(tides);
                     
                     gRef >> corrBase;
@@ -355,7 +355,7 @@ namespace pod
                 gRin >> grDelayRover;
                 gRin >> svPcenterRover;
 
-                Triple tides(solid.getSolidTide(t, nominalPos) + ocean.getOceanLoading(data->SiteRover, t) + pole.getPoleTide(t, nominalPos));
+                Triple tides(solid.getSolidTide(t, nominalPos) + ocean.getOceanLoading(opts().SiteRover, t) + pole.getPoleTide(t, nominalPos));
                 corrRover.setExtraBiases(tides);
                 gRin >> corrRover;
                 
@@ -374,9 +374,9 @@ namespace pod
                 else
                 {
                     gRin >> solver;
-                    GnssEpoch ep(gRin);
+                    auto ep = opts().fullOutput ? GnssEpoch(gRin) : GnssEpoch();
                     // updateNomPos(solverFB);
-                    printSolution(ostream, solver, t, ep);
+                    printSolution( solver, t, ep);
                     gMap.data.insert(std::make_pair(t, ep));
                 }
             }
@@ -389,9 +389,9 @@ namespace pod
             cout << "Last process part started" << endl;
             while (solverFb.lastProcess(gRin))
             {
-                GnssEpoch ep(gRin);
+                auto ep = opts().fullOutput ? GnssEpoch(gRin) : GnssEpoch();
                 //updateNomPos(solverFB);
-                printSolution(ostream, solverFb, gRin.header.epoch, ep);
+                printSolution( solverFb, gRin.header.epoch, ep);
                 gMap.data.insert(std::make_pair(gRin.header.epoch, ep));
             }
             cout << "Measurments rejected: " << solverFb.rejectedMeasurements << endl;
@@ -505,14 +505,11 @@ namespace pod
             Equations->addEquation(std::move(ionoEq));
         }
 
-
         if (opts().carrierBands.find(CarrierBand::L1) != opts().carrierBands.end())
             Equations->addEquation(std::make_unique<AmbiguitiesEquations>(TypeID::BL1));
 
         if (opts().carrierBands.find(CarrierBand::L2) != opts().carrierBands.end())
             Equations->addEquation(std::make_unique<AmbiguitiesEquations>(TypeID::BL2));
-
-       
 
         forwardBackwardCycles = confReader().getValueAsInt("forwardBackwardCycles");
     }

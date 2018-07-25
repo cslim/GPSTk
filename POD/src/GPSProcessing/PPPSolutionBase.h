@@ -32,7 +32,7 @@ namespace pod
     }
     public: virtual std::string  fileName() const override
     {
-        return data->SiteRover + "_ppp_float.txt";
+        return opts().SiteRover + "_ppp_float.txt";
     }
 
     protected: virtual void PRProcess();

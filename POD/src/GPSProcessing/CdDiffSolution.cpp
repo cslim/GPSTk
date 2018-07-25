@@ -48,7 +48,7 @@ namespace pod
 
         Triple pos;
         int i = 0;
-        for (auto& it : confReader().getListValueAsDouble("nominalPosition", data->SiteBase))
+        for (auto& it : confReader().getListValueAsDouble("nominalPosition",opts().SiteBase))
             pos[i++] = it;
         Position refPos(pos);
 
@@ -64,7 +64,7 @@ namespace pod
         modelRef.rxPos = refPos;
 
         gnssRinex gRin, gRef;
-        SyncObs sync(data->getObsFiles(data->SiteBase), gRin);
+        SyncObs sync(data->getObsFiles(opts().SiteBase), gRin);
 
         // Object to decimate data
         Decimate decimateData(
@@ -99,12 +99,9 @@ namespace pod
             solverFb.setLimits(confReader().getListValueAsDouble("codeLimList"), confReader().getListValueAsDouble("phaseLimList"));
         }
 
-        ofstream ostream;
-        ostream.open(data->workingDir + "\\" + fileName(), ios::out);
-
         bool firstTime = true;
         //
-        for (auto &obsFile : data->getObsFiles(data->SiteRover))
+        for (auto &obsFile : data->getObsFiles(opts().SiteRover))
         {
             cout << obsFile << endl;
             //Input observation file stream
@@ -153,8 +150,6 @@ namespace pod
                 tropoBase.setAllParameters(t, refPos);
                 modelRover.rxPos = nominalPos;
 
-                ostream << gRin.header.epoch << "\t" << gRin.header.epoch << endl;
-              
                 gRin >> requireObs;
                 gRin >> CodeFilter;
                 gRin >> SNRFilter;
@@ -227,9 +222,9 @@ namespace pod
                 else
                 {
                     gRin >> solver;
-                    GnssEpoch ep(gRin);
+                    auto ep = opts().fullOutput? GnssEpoch(gRin): GnssEpoch();
                     // updateNomPos(solverFB);
-                    printSolution(ostream, solver, t, ep);
+                    printSolution( solver, t, ep);
                     gMap.data.insert(std::make_pair(t, ep));
                 }
             }
@@ -242,9 +237,9 @@ namespace pod
             cout << "Last process part started" << endl;
             while (solverFb.lastProcess(gRin))
             {
-                GnssEpoch ep(gRin);
+                auto ep = opts().fullOutput ? GnssEpoch(gRin) : GnssEpoch();
                 //updateNomPos(solverFB);
-                printSolution(ostream, solverFb, gRin.header.epoch, ep);
+                printSolution( solverFb, gRin.header.epoch, ep);
                 gMap.data.insert(std::make_pair(gRin.header.epoch, ep));
             }
             cout << "Measurments rejected: " << solverFb.rejectedMeasurements << endl;

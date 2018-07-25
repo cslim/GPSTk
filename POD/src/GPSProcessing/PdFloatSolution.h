@@ -12,7 +12,7 @@ namespace pod
 
         virtual std::string  fileName() const override
         {
-            return data->SiteBase + "-" + data->SiteRover + "_pd_float.txt";
+            return opts().SiteBase + "-" + opts().SiteRover + "_" + slnType2Str.at(desiredSlnType());;
         }
         
         virtual SlnType desiredSlnType() const override

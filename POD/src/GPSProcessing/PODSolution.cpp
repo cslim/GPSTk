@@ -145,7 +145,7 @@ namespace pod
 
         // Feed Antex reader object with Antex file
         AntexReader antexReader;
-        string afile = data->genericFilesDirectory;
+        string afile = opts().genericFilesDirectory;
         afile += confReader().getValue("antexFile");
         antexReader.open(afile);
 
@@ -161,16 +161,16 @@ namespace pod
         {
             Antenna receiverAntenna;
             // Get receiver antenna parameters
-            string aModel(confReader().getValue("antennaModel", data->SiteRover));
+            string aModel(confReader().getValue("antennaModel", opts().SiteRover));
             receiverAntenna = antexReader.getAntenna(aModel);
 
             // Check if we want to use Antex patterns
-            bool usepatterns(confReader().getValueAsBoolean("usePCPatterns",  data->SiteRover));
+            bool usepatterns(confReader().getValueAsBoolean("usePCPatterns", opts().SiteRover));
             if (usepatterns)
             {
                 corr.setAntenna(receiverAntenna);
                 // Should we use elevation/azimuth patterns or just elevation?
-                corr.setUseAzimuth(confReader().getValueAsBoolean("useAzim", data->SiteRover));
+                corr.setUseAzimuth(confReader().getValueAsBoolean("useAzim", opts().SiteRover));
             }
         }
         else
@@ -190,7 +190,7 @@ namespace pod
 #pragma endregion
 
         // Object to compute wind-up effect
-        ComputeWindUp windup(data->SP3EphList, nominalPos, data->genericFilesDirectory + confReader().getValue("satDataFile"));
+        ComputeWindUp windup(data->SP3EphList, nominalPos, opts().genericFilesDirectory + confReader().getValue("satDataFile"));
 
         // Object to compute ionosphere-free combinations to be used
         // as observables in the PPP processing
@@ -249,7 +249,7 @@ namespace pod
         int precision(4);
 
         ofstream outfile;
-        outfile.open(data->workingDir +"\\"+fileName(), ios::out);
+        outfile.open(opts().workingDir +"\\"+fileName(), ios::out);
 
 #pragma endregion
 
@@ -259,7 +259,7 @@ namespace pod
         bool b = true;
 
         //// *** Now comes the REAL forwards processing part *** ////
-        for (auto obsFile : data->getObsFiles(data->SiteRover))
+        for (auto obsFile : data->getObsFiles(opts().SiteRover))
         {
 
             cout << obsFile << endl;
@@ -522,7 +522,7 @@ namespace pod
         }
         else
         {
-            cout << "Approximate Positions loading from \n" + data->workingDir + "\\" + data->apprPosFile + "\n... ";
+            cout << "Approximate Positions loading from \n" + opts().workingDir + "\\" + data->apprPosFile + "\n... ";
 
             data->loadApprPos();
             cout << "\nComplete." << endl;

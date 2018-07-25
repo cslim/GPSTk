@@ -93,15 +93,6 @@ namespace pod
              // pointer to  configuration file reader
     public: gpstk::ConfDataReader* confReader;
 
-            // directory with generic files
-    public: std::string genericFilesDirectory;
-
-            // working directory
-    public: std::string workingDir;
-
-            // Broadcast ephemeris directory
-    public: std::string bceDir;
-
             //object to handle precise ephemeris and clocks
     public: gpstk::SP3EphemerisStore SP3EphList;
 
@@ -116,12 +107,7 @@ namespace pod
 
             // compute the  values related to a given GNSS ionospheric model.
     public: gpstk::ComputeIonoModel ionoCorrector;
-            
-            //rover receiver site ID
-    public: std::string SiteRover;
 
-            //base receiver site ID
-    public: std::string SiteBase;
 
             //path to approximate position and code clock bias file
     public: std::string apprPosFile;
@@ -144,6 +130,25 @@ namespace pod
             //pocessing-spacific options
     public: struct ProcessOpts
     {
+
+        //rover receiver site ID
+        std::string SiteRover;
+
+        //base receiver site ID
+        std::string SiteBase;
+
+        // directory with generic files
+        std::string genericFilesDirectory;
+
+        // working directory
+        std::string workingDir;
+
+        // Broadcast ephemeris directory
+        std::string bceDir;
+
+        // is output SV-depended data?
+        bool fullOutput = false;
+
         // Estimate zenith troposperic delay?
         bool computeTropo = false;
 

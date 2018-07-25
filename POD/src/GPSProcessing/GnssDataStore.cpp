@@ -58,41 +58,49 @@ namespace pod
         try
         {
             initReader(path);
-            workingDir = fs::path(path).parent_path().string();
-            opts.slnType = (SlnType)confReader->getValueAsInt("slnType");
+
+            opts.workingDir = fs::path(path).parent_path().string();
+            
             opts.isSpaceborneRcv = confReader->getValueAsBoolean("IsSpaceborneRcv");
+            
             opts.isSmoothCode = confReader->getValueAsBoolean("IsSmoothCode");
+            
             opts.computeTropo = confReader->getValueAsBoolean("computeTropo");
+            
             opts.maskEl = confReader->getValueAsDouble("ElMask");
+            
             opts.maskSNR = confReader->getValueAsDouble("SNRmask");
+            
+            opts.dynamics = (Dynamics)confReader->getValueAsInt("Dynamics");
+           
+            opts.bceDir = confReader->getValue("RinexNavFilesDir");
+
+            opts.SiteRover = confReader->getValue("SiteRover");
+
+            opts.SiteBase = confReader->getValue("SiteBase");
+
+            opts.fullOutput = confReader->getValueAsBoolean("fullOutput");
+
+            opts.slnType = (SlnType)confReader->getValueAsInt("slnType");
+            cout << "Solution Type: " << slnType2Str[opts.slnType] << endl;
+
+            //set generic files direcory 
+            string subdir = confReader->getValue("GenericFilesDir");
+            opts.genericFilesDirectory = opts.workingDir + "\\" + subdir + "\\";
 
             for (auto it : confReader->getListValueAsInt("carrierBands"))
                 opts.carrierBands.insert(static_cast<CarrierBand>(it));
-           
+
             cout << "Used Carrier bands: ";
-            for (auto& it : opts.carrierBands)
-                cout << carrierBand2Str[it] << " ";
+            for_each(opts.carrierBands.begin(), opts.carrierBands.end(), [](auto && it) { cout << carrierBand2Str[it] << " "; });
             cout << endl;
 
             for (auto it : confReader->getListValueAsInt("satSystems"))
                 opts.systems.insert(static_cast<SatID::SatelliteSystem>(it));
 
             cout << "Used Sat. Systems: ";
-            for (auto& ss : opts.systems)
-                cout << SatID::convertSatelliteSystemToString(ss) << " ";
+            for_each(opts.systems.begin(), opts.systems.end(), [](auto && ss) { cout << SatID::convertSatelliteSystemToString(ss) << " "; });
             cout << endl;
-
-            cout << "Solution Type: " << slnType2Str[opts.slnType] << endl;
-
-            //set BCE files direcory 
-            bceDir = confReader->getValue("RinexNavFilesDir");
-            //set generic files direcory 
-            string subdir = confReader->getValue("GenericFilesDir");
-            genericFilesDirectory = workingDir + "\\" + subdir + "\\";
-
-           
-            SiteRover = confReader->getValue("SiteRover");
-            SiteBase = confReader->getValue("SiteBase");
 
             cout << "Ephemeris Loading... ";
             cout << loadEphemeris() << endl;
@@ -100,8 +108,6 @@ namespace pod
             //opts.isComputeApprPos = confReader->getValueAsBoolean("calcApprPos");
             //if (opts.isComputeApprPos)
             //    apprPosFile = confReader->getValue("apprPosFile");
-
-            opts.dynamics = (Dynamics)confReader->getValueAsInt("Dynamics");
 
             //load clock data from RINEX clk files, if required
             if (confReader->getValueAsBoolean("UseRinexClock"))
@@ -143,7 +149,7 @@ namespace pod
 
         list<string> files;
         string subdir = confReader->getValue("EphemerisDir");
-        FsUtils::getAllFilesInDir(workingDir + "\\" + subdir, files);
+        FsUtils::getAllFilesInDir(opts.workingDir + "\\" + subdir, files);
 
         for (auto file : files)
         {
@@ -168,7 +174,7 @@ namespace pod
     {
         list<string> files;
         string subdir = confReader->getValue("RinexClockDir");
-        FsUtils::getAllFilesInDir(workingDir + "\\" + subdir, files);
+        FsUtils::getAllFilesInDir(opts.workingDir + "\\" + subdir, files);
 
         for (auto file : files)
         {
@@ -221,7 +227,7 @@ namespace pod
     {
         list<string> files;
         string subdir = confReader->getValue("IonexDir");
-        FsUtils::getAllFilesInDir(workingDir + "\\" + subdir, files);
+        FsUtils::getAllFilesInDir(opts.workingDir + "\\" + subdir, files);
         ionexStore.clear();
         for (auto& file : files)
         {
@@ -237,7 +243,7 @@ namespace pod
         const string gpsObsExt = ".[\\d]{2}[nN]";
         list<string> files;
 
-        FsUtils::getAllFilesInDir(workingDir + "\\" + bceDir, gpsObsExt, files);
+        FsUtils::getAllFilesInDir(opts.workingDir + "\\" + opts.bceDir, gpsObsExt, files);
         int i = 0;
         for (auto file : files)
         {
@@ -259,16 +265,16 @@ namespace pod
                     for (auto it : rNavHeader.commentList)
                     {
                         int doy = -1, yr = -1;
-                        std::tr1::cmatch res;
-                        std::tr1::regex rxDoY("DAY [0-9]{3}"), rxY(" [0-9]{4}");
-                        bool b = std::tr1::regex_search(it.c_str(), res, rxDoY);
+                        std::cmatch res;
+                        std::regex rxDoY("DAY [0-9]{3}"), rxY(" [0-9]{4}");
+                        bool b = std::regex_search(it.c_str(), res, rxDoY);
                         if (b)
                         {
                             string sDay = res[0];
                             sDay = sDay.substr(sDay.size() - 4, 4);
                             doy = stoi(sDay);
                         }
-                        if (std::tr1::regex_search(it.c_str(), res, rxY))
+                        if (std::regex_search(it.c_str(), res, rxY))
                         {
                             string sDay = res[0];
                             sDay = sDay.substr(sDay.size() - 5, 5);
@@ -330,7 +336,7 @@ namespace pod
     {
         const string glnObsExt = ".[\\d]{2}[gG]";
         list<string> files;
-        FsUtils::getAllFilesInDir(workingDir + "\\" + bceDir, glnObsExt, files);
+        FsUtils::getAllFilesInDir(opts.workingDir + "\\" + opts.bceDir, glnObsExt, files);
 
         for (auto file : files)
         {
@@ -352,7 +358,7 @@ namespace pod
     bool GnssDataStore::loadEOPData()
     {
 
-        string iersEopFile = genericFilesDirectory;
+        string iersEopFile = opts.genericFilesDirectory;
         try
         {
             iersEopFile += confReader->getValue("IersEopFile");
@@ -379,7 +385,7 @@ namespace pod
 
     bool GnssDataStore::loadCodeBiades()
     {
-        string biasesFile = genericFilesDirectory;
+        string biasesFile = opts.genericFilesDirectory;
         try
         {
             biasesFile += confReader->getValue("IersEopFile");
@@ -406,9 +412,9 @@ namespace pod
 
     void GnssDataStore::checkObservable()
     {
-        ofstream os(workingDir + "\\ObsStatisic.out");
+        ofstream os(opts.workingDir + "\\ObsStatisic.out");
 
-        for (auto obsFile : getObsFiles(SiteRover))
+        for (auto obsFile : getObsFiles(opts.SiteRover))
         {
 
             //Input observation file stream
@@ -463,7 +469,7 @@ namespace pod
         apprPos.clear();
         try
         {
-            ifstream file(workingDir + "\\" + apprPosFile);
+            ifstream file(opts.workingDir + "\\" + apprPosFile);
             if (file.is_open())
             {
                 unsigned int Y(0), m(0), d(0), D(0), M(0), S(0);
@@ -506,7 +512,7 @@ namespace pod
     {
         std::list<string> ObsFiles;
         string  subdir = confReader->getValue("RinesObsDir");
-        FsUtils::getAllFilesInDir(workingDir + "\\" + subdir + "\\" + siteID, ObsFiles);
+        FsUtils::getAllFilesInDir(opts.workingDir + "\\" + subdir + "\\" + siteID, ObsFiles);
         return ObsFiles;
     }
 }

@@ -68,6 +68,11 @@ namespace pod
         return data->opts;
     }
 
+    protected: virtual GnssDataStore::ProcessOpts & opts() const
+    {
+        return data->opts;
+    }
+
     protected: virtual void updateRequaredObs() = 0;
 
     protected: virtual int computeApprPos(
@@ -75,10 +80,8 @@ namespace pod
         const gpstk::XvtStore<gpstk::SatID>& Eph,
         gpstk::Position& pos);
 
-    protected: virtual void printSolution(std::ofstream& os,
-        const KalmanSolver& solver,
-        const gpstk::CommonTime& time,
-        GnssEpoch& gEpoch);
+    protected: 
+        virtual void printSolution(const KalmanSolver& slr, const gpstk::CommonTime& t, GnssEpoch& ep);
 
 #pragma endregion
 

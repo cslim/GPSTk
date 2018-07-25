@@ -22,7 +22,7 @@ namespace pod
 
     public: virtual std::string  fileName() const
     {
-        return data->SiteRover + "_auto.txt";
+        return opts().SiteRover + "_" + slnType2Str.at(desiredSlnType());
     }
 
     public: virtual SlnType desiredSlnType() const override 

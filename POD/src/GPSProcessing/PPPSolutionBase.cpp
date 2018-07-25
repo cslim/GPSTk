@@ -59,14 +59,14 @@ namespace pod
         solverPR->ionoType = data->ionoCorrector.getType();
 
         ofstream os;
-        string outPath = data->workingDir + "\\" + data->apprPosFile;
+        string outPath = opts().workingDir + "\\" + data->apprPosFile;
         os.open(outPath);
        
         //decimation
         int sampl(1);
         double tol(0.1);
 
-        for (auto obsFile : data->getObsFiles(data->SiteRover))
+        for (auto obsFile : data->getObsFiles(opts().SiteRover))
         {
             int badSol(0);
             cout << obsFile << endl;

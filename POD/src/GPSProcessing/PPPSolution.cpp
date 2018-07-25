@@ -57,7 +57,7 @@ namespace pod
     {
         Triple pos;
         int i = 0;
-        for (auto& it : confReader().getListValueAsDouble("nominalPosition", data->SiteRover))
+        for (auto& it : confReader().getListValueAsDouble("nominalPosition", opts().SiteRover))
             pos[i++] = it;
         nominalPos = Position(pos);
 
@@ -109,20 +109,20 @@ namespace pod
         // Vector from monument to antenna ARP [UEN], in meters
         Triple offsetARP;
         i = 0;
-        for(auto &it:confReader().getListValueAsDouble("offsetARP", data->SiteRover))
+        for(auto &it:confReader().getListValueAsDouble("offsetARP", opts().SiteRover))
             offsetARP[i++] = it;
 
         AntexReader antexReader;
         Antenna receiverAntenna;
 
         // Feed Antex reader object with Antex file
-        string afile = data->genericFilesDirectory;
+        string afile = opts().genericFilesDirectory;
         afile += confReader().getValue("antexFile");
 
         antexReader.open(afile);
 
         // Get receiver antenna parameters
-        receiverAntenna = antexReader.getAntenna(confReader().getValue("antennaModel", data->SiteRover));
+        receiverAntenna = antexReader.getAntenna(confReader().getValue("antennaModel", opts().SiteRover));
 
         // Object to compute satellite antenna phase center effect
         ComputeSatPCenter svPcenter(nominalPos);
@@ -136,16 +136,16 @@ namespace pod
         corr.setMonument(offsetARP);
 
         // Check if we want to use Antex patterns
-        bool usepatterns(confReader().getValueAsBoolean("usePCPatterns", data->SiteRover));
+        bool usepatterns(confReader().getValueAsBoolean("usePCPatterns", opts().SiteRover));
         if (usepatterns)
         {
             corr.setAntenna(receiverAntenna);
             // Should we use elevation/azimuth patterns or just elevation?
-            corr.setUseAzimuth(confReader().getValueAsBoolean("useAzim", data->SiteRover));
+            corr.setUseAzimuth(confReader().getValueAsBoolean("useAzim", opts().SiteRover));
         }
 
         // Object to compute wind-up effect
-        ComputeWindUp windup(data->SP3EphList, nominalPos, data->genericFilesDirectory + confReader().getValue("satDataFile"));
+        ComputeWindUp windup(data->SP3EphList, nominalPos, opts().genericFilesDirectory + confReader().getValue("satDataFile"));
       
         // Object to compute the tropospheric data
         ComputeTropModel computeTropo(tropModel);
@@ -223,7 +223,7 @@ namespace pod
 
         // Configure ocean loading model
         OceanLoading ocean;
-        ocean.setFilename(data->genericFilesDirectory + confReader().getValue("oceanLoadingFile"));
+        ocean.setFilename(opts().genericFilesDirectory + confReader().getValue("oceanLoadingFile"));
 
         // This is the GNSS data structure that will hold all the
         // GNSS-related information
@@ -235,13 +235,13 @@ namespace pod
         int prec(4);
 
         ofstream outfile;
-        outfile.open(data->workingDir + "\\" + fileName(), ios::out);
+        outfile.open(opts().workingDir + "\\" + fileName(), ios::out);
 
         #pragma endregion
 
         i = 1;
         cout << "First forward processing part started." << endl;
-        for (auto& obsFile : data->getObsFiles(data->SiteRover))
+        for (auto& obsFile : data->getObsFiles(opts().SiteRover))
         {
             cout << obsFile << endl;
             //Input observation file stream
@@ -284,7 +284,7 @@ namespace pod
                 XYZ2NEU baseChange(nominalPos);
                 tropModel.setAllParameters(time, nominalPos);
                 // Compute solid, oceanic and pole tides effects at this epoch
-                Triple tides(solid.getSolidTide(time, nominalPos) + ocean.getOceanLoading(data->SiteRover, time) + pole.getPoleTide(time, nominalPos));
+                Triple tides(solid.getSolidTide(time, nominalPos) + ocean.getOceanLoading(opts().SiteRover, time) + pole.getPoleTide(time, nominalPos));
 
                 // Update observable correction object with tides information
                 corr.setExtraBiases(tides);
@@ -350,7 +350,7 @@ namespace pod
         {
             outfile.close();
             // We are done with this station. Let's show a message
-            cout << "Processing finished for station: '" << data->SiteRover <<"'." << endl;
+            cout << "Processing finished for station: '" << opts().SiteRover <<"'." << endl;
 
             return true;
         }
@@ -365,7 +365,7 @@ namespace pod
         {
             // If problems arose, issue an message and skip receiver
             cerr << "Exception at reprocessing phase: " << e << endl;
-            cerr << "Station '" << data->SiteRover << "'." << endl;
+            cerr << "Station '" << opts().SiteRover << "'." << endl;
 
             // Close output file for this station
             outfile.close();
@@ -386,7 +386,7 @@ namespace pod
 
         }  // End of 'while( fbpppSolver.LastProcess(gRin) )'
 
-        cout << "Processing finished for station: '" << data->SiteRover << "'." << endl;
+        cout << "Processing finished for station: '" << opts().SiteRover << "'." << endl;
         cout << "Num. of rejected meas. " << fbpppSolver.getRejectedMeasurements() << endl;
        
         outfile.close();
@@ -423,7 +423,6 @@ namespace pod
         double wetMap = solver.getSolution(TypeID::wetMap) + 0.1 + this->tropModel.dry_zenith_delay();
 
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recZTropo, wetMap));
-
 
         double x = nominalPos.X() + solver.getSolution(TypeID::dx);    // dx    - #4
         double y = nominalPos.Y() + solver.getSolution(TypeID::dy);    // dy    - #5
@@ -475,6 +474,7 @@ namespace pod
     {
         //
     }
+
     void PPPSolution::process()
     {
         try

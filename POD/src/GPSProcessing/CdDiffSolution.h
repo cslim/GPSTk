@@ -10,10 +10,13 @@ namespace pod
     {
     public:
         CdDiffSolution(GnssDataStore_sptr prt);
+
         virtual ~CdDiffSolution();
+
         virtual std::string  fileName() const
         {
-            return data->SiteBase + "-" + data->SiteRover + "_cd.txt";
+            return opts().SiteBase + "-" + opts().SiteRover +
+                "_" + slnType2Str.at(desiredSlnType());
         }
 
         virtual SlnType desiredSlnType() const override

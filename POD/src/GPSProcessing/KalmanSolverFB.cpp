@@ -24,8 +24,6 @@ namespace pod
         TypeID::postfitLC,
     };
 
-
-
     KalmanSolverFB::KalmanSolverFB()
         :firstIteration(true), processedMeasurements(0), rejectedMeasurements(0)
     {

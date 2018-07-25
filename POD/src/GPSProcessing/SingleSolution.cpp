@@ -73,14 +73,11 @@ namespace pod
             solverFb.setLimits(confReader().getListValueAsDouble("codeLimList"), confReader().getListValueAsDouble("phaseLimList"));
         }
 
-        ofstream ostream;
-        ostream.open(data->workingDir + "\\" + fileName(), ios::out);
-
         bool firstTime = true;
 
         gnssRinex gRin;
 
-        for (auto &obsFile : data->getObsFiles(data->SiteRover))
+        for (auto &obsFile : data->getObsFiles(opts().SiteRover))
         {
             cout << obsFile << endl;
 
@@ -164,9 +161,9 @@ namespace pod
                 else
                 {
                     gRin >> solver;
-                    GnssEpoch ep(gRin);
+                    auto ep = opts().fullOutput ? GnssEpoch(gRin) : GnssEpoch();
                     // updateNomPos(solverFB);
-                    printSolution(ostream, solver, t, ep);
+                    printSolution( solver, t, ep);
                     gMap.data.insert(std::make_pair(t, ep));
                 }
             }
@@ -180,9 +177,9 @@ namespace pod
             cout << "Last process part started" << endl;
             while (solverFb.lastProcess(gRin))
             {
-                GnssEpoch ep(gRin);
+                auto ep = opts().fullOutput ? GnssEpoch(gRin) : GnssEpoch();
                 //updateNomPos(solverFB);
-                printSolution(ostream, solverFb, gRin.header.epoch, ep);
+                printSolution( solverFb, gRin.header.epoch, ep);
                 gMap.data.insert(std::make_pair(gRin.header.epoch, ep));
             }
             cout << "measurments rejected: " << solverFb.rejectedMeasurements << endl;

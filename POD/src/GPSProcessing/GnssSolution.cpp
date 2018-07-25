@@ -11,7 +11,7 @@ namespace pod
 {
      std::ostream& GnssSolution:: printMsg(const gpstk::CommonTime& time, const char* msg)
      {
-        return( cout << "Epoch: " << CivilTime(time) << " "<< msg << endl);
+        return( cout << "Epoch: " << CivilTime(time).asString() << " "<< msg << endl);
      }
    
      GnssSolution::GnssSolution(GnssDataStore_sptr gnssData, double sigma = 50.0)
@@ -40,9 +40,9 @@ namespace pod
 
         return 0;
     }
-    void GnssSolution::printSolution(std::ofstream& os, const KalmanSolver& solver, const gpstk::CommonTime& time, GnssEpoch& gEpoch)
+    void GnssSolution::printSolution(const KalmanSolver& solver, const gpstk::CommonTime& time, GnssEpoch& gEpoch)
     {
-
+       
         for (auto && it : Equations->currentUnknowns())
         {
             if (it.type == TypeID::dx || it.type == TypeID::dy || it.type == TypeID::dz)
@@ -60,24 +60,29 @@ namespace pod
             else
                 gEpoch.satData[it.sv][it.type] = solver.getSolution(it);
         }
-
         Position newPos;
-        newPos[0] = nominalPos.X() + solver.getSolution(FilterParameter(TypeID::dx));    // dx    - #4
-        newPos[1] = nominalPos.Y() + solver.getSolution(FilterParameter(TypeID::dy));    // dy    - #5
-        newPos[2] = nominalPos.Z() + solver.getSolution(FilterParameter(TypeID::dz));    // dz    - #6
+        double stDev3D(NAN);
+        if (solver.isValid())
+        {
 
-        double varX = solver.getVariance(FilterParameter(TypeID::dx));     // Cov dx    - #8
-        double varY = solver.getVariance(FilterParameter(TypeID::dy));     // Cov dy    - #9
-        double varZ = solver.getVariance(FilterParameter(TypeID::dz));     // Cov dz    - #10
-        double stDev3D = sqrt(varX + varY + varZ);
+            newPos[0] = nominalPos.X() + solver.getSolution(FilterParameter(TypeID::dx));    // dx    - #4
+            newPos[1] = nominalPos.Y() + solver.getSolution(FilterParameter(TypeID::dy));    // dy    - #5
+            newPos[2] = nominalPos.Z() + solver.getSolution(FilterParameter(TypeID::dz));    // dz    - #6
 
+            double varX = solver.getVariance(FilterParameter(TypeID::dx));     // Cov dx    - #8
+            double varY = solver.getVariance(FilterParameter(TypeID::dy));     // Cov dy    - #9
+            double varZ = solver.getVariance(FilterParameter(TypeID::dz));     // Cov dz    - #10
+            stDev3D = sqrt(varX + varY + varZ);
+        }
         int numSats = gEpoch.satData.size();
        // int slnType = ( solver.getSigma() < getMaxSigma() && numSats >= 4) ? desiredSlnType() : 0;
         //if (solver.getSigma() > getMaxSigma())
         //{
          
        // }
-        gEpoch.slnData.insert(make_pair(TypeID::recSlnType, desiredSlnType()));
+        SlnType slnType = solver.isValid() ? desiredSlnType() : SlnType::NONE_SOLUTION;
+
+        gEpoch.slnData.insert(make_pair(TypeID::recSlnType, slnType));
 
         gEpoch.slnData.insert(make_pair(TypeID::recX, newPos.X()));
         gEpoch.slnData.insert(make_pair(TypeID::recY, newPos.Y()));
@@ -87,9 +92,5 @@ namespace pod
 
         gEpoch.slnData.insert(make_pair(TypeID::sigma, solver.getSigma()));
 
-        os << setprecision(6) << CivilTime(time).printf("%02Y %02m %02d %02H %02M %02S %P") << " " << desiredSlnType() << " ";
-        os << setprecision(10) << newPos.X() << "  " << newPos.Y() << "  " << newPos.Z() << "  " << " ";
-        os << setprecision(3) << solver.getSigma() << " " << stDev3D << " " << numSats;
-        os << endl;
     };
 }

@@ -105,7 +105,7 @@ namespace pod
 
 #pragma region prepare ANTEX reader
 
-        string antxfile = data->genericFilesDirectory;
+        string antxfile = opts().genericFilesDirectory;
         antxfile += confReader().getValue("antexFile");
 
         AntexReader antexReader;
@@ -120,13 +120,13 @@ namespace pod
         // Vector from monument to antenna ARP [UEN], in meters
         Triple offsetARP;
         int i = 0;
-        for (auto &it : confReader().getListValueAsDouble("offsetARP", data->SiteRover))
+        for (auto &it : confReader().getListValueAsDouble("offsetARP", opts().SiteRover))
             offsetARP[i++] = it;
         corrRover.setMonument(offsetARP);
 
-        Antenna roverAnt(antexReader.getAntenna(confReader().getValue("antennaModel", data->SiteRover)));
+        Antenna roverAnt(antexReader.getAntenna(confReader().getValue("antennaModel", opts().SiteRover)));
         corrRover.setAntenna(roverAnt);
-        corrRover.setUseAzimuth(confReader().getValueAsBoolean("useAzim", data->SiteRover));
+        corrRover.setUseAzimuth(confReader().getValueAsBoolean("useAzim", opts().SiteRover));
 
 #pragma endregion
 
@@ -135,9 +135,9 @@ namespace pod
         PoleTides pole;
         // Configure ocean loading model
         OceanLoading ocean;
-        ocean.setFilename(data->genericFilesDirectory + confReader().getValue("oceanLoadingFile"));
+        ocean.setFilename(opts().genericFilesDirectory + confReader().getValue("oceanLoadingFile"));
 
-        ComputeWindUp windupRover(data->SP3EphList, data->genericFilesDirectory + confReader().getValue("satDataFile"));
+        ComputeWindUp windupRover(data->SP3EphList, opts().genericFilesDirectory + confReader().getValue("satDataFile"));
 
         ComputeSatPCenter svPcenterRover;
         svPcenterRover.setAntexReader(antexReader);
@@ -153,12 +153,10 @@ namespace pod
             solverFb.setCyclesNumber(forwardBackwardCycles);
             solverFb.setLimits(confReader().getListValueAsDouble("codeLimList"), confReader().getListValueAsDouble("phaseLimList"));
         }
-        ofstream ostream;
-        ostream.open(data->workingDir + "\\" + fileName(), ios::out);
 
         bool firstTime = true;
         //
-        for (auto &obsFile : data->getObsFiles(data->SiteRover))
+        for (auto &obsFile : data->getObsFiles(opts().SiteRover))
         {
             cout << obsFile << endl;
             //Input observation file stream
@@ -199,7 +197,7 @@ namespace pod
                     continue;*/
                     Triple pos;
                     i = 0;
-                    for (auto& it : confReader().getListValueAsDouble("nominalPosition", data->SiteRover))
+                    for (auto& it : confReader().getListValueAsDouble("nominalPosition", opts().SiteRover))
                         pos[i++] = it;
                     nominalPos = Position(pos);
 
@@ -240,7 +238,7 @@ namespace pod
                 gRin >> grDelayRover;
                 gRin >> svPcenterRover;
 
-                Triple tides(solid.getSolidTide(t, nominalPos) + ocean.getOceanLoading(data->SiteRover, t) + pole.getPoleTide(t, nominalPos));
+                Triple tides(solid.getSolidTide(t, nominalPos) + ocean.getOceanLoading(opts().SiteRover, t) + pole.getPoleTide(t, nominalPos));
                 corrRover.setExtraBiases(tides);
                 gRin >> corrRover;
 
@@ -259,9 +257,9 @@ namespace pod
                 else
                 {
                     gRin >> solver;
-                    GnssEpoch ep(gRin);
+                    auto ep = opts().fullOutput ? GnssEpoch(gRin) : GnssEpoch();
                     // updateNomPos(solverFB);
-                    printSolution(ostream, solver, t, ep);
+                    printSolution( solver, t, ep);
                     gMap.data.insert(std::make_pair(t, ep));
                 }
             }
@@ -274,16 +272,14 @@ namespace pod
             cout << "Last process part started" << endl;
             while (solverFb.lastProcess(gRin))
             {
-                GnssEpoch ep(gRin);
+                auto ep = opts().fullOutput ? GnssEpoch(gRin) : GnssEpoch();
                 //updateNomPos(solverFB);
-                printSolution(ostream, solverFb, gRin.header.epoch, ep);
+                printSolution( solverFb, gRin.header.epoch, ep);
                 gMap.data.insert(std::make_pair(gRin.header.epoch, ep));
             }
             cout << "Measurments rejected: " << solverFb.rejectedMeasurements << endl;
         }
     }
-
-
 
     void PppFloatSolution::updateRequaredObs()
     {
