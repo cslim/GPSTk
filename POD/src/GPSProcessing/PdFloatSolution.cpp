@@ -17,6 +17,7 @@
 #include"IonoEquations.h"
 #include"IonoStochasticModel.h"
 #include"PrefitResCatcher.h"
+#include"NumSatFilter.h"
 
 #include"LinearCombinations.hpp"
 #include"LICSDetector.hpp"
@@ -111,7 +112,7 @@ namespace pod
         GravitationalDelay grDelayBase(refPos);
         GravitationalDelay grDelayRover;
 
-#pragma region CS detectors
+#pragma region Catcher objects 
 
         // Objects to mark cycle slips
         // Checks LI cycle slips
@@ -128,12 +129,11 @@ namespace pod
         SNRCatcher snrCatcherL1Base(TypeID::S1, TypeID::CSL1,901.0,5,30);
         SNRCatcher snrCatcherL1Rover(TypeID::S1, TypeID::CSL1, 901.0, 5, 30);
         PrefitResCatcher resCatcher(Equations->measTypes());
+        NumSatFilter minSatFilter(desiredSlnType());
 
         // Object to keep track of satellite arcs
         SatArcMarker markArcBase(TypeID::CSL1, true, 31.0);
         SatArcMarker markArcRover(TypeID::CSL1, true, 31.0);
-
-
 
 #pragma endregion
 
@@ -368,6 +368,7 @@ namespace pod
                 gRin >> oMinusC;
                 gRin >> delta;
                 gRin >> resCatcher;
+                gRin >> minSatFilter;
 
                 DBOUT_LINE(">>" << CivilTime(gRin.header.epoch).asString());
                 if (forwardBackwardCycles > 0)

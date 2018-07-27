@@ -17,6 +17,7 @@
 #include"Action.h"
 #include"PPPSolution.h"
 #include"SQLiteAdapter.h"
+#include"ComputeStatistic.h"
 
 #include <iostream>
 #include<filesystem>
@@ -95,13 +96,15 @@ void testPod(char * path)
     auto t2 = clock();
     cout << (t2 - t1) / (double)CLOCKS_PER_SEC << endl;
     cout << "processed epochs: " << sol.getData().data.size() << endl;
+   
+    sol.saveStatistic();
     sol.saveToDb();
 
     cout << "inserting to db complete ";
     cout << (std::clock() - t2) / (double)CLOCKS_PER_SEC << endl;
 
-    // ofstream f("dump.txt");
-    // gMap.dump(f);
+    //ofstream f("dump.txt");
+    //gMap.dump(f);
     //f.close();
 }
 
@@ -125,6 +128,8 @@ int main(int argc, char* argv[])
     //test();
 
     //testRinParse(argv[1]);
+    cout << argv[1] << endl;
+
     testPod(argv[1]);
     //system("pause");
     return 0;
