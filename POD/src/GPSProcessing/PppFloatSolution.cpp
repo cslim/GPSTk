@@ -186,7 +186,7 @@ namespace pod
                 const auto& t = gRin.header.epoch;
 
                 //keep only satellites from satellites systems selecyted for processing
-                gRin.keepOnlySatSyst(opts().systems);
+                gRin.keepOnlySatSystems(opts().systems);
 
                 //keep only types used for processing
                 // gRin.keepOnlyTypeID(requireObs.getRequiredType());

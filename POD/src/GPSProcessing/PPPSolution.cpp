@@ -266,7 +266,7 @@ namespace pod
                 //work around for post header comments
                 if (gRin.body.size() == 0) continue;
                 //
-                gRin.keepOnlySatSyst(opts().systems);
+                gRin.keepOnlySatSystems(opts().systems);
 
                 /// update current time and nominal position
                 CommonTime time(gRin.header.epoch);

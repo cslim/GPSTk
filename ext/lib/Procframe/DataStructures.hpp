@@ -1088,13 +1088,13 @@ namespace gpstk
          /// @param satSet Set (SatIDSet) containing the satellites to be kept.
       gnssRinex& keepOnlySatID(const SatIDSet& satSet);
 
-      /// Modifies this object, keeping only these satellites.
-      /// @param satSet Set (SatIDSet) containing the satellites to be kept.
-      gnssRinex& keepOnlySatSyst(const SatID::SatelliteSystem& satSyst);
+      /// Returns a gnssRinex with only these types of data.
+      /// @param satSys Satellite System value to be kept. 
+      gnssRinex& keepOnlySatSystems(SatID::SatelliteSystem satSyst);
 
       /// Modifies this object, keeping only these satellites.
       /// @param satSet Set (SatIDSet) containing the satellites to be kept.
-      gnssRinex& keepOnlySatSyst(const SatSystSet& satSet);
+      gnssRinex& keepOnlySatSystems(const SatSystSet& satSet);
 
          /// Returns a gnssRinex with only this type of data.
          /// @param type Type of value to be extracted.
@@ -1116,13 +1116,7 @@ namespace gpstk
          /// @param typeSet Set (TypeIDSet) containing the types of data
          ///                to be kept.
       gnssRinex& keepOnlyTypeID(const TypeIDSet& typeSet);
-
-
-         /// Returns a gnssRinex with only these types of data.
-         /// @param satSys Satellite System value to be kept. 
-      gnssRinex& keepOnlySatSystem(SatID::SatelliteSystem satSys);
-
-
+      
 
          /// Destructor.
       virtual ~gnssRinex() {};

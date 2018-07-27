@@ -281,7 +281,7 @@ namespace pod
             while (rin >> gRin)
             {
 
-                gRin.keepOnlySatSyst(opts().systems);
+                gRin.keepOnlySatSystems(opts().systems);
 
                 PPPSolutionBase::mapSNR(gRin);
 

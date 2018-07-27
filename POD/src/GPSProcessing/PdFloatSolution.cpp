@@ -245,12 +245,12 @@ namespace pod
                 
                 const auto& t = gRin.header.epoch;
                 bool b;
-                CATCH_TIME(t,2015,1,1,15,9,0,b)
+                CATCH_TIME(t,2013,2,21,14,32,30,b)
                 if(b)
                     DBOUT_LINE("catched")
 
                 //keep only satellites from satellites systems selecyted for processing
-                gRin.keepOnlySatSyst(opts().systems);
+                gRin.keepOnlySatSystems(opts().systems);
 
                 //keep only types used for processing
                 // gRin.keepOnlyTypeID(requireObs.getRequiredType());
@@ -304,7 +304,7 @@ namespace pod
                 {
                     gRef >> sync;
                     //keep only satellites from satellites systems selecyted for processing
-                    gRef.keepOnlySatSyst(opts().systems);
+                    gRef.keepOnlySatSystems(opts().systems);
 
                     //keep only types used for processing
                     gRef.keepOnlyTypeID(requireObs.getRequiredType());

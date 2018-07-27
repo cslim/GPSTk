@@ -278,7 +278,7 @@ of designMatrix");
        }
 
        if (numGLN < 2)
-           gRin.keepOnlySatSystem(SatID::SatelliteSystem::systemGPS);
+           gRin.keepOnlySatSystems(SatID::SatelliteSystem::systemGPS);
        else
            defaultEqDef.body.insert(TypeID::recISB_GLN);
    }

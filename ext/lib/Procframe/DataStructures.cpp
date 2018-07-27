@@ -1471,14 +1471,14 @@ in matrix and number of types do not match") );
 
    }  // End of method 'gnssRinex::keepOnlySatID()'
 
-   gnssRinex& gnssRinex::keepOnlySatSyst(const SatID::SatelliteSystem& satSyst)
+   gnssRinex& gnssRinex::keepOnlySatSystems(SatID::SatelliteSystem satSyst)
    {
        SatSystSet satSet;
        satSet.insert(satSyst);
-       return keepOnlySatSyst(satSet);
+       return keepOnlySatSystems(satSet);
    }
 
-   gnssRinex& gnssRinex::keepOnlySatSyst(const SatSystSet& satSet)
+   gnssRinex& gnssRinex::keepOnlySatSystems(const SatSystSet& satSet)
    {
 
        satTypeValueMap stvMap((*this).body.extractSatSyst(satSet));
@@ -1548,27 +1548,6 @@ in matrix and number of types do not match") );
    }  // End of method 'gnssRinex::keepOnlyTypeID()'
 
 
-
-      // Returns a gnssRinex with only these types of data.
-      // @param satSys Satellite System value to be kept.
-   gnssRinex& gnssRinex::keepOnlySatSystem(SatID::SatelliteSystem satSys)
-   {
-       satTypeValueMap stvMap( (*this).body );
-
-       SatIDSet satRejectedSet;
-       for(satTypeValueMap::iterator it = stvMap.begin();
-           it != stvMap.end();
-           ++it)
-       {
-           if( it->first.system != satSys ) satRejectedSet.insert( it->first );
-       }
-       stvMap.removeSatID(satRejectedSet);
-
-
-       (*this).body = stvMap;
-
-       return (*this);
-   }  // End of method 'gnssRinex::keepOnlySatSystem()'
 
 
 
