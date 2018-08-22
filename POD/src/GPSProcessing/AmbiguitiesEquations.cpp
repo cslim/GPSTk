@@ -6,6 +6,8 @@ using namespace gpstk;
 
 namespace pod
 {
+    const double AmbiguitiesEquations::sigma =  4e5;
+
     std::map< gpstk::TypeID, gpstk::TypeID> AmbiguitiesEquations::typeMap;
 
     AmbiguitiesEquations::Initializer AmbiguitiesEquations::initializer;
@@ -27,10 +29,10 @@ namespace pod
 
     void AmbiguitiesEquations::Prepare(gpstk::gnssRinex & gData)
     {
-        currentSatSet = gData.getSatID();
+        svsInView = gData.getSatID();
         
         //update satellites set
-        satSet.insert(currentSatSet.begin(), currentSatSet.end());
+        satSet.insert(svsInView.begin(), svsInView.end());
         
         csFlags.clear();
 
@@ -39,7 +41,7 @@ namespace pod
             stochModel.Prepare(it, gData);
             csFlags[it] = stochModel.getCS();
         }
-        satSet = currentSatSet;
+        satSet = svsInView;
     }
 
     void AmbiguitiesEquations::updatePhi(gpstk::Matrix<double>& Phi, int & index) const
@@ -67,7 +69,7 @@ namespace pod
         for (auto &it : csFlags)
         {
             x(index) = 0;
-            P(index, index) = 4e14;
+            P(index, index) = 4e10;
             ++index;
         }
     }

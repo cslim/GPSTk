@@ -7,15 +7,21 @@ namespace pod
     class AmbiguitiesEquations :
         public EquationBase
     {
+         
     public:
-  
+        static const double sigma;
+
         AmbiguitiesEquations()
             :type(gpstk::TypeID::BL1), obsType(typeMap[gpstk::TypeID::BL1])
-        {};
+        {
+            stochModel.setSigma(sigma);
+        };
 
         AmbiguitiesEquations(const gpstk::TypeID& obsType)
             :type(obsType), obsType(typeMap[obsType])
-        {};
+        {
+            stochModel.setSigma(sigma);
+        };
 
         virtual ~AmbiguitiesEquations() {};
 
@@ -51,7 +57,7 @@ namespace pod
         gpstk::SatIDSet satSet;
 
         ///current satellites set (subset of 'satSet')
-        gpstk::SatIDSet currentSatSet;
+        gpstk::SatIDSet svsInView;
 
         ///cycle slip flags for satellites in 'satSet' 
         std::map<gpstk::SatID, bool> csFlags;
