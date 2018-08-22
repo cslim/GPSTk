@@ -141,11 +141,16 @@ namespace pod
     //
     bool GnssDataStore::loadEphemeris()
     {
-        // Set flags to reject satellites with bad or absent positional
-        // values or clocks
+        // Set flags to reject satellites with bad or absent positional values or clocks
         SP3EphList.clear();
         SP3EphList.rejectBadPositions(true);
         SP3EphList.rejectBadClocks(true);
+
+        // Set flags to reject satellites with absence position and clock data
+        SP3EphList.setClockGapInterval(8101);
+        SP3EphList.setPosGapInterval(8101);
+        SP3EphList.setPosMaxInterval(10000);
+        SP3EphList.setClockMaxInterval(10000);
 
         list<string> files;
         string subdir = confReader->getValue("EphemerisDir");
