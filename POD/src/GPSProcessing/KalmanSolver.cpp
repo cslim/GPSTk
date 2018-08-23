@@ -99,17 +99,28 @@ namespace pod
             //prepare
             Matrix<double> hMatrixTr = transpose(hMatrix);
             Matrix<double> phiMatrixTr = transpose(phiMatrix);
-            Matrix<double> hTrTimesW = hMatrixTr*weigthMatrix;
+            Matrix<double> hTrTimesW = hMatrixTr * weigthMatrix;
 
             //predict
-            Matrix<double> Pminus = phiMatrix*covMatrix*phiMatrixTr + qMatrix;
-            Vector<double> xminus = phiMatrix*solution;
+            Matrix<double> Pminus = phiMatrix * covMatrix*phiMatrixTr + qMatrix;
+            Vector<double> xminus = phiMatrix * solution;
 
-            //DBOUT_LINE("Pminus\n" << Pminus.diagCopy());
+            //DBOUT_LINE("Pminus\n" << Pminus);
             //correct
-            Matrix<double> invPminus = inverseChol(Pminus);
-            covMatrix = inverseChol(hTrTimesW*hMatrix + invPminus);
-            solution = covMatrix*(hTrTimesW*measVector + (invPminus*xminus));
+            try
+            {
+                Matrix<double> invPminus = inverseChol(Pminus);
+                covMatrix = inverseChol(hTrTimesW*hMatrix + invPminus);
+                solution = covMatrix * (hTrTimesW*measVector + (invPminus*xminus));
+            }
+            catch (const gpstk::MatrixException &e)
+            {
+                std::cerr << e << endl;
+
+                Matrix<double> invPminus = inverseSVD(Pminus);
+                covMatrix = inverseSVD(hTrTimesW*hMatrix + invPminus);
+                solution = covMatrix * (hTrTimesW*measVector + (invPminus*xminus));
+            }
 
             postfitResiduals = measVector - hMatrix * solution;
             DBOUT_LINE("solution\n" << solution);
@@ -122,7 +133,7 @@ namespace pod
             fixAmbiguities(gData);
             //storeAmbiguities(gData);
 
-            auto vpv = postfitResiduals*weigthMatrix*postfitResiduals;
+            auto vpv = postfitResiduals * weigthMatrix*postfitResiduals;
             int numMeas = postfitResiduals.size();
             int numPar = solution.size();
 
