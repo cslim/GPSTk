@@ -112,10 +112,17 @@ namespace gpstk
          /// object belongs to.
       virtual std::string getClassName(void) const = 0;
 
+      virtual  std::map<CommonTime, SatIDSet>  getRejSats() const
+      {
+          return rejectedSatsTable;
+      };
 
          /// Destructor
       virtual ~ProcessingClass() {};
+   
+   protected:
 
+       std::map<CommonTime, SatIDSet> rejectedSatsTable;
 
 
    }; // End of class 'ProcessingClass'

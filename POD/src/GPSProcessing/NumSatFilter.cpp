@@ -24,7 +24,7 @@ namespace pod
     {
         auto svs = gData.getSatID();
         map<SatID::SatelliteSystem, int> counter;
-
+        auto  & rejTableItem = rejectedSatsTable[gData.header.epoch];
         for_each(svs.begin(), svs.end(), [&counter](const SatID& sv) {counter[sv.system]++; });
         SatSystSet ssset;
         for (auto&& it: counter)
@@ -32,6 +32,11 @@ namespace pod
             if(it.second>=minSvNum)
                 ssset.insert(it.first);
         }
+
+        for (auto && sv : svs)
+            if (ssset.find(sv.system) == ssset.end())
+                rejTableItem.insert(sv);
+        
         gData.keepOnlySatSystems(ssset);
         return gData;
     }

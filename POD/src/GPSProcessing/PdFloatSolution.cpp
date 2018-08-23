@@ -63,10 +63,19 @@ namespace pod
 
     void  PdFloatSolution::process()
     {
+        list<ProcessingClass*> plBase, plRov;
         updateRequaredObs();
 
-        SimpleFilter CodePhaseFilter(TypeIDSet{ codeL1,TypeID::P2,TypeID::L1,TypeID::L2 });
-        SimpleFilter SNRFilter(TypeID::S1, confReader().getValueAsInt("SNRmask"), DBL_MAX);
+        SimpleFilter CodePhaseFilterBase(TypeIDSet{ codeL1,TypeID::P2,TypeID::L1,TypeID::L2 });
+        plBase.push_back(&CodePhaseFilterBase);
+        SimpleFilter CodePhaseFilterRover(CodePhaseFilterBase);
+        plRov.push_back(&CodePhaseFilterRover);
+
+        SimpleFilter SNRFilterBase(TypeID::S1, confReader().getValueAsInt("SNRmask"), DBL_MAX);
+        plBase.push_back(&SNRFilterBase);
+        SimpleFilter SNRFilterRover(SNRFilterBase);
+        plRov.push_back(&SNRFilterRover);
+
         // Object to remove eclipsed satellites
         EclipsedSatFilter eclipsedSV;
 
@@ -81,11 +90,11 @@ namespace pod
         modelRef.setDefaultEphemeris(data->SP3EphList);
         modelRef.setDefaultObservable(codeL1);
         modelRef.setMinElev(opts().maskEl);
-
+        plBase.push_back(&modelRef);
         // basic model object for rover has the same settings as BasicModel for ref. station
         BasicModel modelRover(modelRef);
         modelRef.rxPos = refPos;
-
+        plRov.push_back(&modelRover);
         gnssRinex gRin, gRef;
         SyncObs sync(data->getObsFiles(opts().SiteBase), gRin);
 
@@ -112,6 +121,9 @@ namespace pod
         GravitationalDelay grDelayBase(refPos);
         GravitationalDelay grDelayRover;
 
+        plBase.push_back(&grDelayBase);
+        plRov.push_back(&grDelayRover);
+
 #pragma region Catcher objects 
 
         // Objects to mark cycle slips
@@ -124,12 +136,24 @@ namespace pod
         MWCSDetector  markCSMW2Base, markCSMW2Rover;        
         markCSMW2Base.setMaxNumLambdas(confReader().getValueAsDouble("MWNLambdas"));
         markCSMW2Rover.setMaxNumLambdas(confReader().getValueAsDouble("MWNLambdas"));
-        
+
+        plBase.push_back(&markCSLI2Base);
+        plBase.push_back(&markCSMW2Base);
+        plRov.push_back(&markCSLI2Rover);
+        plRov.push_back(&markCSMW2Rover);
+
+
         // check sharp SNR drops 
         SNRCatcher snrCatcherL1Base(TypeID::S1, TypeID::CSL1,901.0,5,30);
         SNRCatcher snrCatcherL1Rover(TypeID::S1, TypeID::CSL1, 901.0, 5, 30);
         PrefitResCatcher resCatcher(Equations->measTypes());
         NumSatFilter minSatFilter(desiredSlnType());
+        
+        plBase.push_back(&snrCatcherL1Base);
+
+        plRov.push_back(&snrCatcherL1Rover);
+        plRov.push_back(&resCatcher);
+        plRov.push_back(&minSatFilter);
 
         // Object to keep track of satellite arcs
         SatArcMarker markArcBase(TypeID::CSL1, true, 31.0);
@@ -153,6 +177,9 @@ namespace pod
         corrBase.setNominalPosition(refPos);
 
         CorrectObservables corrRover(data->SP3EphList);
+
+        plBase.push_back(&corrBase);
+        plRov.push_back(&corrRover);
 
         // Vector from monument to antenna ARP [UEN], in meters
         //for base
@@ -187,11 +214,18 @@ namespace pod
 
         ComputeWindUp windupBase(data->SP3EphList, refPos, opts().genericFilesDirectory + confReader().getValue("satDataFile"));
         ComputeWindUp windupRover(data->SP3EphList, refPos, opts().genericFilesDirectory + confReader().getValue("satDataFile"));
+        
+        plBase.push_back(&windupBase);
+        plRov.push_back(&windupRover);
 
         ComputeSatPCenter svPcenterBase(refPos);
         svPcenterBase.setAntexReader(antexReader);
+
         ComputeSatPCenter svPcenterRover;
         svPcenterRover.setAntexReader(antexReader);
+
+        plBase.push_back(&svPcenterBase);
+        plRov.push_back(&svPcenterRover);
 
         ProcessLinear linearIonoFree;
         linearIonoFree.add(make_unique<PCCombimnation>());
@@ -199,16 +233,17 @@ namespace pod
 
         //Compute single differences opreator
         DeltaOp delta;
+
         //configure single differences operator with appropriate measurements types
         TypeIDSet diffTypeSet;
-        for (const auto& it : Equations->measTypes())
+        for (auto&& it : Equations->measTypes())
             diffTypeSet.insert(it);
         delta.setDiffTypeSet(diffTypeSet);
 
         KalmanSolver solver(Equations);
-        solver.setMinSatNumber(4);
+        solver.setMinSatNumber(5);
         KalmanSolverFB solverFb(Equations);
-        solverFb.setMinSatNumber(4);
+        solverFb.setMinSatNumber(5);
         if (forwardBackwardCycles > 0)
         {
             solverFb.setCyclesNumber(forwardBackwardCycles);
@@ -282,8 +317,8 @@ namespace pod
 
 
                 gRin >> requireObs;
-                gRin >> CodePhaseFilter;
-                gRin >> SNRFilter;
+                gRin >> CodePhaseFilterRover;
+                gRin >> SNRFilterRover;
 
                 if (gRin.body.size() == 0)
                 {
@@ -310,9 +345,8 @@ namespace pod
                     gRef.keepOnlyTypeID(requireObs.getRequiredType());
 
                     gRef >> requireObs;
-                    gRef >> CodePhaseFilter;
-                    gRef >> SNRFilter;
-
+                    gRef >> CodePhaseFilterBase;
+                    gRef >> SNRFilterBase;
 
                     gRef >> computeLinear;
                     gRef >> markCSLI2Base;
@@ -324,7 +358,7 @@ namespace pod
                         continue;
 
                     gRef >> modelRef;
-                    gRef >> eclipsedSV;
+                    //gRef >> eclipsedSV;
                     gRef >> grDelayBase;
                     gRef >> svPcenterBase;
 
@@ -353,7 +387,7 @@ namespace pod
                 }
 
                 gRin >> modelRover;
-                gRin >> eclipsedSV;
+                //gRin >> eclipsedSV;
                 gRin >> grDelayRover;
                 gRin >> svPcenterRover;
 
@@ -400,6 +434,12 @@ namespace pod
             }
             cout << "Measurments rejected: " << solverFb.rejectedMeasurements << endl;
         }
+
+        CatcherStatistic statB(opts().workingDir+"\\"+opts().SiteBase+".cst");
+        statB.logStatistic(plBase);
+        CatcherStatistic statR(opts().workingDir+"\\"+opts().SiteRover+".cst");
+        statR.logStatistic(plRov);
+
     }
 
     void PdFloatSolution::updateRequaredObs()

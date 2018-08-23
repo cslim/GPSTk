@@ -34,7 +34,8 @@ namespace pod
 
     gnssRinex & PrefitResCatcher::Process(gnssRinex & gData)
     {
-        
+        auto & rejSatItem = rejectedSatsTable[gData.header.epoch];
+
         for (auto && tid:resTypes)
         {
             int s = gData.body.size();
@@ -47,6 +48,7 @@ namespace pod
                 {
                     DBOUT_LINE(getClassName()<<" "<<svs[i]<<" "<<tid<<" "<<ratio)
                     gData.removeSatID(svs[i]);
+                    rejSatItem.insert(svs[i]);
                     break;
                 }
             }

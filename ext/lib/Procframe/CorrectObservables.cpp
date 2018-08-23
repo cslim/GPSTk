@@ -409,7 +409,7 @@ namespace gpstk
 
             // Remove satellites with missing data
          gData.removeSatID(satRejectedSet);
-
+         rejectedSatsTable[time] = satRejectedSet;
          return gData;
 
       }

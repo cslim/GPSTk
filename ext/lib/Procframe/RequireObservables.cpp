@@ -116,7 +116,7 @@ namespace gpstk
 
             // Let's remove satellites without all TypeID's
          gData.removeSatID(satRejectedSet);
-
+         rejectedSatsTable[t] = satRejectedSet;
          return gData;
 
       }

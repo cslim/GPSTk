@@ -279,6 +279,7 @@ namespace gpstk
          }
 
          isFirstTime = false;
+         rejectedSatsTable[time] = satRejectedSet;
          return gData;
 
       }   // End of try...

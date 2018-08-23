@@ -229,7 +229,11 @@ namespace gpstk
           */
       virtual gnssRinex& Process(gnssRinex& gData)
          throw(ProcessingException)
-      { Process(gData.body); return gData; };
+      { 
+          t = gData.header.epoch;
+          Process(gData.body);
+          return gData;
+      };
 
 
          /// Returns a string identifying this object.
@@ -252,6 +256,7 @@ namespace gpstk
       virtual bool checkValue(const double& value) const
       { return ( (value>=minLimit) && (value<=maxLimit) ); };
 
+      CommonTime t;
 
          /// Set of types to be filtered
       TypeIDSet filterTypeSet;

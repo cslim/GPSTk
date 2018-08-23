@@ -807,6 +807,8 @@ namespace gpstk
       SatIDSet getSatID() const
       { return (*this).body.getSatID(); }
 
+      /// Returns a SatIDSet with all the satellites present in this object.
+      SatSystSet getSatSystems() const;
 
          /// Returns a Vector with all the satellites present in this object.
       Vector<SatID> getVectorOfSatID() const

@@ -54,6 +54,7 @@ namespace pod
     {
         try
         {
+            auto & rejTableItem = rejectedSatsTable[epoch];
             double value1(0.0);
 
             SatIDSet satRejectedSet;
@@ -81,10 +82,13 @@ namespace pod
             // Remove satellites with missing data
             gData.removeSatID(satRejectedSet);
 
+            rejTableItem.insert(satRejectedSet.begin(), satRejectedSet.end());
+
             //palliative guard in case of sharp drop SNR for huge amount of observable satellites
             if (affectedSatSet.size() < 3)
                 for (auto&& sv : affectedSatSet)
                 {
+                    rejTableItem.insert(sv);
                     auto & it = gData[sv];
                     it[resultType1] += 1.0;
                     if (it[resultType1] > 1.0)

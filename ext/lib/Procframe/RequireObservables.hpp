@@ -178,7 +178,11 @@ namespace gpstk
           */
       virtual gnssRinex& Process(gnssRinex& gData)
          throw(ProcessingException)
-      { Process(gData.body); return gData; };
+      {
+          t = gData.header.epoch;
+          Process(gData.body); 
+          return gData;
+      };
 
 
          /// Returns a string identifying this object.
@@ -191,7 +195,7 @@ namespace gpstk
 
    private:
 
-
+       CommonTime t;
          /// Set of types to be required
       TypeIDSet requiredTypeSet;
 

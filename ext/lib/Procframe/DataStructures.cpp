@@ -1177,19 +1177,26 @@ in matrix and number of types do not match") );
 
       ////// gnssSatTypeValue //////
 
+      // Returns a getSatSystems with only this satellite.
+      // @param satellite Satellite to be extracted.
+   SatSystSet gnssSatTypeValue::getSatSystems() const
+   {
+       typedef decltype(body)::value_type elm;
+       SatSystSet res;
+       for_each(body.cbegin(), body.cend(), [&res](const elm& e) { res.insert(e.first.system); });
+       return res;
+   }
 
       // Returns a gnssSatTypeValue with only this satellite.
       // @param satellite Satellite to be extracted.
    gnssSatTypeValue gnssSatTypeValue::extractSatID(const SatID& satellite)
       const
    {
-
       gnssSatTypeValue result;
       result.header = (*this).header;
       result.body = (*this).body.extractSatID(satellite);
 
       return result;
-
    }  // End of method 'gnssSatTypeValue::extractSatID()'
 
 
@@ -3301,77 +3308,85 @@ in matrix and number of types do not match") );
       // @param roh Rinex3ObsHeader holding the data
       // @param rod Rinex3ObsData holding the data.
    satTypeValueMap satTypeValueMapFromRinex3ObsData(
-                         const Rinex3ObsHeader& roh, const Rinex3ObsData& rod )
+       const Rinex3ObsHeader& roh, const Rinex3ObsData& rod)
    {
-      // We need to declare a satTypeValueMap
-      satTypeValueMap theMap;
+       // We need to declare a satTypeValueMap
+       satTypeValueMap theMap;
 
-      Rinex3ObsData::DataMap::const_iterator it;
-      for(it=rod.obs.begin(); it != rod.obs.end(); it++)
-      {
-         RinexSatID sat(it->first);
+       Rinex3ObsData::DataMap::const_iterator it;
+       for (it = rod.obs.begin(); it != rod.obs.end(); it++)
+       {
+           RinexSatID sat(it->first);
 
 
-         typeValueMap tvMap;
+           typeValueMap tvMap;
 
-         map<std::string,std::vector<RinexObsID> > mapObsTypes(roh.mapObsTypes);
-         const vector<RinexObsID> types = mapObsTypes[sat.toString().substr(0,1)];
-
-         for(size_t i=0; i<types.size(); i++)
-         {
-            TypeID type = ConvertToTypeID(types[i],sat);
-
-            const int n = GetCarrierBand(types[i]);
-
-            if(types[i].type==ObsID::otPhase)   // Phase
-            {
-               // TODO:: handle glonass data later(yanweigps)
-               int fcn = static_cast<SatID>(sat).getGloFcn();
-
-               tvMap[type] = it->second[i].data*getWavelength(sat, n, fcn);
-
-               // n=1 2 5 6 7 8
-               if(n==1)
+           map<std::string, std::vector<RinexObsID> > mapObsTypes(roh.mapObsTypes);
+           const vector<RinexObsID> types = mapObsTypes[sat.toString().substr(0, 1)];
+           try
+           {
+               for (size_t i = 0; i < types.size(); i++)
                {
-                  tvMap[TypeID::LLI1] = it->second[i].lli;
-                  tvMap[TypeID::SSI1] = it->second[i].ssi;
-               }
-               else if(n==2)
-               {
-                  tvMap[TypeID::LLI2] = it->second[i].lli;
-                  tvMap[TypeID::SSI2] = it->second[i].ssi;
-               }
-               else if(n==5)
-               {
-                  tvMap[TypeID::LLI5] = it->second[i].lli;
-                  tvMap[TypeID::SSI5] = it->second[i].ssi;
-               }
-               else if(n==6)
-               {
-                  tvMap[TypeID::LLI6] = it->second[i].lli;
-                  tvMap[TypeID::SSI6] = it->second[i].ssi;
-               }
-               else if(n==7)
-               {
-                  tvMap[TypeID::LLI7] = it->second[i].lli;
-                  tvMap[TypeID::SSI7] = it->second[i].ssi;
-               }
-               else if(n==8)
-               {
-                  tvMap[TypeID::LLI8] = it->second[i].lli;
-                  tvMap[TypeID::SSI8] = it->second[i].ssi;
-               }
-            }
-            else
-            {
-               tvMap[ type ] = it->second[i].data;
-            }
-         }
+                   TypeID type = ConvertToTypeID(types[i], sat);
 
-         theMap[sat] = tvMap;
-      }   // End loop over all the satellite
+                   const int n = GetCarrierBand(types[i]);
 
-      return theMap;
+                   if (types[i].type == ObsID::otPhase)   // Phase
+                   {
+                       // TODO:: handle glonass data later(yanweigps)
+
+                       int fcn = static_cast<SatID>(sat).getGloFcn();
+                       tvMap[type] = it->second[i].data*getWavelength(sat, n, fcn);
+
+
+
+
+                       // n=1 2 5 6 7 8
+                       if (n == 1)
+                       {
+                           tvMap[TypeID::LLI1] = it->second[i].lli;
+                           tvMap[TypeID::SSI1] = it->second[i].ssi;
+                       }
+                       else if (n == 2)
+                       {
+                           tvMap[TypeID::LLI2] = it->second[i].lli;
+                           tvMap[TypeID::SSI2] = it->second[i].ssi;
+                       }
+                       else if (n == 5)
+                       {
+                           tvMap[TypeID::LLI5] = it->second[i].lli;
+                           tvMap[TypeID::SSI5] = it->second[i].ssi;
+                       }
+                       else if (n == 6)
+                       {
+                           tvMap[TypeID::LLI6] = it->second[i].lli;
+                           tvMap[TypeID::SSI6] = it->second[i].ssi;
+                       }
+                       else if (n == 7)
+                       {
+                           tvMap[TypeID::LLI7] = it->second[i].lli;
+                           tvMap[TypeID::SSI7] = it->second[i].ssi;
+                       }
+                       else if (n == 8)
+                       {
+                           tvMap[TypeID::LLI8] = it->second[i].lli;
+                           tvMap[TypeID::SSI8] = it->second[i].ssi;
+                       }
+                   }
+                   else
+                   {
+                       tvMap[type] = it->second[i].data;
+                   }
+               }
+           }
+           catch (gpstk::InvalidRequest &e)
+           {
+               continue;
+           }
+           theMap[sat] = tvMap;
+       }   // End loop over all the satellite
+
+       return theMap;
    }
 
 }  // End of namespace gpstk

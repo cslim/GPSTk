@@ -98,75 +98,82 @@ namespace gpstk
          double lli2(0.0);
 
          SatIDSet satRejectedSet;
+         auto & rejTableItem = rejectedSatsTable[epoch];
 
             // Loop through all the satellites
          satTypeValueMap::iterator it;
          for (it = gData.begin(); it != gData.end(); ++it)
          {
-            try
-            {
-                  // Try to extract the values
-               value1 = (*it).second(obsType);
-            }
-            catch(...)
-            {
-                  // If some value is missing, then schedule this satellite
-                  // for removal
-               satRejectedSet.insert( (*it).first );
-               continue;
-            }
+             try
+             {
+                 // Try to extract the values
+                 value1 = it->second(obsType);
+             }
+             catch (...)
+             {
+                 // If some value is missing, then schedule this satellite
+                 // for removal
+                 satRejectedSet.insert(it->first);
+                 continue;
+             }
 
-            if (useLLI)
-            {
-               try
-               {
+             if (useLLI)
+             {
+                 try
+                 {
                      // Try to get the LLI1 index
-                  lli1  = (*it).second(lliType1);
-               }
-               catch(...)
-               {
+                     lli1 = it->second(lliType1);
+                 }
+                 catch (...)
+                 {
                      // If LLI #1 is not found, set it to zero
                      // You REALLY want to have BOTH LLI indexes properly set
-                  lli1 = 0.0;
-               }
+                     lli1 = 0.0;
+                 }
 
-               try
-               {
+                 try
+                 {
                      // Try to get the LLI2 index
-                  lli2  = (*it).second(lliType2);
-               }
-               catch(...)
-               {
+                     lli2 = it->second(lliType2);
+                 }
+                 catch (...)
+                 {
                      // If LLI #2 is not found, set it to zero
                      // You REALLY want to have BOTH LLI indexes properly set
-                  lli2 = 0.0;
-               }
-            }
+                     lli2 = 0.0;
+                 }
+             }
 
-               // If everything is OK, then get the new values inside the
-               // structure. This way of computing it allows concatenation of
-               // several different cycle slip detectors
-            (*it).second[resultType1] += getDetection( epoch,
-                                                       (*it).first,
-                                                       (*it).second,
-                                                       epochflag,
-                                                       value1,
-                                                       lli1,
-                                                       lli2 );
+             // If everything is OK, then get the new values inside the
+             // structure. This way of computing it allows concatenation of
+             // several different cycle slip detectors
+             double res = getDetection(epoch,
+                                        it->first,
+                                        it->second,
+                                         epochflag,
+                                         value1,
+                                         lli1,
+                                         lli2);
 
-            if ( (*it).second[resultType1] > 1.0 )
-            {
-               (*it).second[resultType1] = 1.0;
-            }
+             it->second[resultType1] += res;
 
-               // We will mark both cycle slip flags
-            (*it).second[resultType2] = (*it).second[resultType1];
+             if (res > 0)
+                 rejTableItem.insert(it->first);
+
+             if (it->second[resultType1] > 1.0)
+                 it->second[resultType1] = 1.0;
+             
+
+             // We will mark both cycle slip flags
+             it->second[resultType2] = it->second[resultType1];
 
          }
 
             // Remove satellites with missing data
          gData.removeSatID(satRejectedSet);
 
+         rejTableItem.insert(satRejectedSet.begin(), satRejectedSet.end());
+         
          return gData;
 
       }

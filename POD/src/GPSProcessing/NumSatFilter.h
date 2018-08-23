@@ -15,7 +15,9 @@ namespace pod
 
         // Inherited via ProcessingClass
         virtual gpstk::gnssSatTypeValue & Process(gpstk::gnssSatTypeValue & gData) override;
+
         virtual gpstk::gnssRinex & Process(gpstk::gnssRinex & gData) override;
+        
         virtual std::string getClassName(void) const override;
 
         int minSvNum;

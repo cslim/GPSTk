@@ -99,6 +99,8 @@ namespace gpstk
                // Before checking next TypeID, let's remove satellites with
                // data out of bounds
             gData.removeSatID(satRejectedSet);
+
+            rejectedSatsTable[t] = satRejectedSet;
          }
 
          return gData;
