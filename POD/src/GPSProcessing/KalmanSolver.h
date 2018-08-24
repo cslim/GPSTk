@@ -3,11 +3,8 @@
 #include"SimpleKalmanFilter.hpp"
 #include"EquationComposer.h"
 
-using namespace gpstk;
-
 namespace pod
 {
-
     class KalmanSolver :
         public gpstk::SolverBase, public gpstk::ProcessingClass
     {
@@ -21,16 +18,15 @@ namespace pod
 
         virtual ~KalmanSolver();
 
-        virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
-            throw(ProcessingException);
+        virtual gpstk::gnssSatTypeValue& Process(gpstk::gnssSatTypeValue& gData)
+            throw(gpstk::ProcessingException);
 
-        virtual gnssRinex& Process(gnssRinex& gData)
-            throw(ProcessingException);
+        virtual gpstk::gnssRinex& Process(gpstk::gnssRinex& gData)
+            throw(gpstk::ProcessingException);
 
-        /// Returns a string identifying this object.
+        // Returns a string identifying this object.
         virtual std::string getClassName(void) const
         { return "KalmanSolver"; }
-
 
         virtual EquationComposer& eqComposer() 
         {
@@ -69,48 +65,50 @@ namespace pod
     protected:
 
         //resolve carrier  phase ambiguities ot integer values
-        virtual void fixAmbiguities(gnssRinex& gData);
+        virtual void fixAmbiguities(gpstk::gnssRinex& gData);
         
         //check data integrity 
-        virtual int check(gnssRinex& gData);
+        virtual int check(gpstk::gnssRinex& gData);
+
+        int checkPhase(gpstk::gnssRinex& gData);
 
         //reject bad observation using residuals value
-        virtual gnssRinex& reject(gnssRinex& gData, const TypeIDSet& typeOfResid);
+        virtual gpstk::gnssRinex& reject(gpstk::gnssRinex& gData, const gpstk::TypeIDSet& typeOfResid);
 
         virtual void reset()
         {
             equations->clearData();
         }
 
-        CommonTime t_pre = CommonTime::BEGINNING_OF_TIME;
+        gpstk::CommonTime t_pre = gpstk::CommonTime::BEGINNING_OF_TIME;
 
         bool firstTime;
 
-        //current solution type
+        //indicate, is current filter state valid
         bool isValid_;
 
         //minimum number of satellites requared for state esimation
         int minSatNumber;
 
-        ///state transition matrix
-        Matrix<double> phiMatrix;
+        //state transition matrix
+        gpstk::Matrix<double> phiMatrix;
 
-        ///process noise matrix
-        Matrix<double> qMatrix;
+        //process noise matrix
+        gpstk::Matrix<double> qMatrix;
 
-        /// Geometry matrix
-        Matrix<double> hMatrix;
+        // Geometry matrix
+        gpstk::Matrix<double> hMatrix;
 
-        /// weights matrix
-        Matrix<double> weigthMatrix;
+        // weights matrix
+        gpstk::Matrix<double> weigthMatrix;
 
-        /// Measurements vector (Prefit-residuals)
-        Vector<double> measVector;
+        // Measurements vector (Prefit-residuals)
+        gpstk::Vector<double> measVector;
 
-        ///sqrt(vpv/(n-p))
-        double  sigma;
+        //sqrt(vpv/(n-p))
+        double sigma;
 
-        ///object to prepare Matrix for filter
+        //object to prepare Matrix for filter
         eqComposer_sptr equations;
 
     };

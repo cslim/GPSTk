@@ -6,7 +6,7 @@ using namespace gpstk;
 
 namespace pod
 {
-    const double AmbiguitiesEquations::sigma =  4e5;
+    const double AmbiguitiesEquations::sigma =  2e7;
 
     std::map< gpstk::TypeID, gpstk::TypeID> AmbiguitiesEquations::typeMap;
 

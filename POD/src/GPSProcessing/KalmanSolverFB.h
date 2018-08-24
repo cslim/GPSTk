@@ -26,34 +26,37 @@ namespace pod
             return "KalmanSolverFB";
         }
 
-        /// Solution
-        virtual const  Vector<double>& Solution() const
+        // Solution
+        virtual const  gpstk::Vector<double>& Solution() const
         {
             return solver.Solution();
         }
 
-        virtual  Vector<double>& Solution()
+        virtual  gpstk::Vector<double>& Solution()
         {
             return solver.Solution();
         }
 
-        /// Postfit-residuals.
-        virtual const Vector<double>& PostfitResiduals() const override
-        {
-            return solver.PostfitResiduals();
-        }
-        virtual Vector<double>& PostfitResiduals() override
+        // Postfit-residuals.
+        virtual const gpstk::Vector<double>& PostfitResiduals() const override
         {
             return solver.PostfitResiduals();
         }
 
-        /// Covariance matrix
-        virtual const Matrix<double>& CovMatrix()const
+        //return postfit residuals vector
+        virtual gpstk::Vector<double>& PostfitResiduals() override
+        {
+            return solver.PostfitResiduals();
+        }
+
+        //return current varince - covarince matrix
+        virtual const gpstk::Matrix<double>& CovMatrix()const
         {
             return solver.CovMatrix();
         }
 
-        virtual Matrix<double>& CovMatrix()
+        //return current varince - covarince matrix
+        virtual gpstk::Matrix<double>& CovMatrix()
         {
             return solver.CovMatrix();
         }
@@ -69,7 +72,7 @@ namespace pod
         {
             return solver.getMinSatNumber();
         }
-        
+
         //return current solver  status 
         // true - solution valid
         // false - invalid
@@ -85,11 +88,13 @@ namespace pod
             return *this;
         }
 
+        //get current value for given filter parameter
         double getSolution(const FilterParameter& type) const override
         {
             return solver.getSolution(type);
         }
 
+        //get current varince value for given filter parameter
         double getVariance(const FilterParameter& type) const override
         {
             return solver.getVariance(type);
@@ -105,7 +110,7 @@ namespace pod
 
         gpstk::gnssRinex & Process(gpstk::gnssRinex & gRin);
 
-
+        //last forward process cycle
         bool lastProcess(gpstk::gnssRinex & gRin);
 
         //Reprocess the data stored during a previous 'Process()' call.
@@ -114,9 +119,11 @@ namespace pod
         //Reprocess the data stored during a previous 'Process()' call.
         void reProcess(void);
 
-        //This method checks the residuals and modifies 'gData' accordingly.
+        
     private:
+        //This method checks the residuals and modifies 'gData' accordingly.
         void checkLimits(gpstk::gnssRinex& gData, int cycleNumber);
+
         double getLimit(const gpstk::TypeID& type, int cycleNumber);
 
 #pragma region Fields
@@ -127,21 +134,28 @@ namespace pod
             std::vector<double> phaseLimits;
         }tresholds;
 
+    public:
+
         // Number of processed measurements.
-    public: int processedMeasurements;
+        int processedMeasurements;
 
-            //Number of measurements rejected because they were off limits.
-    public: int rejectedMeasurements;
+        //Number of measurements rejected because they were off limits.
+        int rejectedMeasurements;
 
-            //Number of measurements rejected because they were off limits.
-    private: std::list<gpstk::gnssRinex> ObsData;
+       
+    private:
 
-             // is current iteration first
-    private: bool firstIteration;
+        //Number of measurements rejected because they were off limits.
+        std::list<gpstk::gnssRinex> ObsData;
 
-    private: KalmanSolver solver;
+        // is current iteration first
+        bool firstIteration;
 
-    private: size_t cyclesNumber;
+        //internal kalman solver object, which do main part of real work
+        KalmanSolver solver;
+
+        //number of forward-backward cycles
+        size_t cyclesNumber;
 
 #pragma endregion
 

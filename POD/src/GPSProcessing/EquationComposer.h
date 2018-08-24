@@ -16,47 +16,49 @@ namespace pod
     {
 
     public:
-        ///to map opbservables TypeID to weight factor
+        //to map opbservables TypeID to weight factor
         static const std::map<gpstk::TypeID, double> weigthFactors;
 
         EquationComposer() {};
+
         EquationComposer(SlnType st): slnType(st) {};
+
         virtual ~EquationComposer() {};
 
-        ///prepare equations according current data set 'gData'
+        //prepare equations according current data set 'gData'
         virtual void Prepare(gpstk::gnssRinex& gData) ;
 
-        /// compose design matrix
+        // compose design matrix
         virtual void updateH(gpstk::gnssRinex& gData, gpstk::Matrix<double>& H);
         
         /// compose state transition matrix
         virtual void updatePhi(gpstk::Matrix<double>& Phi) const;
        
-        /// compose process noise matrix
+        // compose process noise matrix
         virtual void updateQ(gpstk::Matrix<double>& Q) const;
         
-        /// compose measurments errors matrix
+        // compose measurments errors matrix
         virtual void updateW(const gpstk::gnssRinex& gData,  gpstk::Matrix<double>& R);
 
-        /// compose vector of measurements (prefit residuals)
+        // compose vector of measurements (prefit residuals)
         virtual void updateMeas(const gpstk::gnssRinex& gData, gpstk::Vector<double>& prefitResiduas);
 
-        /// compose current state vector and covariance matrix
+        // compose current state vector and covariance matrix
         virtual void updateKfState(gpstk::Vector<double>& state, gpstk::Matrix<double>& cov) const;
 
-        /// store current state vector and covariance matrix
+        // store current state vector and covariance matrix
         virtual void storeKfState(const gpstk::Vector<double>& state, const gpstk::Matrix<double>& cov);
        
-        /// compose current state vector and covariance matrix with default values
+        // compose current state vector and covariance matrix with default values
         virtual void initKfState(gpstk::Vector<double>& state, gpstk::Matrix<double>& cov) const;
         
-        /// insert current residuals vector into GNSS data structure
+        // insert current residuals vector into GNSS data structure
         virtual void saveResiduals(gpstk::gnssRinex& gData, gpstk::Vector<double>& postfitResiduals) const;
 
-        /// get curent number of unknowns
+        // get curent number of unknowns
         virtual int getNumUnknowns() const;
         
-        /// get current set unknowns TypeID's
+        // get current set unknowns TypeID's
         virtual ParametersSet & currentUnknowns()
         {
             return unknowns;
