@@ -18,6 +18,7 @@
 #include"IonoStochasticModel.h"
 #include"PrefitResCatcher.h"
 #include"NumSatFilter.h"
+#include"CatcherStatistic.h"
 
 #include"LinearCombinations.hpp"
 #include"LICSDetector.hpp"
@@ -267,6 +268,9 @@ namespace pod
             //read the header
             rin >> roh;
             gMap.header = roh;
+            
+            Antenna ant_rov(antexReader.getAntenna(roh.antType));
+            corrRover.setAntenna(ant_rov);
 
             //read all epochs
             while (rin >> gRin)
@@ -280,13 +284,14 @@ namespace pod
                 
                 const auto& t = gRin.header.epoch;
                 bool b;
-                CATCH_TIME(t,2013,2,21,14,32,30,b)
+#if _DEBUG
+                CATCH_TIME(t,2012,12,27,19,48,0,b)
                 if(b)
                     DBOUT_LINE("catched")
-
+#endif
                 //keep only satellites from satellites systems selecyted for processing
                 gRin.keepOnlySatSystems(opts().systems);
-
+               
                 //keep only types used for processing
                 // gRin.keepOnlyTypeID(requireObs.getRequiredType());
 
@@ -338,6 +343,10 @@ namespace pod
                 try
                 {
                     gRef >> sync;
+                    
+                    Antenna ant_ref(antexReader.getAntenna(sync.getRefHeader().antType));
+                    corrBase.setAntenna(ant_ref);
+                   
                     //keep only satellites from satellites systems selecyted for processing
                     gRef.keepOnlySatSystems(opts().systems);
 
