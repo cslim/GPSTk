@@ -444,10 +444,10 @@ namespace pod
             cout << "Measurments rejected: " << solverFb.rejectedMeasurements << endl;
         }
 
-        CatcherStatistic statB(opts().workingDir+"\\"+opts().SiteBase+".cst");
-        statB.logStatistic(plBase);
-        CatcherStatistic statR(opts().workingDir+"\\"+opts().SiteRover+".cst");
-        statR.logStatistic(plRov);
+        //CatcherStatistic statB(opts().workingDir+"\\"+opts().SiteBase+".cst");
+        //statB.logStatistic(plBase);
+        //CatcherStatistic statR(opts().workingDir+"\\"+opts().SiteRover+".cst");
+        //statR.logStatistic(plRov);
 
     }
 
@@ -534,7 +534,7 @@ namespace pod
         //add position equations
         Equations->addEquation(std::move(coord));
 
-        Equations->addEquation(std::make_unique<ClockBiasEquations>());
+        Equations->addEquation(std::make_unique<ClockBiasEquations>(confReader().getValueAsDouble("clkSigma")));
 
         if (opts().systems.size() > 1)
             Equations->addEquation(std::make_unique<InterSystemBias>());

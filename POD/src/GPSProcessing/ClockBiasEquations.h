@@ -9,6 +9,7 @@ namespace pod
     {
     public:
         ClockBiasEquations();
+        ClockBiasEquations(double sigma);
         virtual ~ClockBiasEquations(){};
 
         virtual ClockBiasEquations& setStochasicModel(gpstk::StochasticModel_sptr newModel);

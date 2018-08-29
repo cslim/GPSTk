@@ -230,7 +230,7 @@ namespace pod
     int KalmanSolver::checkPhase(gnssRinex& gData)
     {
         static const double codeLim(DBL_MAX);
-        static const double phaseLim(0.1);
+        static const double phaseLim(0.06);
         static const TypeIDSet phaseTypes{ TypeID::postfitL1, TypeID::postfitL2, TypeID::postfitLC };
 
         auto svSet = gData.getSatID();

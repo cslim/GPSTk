@@ -8,7 +8,12 @@ namespace pod
         : type( TypeID::cdt), stochModel(std::make_unique<WhiteNoiseModel>())
     {
     }
-    
+
+    ClockBiasEquations::ClockBiasEquations(double sigma)
+        : type(TypeID::cdt), stochModel(std::make_unique<WhiteNoiseModel>(sigma))
+    {
+    }
+
     ClockBiasEquations& ClockBiasEquations::setStochasicModel( StochasticModel_sptr newModel)
     {
         stochModel = newModel;

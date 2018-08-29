@@ -33,6 +33,7 @@ namespace pod
                 res.push_back(resi);
             }
         }
+
         //calculate sum squares 
         for (auto&& it : res)
         {
