@@ -269,10 +269,14 @@ namespace gpstk
          recZTropo,  ///< full ZTD
          recZTropoWet,  ///< Wet component of ZTD
          recZTropoDry,  ///< Dry component of ZTD
+
          recStDevX, ///< Receiver position, X component satndard deviation
          recStDevY, ///< Receiver position, Y component satndard deviation
          recStDevZ, ///< Receiver position, Z component satndard deviation
-         recStDev3D,
+         recStDev3D,///< Receiver position, position satndard deviation
+         recCorrXY,///< Receiver position, X-Y correlation
+         recCorrXZ,///< Receiver position, X-Z correlation
+         recCorrYZ,///< Receiver position, Y-Z correlation
          recPDOP,   ///< PDOP
          recHDOP,   ///< HDOP
          recVDOP,   ///< VDOP

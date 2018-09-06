@@ -343,9 +343,12 @@ namespace gpstk
       tStrings[recStDevY]  = "Rx Position St.Dev. Y";
       tStrings[recStDevZ]  = "Rx Position St.Dev. Z";
       tStrings[recStDev3D] = "Rx Position St.Dev. 3D";
+      tStrings[recCorrXY]  = "Rx Position Corr. X-Y";
+      tStrings[recCorrXZ]  = "Rx Position Corr. X-Z";
+      tStrings[recCorrYZ]  = "Rx Position Corr. Y-Z";
       tStrings[recPDOP]    = "Rx PDOP";
-      tStrings[recHDOP] = "Rx HDOP";
-      tStrings[recVDOP] = "Rx VDOP";
+      tStrings[recHDOP]    = "Rx HDOP";
+      tStrings[recVDOP]    = "Rx VDOP";
       tStrings[recUsedSV]  = "Rx Used SV";
       tStrings[recSlnType] = "Rx Solution Type",
       tStrings[recVX]      = "Rx Velocity X";
