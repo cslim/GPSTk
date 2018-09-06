@@ -50,48 +50,47 @@ namespace pod
 
         std::map<gpstk::CommonTime, GnssEpoch> data;
 
-
-        auto begin()
+        std::map<gpstk::CommonTime, GnssEpoch>::iterator begin() 
         {
             return data.begin();
         };
 
-        auto end()
+        std::map<gpstk::CommonTime, GnssEpoch>::iterator end()
         {
             return data.end();
         };
 
-        auto begin() const
+        std::map<gpstk::CommonTime, GnssEpoch>::const_iterator begin() const
         {
             return data.begin();
         };
 
-        auto end() const
+        std::map<gpstk::CommonTime, GnssEpoch>::const_iterator end() const
         {
             return data.end();
         };
         
-        auto rbegin() 
+        std::map<gpstk::CommonTime, GnssEpoch>::reverse_iterator rbegin() 
         {
             return data.rbegin();
         };
 
-        auto rbegin() const
+        std::map<gpstk::CommonTime, GnssEpoch>::const_reverse_iterator rbegin() const
         {
             return data.rbegin();
         };
 
-        auto rend()
+        std::map<gpstk::CommonTime, GnssEpoch>::reverse_iterator rend()
         {
             return data.rend();
         };
 
-        auto rend() const
+        std::map<gpstk::CommonTime, GnssEpoch>::const_reverse_iterator rend() const
         {
             return data.rend();
         };
 
-        auto getInitialTime() const
+        gpstk::CommonTime getInitialTime() const
         {
             if (data.size() == 0)
                 GPSTK_THROW(gpstk::InvalidRequest("GnssEpochMap objects contais no elements"));
@@ -99,7 +98,7 @@ namespace pod
             return begin()->first;
         }
 
-        auto getFinalTime() const
+        gpstk::CommonTime getFinalTime() const
         {
             if (data.size() == 0)
                 GPSTK_THROW(gpstk::InvalidRequest("GnssEpochMap objects contais no elements"));
