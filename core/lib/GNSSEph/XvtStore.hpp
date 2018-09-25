@@ -115,6 +115,18 @@ namespace gpstk
         ///
         virtual unsigned size() const = 0;
 
+       /** flag indicating unhealthy ephemerides should be excluded
+        * from getXvt, otherwise it will throw (default condition may vary
+        * with sub-classes) */
+       bool onlyHealthy;
+
+       /// get the flag that limits getXvt() to healthy ephemerides
+       bool getOnlyHealthyFlag(void) const
+       { return onlyHealthy; }
+
+       /// set the flag that limits getXvt() to healthy ephemerides
+       void setOnlyHealthyFlag(bool flag)
+       { onlyHealthy = flag; }
         ///
         std::string dumpToString(short details)
         {
@@ -124,8 +136,6 @@ namespace gpstk
         }
 
     }; // end class XvtStore
-
-       //@}
 
 } // namespace
 

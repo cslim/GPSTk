@@ -2,6 +2,7 @@
 *~
 .*.swp
 
+# Python compiled byte-code
 *.pyc
 
 # build directories
@@ -15,3 +16,6 @@ build*/
 
 # Visual Studio 2015 cache/options directory
 .vs/
+
+# Coverage file results
+gcovr

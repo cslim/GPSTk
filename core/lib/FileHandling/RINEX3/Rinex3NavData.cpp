@@ -1038,6 +1038,22 @@ namespace gpstk
          if(strm.header.version < 3) line += string(3, ' ');
          else                        line += string(4, ' ');
 
+
+         // Internally (Rinex3NavData), weeknum=week of HOW
+         // In RINEX 3 *files*, weeknum is the week of TOE.
+         double wk = double(weeknum);
+         long xmit = xmitTime;
+         if(xmit - Toe > HALFWEEK)
+         {
+            xmit -= FULLWEEK;
+            wk++;
+         }
+         else if(xmit - Toe < -(HALFWEEK))
+         {
+            xmit += FULLWEEK;
+            wk--;
+         }
+
          if(nline == 1) {
             if(satSys == "R" || satSys == "S") {     // GLO and GEO
                line += doubleToScientific(px,19,12,2);
@@ -1105,14 +1121,6 @@ namespace gpstk
          }
 
          else if(nline == 5) {
-            // Internally (Rinex3NavData), weeknum=week of HOW
-            // In RINEX 3 *files*, weeknum is the week of TOE.
-            double wk = double(weeknum);
-            if(xmitTime - Toe > HALFWEEK)
-               wk++;
-            else if(xmitTime - Toe < -(HALFWEEK))
-               wk--;
-
             if(satSys == "G" || satSys == "J") {      // GPS QZS
                line += doubleToScientific(idot,19,12,2);
                line += doubleToScientific((double)codeflgs,19,12,2);
@@ -1148,7 +1156,7 @@ namespace gpstk
          }
 
          else if(nline == 7) {
-            line += doubleToScientific((xmitTime),19,12,2);
+            line += doubleToScientific((xmit),19,12,2);
             if(satSys == "G" || satSys == "J") {
                line += doubleToScientific(fitint,19,12,2);
             }
@@ -1400,7 +1408,6 @@ namespace gpstk
             // Some RINEX files have xmitTime < 0.
             while(xmitTime < 0) {
                xmitTime += (long)FULLWEEK;
-               weeknum--;
             }
    
             // In RINEX *files*, weeknum is the week of TOE.

@@ -72,8 +72,10 @@ namespace gpstk
       GloEphemerisStore()
             : initialTime(CommonTime::END_OF_TIME),
               finalTime(CommonTime::BEGINNING_OF_TIME),
-              step(1.0), checkHealthFlag(false)
-      { };
+              step(1.0)
+      {
+            setCheckHealthFlag(false);
+      }
 
          /** Common constructor
           *
@@ -84,8 +86,11 @@ namespace gpstk
                          bool checkHealth )
             : initialTime(CommonTime::END_OF_TIME),
               finalTime(CommonTime::BEGINNING_OF_TIME),
-              step(rkStep), checkHealthFlag(checkHealth), validInterval(900.0)
-      { };
+              step(rkStep), validInterval(900.0)
+      {
+            setCheckHealthFlag(false);
+      }
+
 
          /// Destructor
       virtual ~GloEphemerisStore() {};
@@ -123,14 +128,14 @@ namespace gpstk
 
          /// Get whether satellite health bit will be used or not.
       bool getCheckHealthFlag() const
-      { return checkHealthFlag; };
+      { return onlyHealthy; };
 
          /** Set whether satellite health bit will be used or not.
           *
           * @param checkHealth   Enable or disable the use of the health bit.
           */
       GloEphemerisStore& setCheckHealthFlag( bool checkHealth )
-      { checkHealthFlag = checkHealth; return (*this); };
+      { onlyHealthy = checkHealth; return (*this); };
 
          /** A debugging function that outputs in human readable form,
           *  all data stored in this object.
@@ -273,13 +278,9 @@ namespace gpstk
          /// Integration step for Runge-Kutta algorithm (1 second by default)
       double step;
 
-         /// Flag signaling if satellites will be screened out according to
-         /// their health bit (by default it is false)
-      bool checkHealthFlag;
-         
          ///
       double validInterval;
-     
+
    };  // End of class 'GloEphemerisStore'
 
       //@}
