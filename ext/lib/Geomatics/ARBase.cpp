@@ -28,7 +28,7 @@ namespace gpstk
 {
       // This method to get the convert matrix from SD ambiguity to DD 
       // ambiguity
-   Matrix<double> ARBase::sd2ddMatrix(const size_t& n, const size_t& i)
+   Matrix<double> ARBase::sd2ddMatrix( size_t n,  size_t i)
       throw(ARException)
    {
       if( i >= n)
@@ -39,11 +39,11 @@ namespace gpstk
 
       Matrix<double> sdMat(n-1, n, 0.0);
 
-      for(int j = 0; j< sdMat.rows(); j++)
+      for (size_t j = 0; j < sdMat.rows(); j++)
       {
-         sdMat(j,i) = -1.0;
-         if(j<i) sdMat(j,j) = 1.0;  
-         else    sdMat(j,j+1) = 1.0;    
+          sdMat(j, i) = -1.0;
+          if (j < i) sdMat(j, j) = 1.0;
+          else    sdMat(j, j + 1) = 1.0;
       }
 
       return sdMat;

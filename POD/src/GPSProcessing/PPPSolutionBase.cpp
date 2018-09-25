@@ -19,6 +19,8 @@
 
 #include"GnssSolution.h"
 
+using namespace gpstk;
+
 namespace pod
 {
 

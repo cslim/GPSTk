@@ -6,6 +6,17 @@ using namespace gpstk;
 
 namespace pod
 {
+    //method to compute correlation matrix from variance-covariance one
+    Matrix<double> ComputeStatistic::corrMatrix(const  Matrix<double>& covar)
+    {
+        Matrix<double> corr(covar.rows(), covar.cols(), .0);
+
+        for (size_t i = 0; i < covar.rows(); i++)
+            for (size_t j = 0; j < covar.cols(); j++)
+                corr(i, j) = covar(i, j) / sqrt(covar(i, i)) / sqrt(covar(j, j));
+        return corr;
+    }
+
     void ComputeStatistic::compute(const GnssEpochMap & data, gpstk::Vector<double>& sln, gpstk::Matrix<double>& covar)
     {
         int s = types.size();

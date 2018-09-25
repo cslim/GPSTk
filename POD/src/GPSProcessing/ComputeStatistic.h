@@ -10,6 +10,9 @@ namespace pod
 
     public:
 
+        //method to compute correlation matrix from variance-covariance one
+        static  gpstk::Matrix<double> corrMatrix(const gpstk::Matrix<double>& covar);
+
         ComputeStatistic(SlnType st, gpstk::TypeIDSet tIDs)
             :slnType(st), types(tIDs)
         {};

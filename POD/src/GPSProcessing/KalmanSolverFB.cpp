@@ -151,7 +151,7 @@ namespace pod
         return *this;
     }
 
-    double KalmanSolverFB::getLimit(const gpstk::TypeID& type, int cycleNumber)
+    double KalmanSolverFB::getLimit(const gpstk::TypeID& type, size_t cycleNumber)
     {
         if (codeResTypes.find(type) != codeResTypes.end())
             if (cycleNumber < tresholds.codeLimits.size())
@@ -169,7 +169,7 @@ namespace pod
         GPSTK_THROW(e);
 
     }
-    void KalmanSolverFB::checkLimits(gnssRinex& gData, int cycleNumber)
+    void KalmanSolverFB::checkLimits(gnssRinex& gData, size_t cycleNumber)
     {
         // Set to store rejected satellites
         SatIDSet satRejectedSet;

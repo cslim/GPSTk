@@ -5,7 +5,7 @@
 
 #include"SolverPPP.hpp"
 #include"CodeSolverLEO.h"
-#include "ComputeDOP.hpp"
+#include"ComputeDOP.hpp"
 #include"SP3EphemerisStore.hpp"
 #include"ConfDataReader.hpp"
 #include"GnssEpochMap.h"
@@ -14,7 +14,6 @@
 #include"GnssDataStore.hpp"
 #include"GnssSolution.h"
 
-using namespace gpstk;
 
 namespace pod
 {
@@ -39,11 +38,11 @@ namespace pod
 
     protected: virtual bool processCore() = 0;
 
-    protected: virtual void mapSNR(gnssRinex& value);
+    protected: virtual void mapSNR(gpstk::gnssRinex& value);
 
     protected: virtual double mapSNR(double value) { return value; };
 
-    protected: virtual void updateNomPos(const CommonTime& time, Position& nominalPos) = 0;
+    protected: virtual void updateNomPos(const gpstk::CommonTime& time, gpstk::Position& nominalPos) = 0;
 
 #pragma endregion
 

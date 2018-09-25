@@ -88,7 +88,7 @@ namespace pod
         bool isValid_;
 
         //minimum number of satellites requared for state esimation
-        int minSatNumber;
+        size_t minSatNumber;
 
         //state transition matrix
         gpstk::Matrix<double> phiMatrix;

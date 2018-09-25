@@ -17,16 +17,7 @@ namespace pod
     //maximum time interval (in seconds) without data
     double KalmanSolver::maxGap = 3600.0;
 
-    //method to compute correlation matrix from variance-covariance one
-    Matrix<double> corrMatrix(const  Matrix<double>& covar)
-    {
-        Matrix<double> corr(covar.rows(), covar.cols(), .0);
-
-        for (size_t i = 0; i < covar.rows(); i++)
-            for (size_t j = 0; j < covar.cols(); j++)
-                corr(i, j) = covar(i, j) / sqrt(covar(i, i)) / sqrt(covar(j, j));
-        return corr;
-    }
+   
 
     KalmanSolver::KalmanSolver()
         :firstTime(true), isValid_(false)
@@ -181,12 +172,12 @@ namespace pod
         Matrix<double> m1(m.rows(), newCols, .0);
         int k = 0;
 
-        for (int i = 0; i < m.cols(); i++)
+        for (size_t i = 0; i < m.cols(); i++)
         {
             if (cols.find(i) != cols.end())
                 continue;
 
-            for (int j = 0; j < m.rows(); j++)
+            for (size_t j = 0; j < m.rows(); j++)
                 m1(j, k) = m(j, i);
             k++;
         }
@@ -199,12 +190,12 @@ namespace pod
         Matrix<double> m1(newRows, m.cols(), .0);
         int k = 0;
 
-        for (int i = 0; i < m.rows(); i++)
+        for (size_t i = 0; i < m.rows(); i++)
         {
             if (rows.find(i) != rows.end())
                 continue;
 
-            for (int j = 0; j < m.cols(); j++)
+            for (size_t j = 0; j < m.cols(); j++)
                 m1(k, j) = m(i, j);
             k++;
         }
@@ -217,7 +208,7 @@ namespace pod
         Vector<double> v1(newSize, .0);
 
         int k = 0;
-        for (int i = 0; i < v.size(); i++)
+        for (size_t i = 0; i < v.size(); i++)
         {
             if (elms.find(i) != elms.end())
                 continue;
@@ -285,7 +276,7 @@ namespace pod
             int corParNum = equations->getNumUnknowns()- ambSet.size();
             
             //update Phi and Q marices
-            for (int i = 0; i < typeSet.size(); i++)
+            for (size_t i = 0; i < typeSet.size(); i++)
             {
                 int ind = corParNum + i * svSet.size();
                 phiMatrix(ind, ind) = 0;

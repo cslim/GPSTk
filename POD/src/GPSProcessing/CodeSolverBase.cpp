@@ -22,10 +22,10 @@ namespace pod
             Sol += dSol;
             return;
         }
-        int K = dSol.size();
-        Vector<double> Sol1(K);
 
-        int m = min(Sol.size(), Sol1.size());
+        Vector<double> Sol1(dSol.size());
+
+        size_t m = min(Sol.size(), Sol1.size());
 
         for (size_t i = 0; i < m; i++)
             Sol1[i] = Sol[i] + dSol[i];

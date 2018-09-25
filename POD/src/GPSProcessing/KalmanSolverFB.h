@@ -122,9 +122,9 @@ namespace pod
         
     private:
         //This method checks the residuals and modifies 'gData' accordingly.
-        void checkLimits(gpstk::gnssRinex& gData, int cycleNumber);
+        void checkLimits(gpstk::gnssRinex& gData, size_t cycleNumber);
 
-        double getLimit(const gpstk::TypeID& type, int cycleNumber);
+        double getLimit(const gpstk::TypeID& type, size_t cycleNumber);
 
 #pragma region Fields
 

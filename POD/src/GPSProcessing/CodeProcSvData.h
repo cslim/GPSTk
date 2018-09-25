@@ -53,15 +53,15 @@ namespace pod
         
         ///
         ///get number of satellies with 'use==true'
-        int getNumUsedSv() const;
+        size_t getNumUsedSv() const;
         
         ///
         ///get number of satellies with 'use==true' for given satellie system
-        int CodeProcSvData::getNumUsedSv(SatID::SatelliteSystem sys) const;
+        size_t CodeProcSvData::getNumUsedSv(SatID::SatelliteSystem sys) const;
         
         ///
         ///get number of parameters for autonomous code position computation 
-        int getParamNum() const;
+        size_t getParamNum() const;
         
         ///
         /// update solution vector length, according to constellations,

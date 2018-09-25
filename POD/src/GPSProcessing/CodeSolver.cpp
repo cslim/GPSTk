@@ -16,5 +16,12 @@ namespace pod
          double height = rxPos.getHeight();
          if ( height < 10000.0 || height > -1000)
              return  tropo->correction(rxPos, svPos, t);
+         else
+         {
+             auto e = gpstk::InvalidRequest();
+             e.addLocation(ExceptionLocation(__FILE__, __FUNCTION__, __LINE__));
+             e.addText("Invalid height for tropospheric correction computation");
+             GPSTK_THROW(e)
+         }
      }
 }

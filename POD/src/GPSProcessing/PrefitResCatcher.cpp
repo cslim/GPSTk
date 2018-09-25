@@ -6,7 +6,7 @@ namespace pod
 {
     bool getDetection(const Vector<double> sample, int excl, double maxRatio, double& ratio)
     {
-        int s = sample.size();
+        size_t s = sample.size();
         double avg(0);
         for (size_t i = 0; i < s; i++)
             if (i != excl)

@@ -54,10 +54,10 @@ namespace pod
         //DBOUT_LINE("SD2DDamb\n" << SD2DDamb);
 
          //put the ambiguities part of DD to SD into main DD to SD transition matrix
-        for (int i = 0; i < types.size(); i++)
+        for (size_t i = 0; i < types.size(); i++)
         {
-            for (int j = 0; j < SD2DDamb.rows(); j++)
-                for (int k = 0; k < SD2DDamb.cols(); k++)
+            for (size_t j = 0; j < SD2DDamb.rows(); j++)
+                for (size_t k = 0; k < SD2DDamb.cols(); k++)
                 {
                     int j1 = j + coreNum + SD2DDamb.rows()*i;
                     int k1 = k + coreNum + SD2DDamb.cols()*i;
@@ -87,13 +87,13 @@ namespace pod
         }
 
         int i_(0);
-        for (int i = 0; i < pSdFloatSolution->size(); i++)
+        for (size_t i = 0; i < pSdFloatSolution->size(); i++)
         {
 
             if (inds.find(i) != inds.end()) continue;
             newSdFloatSln(i_) = (*pSdFloatSolution)(i);
             int j_(0);
-            for (int j = 0; j < pSdFloatSolution->size(); j++)
+            for (size_t j = 0; j < pSdFloatSolution->size(); j++)
             {
 
                 if (inds.find(j) != inds.end()) continue;
@@ -176,7 +176,7 @@ namespace pod
         for (const auto &t : types)
             for (const auto &ss : sv_by_ss)
             {
-                int currNumDD(ss.second.size() - 1);
+                size_t currNumDD(ss.second.size() - 1);
                 Vector<double> currDdAmbFloat(currNumDD, .0);
                 Matrix<double> currDdAmbCov(currNumDD, currNumDD, .0);
 

@@ -3,10 +3,10 @@
 
 #include"BasicFramework.hpp"
 #include"ConfDataReader.hpp"
-#include"PPPSolutionBase.h"
+
 #include"GnssEpochMap.h"
 #include"CustomSolution.h"
-#include"ComputeStatistic.h"
+
 
 namespace pod
 {

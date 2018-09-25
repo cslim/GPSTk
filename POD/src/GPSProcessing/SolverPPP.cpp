@@ -518,7 +518,7 @@ namespace pod
 
             Vector<double> prefitC(gData.getVectorOfTypeID(defaultEqDef.header));
             Vector<double> prefitL(gData.getVectorOfTypeID(TypeID::prefitL));
-            for (int i = 0; i < numCurrentSV; i++)
+            for (size_t i = 0; i < numCurrentSV; i++)
             {
                 measVector(i) = prefitC(i);
                 measVector(numCurrentSV + i) = prefitL(i);
@@ -537,10 +537,10 @@ namespace pod
             Matrix<double> dMatrix(gData.body.getMatrixOfTypes(defaultEqDef.body));
 
             // Let's fill 'hMatrix'
-            for (int i = 0; i < numCurrentSV; i++)
+            for (size_t i = 0; i < numCurrentSV; i++)
             {
                 // First, fill the coefficients related to tropo, coords and clock
-                for (int j = 0; j < numVar; j++)
+                for (size_t j = 0; j < numVar; j++)
                 {
                     hMatrix(i, j) = dMatrix(i, j);
                     hMatrix(i + numCurrentSV, j) = dMatrix(i, j);
@@ -614,7 +614,6 @@ namespace pod
                 }
                 // No longer first time
                 firstTime = false;
-
             }
             else
             {

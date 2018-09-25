@@ -38,7 +38,7 @@ namespace gpstk
       ARBase(){}      
 
 
-      virtual Matrix<double> sd2ddMatrix(const size_t& n, const size_t& i)
+      virtual Matrix<double> sd2ddMatrix( size_t n, size_t i)
          throw(ARException);
       
 

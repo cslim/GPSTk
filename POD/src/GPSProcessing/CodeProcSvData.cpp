@@ -76,7 +76,7 @@ namespace pod
         return true;
     }
 
-    int CodeProcSvData::getNumUsedSv() const
+    size_t CodeProcSvData::getNumUsedSv() const
     {
         int n = 0;
         for(auto & it :data)
@@ -85,7 +85,7 @@ namespace pod
         
         return n;
     }
-    int CodeProcSvData::getNumUsedSv(SatID::SatelliteSystem sys) const
+    size_t CodeProcSvData::getNumUsedSv(SatID::SatelliteSystem sys) const
     {
         int n = 0;
         for (auto & it : data)
@@ -94,7 +94,7 @@ namespace pod
 
         return n;
     }
-    int CodeProcSvData::getParamNum() const
+    size_t CodeProcSvData::getParamNum() const
     {
         std::set<SatID::SatelliteSystem> ss;
         for (auto & it : data)

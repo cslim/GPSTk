@@ -4,7 +4,9 @@
 #include "Shlwapi.h"
 
 #include"FsUtils.h"
-
+#include"ComputeStatistic.h"
+using namespace std;
+using namespace gpstk;
 namespace pod
 {
 
@@ -88,10 +90,16 @@ namespace pod
         //print rms3d
         wrt << std::fixed << std::scientific << std::setprecision(3) << std::setfill(' ') << rms3d << sep;
         
-        // print covarince matrix
-        for (int i = 0; i < covar.rows(); i++)
-            for (int j = 0; j <= i; j++)
-                wrt << std::fixed << std::scientific << std::setprecision(4) << std::setfill(' ') << covar(i, j) << sep;
+        //compute corr. matrix
+        auto corr = ComputeStatistic::corrMatrix(covar);
+        //print std.dev.
+        for (size_t i = 0; i < covar.rows(); i++)
+            wrt << std::fixed << std::scientific << std::setprecision(4) << std::setfill(' ') << sqrt(covar(i, i)) << sep;
+
+        // print correlation coeff.: xx,xz,yz
+        for (size_t i = 0; i < corr.rows(); i++)
+            for (size_t j = 0; j < i; j++)
+                wrt << std::fixed << std::scientific << std::setprecision(4) << std::setfill(' ') << corr(i, j) << sep;
 
         wrt << endl;
     }

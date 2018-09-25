@@ -52,8 +52,8 @@ namespace pod
         //prepare single to double differences transition matrix
         Matrix<double> SD2DD(svs.size() - svs_by_ss.size(), svs.size(), .0);
 
-        int n(0);
-        int k(0);
+        size_t n(0);
+        size_t k(0);
         for (const auto& sv : svs_by_ss)
         {
             if (currRefSv == refSvSet.end()) break;

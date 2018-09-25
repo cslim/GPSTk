@@ -158,10 +158,10 @@ namespace pod
         gpstk::TypeIDSet residualsTypes;
         
         /// number of unknowns
-        int numUnknowns;
+        size_t numUnknowns;
 
         /// number of measurments
-        int numMeas;
+        size_t numMeas;
 
         SlnType slnType;
 
