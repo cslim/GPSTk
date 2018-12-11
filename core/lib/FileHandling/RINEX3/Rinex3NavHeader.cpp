@@ -103,6 +103,10 @@ namespace gpstk
          case GAL:  return std::string("GAL");
          case GPSA: return std::string("GPSA");
          case GPSB: return std::string("GPSB");
+         case BDSA: return std::string("BDSA");
+         case BDSB: return std::string("BDSB");
+         case QZSA: return std::string("QZSA");
+         case QZSB: return std::string("QZSB");
          case Unknown:
             break;
       }
@@ -114,12 +118,13 @@ namespace gpstk
    fromString(const std::string str) throw(Exception)
    {
       std::string STR(gpstk::StringUtils::upperCase(str));
-      if (STR == std::string("GAL"))
-         type = GAL;
-      else if (STR == std::string("GPSA"))
-         type = GPSA;
-      else if (STR == std::string("GPSB"))
-         type = GPSB;
+      if (STR == std::string("GAL")) type = GAL;
+      else if (STR == std::string("GPSA")) type = GPSA;
+      else if (STR == std::string("GPSB")) type = GPSB;
+      else if (STR == std::string("BDSA")) type = BDSA;
+      else if (STR == std::string("BDSB")) type = BDSB;
+      else if (STR == std::string("QZSA")) type = QZSA;
+      else if (STR == std::string("QZSB")) type = QZSB;
       else
       {
          Exception e("Unknown IonoCorr type: " + str);
@@ -750,6 +755,26 @@ namespace gpstk
                  << " " << icit->second.param[1]
                  << " " << icit->second.param[2]
                  << " " << icit->second.param[3];
+            case IonoCorr::BDSA:
+                s << "alpha  " << icit->second.param[0]
+                    << " " << icit->second.param[1]
+                    << " " << icit->second.param[2]
+                    << " " << icit->second.param[3];
+            case IonoCorr::BDSB:
+                s << "beta  " << icit->second.param[0]
+                    << " " << icit->second.param[1]
+                    << " " << icit->second.param[2]
+                    << " " << icit->second.param[3];
+            case IonoCorr::QZSA:
+                s << "alpha  " << icit->second.param[0]
+                    << " " << icit->second.param[1]
+                    << " " << icit->second.param[2]
+                    << " " << icit->second.param[3];
+            case IonoCorr::QZSB:
+                s << "beta  " << icit->second.param[0]
+                    << " " << icit->second.param[1]
+                    << " " << icit->second.param[2]
+                    << " " << icit->second.param[3];
                break;
             case IonoCorr::Unknown:
             default:

@@ -68,7 +68,11 @@ namespace gpstk
          Unknown, ///< A default value
          GAL,     ///< Galileo
          GPSA,    ///< GPS alpha
-         GPSB     ///< GPS beta
+         GPSB,    ///< GPS beta
+         BDSA,    ///< Beidou alpha
+         BDSB,    ///< Beidou beta
+         QZSA,    ///< QZSS alpha
+         QZSB     ///< QZSS beta
       };
 
          /// Set data members to default values
