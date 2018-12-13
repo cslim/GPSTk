@@ -65,8 +65,8 @@ namespace gpstk
        * @param gData     Data object holding the data.
        */
 
-   satTypeValueMap& ComputeIonoModel::Process( const CommonTime& time,
-                                               satTypeValueMap& gData )
+   SatTypePtrMap& ComputeIonoModel::Process( const CommonTime& time,
+                                               SatTypePtrMap& gData )
       throw(ProcessingException)
    {
 
@@ -79,8 +79,7 @@ namespace gpstk
             Position::Cartesian);
 
             // Loop through all the satellites
-         satTypeValueMap::iterator stv;
-         for(stv = gData.begin(); stv != gData.end(); ++stv) 
+         for(auto stv = gData.begin(); stv != gData.end(); ++stv) 
          {
              int fcn = stv->first.getGloFcn();
 
@@ -89,8 +88,8 @@ namespace gpstk
              Position svPos(0.0, 0.0, 0.0, Position::Cartesian);
 
              // If elevation or azimuth is missing, then remove satellite
-             if (stv->second.find(TypeID::elevation) == stv->second.end() ||
-                 stv->second.find(TypeID::azimuth) == stv->second.end())
+             if (stv->second->get_value().find(TypeID::elevation) == stv->second->get_value().end() ||
+                 stv->second->get_value().find(TypeID::azimuth) == stv->second->get_value().end())
              {
 
                  satRejectedSet.insert(stv->first);
@@ -99,8 +98,8 @@ namespace gpstk
 
              }
 
-             const double elevation = (*stv).second[TypeID::elevation];
-             const double azimuth = (*stv).second[TypeID::azimuth];
+             const double elevation = (*stv).second->get_value()[TypeID::elevation];
+             const double azimuth = (*stv).second->get_value()[TypeID::azimuth];
 
              double ionL1 = 0.0;
 
@@ -143,22 +142,22 @@ namespace gpstk
                  double gamma = (L1_FREQ / L2_FREQ) * (L1_FREQ / L2_FREQ);
 
                  double P1(0.0);
-                 if (stv->second.find(TypeID::P1) == stv->second.end())
+                 if (stv->second->get_value().find(TypeID::P1) == stv->second->get_value().end())
                  {
-                     if (stv->second.find(TypeID::C1) != stv->second.end())
+                     if (stv->second->get_value().find(TypeID::C1) != stv->second->get_value().end())
                      {
-                         P1 = stv->second[TypeID::C1];
+                         P1 = stv->second->get_value()[TypeID::C1];
                      }
                  }
                  else
                  {
-                     P1 = stv->second[TypeID::P1];
+                     P1 = stv->second->get_value()[TypeID::P1];
                  }
 
                  double P2(0.0);
-                 if (stv->second.find(TypeID::P2) != stv->second.end())
+                 if (stv->second->get_value().find(TypeID::P2) != stv->second->get_value().end())
                  {
-                     P2 = stv->second[TypeID::P2];
+                     P2 = stv->second->get_value()[TypeID::P2];
                  }
 
                  if (P1 != 0 && P2 != 0)
@@ -175,19 +174,19 @@ namespace gpstk
              //apply correction to pseudorange measurements, if required
              //if (true)
              //{
-             //    if (stv->second.find(TypeID::C1) != stv->second.end())
-             //        (*stv).second[TypeID::C1] -= ionL1;
-             //    if (stv->second.find(TypeID::P1) != stv->second.end())
-             //        (*stv).second[TypeID::P1] -= ionL1;
-             //    if (stv->second.find(TypeID::P2) != stv->second.end())
-             //        (*stv).second[TypeID::P2] -= ionL2;
+             //    if (stv->second->get_value().find(TypeID::C1) != stv->second->get_value().end())
+             //        (*stv).second->get_value()[TypeID::C1] -= ionL1;
+             //    if (stv->second->get_value().find(TypeID::P1) != stv->second->get_value().end())
+             //        (*stv).second->get_value()[TypeID::P1] -= ionL1;
+             //    if (stv->second->get_value().find(TypeID::P2) != stv->second->get_value().end())
+             //        (*stv).second->get_value()[TypeID::P2] -= ionL2;
              //}
              ////  add the new values to the data structure otherwise
              //else
              //{
-             (*stv).second[TypeID::ionoL1] = ionL1;
-             (*stv).second[TypeID::ionoL2] = ionL2;
-             //(*stv).second[TypeID::ionoL5] = ionL5;
+             (*stv).second->get_value()[TypeID::ionoL1] = ionL1;
+             (*stv).second->get_value()[TypeID::ionoL2] = ionL2;
+             //(*stv).second->get_value()[TypeID::ionoL5] = ionL5;
              //}
 
 

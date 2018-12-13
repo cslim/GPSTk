@@ -33,13 +33,15 @@ using namespace pod;
 void testRinNav(char* path)
 {
     Rinex3EphemerisStore nrin;
-    nrin.loadFile(path);
-    auto &sid = SatID(2, SatID::SatelliteSystem::systemBeiDou);
+    cout<< nrin.loadFile(path) << endl;
+    auto &sid = SatID(1, SatID::SatelliteSystem::systemGPS);
     CommonTime t0 = nrin.getInitialTime(sid);
     CommonTime te = nrin.getFinalTime(sid);
     nrin.SearchNear();
     auto t = t0 + (te - t0) / 2;
-    nrin.getXvt(sid, t);
+    nrin.dump(cout);
+   
+   // nrin.getXvt(sid, t);
 }
 
 void testRinParse(char* path)
@@ -130,7 +132,7 @@ int main(int argc, char* argv[])
     //testRinParse(argv[1]);
     cout << argv[1] << endl;
 
-    testPod(argv[1]);
+    //testPod(argv[1]);
     //system("pause");
     return 0;
 }

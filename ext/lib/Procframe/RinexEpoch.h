@@ -1,7 +1,7 @@
 #pragma once
 #include"DataStructures.hpp"
 #include"DataHeaders.hpp"
-
+#include"SatTypePtrMap.h"
 #include<memory>
 
 namespace gpstk
@@ -9,43 +9,31 @@ namespace gpstk
    
     typedef SatID::SatelliteSystem GpstkSatSystem;
 
-    //template<typename T>
-    class ITypeValueMap
-    {
-      
-    public:
-        virtual ~ITypeValueMap() {};
-        virtual typeValueMap& get_value() = 0;
-    };
-
-    class TypeValueMapPtr: public ITypeValueMap
-    {
-    public:
-        TypeValueMapPtr(typeValueMap * p) :ptr(p) {};
-        TypeValueMapPtr(typeValueMap & p) :ptr(&p) {};
-
-        virtual typeValueMap& get_value()
-        {
-            return *ptr;
-        };
-
-        std::shared_ptr<typeValueMap> ptr;
-    };
-
-    typedef std::map<SatID, std::unique_ptr<ITypeValueMap >> SatTypePtrMap;
-
     class IRinex
     {
     public:
-        virtual SatTypePtrMap& get_value() = 0;
+		friend std::istream&  operator>>(std::istream& i, IRinex& f)
+		{
+			return f.read(i);
+		}
+		
+		friend std::ostream&  operator<<(std::ostream& i, IRinex& f)
+		{
+			return f.print(i);
+		}
+
+		virtual std::unique_ptr<IRinex> clone() const =0;
+		virtual std::istream& read(std::istream&) = 0;
+		virtual std::ostream& print(std::ostream&) = 0;
+        virtual sourceEpochRinexHeader& getHeader() = 0;
+        virtual SatTypePtrMap& getBody() = 0;
+		virtual const SatTypePtrMap& getBody() const = 0;
     };
 
-    class RinexEpoch: public IRinex
+    class RinexEpoch : public IRinex
     {
 
     public:
-
-        friend std::istream& operator>>(std::istream& i, RinexEpoch& f);
 
         RinexEpoch( );
         RinexEpoch(const gnssRinex & gRin);
@@ -54,12 +42,17 @@ namespace gpstk
 
         void resetCurrData();
 
-        SatTypePtrMap& get_value()
+        SatTypePtrMap& getBody()
         {
             return currData;
         };
 
-        const SatTypePtrMap& get_value() const
+		virtual std::unique_ptr<IRinex> clone() const override
+		{
+			return std::make_unique<RinexEpoch>(*this);
+		}
+
+        const SatTypePtrMap& getBody() const
         {
             return currData;
         };
@@ -69,10 +62,20 @@ namespace gpstk
             return rinex.header;
         }
 
-        const sourceEpochRinexHeader& getHeader() const
+		const sourceEpochRinexHeader& getHeader() const 
         {
             return rinex.header;
         }
+
+		std::istream& read(std::istream& i)
+		{
+			return i >> rinex;
+		}
+
+		std::ostream& print(std::ostream& i)
+		{
+			return i << rinex;
+		}
 
         RinexEpoch extractSatID(const SatID& satellite) const;
 

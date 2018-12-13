@@ -68,8 +68,8 @@ namespace gpstk
        * @param epoch     Time of observations.
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& GravitationalDelay::Process( const CommonTime& epoch,
-                                           satTypeValueMap& gData )
+   SatTypePtrMap& GravitationalDelay::Process( const CommonTime& epoch,
+                                           SatTypePtrMap& gData )
       throw(ProcessingException)
    {
 
@@ -82,13 +82,12 @@ namespace gpstk
          Triple svPos(0.0, 0.0, 0.0);
 
             // Loop through all the satellites
-         satTypeValueMap::iterator it;
-         for (it = gData.begin(); it != gData.end(); ++it)
+         for (auto it = gData.begin(); it != gData.end(); ++it)
          {
                // Check if satellite position is not already computed
-            if( ( (*it).second.find(TypeID::satX) == (*it).second.end() ) ||
-                ( (*it).second.find(TypeID::satY) == (*it).second.end() ) ||
-                ( (*it).second.find(TypeID::satZ) == (*it).second.end() ) )
+            if( ( (*it).second->get_value().find(TypeID::satX) == (*it).second->get_value().end() ) ||
+                ( (*it).second->get_value().find(TypeID::satY) == (*it).second->get_value().end() ) ||
+                ( (*it).second->get_value().find(TypeID::satZ) == (*it).second->get_value().end() ) )
             {
 
                   // If satellite position is missing, then schedule this 
@@ -102,9 +101,9 @@ namespace gpstk
             {
 
                   // Get satellite position out of GDS
-               svPos[0] = (*it).second[TypeID::satX];
-               svPos[1] = (*it).second[TypeID::satY];
-               svPos[2] = (*it).second[TypeID::satZ];
+               svPos[0] = (*it).second->get_value()[TypeID::satX];
+               svPos[1] = (*it).second->get_value()[TypeID::satY];
+               svPos[2] = (*it).second->get_value()[TypeID::satZ];
 
             }  // End of 'if( ( (*it).second.find(TypeID::satX) == ...'
 
@@ -128,7 +127,7 @@ namespace gpstk
             double gravDel( K*std::log( (r1+r2+r12)/(r1+r2-r12) ) );
 
                // Get the correction into the GDS
-            (*it).second[TypeID::gravDelay] = gravDel;
+            (*it).second->get_value()[TypeID::gravDelay] = gravDel;
 
          }  // End of 'for (it = gData.begin(); it != gData.end(); ++it)'
 
@@ -158,14 +157,14 @@ namespace gpstk
        *
        * @param gData    Data object holding the data.
        */
-   gnssRinex& GravitationalDelay::Process(gnssRinex& gData)
+   IRinex& GravitationalDelay::Process(IRinex& gData)
       throw(ProcessingException)
    {
 
       try
       {
 
-         Process(gData.header.epoch, gData.body);
+         Process(gData.getHeader().epoch, gData.getBody());
 
          return gData;
 

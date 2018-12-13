@@ -173,7 +173,7 @@ namespace gpstk
        */
    void Differentiator::Compute( const CommonTime& epoch,
                                  const SourceID& source,
-                                 const satTypeValueMap& gData )
+                                 const SatTypePtrMap& gData )
       throw(ProcessingException)
    {
 
@@ -184,7 +184,7 @@ namespace gpstk
       {
 
             // Loop through all the satellites
-         for( satTypeValueMap::const_iterator it = gData.begin();
+         for( auto it = gData.begin();
               it != gData.end();
               ++it )
          {
@@ -195,7 +195,7 @@ namespace gpstk
             try
             {
                   // Try to extract value
-               value = (*it).second.getValue(inputType);
+               value = (*it).second->get_value().getValue(inputType);
             }
             catch(...)
             {
@@ -237,7 +237,7 @@ namespace gpstk
                {
 
                      // Try to extract satellite's arc value
-                  arcN = (*it).second.getValue(TypeID::satArc);
+                  arcN = (*it).second->get_value().getValue(TypeID::satArc);
 
                }
                catch(...)
@@ -270,7 +270,7 @@ namespace gpstk
                {
 
                      // Try to extract satellite's cycle slip flag
-                  flag = (*it).second.getValue(watchCSFlag);
+                  flag = (*it).second->get_value().getValue(watchCSFlag);
 
                }
                catch(...)
@@ -338,50 +338,20 @@ namespace gpstk
 
 
 
-      /* Returns a gnnsSatTypeValue object, adding the new data generated
-       *  when calling this object.
-       *
-       * @param gData    Data object holding the data.
-       */
-   gnssSatTypeValue& Differentiator::Process(gnssSatTypeValue& gData)
-      throw(ProcessingException)
-   {
-
-      try
-      {
-
-         Compute(gData.header.epoch, gData.header.source, gData.body);
-
-         return gData;
-
-      }
-      catch(Exception& u)
-      {
-            // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + u.what() );
-
-         GPSTK_THROW(e);
-
-      }
-
-   }  // End of method 'Differentiator::Process()'
-
-
 
       /* Returns a gnnsRinex object, adding the new data generated when
        *  calling this object.
        *
        * @param gData    Data object holding the data.
        */
-   gnssRinex& Differentiator::Process(gnssRinex& gData)
+   IRinex& Differentiator::Process(IRinex& gData)
       throw(ProcessingException)
    {
 
       try
       {
 
-         Compute(gData.header.epoch, gData.header.source, gData.body);
+         Compute(gData.getHeader().epoch, gData.getHeader().source, gData.getBody());
 
          return gData;
 
@@ -405,85 +375,85 @@ namespace gpstk
        *
        * @param gData    Data object holding the data.
        */
-   gnssDataMap& Differentiator::Process(gnssDataMap& gData)
-      throw(ProcessingException)
-   {
+   //gnssDataMap& Differentiator::Process(gnssDataMap& gData)
+   //   throw(ProcessingException)
+   //{
 
-      try
-      {
+   //   try
+   //   {
 
-            // Iterate through all the data structure
-         for( gnssDataMap::iterator itGdata = gData.begin();
-              itGdata != gData.end();
-              ++itGdata )
-         {
+   //         // Iterate through all the data structure
+   //      for( gnssDataMap::iterator itGdata = gData.begin();
+   //           itGdata != gData.end();
+   //           ++itGdata )
+   //      {
 
-               // Get epoch
-            CommonTime workEpoch( (*itGdata).first );
+   //            // Get epoch
+   //         CommonTime workEpoch( (*itGdata).first );
 
-               // Get a set with the SourceID in current data element
-            SourceIDSet sourceSet( (*itGdata).second.getSourceIDSet() );
+   //            // Get a set with the SourceID in current data element
+   //         SourceIDSet sourceSet( (*itGdata).second.getSourceIDSet() );
 
-               // Loop through all the SourceID's
-            for( SourceIDSet::const_iterator itSource = sourceSet.begin();
-                 itSource != sourceSet.end();
-                 ++itSource )
-            {
+   //            // Loop through all the SourceID's
+   //         for( SourceIDSet::const_iterator itSource = sourceSet.begin();
+   //              itSource != sourceSet.end();
+   //              ++itSource )
+   //         {
 
-                  // Compute the derivatives
-               Compute( workEpoch,
-                       (*itSource),
-                       (*itGdata).second[ (*itSource) ] );
+   //               // Compute the derivatives
+   //            Compute( workEpoch,
+   //                    (*itSource),
+   //                    (*itGdata).second[ (*itSource) ] );
 
-                  // We have the derivatives, so let's insert them into GDS
-               for( std::map<SatID, double>::const_iterator
-                              itSat = svDerivativesMap[ (*itSource) ].begin();
-                    itSat != svDerivativesMap[ (*itSource) ].end();
-                    ++itSat )
-               {
+   //               // We have the derivatives, so let's insert them into GDS
+   //            for( std::map<SatID, double>::const_iterator
+   //                           itSat = svDerivativesMap[ (*itSource) ].begin();
+   //                 itSat != svDerivativesMap[ (*itSource) ].end();
+   //                 ++itSat )
+   //            {
 
-                  double value( svDerivativesMap[(*itSource)][(*itSat).first] );
+   //               double value( svDerivativesMap[(*itSource)][(*itSat).first] );
 
-                     // Insert the derivatives in the right place
-                  try
-                  {
+   //                  // Insert the derivatives in the right place
+   //               try
+   //               {
 
-                        // We must take into account the delay
-                     gData.insertValue( (workEpoch - delay),
-                                        (*itSource),
-                                        (*itSat).first,
-                                        outputType,
-                                        value );
+   //                     // We must take into account the delay
+   //                  gData.insertValue( (workEpoch - delay),
+   //                                     (*itSource),
+   //                                     (*itSat).first,
+   //                                     outputType,
+   //                                     value );
 
-                  }
-                  catch(...)
-                  {
-                        // If it wasn't possible to introduce the derivative,
-                        // let's continue
-                     continue;
-                  }
+   //               }
+   //               catch(...)
+   //               {
+   //                     // If it wasn't possible to introduce the derivative,
+   //                     // let's continue
+   //                  continue;
+   //               }
 
-               }  // End of 'for( std::map<SatID, double>::const_iterator itSat'
+   //            }  // End of 'for( std::map<SatID, double>::const_iterator itSat'
 
-            }  // End of 'for( SourceIDSet::const_iterator itSource = ...'
+   //         }  // End of 'for( SourceIDSet::const_iterator itSource = ...'
 
-         }  // End of 'for( gnssDataMap::iterator itGdata = gData.begin();'
+   //      }  // End of 'for( gnssDataMap::iterator itGdata = gData.begin();'
 
-            // Let's return
-         return gData;
+   //         // Let's return
+   //      return gData;
 
-      }
-      catch(Exception& u)
-      {
-            // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + u.what() );
+   //   }
+   //   catch(Exception& u)
+   //   {
+   //         // Throw an exception if something unexpected happens
+   //      ProcessingException e( getClassName() + ":"
+   //                             + u.what() );
 
-         GPSTK_THROW(e);
+   //      GPSTK_THROW(e);
 
-      }
+   //   }
 
-   }  // End of method 'Differentiator::Process()'
+   //}  // End of method 'Differentiator::Process()'
 
 
 }  // End of namespace gpstk

@@ -118,7 +118,7 @@ namespace gpstk
     //
     // @param gData     Data object holding the data.
     //
-    satTypeValueMap& NablaOp::Process(satTypeValueMap& gData)
+   SatTypePtrMap& NablaOp::Process(SatTypePtrMap& gData)
       throw(ProcessingException)
    {
 
@@ -134,8 +134,7 @@ namespace gpstk
 
                // Loop through all satellites in reference station data set,
                // looking for reference satellite
-            satTypeValueMap::iterator it;
-            for (it = gData.begin(); it != gData.end(); ++it)
+            for (auto it = gData.begin(); it != gData.end(); ++it)
             {
 
                   // The satellite with the highest elevation will usually be
@@ -154,7 +153,7 @@ namespace gpstk
 
 
             // We will use reference satellite data as reference data
-         satTypeValueMap refData(gData.extractSatID(refSat));
+         auto refData(gData.extractSatID(refSat));
 
             // We must remove reference satellite data from data set
          gData.removeSatID(refSat);
@@ -164,8 +163,7 @@ namespace gpstk
 
 
             // Loop through all the satellites in station data set
-         satTypeValueMap::iterator it;
-         for (it = gData.begin(); it != gData.end(); ++it)
+         for (auto it = gData.begin(); it != gData.end(); ++it)
          {
 
                // We must compute the difference for all types in

@@ -57,7 +57,7 @@ namespace gpstk
        *
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& Pruner::Process( satTypeValueMap& gData )
+   SatTypePtrMap& Pruner::Process(SatTypePtrMap& gData )
       throw(ProcessingException)
    {
 

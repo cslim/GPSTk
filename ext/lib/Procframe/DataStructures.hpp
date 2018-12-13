@@ -62,7 +62,7 @@
 #include "YDSTime.hpp"
 #include "GNSSconstants.hpp"
 
-
+#include"SatTypePtrMap.h"
 
 namespace gpstk
 {
@@ -1130,7 +1130,46 @@ namespace gpstk
 
       //// Some other handy data structures
 
+   struct sourcePtrDataMap : std::map<SourceID, SatTypePtrMap>
+   {
 
+	   /// Default constructor
+	   sourcePtrDataMap() {};
+
+
+	   /** Returns the data value (double) corresponding to provided SourceID,
+		*  SatID and TypeID.
+		*
+		* @param source        Source to be looked for.
+		* @param satellite     Satellite to be looked for.
+		* @param type          Type to be looked for.
+		*/
+	   double getValue(const SourceID& source,
+		   const SatID& satellite,
+		   const TypeID& type) const
+		   throw(SourceIDNotFound, SatIDNotFound, TypeIDNotFound);
+
+
+	   /** Get a set with all the SourceID's in this data structure.
+		*
+		* @warning If current 'sourceDataMap' is big, this could be a very
+		* costly operation.
+		*/
+	   SourceIDSet getSourceIDSet(void) const;
+
+
+	   /** Get a set with all the SatID's in this data structure.
+		*
+		* @warning If current 'sourceDataMap' is big, this could be a very
+		* costly operation.
+		*/
+	   SatIDSet getSatIDSet(void) const;
+
+
+	   /// Destructor.
+	   virtual ~sourcePtrDataMap() {};
+
+   };
       /// GNSS data structure consisting in a map with SourceID as keys, and
       /// satTypeValueMap as elements.
    struct sourceDataMap : std::map<SourceID, satTypeValueMap>

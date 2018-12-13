@@ -60,8 +60,8 @@ namespace gpstk
        * @param time      Epoch.
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& ComputeTropModel::Process( const CommonTime& time,
-                                         satTypeValueMap& gData )
+   SatTypePtrMap& ComputeTropModel::Process( const CommonTime& time,
+                                         SatTypePtrMap& gData )
       throw(ProcessingException)
    {
 
@@ -71,8 +71,7 @@ namespace gpstk
          SatIDSet satRejectedSet;
 
             // Loop through all the satellites
-         satTypeValueMap::iterator stv;
-         for(stv = gData.begin(); stv != gData.end(); ++stv) 
+         for(auto stv = gData.begin(); stv != gData.end(); ++stv) 
          {
 
             // First check if TropModel was set
@@ -84,7 +83,7 @@ namespace gpstk
             }
 
                // If satellite elevation is missing, remove satellite
-            if( (*stv).second.find(TypeID::elevation) == (*stv).second.end() )
+            if( (*stv).second->get_value().find(TypeID::elevation) == (*stv).second->get_value().end() )
             {
                satRejectedSet.insert( (*stv).first );
                continue;
@@ -93,7 +92,7 @@ namespace gpstk
             {
 
                   // Scalar to hold satellite elevation
-               double elevation( (*stv).second(TypeID::elevation) );
+               double elevation( (*stv).second->get_value()(TypeID::elevation) );
                double tropoCorr(0.0), dryZDelay(0.0), wetZDelay(0.0);
                double dryMap(0.0), wetMap(0.0);
 
@@ -126,11 +125,11 @@ namespace gpstk
                };
 
                   // Now we have to add the new values to the data structure
-               (*stv).second[TypeID::tropoSlant] = tropoCorr;
-               (*stv).second[TypeID::dryTropo] = dryZDelay;
-               (*stv).second[TypeID::wetTropo] = wetZDelay;
-               (*stv).second[TypeID::dryMap] = dryMap;
-               (*stv).second[TypeID::wetMap] = wetMap;
+               (*stv).second->get_value()[TypeID::tropoSlant] = tropoCorr;
+               (*stv).second->get_value()[TypeID::dryTropo] = dryZDelay;
+               (*stv).second->get_value()[TypeID::wetTropo] = wetZDelay;
+               (*stv).second->get_value()[TypeID::dryMap] = dryMap;
+               (*stv).second->get_value()[TypeID::wetMap] = wetMap;
 
             }
 

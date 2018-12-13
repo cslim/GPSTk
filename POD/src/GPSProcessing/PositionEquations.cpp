@@ -12,33 +12,38 @@ namespace pod
     //    for (const auto &it : types)
     //        stochasticModels[it] = std::make_unique<WhiteNoiseModel>(100);
     //}
-    PositionEquations::PositionEquations(double sigma)
+    PositionEquations::
+        PositionEquations(double sigma)
         :types({ FilterParameter(TypeID::dx), FilterParameter(TypeID::dy), FilterParameter(TypeID::dz) })
     {
         for (const auto &it : types)
             stochasticModels[it] = std::make_unique<WhiteNoiseModel>(sigma);
     }
     
-    PositionEquations& PositionEquations::setStochasicModel( StochasticModel_sptr newModel)
+    PositionEquations& PositionEquations::
+        setStochasicModel( StochasticModel_sptr newModel)
     {
         for(auto& it: stochasticModels)
             it.second= newModel;
         return *this;
     }
 
-    PositionEquations& PositionEquations::setStochasicModel(FilterParameter param, StochasticModel_sptr newModel)
+    PositionEquations& PositionEquations::
+        setStochasicModel(FilterParameter param, StochasticModel_sptr newModel)
     {
         stochasticModels[param] = newModel;
         return *this;
     }
 
-    void PositionEquations::Prepare(gpstk::gnssRinex& gData)
+    void PositionEquations::
+        Prepare(gpstk::gnssRinex& gData)
     {
         for (const auto& it : stochasticModels)
             it.second->Prepare(SatID::dummy, gData);
     }
 
-    void PositionEquations::updateH(const gpstk::gnssRinex & gData, const gpstk::TypeIDSet & obsTypes, gpstk::Matrix<double>& H, int & col_0)
+    void PositionEquations::
+        updateH(const gpstk::gnssRinex & gData, const gpstk::TypeIDSet & obsTypes, gpstk::Matrix<double>& H, int & col_0)
     {
         int row(0);
 
@@ -53,7 +58,8 @@ namespace pod
         col_0 += 3;
     }
 
-    void PositionEquations::updatePhi(gpstk::Matrix<double>& Phi, int& index) const
+    void PositionEquations::
+        updatePhi(gpstk::Matrix<double>& Phi, int& index) const
     {
 
         for (const auto &it : types)
@@ -63,7 +69,8 @@ namespace pod
         }
     }
 
-    void PositionEquations::updateQ(gpstk::Matrix<double>& Q, int& index) const
+    void PositionEquations::
+        updateQ(gpstk::Matrix<double>& Q, int& index) const
     {
 
         for (const auto &it : types)
@@ -73,7 +80,8 @@ namespace pod
         }
     }
 
-    void PositionEquations::defStateAndCovariance(gpstk::Vector<double>& x, gpstk::Matrix<double>& P, int& index) const
+    void PositionEquations::
+        defStateAndCovariance(gpstk::Vector<double>& x, gpstk::Matrix<double>& P, int& index) const
     {
         for (const auto &it : types)
         {
@@ -83,7 +91,8 @@ namespace pod
         }
     }
 
-    int PositionEquations::getNumUnknowns() const
+    int PositionEquations::
+        getNumUnknowns() const
     {
         return types.size();
     }

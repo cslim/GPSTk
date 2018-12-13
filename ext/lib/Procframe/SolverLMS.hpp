@@ -165,18 +165,8 @@ namespace gpstk
           *
           * @param gData     Data object holding the data.
           */
-      virtual satTypeValueMap& Process(satTypeValueMap& gData)
+      virtual SatTypePtrMap& Process(SatTypePtrMap& gData)
          throw(ProcessingException);
-
-
-         /** Returns a reference to a gnnsSatTypeValue object after
-          *  solving the previously defined equation system.
-          *
-          * @param gData    Data object holding the data.
-          */
-      virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
-         throw(ProcessingException)
-      { Process(gData.body); return gData; };
 
 
          /** Returns a reference to a gnnsRinex object after solving
@@ -184,9 +174,9 @@ namespace gpstk
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssRinex& Process(gnssRinex& gData)
+      virtual IRinex& Process(IRinex& gData)
          throw(ProcessingException)
-      { Process(gData.body); return gData; };
+      { Process(gData.getBody()); return gData; };
 
 
          /** Returns the solution associated to a given TypeID.

@@ -61,8 +61,8 @@ namespace gpstk
        * @param epoch     Time of observations.
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& ProblemSatFilter::Process( const CommonTime& epoch,
-                                                satTypeValueMap& gData )
+   SatTypePtrMap& ProblemSatFilter::Process( const CommonTime& epoch,
+                                                SatTypePtrMap& gData )
       throw(ProcessingException)
    {
 
@@ -71,9 +71,8 @@ namespace gpstk
 
          SatIDSet satRejectedSet;
    
-            // Loop through all the satellites
-         satTypeValueMap::iterator it;
-         for (it = gData.begin(); it != gData.end(); ++it) 
+
+         for (auto it = gData.begin(); it != gData.end(); ++it) 
          {
             if( isBadSat(epoch,it->first)) satRejectedSet.insert(it->first);
          }
@@ -102,14 +101,14 @@ namespace gpstk
        *
        * @param gData    Data object holding the data.
        */
-   gnssRinex& ProblemSatFilter::Process(gnssRinex& gData)
+   IRinex& ProblemSatFilter::Process(IRinex& gData)
       throw(ProcessingException)
    {
 
       try
       {
 
-         Process(gData.header.epoch, gData.body);
+         Process(gData.getHeader().epoch, gData.getBody());
 
          return gData;
 

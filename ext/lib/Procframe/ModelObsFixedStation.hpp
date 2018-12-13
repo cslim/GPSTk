@@ -232,19 +232,10 @@ namespace gpstk
           * @param time      Epoch.
           * @param gData     Data object holding the data.
           */
-      virtual satTypeValueMap& Process( const CommonTime& time,
-                                        satTypeValueMap& gData )
+      virtual SatTypePtrMap& Process( const CommonTime& time,
+                                        SatTypePtrMap& gData )
          throw(ProcessingException);
 
-
-         /** Returns a gnnsSatTypeValue object, adding the new data generated
-          *  when calling a modeling object.
-          *
-          * @param gData    Data object holding the data.
-          */
-      virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
-         throw(ProcessingException)
-      { Process(gData.header.epoch, gData.body); return gData; };
 
 
          /** Returns a gnnsRinex object, adding the new data generated when
@@ -252,9 +243,9 @@ namespace gpstk
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssRinex& Process(gnssRinex& gData)
+      virtual IRinex& Process(IRinex& gData)
          throw(ProcessingException)
-      { Process(gData.header.epoch, gData.body); return gData; };
+      { Process(gData.getHeader().epoch, gData.getBody()); return gData; };
 
 
          /// Method to get satellite elevation cut-off angle. By default, it

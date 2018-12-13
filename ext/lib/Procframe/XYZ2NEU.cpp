@@ -151,7 +151,7 @@ namespace gpstk
       //
       // @param gData     Data object holding the data.
       //
-   satTypeValueMap& XYZ2NEU::Process(satTypeValueMap& gData)
+   SatTypePtrMap& XYZ2NEU::Process(SatTypePtrMap& gData)
       throw(ProcessingException)
    {
 

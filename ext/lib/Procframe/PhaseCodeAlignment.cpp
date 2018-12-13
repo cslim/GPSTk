@@ -102,8 +102,8 @@ namespace gpstk
        * @param epoch     Time of observations.
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& PhaseCodeAlignment::Process( const CommonTime& epoch,
-                                           satTypeValueMap& gData )
+   SatTypePtrMap& PhaseCodeAlignment::Process( const CommonTime& epoch,
+                                           SatTypePtrMap& gData )
       throw(ProcessingException)
    {
 
@@ -113,9 +113,7 @@ namespace gpstk
          SatIDSet satRejectedSet;
 
             // Loop through all the satellites
-         for( satTypeValueMap::iterator it = gData.begin();
-              it != gData.end();
-              ++it )
+         for( auto it = gData.begin(); it != gData.end(); ++it )
          {
 
                // Check if satellite currently has entries
@@ -146,7 +144,7 @@ namespace gpstk
                {
 
                      // Try to extract the satellite arc value
-                  arcN = (*it).second(TypeID::satArc);
+                  arcN = (*it).second->get_value()(TypeID::satArc);
 
                }
                catch(...)
@@ -182,7 +180,7 @@ namespace gpstk
                {
 
                      // Try to extract the CS flag value
-                  flag = (*it).second(watchCSFlag);
+                  flag = (*it).second->get_value()(watchCSFlag);
 
                }
                catch(...)
@@ -212,7 +210,7 @@ namespace gpstk
             {
 
                   // Compute difference between code and phase measurements
-               double diff( (*it).second(codeType) - (*it).second(phaseType) );
+               double diff( (*it).second->get_value()(codeType) - (*it).second->get_value()(phaseType) );
 
                   // Convert 'diff' to cycles
                diff = diff/phaseWavelength;
@@ -227,7 +225,7 @@ namespace gpstk
 
                // Let's align the phase measurement using the
                // corresponding offset
-            (*it).second[phaseType] = (*it).second[phaseType]
+            (*it).second->get_value()[phaseType] = (*it).second->get_value()[phaseType]
                                       + svData[(*it).first].offset;
 
          }
@@ -252,35 +250,6 @@ namespace gpstk
 
 
 
-      /* Returns a gnnsSatTypeValue object, adding the new data generated
-       *  when calling this object.
-       *
-       * @param gData    Data object holding the data.
-       */
-   gnssSatTypeValue& PhaseCodeAlignment::Process(gnssSatTypeValue& gData)
-      throw(ProcessingException)
-   {
-
-      try
-      {
-
-         Process(gData.header.epoch, gData.body);
-
-         return gData;
-
-      }
-      catch(Exception& u)
-      {
-            // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + u.what() );
-
-         GPSTK_THROW(e);
-
-      }
-
-   }  // End of 'PhaseCodeAlignment::Process()'
-
 
 
       /* Returns a gnnsRinex object, adding the new data generated when
@@ -288,14 +257,14 @@ namespace gpstk
        *
        * @param gData    Data object holding the data.
        */
-   gnssRinex& PhaseCodeAlignment::Process(gnssRinex& gData)
+   IRinex& PhaseCodeAlignment::Process(IRinex& gData)
       throw(ProcessingException)
    {
 
       try
       {
 
-         Process(gData.header.epoch, gData.body);
+         Process(gData.getHeader().epoch, gData.getBody());
 
          return gData;
 

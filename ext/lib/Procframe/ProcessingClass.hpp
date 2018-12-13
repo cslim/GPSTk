@@ -45,6 +45,7 @@
 
 #include "StringUtils.hpp"
 #include "DataStructures.hpp"
+#include "RinexEpoch.h"
 
 
 namespace gpstk
@@ -98,14 +99,20 @@ namespace gpstk
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData) = 0;
+      //virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData) = 0;
 
+
+      /** Abstract method. It returns a RinexEpoch object.
+       *
+       * @param gData    Data object holding the data.
+       */
+      virtual IRinex& Process(IRinex& gData) = 0;
 
          /** Abstract method. It returns a gnnsRinex object.
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssRinex& Process(gnssRinex& gData) = 0;
+     // virtual gnssRinex& Process(gnssRinex& gData) = 0;
 
 
          /// Abstract method. It returns a string identifying the class the
@@ -128,17 +135,21 @@ namespace gpstk
    }; // End of class 'ProcessingClass'
 
 
-      /// Input operator from gnssSatTypeValue to ProcessingClass.
-   inline gnssSatTypeValue& operator>>( gnssSatTypeValue& gData,
-                                        ProcessingClass& procClass )
-   { procClass.Process(gData); return gData; }
+   //   /// Input operator from gnssSatTypeValue to ProcessingClass.
+   //inline gnssSatTypeValue& operator>>( gnssSatTypeValue& gData,
+   //                                     ProcessingClass& procClass )
+   //{ procClass.Process(gData); return gData; }
 
 
-      /// Input operator from gnssRinex to ProcessingClass.
+ /*     /// Input operator from gnssRinex to ProcessingClass.
    inline gnssRinex& operator>>( gnssRinex& gData,
                                  ProcessingClass& procClass )
-   { procClass.Process(gData); return gData; }
+   { procClass.Process(gData); return gData; }*/
 
+        /// Input operator from gnssRinex to ProcessingClass.
+     inline IRinex& operator>>(IRinex& gData,
+                                   ProcessingClass& procClass )
+     { procClass.Process(gData); return gData; }
 
    //@}
 

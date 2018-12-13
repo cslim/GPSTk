@@ -84,8 +84,8 @@ namespace gpstk
        * @param gData     Data object holding the data.
        * @param epochflag Epoch flag.
        */
-   satTypeValueMap& LICSDetector2::Process( const CommonTime& epoch,
-                                            satTypeValueMap& gData,
+   SatTypePtrMap& LICSDetector2::Process( const CommonTime& epoch,
+                                            SatTypePtrMap& gData,
                                             const short& epochflag )
       throw(ProcessingException)
    {
@@ -101,13 +101,13 @@ namespace gpstk
          auto & rejTableItem = rejectedSatsTable[epoch];
 
             // Loop through all the satellites
-         satTypeValueMap::iterator it;
-         for (it = gData.begin(); it != gData.end(); ++it)
+        
+         for (auto it = gData.begin(); it != gData.end(); ++it)
          {
              try
              {
                  // Try to extract the values
-                 value1 = it->second(obsType);
+                 value1 = it->second->get_value()(obsType);
              }
              catch (...)
              {
@@ -122,7 +122,7 @@ namespace gpstk
                  try
                  {
                      // Try to get the LLI1 index
-                     lli1 = it->second(lliType1);
+                     lli1 = it->second->get_value()(lliType1);
                  }
                  catch (...)
                  {
@@ -134,7 +134,7 @@ namespace gpstk
                  try
                  {
                      // Try to get the LLI2 index
-                     lli2 = it->second(lliType2);
+                     lli2 = it->second->get_value()(lliType2);
                  }
                  catch (...)
                  {
@@ -149,23 +149,23 @@ namespace gpstk
              // several different cycle slip detectors
              double res = getDetection(epoch,
                                         it->first,
-                                        it->second,
+                                        it->second->get_value(),
                                          epochflag,
                                          value1,
                                          lli1,
                                          lli2);
 
-             it->second[resultType1] += res;
+             it->second->get_value()[resultType1] += res;
 
              if (res > 0)
                  rejTableItem.insert(it->first);
 
-             if (it->second[resultType1] > 1.0)
-                 it->second[resultType1] = 1.0;
+             if (it->second->get_value()[resultType1] > 1.0)
+                 it->second->get_value()[resultType1] = 1.0;
              
 
              // We will mark both cycle slip flags
-             it->second[resultType2] = it->second[resultType1];
+             it->second->get_value()[resultType2] = it->second->get_value()[resultType1];
 
          }
 
@@ -292,14 +292,14 @@ namespace gpstk
        *
        * @param gData    Data object holding the data.
        */
-   gnssRinex& LICSDetector2::Process(gnssRinex& gData)
+   IRinex& LICSDetector2::Process(IRinex& gData)
       throw(ProcessingException)
    {
 
       try
       {
-          auto flag = (useEpochFlag) ? gData.header.epochFlag: 0;
-         Process(gData.header.epoch, gData.body, flag);
+          auto flag = (useEpochFlag) ? gData. getHeader().epochFlag: 0;
+         Process(gData.getHeader().epoch, gData.getBody(), flag);
 
          return gData;
 

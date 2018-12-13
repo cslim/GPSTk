@@ -37,9 +37,8 @@ namespace pod
         virtual gpstk::gnssRinex& Process(gpstk::gnssRinex& gData)
             throw(gpstk::ProcessingException);
 
-        virtual  gpstk::satTypeValueMap& Process(const  gpstk::CommonTime& epoch,
-            gpstk::satTypeValueMap& gData,
-            const short& epochflag = 0)
+        virtual  gpstk::satTypeValueMap& Process(const gpstk::CommonTime& epoch,
+            gpstk::satTypeValueMap& gData)
             throw(gpstk::ProcessingException);
 
         /** Method that implements the LI cycle slip detection algorithm
@@ -48,7 +47,6 @@ namespace pod
         * @param sat       SatID.
         * @param tvMap     Data structure of TypeID and values.
         * @param li        Current LI observation value.
-
         */
         virtual double getDetection(const gpstk::CommonTime& epoch,
             const gpstk::SatID& sat,

@@ -140,8 +140,8 @@ namespace gpstk
        * @param gData     Data object holding the data.
        * @param epochflag Epoch flag.
        */
-   satTypeValueMap& OneFreqCSDetector::Process( const CommonTime& epoch,
-                                                satTypeValueMap& gData,
+   SatTypePtrMap& OneFreqCSDetector::Process( const CommonTime& epoch,
+                                                SatTypePtrMap& gData,
                                                 const short& epochflag )
       throw(ProcessingException)
    {
@@ -155,14 +155,13 @@ namespace gpstk
          SatIDSet satRejectedSet;
 
             // Loop through all the satellites
-         satTypeValueMap::iterator it;
-         for (it = gData.begin(); it != gData.end(); ++it) 
+         for (auto it = gData.begin(); it != gData.end(); ++it) 
          {
             try
             {
                   // Try to extract the values
-               value1 = (*it).second(codeType);
-               value2 = (*it).second(phaseType);
+               value1 = (*it).second->get_value()(codeType);
+               value2 = (*it).second->get_value()(phaseType);
             }
             catch(...)
             {
@@ -176,16 +175,16 @@ namespace gpstk
                // the structure.
                // This way of doing it allows concatenation of several
                // different cycle slip detectors
-            (*it).second[resultType] += getDetection( epoch,
+            (*it).second->get_value()[resultType] += getDetection( epoch,
                                                       (*it).first,
-                                                      (*it).second,
+                                                      (*it).second->get_value(),
                                                       epochflag,
                                                       value1,
                                                       value2 );
 
-            if ( (*it).second[resultType] > 1.0 )
+            if ( (*it).second->get_value()[resultType] > 1.0 )
             {
-               (*it).second[resultType] = 1.0;
+               (*it).second->get_value()[resultType] = 1.0;
             }
 
          }
@@ -237,14 +236,14 @@ namespace gpstk
        *
        * @param gData    Data object holding the data.
        */
-   gnssRinex& OneFreqCSDetector::Process(gnssRinex& gData)
+   IRinex& OneFreqCSDetector::Process(IRinex& gData)
       throw(ProcessingException)
    {
 
       try
       {
 
-         Process(gData.header.epoch, gData.body, gData.header.epochFlag);
+         Process(gData.getHeader().epoch, gData.getBody(), gData.getHeader().epochFlag);
 
          return gData;
 

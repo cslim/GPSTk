@@ -17,11 +17,10 @@ namespace pod
         ComputeWeightSimple();
         virtual ~ComputeWeightSimple();
 
-        virtual gpstk::gnssSatTypeValue& Process(gpstk::gnssSatTypeValue& gData) override;
 
-        virtual gpstk::gnssRinex& Process(gpstk::gnssRinex& gData) override;
+        virtual gpstk::IRinex& Process(gpstk::IRinex& gData) override;
 
-        gpstk::satTypeValueMap& Process(gpstk::satTypeValueMap& gData);
+        gpstk::SatTypePtrMap& Process(gpstk::SatTypePtrMap& gData);
 
         virtual std::string getClassName(void) const override { return "ComputeWeightSimple"; }
 

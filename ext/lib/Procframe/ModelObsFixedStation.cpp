@@ -245,8 +245,8 @@ namespace gpstk
        * @param time      Epoch.
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& ModelObsFixedStation::Process( const CommonTime& time,
-                                                   satTypeValueMap& gData )
+   SatTypePtrMap& ModelObsFixedStation::Process( const CommonTime& time,
+                                                   SatTypePtrMap& gData )
       throw(ProcessingException)
    {
 
@@ -256,8 +256,7 @@ namespace gpstk
          SatIDSet satRejectedSet;
 
             // Loop through all the satellites
-         satTypeValueMap::iterator stv;
-         for(stv = gData.begin(); stv != gData.end(); ++stv)
+         for(auto stv = gData.begin(); stv != gData.end(); ++stv)
          {
                // Scalars to hold temporal values
             double tempPR(0.0);
@@ -266,7 +265,7 @@ namespace gpstk
             double tempModeledPR(0.0);
             double tempTGD(0.0);
             double tempPrefit(0.0);
-            double observable( (*stv).second(defaultObservable) );
+            double observable( (*stv).second->get_value()(defaultObservable) );
 
                // A lot of the work is done by a CorrectedEphemerisRange object
             CorrectedEphemerisRange cerange;
@@ -309,12 +308,12 @@ namespace gpstk
                tempTrop = getTropoCorrections( pDefaultTropoModel,
                                                cerange.elevationGeodetic );
 
-               (*stv).second[TypeID::tropoSlant] = tempTrop;
+               (*stv).second->get_value()[TypeID::tropoSlant] = tempTrop;
 
             }
             else
             {
-               (*stv).second[TypeID::tropoSlant] = 0.0;
+               (*stv).second->get_value()[TypeID::tropoSlant] = 0.0;
             }
 
                // If given, computes ionospheric model
@@ -351,21 +350,21 @@ namespace gpstk
 
 
                // Now we have to add the new values to the data structure
-            (*stv).second[TypeID::prefitC] = tempPrefit;
-            (*stv).second[TypeID::dtSat] = cerange.svclkbias;
+            (*stv).second->get_value()[TypeID::prefitC] = tempPrefit;
+            (*stv).second->get_value()[TypeID::dtSat] = cerange.svclkbias;
 
                // Now, lets insert the geometry matrix
-            (*stv).second[TypeID::dx] = cerange.cosines[0];
-            (*stv).second[TypeID::dy] = cerange.cosines[1];
-            (*stv).second[TypeID::dz] = cerange.cosines[2];
+            (*stv).second->get_value()[TypeID::dx] = cerange.cosines[0];
+            (*stv).second->get_value()[TypeID::dy] = cerange.cosines[1];
+            (*stv).second->get_value()[TypeID::dz] = cerange.cosines[2];
                // When using pseudorange method, this is 1.0
-            (*stv).second[TypeID::cdt] = 1.0;
+            (*stv).second->get_value()[TypeID::cdt] = 1.0;
 
                // Now we have to add the new values to the data structure
-            (*stv).second[TypeID::rho] = cerange.rawrange;
-            (*stv).second[TypeID::rel] = -cerange.relativity;
-            (*stv).second[TypeID::elevation] = cerange.elevationGeodetic;
-            (*stv).second[TypeID::azimuth] = cerange.azimuthGeodetic;
+            (*stv).second->get_value()[TypeID::rho] = cerange.rawrange;
+            (*stv).second->get_value()[TypeID::rel] = -cerange.relativity;
+            (*stv).second->get_value()[TypeID::elevation] = cerange.elevationGeodetic;
+            (*stv).second->get_value()[TypeID::azimuth] = cerange.azimuthGeodetic;
 
 
                // Get iono and instrumental delays right
@@ -415,12 +414,12 @@ namespace gpstk
 
             if( pDefaultIonoModel )
             {
-               (*stv).second[ionoDelayType] = tempIono;
+               (*stv).second->get_value()[ionoDelayType] = tempIono;
             }
 
             if( useTGD )
             {
-               (*stv).second[instDelayType] = tempTGD;
+               (*stv).second->get_value()[instDelayType] = tempTGD;
             }
 
 

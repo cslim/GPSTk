@@ -60,8 +60,8 @@ namespace gpstk
        * @param time      Epoch corresponding to the data.
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& ComputeSimpleWeights::Process( const CommonTime& time,
-                                                 satTypeValueMap& gData )
+   SatTypePtrMap& ComputeSimpleWeights::Process( const CommonTime& time,
+                                                 SatTypePtrMap& gData )
       throw(ProcessingException)
    {
 
@@ -84,7 +84,7 @@ namespace gpstk
 
 
             // Loop through all the satellites
-         for( satTypeValueMap::iterator it = gData.begin();
+         for( auto it = gData.begin();
               it != gData.end();
               ++it )
          {
@@ -112,7 +112,7 @@ namespace gpstk
 
             double weight( 1.0 / ( scaleFact*( mt*mt*tropoVar + multiVar ) ) );
 
-            (*it).second[TypeID::weight] = weight;
+            (*it).second->get_value()[TypeID::weight] = weight;
 
          }
 
@@ -136,50 +136,20 @@ namespace gpstk
 
 
 
-      /* Returns a gnnsSatTypeValue object, adding the new data
-       * generated when calling this object.
-       *
-       * @param gData    Data object holding the data.
-       */
-   gnssSatTypeValue& ComputeSimpleWeights::Process(gnssSatTypeValue& gData)
-      throw(ProcessingException)
-   {
-
-      try
-      {
-
-         Process(gData.header.epoch, gData.body);
-
-         return gData;
-
-      }
-      catch(Exception& u)
-      {
-            // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + u.what() );
-
-         GPSTK_THROW(e);
-
-      }
-
-   }  // End of method 'ComputeSimpleWeightsWeights::Process()'
-
-
 
       /* Returns a gnnsRinex object, adding the new data generated
        * when calling this object.
        *
        * @param gData    Data object holding the data.
        */
-   gnssRinex& ComputeSimpleWeights::Process(gnssRinex& gData)
+   IRinex& ComputeSimpleWeights::Process(IRinex& gData)
       throw(ProcessingException)
    {
 
       try
       {
 
-         Process(gData.header.epoch, gData.body);
+         Process(gData.getHeader().epoch, gData.getBody());
 
          return gData;
 

@@ -104,26 +104,18 @@ namespace gpstk
           *
           * @param gData     Data object holding the data.
           */
-      virtual satTypeValueMap& Process( satTypeValueMap& gData )
+      virtual SatTypePtrMap& Process(SatTypePtrMap& gData )
          throw(ProcessingException);
 
-
-         /** Keeps data from a gnnsSatTypeValue object.
-          *
-          * @param gData    Data object holding the data.
-          */
-      virtual gnssSatTypeValue& Process( gnssSatTypeValue& gData )
-         throw(ProcessingException)
-      { Process(gData.body); return gData; };
 
 
          /** Keeps data from a gnnsRinex object.
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssRinex& Process( gnssRinex& gData )
+      virtual IRinex& Process( IRinex& gData )
          throw(ProcessingException)
-      { Process(gData.body); return gData; };
+      { Process(gData.getBody()); return gData; };
 
 
          /** Method to set the TypeID to be kept.

@@ -72,7 +72,7 @@ namespace gpstk
       //
       // @param gData     Data object holding the data.
       //
-   satTypeValueMap& RequireObservables::Process(satTypeValueMap& gData)
+   SatTypePtrMap& RequireObservables::Process(SatTypePtrMap& gData)
       throw(ProcessingException)
    {
 
@@ -82,7 +82,7 @@ namespace gpstk
          SatIDSet satRejectedSet;
 
             // Loop through all the satellites
-         for ( satTypeValueMap::iterator satIt = gData.begin();
+         for ( auto satIt = gData.begin();
                satIt != gData.end();
                ++satIt )
          {
@@ -96,10 +96,10 @@ namespace gpstk
 
 
                   // Try to find required type
-               typeValueMap::iterator it( (*satIt).second.find(*typeIt) );
+               typeValueMap::iterator it( (*satIt).second->get_value().find(*typeIt) );
 
                   // Now, check if this TypeID exists in this data structure
-               if ( it == (*satIt).second.end() )
+               if ( it == (*satIt).second->get_value().end() )
                {
                      // If we couldn't find type, then schedule this
                      // satellite for removal

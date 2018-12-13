@@ -42,6 +42,7 @@
  */
 
 #include "ComputeCombination.hpp"
+#include "SatTypePtrMap.h"
 
 namespace gpstk
 {
@@ -57,7 +58,7 @@ namespace gpstk
        *
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& ComputeCombination::Process(satTypeValueMap& gData)
+   SatTypePtrMap& ComputeCombination::Process(SatTypePtrMap& gData)
       throw(ProcessingException)
    {
 
@@ -70,27 +71,27 @@ namespace gpstk
          SatIDSet satRejectedSet;
 
             // Loop through all the satellites
-         satTypeValueMap::iterator it;
-         for( it = gData.begin(); it != gData.end(); ++it ) 
+        
+         for( auto&& it: gData)
          {
 
             try
             {
                   // Try to extract the values
-               value1 = (*it).second(type1);
-               value2 = (*it).second(type2);
+               value1 = it.second->get_value()(type1);
+               value2 = it.second->get_value()(type2);
             }
             catch(...)
             {
                   // If some value is missing, schedule this satellite
                   // for removal
-               satRejectedSet.insert( (*it).first );
+               satRejectedSet.insert( it.first );
                continue;
             }
 
                // If everything is OK, then get the new value inside
                // the structure
-            (*it).second[resultType] = getCombination(value1, value2);
+             it.second->get_value()[resultType] = getCombination(value1, value2);
 
          }
 

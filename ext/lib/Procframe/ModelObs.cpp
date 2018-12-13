@@ -318,7 +318,7 @@ namespace gpstk
        *  -1 if problems arose
        */
    int ModelObs::Prepare( const CommonTime& time,
-                          const satTypeValueMap& data )
+                          const SatTypePtrMap& data )
    {
 
       int i;
@@ -410,8 +410,8 @@ namespace gpstk
        * @param time      Epoch.
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& ModelObs::Process( const CommonTime& time,
-                                       satTypeValueMap& gData )
+   SatTypePtrMap& ModelObs::Process( const CommonTime& time,
+                                       SatTypePtrMap& gData )
       throw(ProcessingException)
    {
 

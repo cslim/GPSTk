@@ -51,7 +51,7 @@
 
 namespace gpstk
 {
-
+	typedef std::unique_ptr<IRinex> IRinexUPtr;
       /// Thrown when synchronization was not possible at a given epoch
       /// @ingroup exceptiongroup
    NEW_EXCEPTION_CLASS(SynchronizeException, gpstk::Exception);
@@ -163,7 +163,7 @@ namespace gpstk
 
          /// Default constructor
       Synchronize()
-         : pRinexRef(NULL), pgRov1(NULL), tolerance(1.0),
+         : pRinexRef(NULL), tolerance(1.0),
            firstTime(true)
       { };
       /** Common constructor.
@@ -172,7 +172,7 @@ namespace gpstk
       * @param roverData     gnssRinex that holds ROVER receiver data
       * @param tol           Tolerance, in seconds.
       */
-      Synchronize( gnssRinex& roverData,
+      Synchronize( IRinex& roverData,
           const double tol = 1.0)
           : tolerance(tol), firstTime(true)
       {
@@ -186,32 +186,10 @@ namespace gpstk
           * @param tol           Tolerance, in seconds.
           */
       Synchronize( Rinex3ObsStream& rinexObs,
-                   gnssRinex& roverData,
+                   IRinex& roverData,
                    const double tol = 1.0 )
          : tolerance(tol), firstTime(true)
       { setReferenceSource(rinexObs); setRoverData(roverData); };
-
-
-         /** Common constructor.
-          *
-          * @param rinexObs      Rinex3ObsStream object of reference data.
-          * @param roverData     gnssSatTypeValue that holds ROVER receiver data
-          * @param tol           Tolerance, in seconds.
-          */
-      Synchronize( Rinex3ObsStream& rinexObs,
-                   gnssSatTypeValue& roverData,
-                   const double tol = 1.0 )
-         : tolerance(tol), firstTime(true)
-      { setReferenceSource(rinexObs); setRoverData(roverData); };
-
-
-         /** Returns a gnnsSatTypeValue object, adding the new data
-          *  generated when calling this object.
-          *
-          * @param gData    Data object holding the data.
-          */
-      virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
-         throw(SynchronizeException);
 
 
          /** Returns a gnnsRinex object, adding the new data generated
@@ -219,7 +197,7 @@ namespace gpstk
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssRinex& Process(gnssRinex& gData)
+      virtual IRinex& Process(IRinex& gData)
          throw(SynchronizeException);
 
 
@@ -247,21 +225,12 @@ namespace gpstk
       virtual Synchronize& setReferenceSource(Rinex3ObsStream& rinexObs)
       { pRinexRef = &rinexObs; firstTime=true; return (*this); }
 
-
-         /** Sets the gnssRinex that holds ROVER receiver data.
-          *
-          * @param roverData     gnssRinex that holds ROVER receiver data
-          */
-      virtual Synchronize& setRoverData(gnssRinex& roverData)
-      { pgRov1 = (gnssSatTypeValue*)(&roverData); return (*this); }
-
-
-         /** Sets the gnssSatTypeValue that holds ROVER receiver data.
+         /** Sets the IRinex that holds ROVER receiver data.
           *
           * @param roverData     gnssSatTypeValue that holds ROVER receiver data
           */
-      virtual Synchronize& setRoverData(gnssSatTypeValue& roverData)
-      { pgRov1 = &roverData; return (*this); }
+      virtual Synchronize& setRoverData(IRinex& roverData)
+      { pgRov1.reset(&roverData); return (*this); }
 
          /// Returns a string identifying this object.
       virtual std::string getClassName(void) const;
@@ -273,11 +242,11 @@ namespace gpstk
 
    protected:
 
-      virtual gnssRinex& Process(CommonTime time, gnssRinex& gData)
+      virtual IRinex& Process(CommonTime time, IRinex& gData)
          throw(SynchronizeException);
 
          /// gnssRinex data buffer
-      std::list<gnssRinex> gnssRinexBuffer;
+      std::list<IRinexUPtr> gnssRinexBuffer;
 
 
          /// Pointer to input observation file stream for reference station.
@@ -286,7 +255,7 @@ namespace gpstk
 
 
          /// Pointer to gnnsRinex data structure (GDS) that holds ROVER data.
-      gnssSatTypeValue* pgRov1;
+	  IRinexUPtr pgRov1;
 
 
          /// Tolerance, in seconds.

@@ -1559,6 +1559,32 @@ in matrix and number of types do not match") );
 
 
       //// Some other handy data structures
+	/* Returns the data value (double) corresponding to provided SourceID,
+	   * SatID and TypeID.
+	   *
+	   * @param source        Source to be looked for.
+	   * @param satellite     Satellite to be looked for.
+	   * @param type          Type to be looked for.
+	   */
+   double sourcePtrDataMap::getValue(const SourceID& source,
+	   const SatID& satellite,
+	   const TypeID& type) const
+	   throw(SourceIDNotFound, SatIDNotFound, TypeIDNotFound)
+   {
+
+	   // Look for the SourceID
+	   auto itObs = find(source);
+	   if (itObs != (*this).end())
+	   {
+
+		   return (*itObs)->.getValue(satellite, type);
+	   }
+	   else
+	   {
+		   GPSTK_THROW(SourceIDNotFound("SourceID not found in map"));
+	   }
+
+   }  // End of method 'sourceDataMap::getValue()'
 
 
 

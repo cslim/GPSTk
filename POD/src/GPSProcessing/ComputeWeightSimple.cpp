@@ -20,25 +20,19 @@ namespace pod
     {
     }
 
-    gnssSatTypeValue& ComputeWeightSimple::Process(gnssSatTypeValue& gData)
+    IRinex& ComputeWeightSimple::Process(IRinex& gData)
     {
-        Process(gData.body);
+        Process(gData.getBody());
         return gData;
     }
 
-    gnssRinex& ComputeWeightSimple::Process(gnssRinex& gData)
-    {
-        Process(gData.body);
-        return gData;
-    }
-
-    gpstk::satTypeValueMap& ComputeWeightSimple::Process(gpstk::satTypeValueMap& gData)
+    gpstk::SatTypePtrMap& ComputeWeightSimple::Process(gpstk::SatTypePtrMap& gData)
     {
         SatIDSet rejSatSet;
         for (auto& it: gData)
         {
-            auto el = it.second.find(TypeID::elevation);
-            if (el != it.second.end() && el->second >0)
+            auto el = it.second->get_value().find(TypeID::elevation);
+            if (el != it.second->get_value().end() && el->second >0)
             {
                
                 double invsig = 1.0;
@@ -47,7 +41,7 @@ namespace pod
 
                 double factor = (it.first.system == SatID::systemGlonass) ? glnSigmaFactor : 1;
                 
-                it.second[TypeID::weight] = invsig*invsig/factor;
+                it.second->get_value()[TypeID::weight] = invsig*invsig/factor;
             }
             else
             {

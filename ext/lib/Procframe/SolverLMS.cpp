@@ -144,7 +144,7 @@ of designMatrix");
        *
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& SolverLMS::Process(satTypeValueMap& gData)
+   SatTypePtrMap& SolverLMS::Process(SatTypePtrMap& gData)
       throw(ProcessingException)
    {
 

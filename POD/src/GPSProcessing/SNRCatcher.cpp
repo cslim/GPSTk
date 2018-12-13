@@ -48,8 +48,7 @@ namespace pod
        * @param epochflag Epoch flag.
        */
     satTypeValueMap& SNRCatcher::Process(const CommonTime& epoch,
-        satTypeValueMap& gData,
-        const short& epochflag)
+        satTypeValueMap& gData)
         throw(ProcessingException)
     {
         try

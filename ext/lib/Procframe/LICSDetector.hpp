@@ -143,8 +143,8 @@ namespace gpstk
           * @param gData     Data object holding the data.
           * @param epochflag Epoch flag.
           */
-      virtual satTypeValueMap& Process( const CommonTime& epoch,
-                                        satTypeValueMap& gData,
+      virtual SatTypePtrMap& Process( const CommonTime& epoch,
+                                        SatTypePtrMap& gData,
                                         const short& epochflag = 0 )
          throw(ProcessingException);
 
@@ -207,14 +207,6 @@ namespace gpstk
       { useLLI = use; return (*this); };
 
 
-         /** Returns a gnnsSatTypeValue object, adding the new data generated
-          *  when calling this object.
-          *
-          * @param gData    Data object holding the data.
-          */
-      virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
-         throw(ProcessingException)
-      { Process(gData.header.epoch, gData.body); return gData; };
 
 
          /** Returns a gnnsRinex object, adding the new data generated when
@@ -222,7 +214,7 @@ namespace gpstk
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssRinex& Process(gnssRinex& gData)
+      virtual IRinex& Process(IRinex& gData)
          throw(ProcessingException);
 
 

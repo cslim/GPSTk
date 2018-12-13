@@ -55,7 +55,7 @@ namespace gpstk
       //
       // @param gData     Data object holding the data.
       //
-   satTypeValueMap& SimpleFilter::Process(satTypeValueMap& gData)
+   SatTypePtrMap& SimpleFilter::Process(SatTypePtrMap& gData)
       throw(ProcessingException)
    {
 
@@ -72,13 +72,13 @@ namespace gpstk
             double value(0.0);
 
                // Loop through all the satellites
-            satTypeValueMap::iterator it;
-            for (it = gData.begin(); it != gData.end(); ++it) 
+           
+            for (auto it = gData.begin(); it != gData.end(); ++it) 
             {
                try
                {
                      // Try to extract the values
-                  value = (*it).second(*pos);
+                  value = (*it).second->get_value()(*pos);
 
                      // Now, check that the value is within bounds
                   if ( !( checkValue(value) ) )

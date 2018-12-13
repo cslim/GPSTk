@@ -58,8 +58,8 @@ namespace gpstk
        * @param time      Epoch corresponding to the data.
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& ComputeLinear::Process( const CommonTime& time,
-                                            satTypeValueMap& gData )
+    SatTypePtrMap& ComputeLinear::Process( const CommonTime& time,
+                                            SatTypePtrMap& gData )
       throw(ProcessingException)
    {
 
@@ -67,8 +67,7 @@ namespace gpstk
       {
 
             // Loop through all the satellites
-         satTypeValueMap::iterator it;
-         for( it = gData.begin(); it != gData.end(); ++it )
+         for( auto it = gData.begin(); it != gData.end(); ++it )
          {
 
                // Loop through all the defined linear combinations
@@ -86,20 +85,20 @@ namespace gpstk
 
                   TypeID type(iter->first);
 
-                  if( (*it).second.find(type) != (*it).second.end() )
+                  if( (*it).second->get_value().find(type) != (*it).second->get_value().end() )
                   {
-                     temp = (*it).second[type];
+                     temp = (*it).second->get_value()[type];
                   }
                   else
                   {
                      temp = 0.0;
                   }
 
-                  result = result + (*iter).second * temp;
+                  result = result + (*iter).second* temp;
                }
 
                   // Store the result in the proper place
-               (*it).second[pos->header] = result;
+               (*it).second->get_value()[pos->header] = result;
 
             }
 

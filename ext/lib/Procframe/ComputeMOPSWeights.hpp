@@ -172,17 +172,8 @@ namespace gpstk
           * @param time      Epoch corresponding to the data.
           * @param gData     Data object holding the data.
           */
-      virtual satTypeValueMap& Process( const CommonTime& time,
-                                        satTypeValueMap& gData )
-         throw(ProcessingException);
-
-
-         /** Returns a gnnsSatTypeValue object, adding the new data
-          *  generated when calling this object.
-          *
-          * @param gData    Data object holding the data.
-          */
-      virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
+      virtual SatTypePtrMap& Process( const CommonTime& time,
+                                        SatTypePtrMap& gData )
          throw(ProcessingException);
 
 
@@ -191,7 +182,7 @@ namespace gpstk
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssRinex& Process(gnssRinex& gData)
+      virtual IRinex& Process(IRinex& gData)
          throw(ProcessingException);
 
 

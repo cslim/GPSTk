@@ -163,7 +163,7 @@ namespace gpstk
           *                  default behaviour).
           */
     
-      DeltaOp( const satTypeValueMap& gData,
+      DeltaOp( const SatTypePtrMap& gData,
                const bool& delSats = true )
          : refData(gData), updateCSFlag(true), deleteMissingSats(delSats)
       { diffTypes.insert(TypeID::prefitC); }
@@ -183,7 +183,7 @@ namespace gpstk
           *                   will be deleted from the later (this is the
           *                   default behaviour).
           */
-      DeltaOp( const satTypeValueMap& gData,
+      DeltaOp( const SatTypePtrMap& gData,
                const TypeID& difftype,
                const bool& delSats = true )
          : refData(gData), updateCSFlag(true), deleteMissingSats(delSats)
@@ -204,7 +204,7 @@ namespace gpstk
           *                   will be deleted from the later (this is the
           *                   default behaviour).
           */
-      DeltaOp( const satTypeValueMap& gData,
+      DeltaOp( const SatTypePtrMap& gData,
                const TypeIDSet& diffSet,
                const bool& delSats = true )
          : refData(gData), updateCSFlag(true), deleteMissingSats(delSats),
@@ -226,9 +226,9 @@ namespace gpstk
           *                   will be deleted from the later (this is the
           *                   default behaviour).
           */
-      DeltaOp( const gnssSatTypeValue& gData,
+      DeltaOp(  IRinex& gData,
                const bool& delSats = true )
-         : refData(gData.body), updateCSFlag(true), deleteMissingSats(delSats)
+         : refData(gData.getBody()), updateCSFlag(true), deleteMissingSats(delSats)
       { diffTypes.insert(TypeID::prefitC); }
 
 
@@ -246,10 +246,10 @@ namespace gpstk
           *                   will be deleted from the later (this is the
           *                   default behaviour).
           */
-      DeltaOp( const gnssSatTypeValue& gData,
+      DeltaOp(  IRinex& gData,
                const TypeID& difftype,
                const bool& delSats = true )
-         : refData(gData.body), updateCSFlag(true), deleteMissingSats(delSats)
+         : refData(gData.getBody()), updateCSFlag(true), deleteMissingSats(delSats)
       { diffTypes.insert(difftype); }
 
 
@@ -267,10 +267,10 @@ namespace gpstk
           *                   will be deleted from the later (this is the
           *                   default behaviour).
           */
-      DeltaOp( const gnssSatTypeValue& gData,
+      DeltaOp(  IRinex& gData,
                const TypeIDSet& diffSet,
                const bool& delSats = true )
-         : refData(gData.body), updateCSFlag(true), deleteMissingSats(delSats),
+         : refData(gData.getBody()), updateCSFlag(true), deleteMissingSats(delSats),
            diffTypes(diffSet)
       { }
 
@@ -288,51 +288,7 @@ namespace gpstk
           *                   will be deleted from the later (this is the
           *                   default behaviour).
           */
-      DeltaOp( const gnssRinex& gData,
-               const bool& delSats = true )
-         : refData(gData.body), updateCSFlag(true), deleteMissingSats(delSats)
-      { diffTypes.insert(TypeID::prefitC); }
 
-
-         /** Common constructor taking a gnssRinex as reference station data.
-          *
-          * By default it will delete satellites present in reference station
-          * data but missing in input data.
-          *
-          * @param gData      gnssRinex data object holding reference
-          *                   station data.
-          * @param difftype   TypeID of data values to be differenced.
-          * @param delSats    Boolean value setting if satellites present in
-          *                   reference station data but missing in input data
-          *                   will be deleted from the later (this is the
-          *                   default behaviour).
-          */
-      DeltaOp( const gnssRinex& gData,
-               const TypeID& difftype,
-               const bool& delSats = true )
-         : refData(gData.body), updateCSFlag(true), deleteMissingSats(delSats)
-      { diffTypes.insert(difftype); }
-
-
-         /** Common constructor taking a gnssRinex as reference station data.
-          *
-          * By default it will delete satellites present in reference station
-          * data  but missing in input data.
-          *
-          * @param gData      gnssRinex data object holding reference
-          *                   station data.
-          * @param diffSet    TypeIDSet of data values to be differenced.
-          * @param delSats    Boolean value setting if satellites present in
-          *                   reference station data but missing in input data
-          *                   will be deleted from the later (this is the
-          *                   default behaviour).
-          */
-      DeltaOp( const gnssRinex& gData,
-               const TypeIDSet& diffSet,
-               const bool& delSats = true )
-         : refData(gData.body), updateCSFlag(true), deleteMissingSats(delSats),
-           diffTypes(diffSet)
-      { }
 
          /** Method to set the satTypeValueMap data object holding reference
           *  station data.
@@ -340,18 +296,8 @@ namespace gpstk
           * @param gData      satTypeValueMap data object holding reference
           *                   station data.
           */
-      virtual DeltaOp& setRefData(const satTypeValueMap& gData)
+      virtual DeltaOp& setRefData(const SatTypePtrMap& gData)
       { refData = gData; return (*this); }
-
-
-         /** Method to set the gnssSatTypeValue data object holding reference
-          *  station data.
-          *
-          * @param gData      gnssSatTypeValue data object holding reference
-          *                   station data.
-          */
-      virtual DeltaOp& setRefData(const gnssSatTypeValue& gData)
-      { return setRefData( gData.body ); }
 
 
          /** Method to set the gnssRinex data object holding reference
@@ -360,13 +306,16 @@ namespace gpstk
           * @param gData      gnssRinex data object holding reference
           *                   station data.
           */
-      virtual DeltaOp& setRefData(const gnssRinex& gData)
-      { return setRefData( gData.body ); }
+      virtual DeltaOp& setRefData(const IRinex& g)
+      { 
+		  setRefData(g.getBody()); 
+		  return *this;
+	  }
 
 
          /// Method to get the satTypeValueMap data object holding reference
          /// station data.
-      virtual satTypeValueMap getRefData(void) const
+      virtual SatTypePtrMap getRefData(void) const
       { return refData; }
 
 
@@ -437,19 +386,10 @@ namespace gpstk
           *
           * @param gData      Data object holding the data.
           */
-      virtual satTypeValueMap& Process(satTypeValueMap& gData)
+      virtual SatTypePtrMap& Process(SatTypePtrMap& gData)
          throw(ProcessingException);
 
 
-         /** Returns a reference to a gnssSatTypeValue object after
-          *  differencing data type values given in 'diffTypes' field with
-          *  respect to reference station data in 'refData' field.
-          *
-          * @param gData      Data object holding the data.
-          */
-      virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
-         throw(ProcessingException)
-      { Process(gData.body); return gData; }
 
 
          /** Returns a reference to a gnnsRinex object after differencing
@@ -458,9 +398,9 @@ namespace gpstk
           *
           * @param gData      Data object holding the data.
           */
-      virtual gnssRinex& Process(gnssRinex& gData)
+      virtual IRinex& Process(IRinex& gData)
          throw(ProcessingException)
-      { Process(gData.body); return gData; }
+      { Process(gData.getBody()); return gData; }
 
 
          /// Returns a string identifying this object.
@@ -475,7 +415,7 @@ namespace gpstk
 
 
          /// satTypeValueMap data structure containing reference station data.
-      satTypeValueMap refData;
+      SatTypePtrMap refData;
 
 
          /// Flag indicating if the CSF(Cycle Slip Flag) input GDS will be 

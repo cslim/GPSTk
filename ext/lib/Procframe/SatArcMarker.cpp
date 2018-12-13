@@ -123,8 +123,8 @@ namespace gpstk
        * @param epoch     Time of observations.
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& SatArcMarker::Process( const CommonTime& epoch,
-                                           satTypeValueMap& gData )
+   SatTypePtrMap& SatArcMarker::Process( const CommonTime& epoch,
+                                           SatTypePtrMap& gData )
       throw(ProcessingException)
    {
 
@@ -136,14 +136,12 @@ namespace gpstk
          SatIDSet satRejectedSet;
 
             // Loop through all the satellites
-         for ( satTypeValueMap::iterator it = gData.begin();
-               it != gData.end();
-               ++it )
+         for ( auto it = gData.begin(); it != gData.end(); ++it )
          {
             try
             {
                   // Try to extract the CS flag value
-               flag = (*it).second(watchCSFlag);
+               flag = (*it).second->get_value()(watchCSFlag);
             }
             catch(...)
             {
@@ -210,7 +208,7 @@ namespace gpstk
             }
 
                // We will insert satellite arc number
-            (*it).second[TypeID::satArc] = satArcMap[ (*it).first ];
+            (*it).second->get_value()[TypeID::satArc] = satArcMap[ (*it).first ];
 
          }
 
@@ -234,50 +232,20 @@ namespace gpstk
 
 
 
-      /* Returns a gnnsSatTypeValue object, adding the new data generated
-       *  when calling this object.
-       *
-       * @param gData    Data object holding the data.
-       */
-   gnssSatTypeValue& SatArcMarker::Process(gnssSatTypeValue& gData)
-      throw(ProcessingException)
-   {
-
-      try
-      {
-
-         Process(gData.header.epoch, gData.body);
-
-         return gData;
-
-      }
-      catch(Exception& u)
-      {
-            // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + u.what() );
-
-         GPSTK_THROW(e);
-
-      }
-
-   }  // End of method 'SatArcMarker::Process()'
-
-
 
       /* Returns a gnnsRinex object, adding the new data generated when
        *  calling this object.
        *
        * @param gData    Data object holding the data.
        */
-   gnssRinex& SatArcMarker::Process(gnssRinex& gData)
+   IRinex& SatArcMarker::Process(IRinex& gData)
       throw(ProcessingException)
    {
 
       try
       {
 
-         Process(gData.header.epoch, gData.body);
+         Process(gData.getHeader().epoch, gData.getBody());
 
          return gData;
 

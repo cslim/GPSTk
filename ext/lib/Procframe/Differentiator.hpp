@@ -226,8 +226,8 @@ namespace gpstk
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
-         throw(ProcessingException);
+      //virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
+      //   throw(ProcessingException);
 
 
          /** Returns a gnnsRinex object, adding the new data generated when
@@ -235,7 +235,7 @@ namespace gpstk
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssRinex& Process(gnssRinex& gData)
+      virtual IRinex& Process(IRinex& gData)
          throw(ProcessingException);
 
 
@@ -244,8 +244,8 @@ namespace gpstk
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssDataMap& Process(gnssDataMap& gData)
-         throw(ProcessingException);
+      //virtual gnssDataMap& Process(gnssDataMap& gData)
+      //   throw(ProcessingException);
 
 
          /// Returns a string identifying this object.
@@ -325,7 +325,7 @@ namespace gpstk
           */
       void Compute( const CommonTime& epoch,
                     const SourceID& source,
-                    const satTypeValueMap& gData )
+                    const SatTypePtrMap& gData )
          throw(ProcessingException);
 
 

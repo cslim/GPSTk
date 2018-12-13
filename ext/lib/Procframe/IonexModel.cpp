@@ -105,8 +105,8 @@ namespace gpstk
        * @param time      Epoch.
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& IonexModel::Process( const CommonTime& time,
-                                         satTypeValueMap& gData )
+   SatTypePtrMap& IonexModel::Process( const CommonTime& time,
+                                         SatTypePtrMap& gData )
       throw(Exception)
    {
 
@@ -115,9 +115,8 @@ namespace gpstk
       try
       {
 
-            // Loop through all the satellites
-         satTypeValueMap::iterator stv;
-         for(stv = gData.begin(); stv != gData.end(); ++stv)
+            // Loop through all the satellites  
+         for(auto stv = gData.begin(); stv != gData.end(); ++stv)
          {
 
                // First check if ionex maps were set
@@ -132,8 +131,8 @@ namespace gpstk
             }
 
                // If elevation or azimuth is missing, then remove satellite
-            if( stv->second.find(TypeID::elevation) == stv->second.end() ||
-                stv->second.find(TypeID::azimuth)   == stv->second.end() )
+            if( stv->second->get_value().find(TypeID::elevation) == stv->second->get_value().end() ||
+                stv->second->get_value().find(TypeID::azimuth)   == stv->second->get_value().end() )
             {
 
                satRejectedSet.insert( stv->first );
@@ -146,8 +145,8 @@ namespace gpstk
 
                   // Scalars to hold satellite elevation, azimuth, ionospheric
                   // map and ionospheric slant delays
-               double elevation( stv->second(TypeID::elevation) );
-               double azimuth(   stv->second(TypeID::azimuth)   );
+               double elevation( stv->second->get_value()(TypeID::elevation) );
+               double azimuth(   stv->second->get_value()(TypeID::azimuth)   );
                double ionoMap(0.0);
                double ionexL1(0.0), ionexL2(0.0), ionexL5(0.0);   // GPS
                double ionexL6(0.0), ionexL7(0.0), ionexL8(0.0);   // Galileo
@@ -216,14 +215,14 @@ namespace gpstk
 
                   // Now we have to add the new values (i.e., ionosphere delays)
                   // to the data structure
-               (*stv).second[TypeID::ionoTEC] = tecval;
-               (*stv).second[TypeID::ionoMap] = ionoMap;
-               (*stv).second[TypeID::ionoL1]  = ionexL1;
-               (*stv).second[TypeID::ionoL2]  = ionexL2;
-               (*stv).second[TypeID::ionoL5]  = ionexL5;
-               (*stv).second[TypeID::ionoL6]  = ionexL6;
-               (*stv).second[TypeID::ionoL7]  = ionexL7;
-               (*stv).second[TypeID::ionoL8]  = ionexL8;
+               (*stv).second->get_value()[TypeID::ionoTEC] = tecval;
+               (*stv).second->get_value()[TypeID::ionoMap] = ionoMap;
+               (*stv).second->get_value()[TypeID::ionoL1]  = ionexL1;
+               (*stv).second->get_value()[TypeID::ionoL2]  = ionexL2;
+               (*stv).second->get_value()[TypeID::ionoL5]  = ionexL5;
+               (*stv).second->get_value()[TypeID::ionoL6]  = ionexL6;
+               (*stv).second->get_value()[TypeID::ionoL7]  = ionexL7;
+               (*stv).second->get_value()[TypeID::ionoL8]  = ionexL8;
 
 
                   // DCB corrections for P1 measurements and satellite clock
@@ -251,13 +250,13 @@ namespace gpstk
                   double kappa2(-1.0/0.646944444);
                   double dcb(tempDCB * C_MPS * 1e-9);  // meters
 
-                  if( stv->second.find(TypeID::instC1) == stv->second.end() )
+                  if( stv->second->get_value().find(TypeID::instC1) == stv->second->get_value().end() )
                   {
-                     stv->second[TypeID::instC1] = (kappa2 * dcb);
+                     stv->second->get_value()[TypeID::instC1] = (kappa2 * dcb);
                   }
                   else
                   {
-                     stv->second[TypeID::instC1] += (kappa2 * dcb);
+                     stv->second->get_value()[TypeID::instC1] += (kappa2 * dcb);
                   }
 
                }  // End of 'if(useDCB)...'

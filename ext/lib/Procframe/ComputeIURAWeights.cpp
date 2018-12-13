@@ -58,8 +58,8 @@ namespace gpstk
        *
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& ComputeIURAWeights::Process( const CommonTime& time,
-                                                 satTypeValueMap& gData )
+   SatTypePtrMap& ComputeIURAWeights::Process( const CommonTime& time,
+                                                 SatTypePtrMap& gData )
       throw(ProcessingException)
    {
 
@@ -72,8 +72,7 @@ namespace gpstk
          SatIDSet satRejectedSet;
 
                // Loop through all the satellites
-         satTypeValueMap::iterator it;
-         for( it = gData.begin(); it != gData.end(); ++it )
+         for(auto it = gData.begin(); it != gData.end(); ++it )
          {
 
             try
@@ -106,7 +105,7 @@ namespace gpstk
 
                // If everything is OK, then get the new value inside
                // the GDS structure
-            (*it).second[TypeID::weight] = weight;
+            (*it).second->get_value()[TypeID::weight] = weight;
 
          }  // End of 'for( it = gData.begin(); it != gData.end(); ++it )'
 

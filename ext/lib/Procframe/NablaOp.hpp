@@ -255,19 +255,8 @@ namespace gpstk
           *
           * @param gData      Data object holding the data.
           */
-      virtual satTypeValueMap& Process(satTypeValueMap& gData)
+      virtual SatTypePtrMap& Process(SatTypePtrMap& gData)
          throw(ProcessingException);
-
-
-         /** Returns a reference to a gnssSatTypeValue object after
-          *  differencing data type values given in 'diffTypes' field with
-          *  respect to reference station data in 'refData' field.
-          *
-          * @param gData      Data object holding the data.
-          */
-      virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
-         throw(ProcessingException)
-      { Process(gData.body); return gData; };
 
 
          /** Returns a reference to a gnnsRinex object after differencing
@@ -276,9 +265,9 @@ namespace gpstk
           *
           * @param gData      Data object holding the data.
           */
-      virtual gnssRinex& Process(gnssRinex& gData)
+      virtual IRinex& Process(IRinex& gData)
          throw(ProcessingException)
-      { Process(gData.body); return gData; };
+      { Process(gData.getBody()); return gData; };
 
 
          /// Returns a string identifying this object.

@@ -292,21 +292,7 @@ namespace gpstk
           *  -1 if problems arose
           */
       virtual int Prepare( const CommonTime& time,
-                           const satTypeValueMap& data );
-
-
-         /** Method to set an a priori position of receiver using
-          *  Bancroft's method.
-          *
-          * @param gData         GNSS data structure to be used
-          *
-          * @return
-          *  0 if OK
-          *  -1 if problems arose
-          */
-      virtual int Prepare(const gnssSatTypeValue& gData)
-      { return (Prepare(gData.header.epoch, gData.body)); };
-
+                           const SatTypePtrMap& data );
 
          /** Method to set the initial (a priori) position of receiver before
           *  Compute() method.
@@ -337,8 +323,8 @@ namespace gpstk
           * @param time      Epoch.
           * @param gData     Data object holding the data.
           */
-      virtual satTypeValueMap& Process( const CommonTime& time,
-                                        satTypeValueMap& gData )
+      virtual SatTypePtrMap& Process( const CommonTime& time,
+                                        SatTypePtrMap& gData )
          throw(ProcessingException);
 
 

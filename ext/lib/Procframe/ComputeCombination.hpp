@@ -74,7 +74,7 @@ namespace gpstk
           *
           * @param gData     Data object holding the data.
           */
-      virtual satTypeValueMap& Process(satTypeValueMap& gData)
+      virtual SatTypePtrMap& Process(SatTypePtrMap& gData)
          throw(ProcessingException);
 
 
@@ -83,20 +83,9 @@ namespace gpstk
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
+      virtual IRinex& Process(IRinex& gData)
          throw(ProcessingException)
-      { Process(gData.body); return gData; };
-
-
-         /** Returns a gnnsRinex object, adding the new data generated when
-          *  calling this object.
-          *
-          * @param gData    Data object holding the data.
-          */
-      virtual gnssRinex& Process(gnssRinex& gData)
-         throw(ProcessingException)
-      { Process(gData.body); return gData; };
-
+      { Process(gData.getBody()); return gData; };
 
          /// Returns a string identifying this object.
       virtual std::string getClassName(void) const;

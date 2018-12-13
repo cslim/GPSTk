@@ -2,10 +2,7 @@
 using namespace std;
 namespace gpstk
 {
-    std::istream& operator>>(std::istream& i, RinexEpoch& f)
-    {
-        return i >> f.rinex;
-    }
+
 
     RinexEpoch::
         RinexEpoch()

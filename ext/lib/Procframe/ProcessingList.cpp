@@ -50,45 +50,11 @@ namespace gpstk
    std::string ProcessingList::getClassName() const
    { return "ProcessingList"; }
 
-
-
-      /* Processing method. It returns a gnnsSatTypeValue object.
-       *
-       * @param gData    Data object holding the data.
-       */
-   gnssSatTypeValue& ProcessingList::Process(gnssSatTypeValue& gData)
-   {
-
-      try
-      {
-
-         std::list<ProcessingClass*>::const_iterator pos;
-         for (pos = proclist.begin(); pos != proclist.end(); ++pos)
-         {
-            (*pos)->Process(gData);
-         }
-
-         return gData;
-
-      }
-      catch(...)
-      {
-
-            // This method must throw the same exceptions it may get from
-            // the 'ProcessingList' elements, without altering them.
-         throw;
-
-      }
-
-   }  // End of method 'ProcessingList::Process()'
-
-
-
       /* Processing method. It returns a gnnsRinex object.
        *
        * @param gData    Data object holding the data.
        */
-   gnssRinex& ProcessingList::Process(gnssRinex& gData)
+   IRinex& ProcessingList::Process(IRinex& gData)
    {
 
       try

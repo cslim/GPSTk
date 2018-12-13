@@ -61,8 +61,8 @@ namespace gpstk
        * @param time      Epoch corresponding to the data.
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& ComputeMOPSWeights::Process( const CommonTime& time,
-                                                 satTypeValueMap& gData )
+   SatTypePtrMap& ComputeMOPSWeights::Process( const CommonTime& time,
+	   SatTypePtrMap& gData )
       throw(ProcessingException)
    {
 
@@ -76,13 +76,12 @@ namespace gpstk
          SatIDSet satRejectedSet;
 
             // Loop through all the satellites
-         satTypeValueMap::iterator it;
-         for( it = gData.begin(); it != gData.end(); ++it )
+         for(auto it = gData.begin(); it != gData.end(); ++it )
          {
 
             try
             {
-               weight = getWeight( ((*it).first), ((*it).second) );
+               weight = getWeight( ((*it).first), (*it).second->get_value() );
             }
             catch(...)
             {
@@ -97,7 +96,7 @@ namespace gpstk
 
                // If everything is OK, then get the new value inside
                // the GDS structure
-            (*it).second[TypeID::weight] = weight;
+            (*it).second->get_value()[TypeID::weight] = weight;
 
          }
 
@@ -121,50 +120,20 @@ namespace gpstk
 
 
 
-      /* Returns a gnnsSatTypeValue object, adding the new data
-       * generated when calling this object.
-       *
-       * @param gData    Data object holding the data.
-       */
-   gnssSatTypeValue& ComputeMOPSWeights::Process(gnssSatTypeValue& gData)
-      throw(ProcessingException)
-   {
-
-      try
-      {
-
-         Process(gData.header.epoch, gData.body);
-
-         return gData;
-
-      }
-      catch(Exception& u)
-      {
-            // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + u.what() );
-
-         GPSTK_THROW(e);
-
-      }
-
-   }  // End of method 'ComputeMOPSWeightsWeights::Process()'
-
-
 
       /* Returns a gnnsRinex object, adding the new data generated
        * when calling this object.
        *
        * @param gData    Data object holding the data.
        */
-   gnssRinex& ComputeMOPSWeights::Process(gnssRinex& gData)
+   IRinex& ComputeMOPSWeights::Process(IRinex& gData)
       throw(ProcessingException)
    {
 
       try
       {
 
-         Process(gData.header.epoch, gData.body);
+         Process(gData.getHeader().epoch, gData.getBody());
 
          return gData;
 

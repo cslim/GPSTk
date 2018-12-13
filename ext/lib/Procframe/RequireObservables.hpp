@@ -114,12 +114,12 @@ namespace gpstk
       { };
 
 
-         /** Returns a satTypeValueMap object, checking the required
+         /** Returns a SatTypePtrMap object, checking the required
           *  observables.
           *
           * @param gData     Data object holding the data.
           */
-      virtual satTypeValueMap& Process(satTypeValueMap& gData)
+      virtual SatTypePtrMap& Process(SatTypePtrMap& gData)
          throw(ProcessingException);
 
 
@@ -161,14 +161,6 @@ namespace gpstk
       { return requiredTypeSet; };
 
 
-         /** Returns a gnnsSatTypeValue object, checking the required
-          *  observables.
-          *
-          * @param gData    Data object holding the data.
-          */
-      virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
-         throw(ProcessingException)
-      { Process(gData.body); return gData; };
 
 
 
@@ -176,11 +168,11 @@ namespace gpstk
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssRinex& Process(gnssRinex& gData)
+      virtual IRinex& Process(IRinex& gData)
          throw(ProcessingException)
       {
-          t = gData.header.epoch;
-          Process(gData.body); 
+          t = gData.getHeader().epoch;
+          Process(gData.getBody()); 
           return gData;
       };
 

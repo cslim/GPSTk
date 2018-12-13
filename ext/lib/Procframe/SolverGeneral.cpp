@@ -80,54 +80,12 @@ namespace gpstk
 
    }  // End of constructor 'SolverGeneral::SolverGeneral()'
 
-
-      /* Returns a reference to a gnnsSatTypeValue object after
-       * solving the previously defined equation system.
-       *
-       * @param gData    Data object holding the data.
-       */
-   gnssSatTypeValue& SolverGeneral::Process(gnssSatTypeValue& gData)
-      throw(ProcessingException)
-   {
-
-      try
-      {
-
-            // Build a gnssRinex object and fill it with data
-         gnssRinex g1;
-         g1.header = gData.header;
-         g1.body = gData.body;
-
-            // Call the Process() method with the appropriate input object
-         Process(g1);
-
-            // Update the original gnssSatTypeValue object with the results
-         gData.body = g1.body;
-
-         return gData;
-
-      }
-      catch(Exception& u)
-      {
-            // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + StringUtils::asString( getIndex() ) + ":"
-                                + u.what() );
-
-         GPSTK_THROW(e);
-
-      }
-
-   }  // End of method 'SolverGeneral::Process()'
-
-
-
       /* Returns a reference to a gnnsRinex object after solving
        * the previously defined equation system.
        *
        * @param gData     Data object holding the data.
        */
-   gnssRinex& SolverGeneral::Process(gnssRinex& gData)
+   IRinex& SolverGeneral::Process(IRinex& gData)
       throw(ProcessingException)
    {
 
@@ -136,7 +94,7 @@ namespace gpstk
 
             // Build a gnssDataMap object and fill it with data
          gnssDataMap gdsMap;
-         SourceID source( gData.header.source );
+         SourceID source( gData.getHeader().source );
          gdsMap.addGnssRinex( gData );
 
             // Call the Process() method with the appropriate input object,

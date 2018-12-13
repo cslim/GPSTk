@@ -59,8 +59,8 @@ namespace gpstk
        * @param time      Epoch corresponding to the data.
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& ComputeWindUp::Process( const CommonTime& time,
-                                            satTypeValueMap& gData )
+   SatTypePtrMap& ComputeWindUp::Process( const CommonTime& time,
+                                            SatTypePtrMap& gData )
       throw(ProcessingException)
    {
 
@@ -77,7 +77,7 @@ namespace gpstk
          SatIDSet satRejectedSet;
 
             // Loop through all the satellites
-         for ( satTypeValueMap::iterator it = gData.begin();
+         for ( auto it = gData.begin();
                it != gData.end();
                ++it )
          {
@@ -92,11 +92,11 @@ namespace gpstk
                // Then, check both if there is arc information, and if current
                // arc number is different from arc number in storage (which
                // means a cycle slip happened)
-            if ( (*it).second.find(TypeID::satArc) != (*it).second.end() &&
-                 (*it).second(TypeID::satArc) != satArcMap[ (*it).first ] )
+            if ( (*it).second->get_value().find(TypeID::satArc) != (*it).second->get_value().end() &&
+                 (*it).second->get_value()(TypeID::satArc) != satArcMap[ (*it).first ] )
             {
                   // If different, update satellite arc in storage
-               satArcMap[ (*it).first ] = (*it).second(TypeID::satArc);
+               satArcMap[ (*it).first ] =(*it).second->get_value()(TypeID::satArc);
 
                   // Reset phase information
                phase_satellite[ (*it).first ].previousPhase = 0.0;
@@ -106,9 +106,9 @@ namespace gpstk
 
 
                // Use ephemeris if satellite position is not already computed
-            if( ( (*it).second.find(TypeID::satX) == (*it).second.end() ) ||
-                ( (*it).second.find(TypeID::satY) == (*it).second.end() ) ||
-                ( (*it).second.find(TypeID::satZ) == (*it).second.end() ) )
+            if( ( (*it).second->get_value().find(TypeID::satX) == (*it).second->get_value().end() ) ||
+                ( (*it).second->get_value().find(TypeID::satY) == (*it).second->get_value().end() ) ||
+                ( (*it).second->get_value().find(TypeID::satZ) == (*it).second->get_value().end() ) )
             {
 
                if(pEphemeris==NULL)
@@ -155,16 +155,16 @@ namespace gpstk
             {
 
                   // Get satellite position out of GDS
-               svPos[0] = (*it).second[TypeID::satX];
-               svPos[1] = (*it).second[TypeID::satY];
-               svPos[2] = (*it).second[TypeID::satZ];
+               svPos[0] = (*it).second->get_value()[TypeID::satX];
+               svPos[1] = (*it).second->get_value()[TypeID::satY];
+               svPos[2] = (*it).second->get_value()[TypeID::satZ];
 
             }  // End of 'if( ( (*it).second.find(TypeID::satX) == ...'
 
 
                // Let's get wind-up value in radians, and insert it
                // into GNSS data structure.
-            (*it).second[TypeID::windUp] =
+            (*it).second->get_value()[TypeID::windUp] =
                getWindUp((*it).first, time, svPos, sunPos);
 
          }  // End of 'for (it = gData.begin(); it != gData.end(); ++it)'

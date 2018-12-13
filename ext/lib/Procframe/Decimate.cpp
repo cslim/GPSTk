@@ -99,8 +99,8 @@ namespace gpstk
         * @param time      Epoch corresponding to the data.
         * @param gData     Data object holding the data.
         */
-    satTypeValueMap& Decimate::Process(const CommonTime& time,
-        satTypeValueMap& gData)
+    SatTypePtrMap& Decimate::Process(const CommonTime& time,
+		SatTypePtrMap& gData)
         throw(DecimateEpoch)
     {
 
