@@ -6,9 +6,9 @@
 
 namespace gpstk
 {
-   
-    typedef SatID::SatelliteSystem GpstkSatSystem;
-
+	class IRinex;
+	typedef SatID::SatelliteSystem GpstkSatSystem;
+	typedef std::unique_ptr<IRinex> irinex_uptr;
     class IRinex
     {
     public:
@@ -22,10 +22,14 @@ namespace gpstk
 			return f.print(i);
 		}
 
-		virtual std::unique_ptr<IRinex> clone() const =0;
+		virtual irinex_uptr clone() const =0;
+		
 		virtual std::istream& read(std::istream&) = 0;
 		virtual std::ostream& print(std::ostream&) = 0;
-        virtual sourceEpochRinexHeader& getHeader() = 0;
+        
+		virtual sourceEpochRinexHeader& getHeader() = 0;
+        virtual const sourceEpochRinexHeader& getHeader() const = 0;
+
         virtual SatTypePtrMap& getBody() = 0;
 		virtual const SatTypePtrMap& getBody() const = 0;
     };
@@ -47,7 +51,7 @@ namespace gpstk
             return currData;
         };
 
-		virtual std::unique_ptr<IRinex> clone() const override
+		virtual irinex_uptr clone() const override
 		{
 			return std::make_unique<RinexEpoch>(*this);
 		}

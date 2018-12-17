@@ -116,7 +116,7 @@ namespace gpstk
        * @param forceCoef        Always use default coefficient.
        */
    Variable::Variable( const TypeID& type,
-                       StochasticModel* pModel,
+                       IStochasticModel* pModel,
                        bool sourceIndexed,
                        bool satIndexed,
                        double variance,
@@ -150,7 +150,7 @@ namespace gpstk
        * @param forceCoef   Always use default coefficient.
        */
    void Variable::Init( const TypeID& type,
-                        StochasticModel* pModel,
+                        IStochasticModel* pModel,
                         double variance,
                         double coef,
                         bool forceCoef, 

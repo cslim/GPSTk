@@ -26,7 +26,7 @@ namespace pod
    
     gpstk::StochasticModel_uptr  IonoEquations::constantModel(double sigma)
     {
-        return std::make_unique<StochasticModel>();
+        return std::make_unique<ConstantModel>();
     }
 
     gpstk::StochasticModel_uptr  IonoEquations::rWalkModel(double qPrime)
@@ -58,10 +58,10 @@ namespace pod
         stModelInitializer(&IonoEquations::constantModel)
     {};
 
-    void IonoEquations::Prepare(gpstk::gnssRinex & gData)
+    void IonoEquations::Prepare(gpstk::IRinex & gData)
     {
         currParameters.clear();
-        auto&& currentSatSet = gData.getSatID();
+        auto&& currentSatSet = gData.getBody().getSatID();
 
         for (auto&& it : currentSatSet)
         {
@@ -77,7 +77,7 @@ namespace pod
         }
     }
 
-    void IonoEquations::updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0)
+    void IonoEquations::updateH(const gpstk::IRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0)
     {
         int nSv = currParameters.size();
         Matrix<double>mI = ident<double>(nSv);

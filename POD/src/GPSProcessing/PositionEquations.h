@@ -21,9 +21,9 @@ namespace pod
             return types;
         }
 
-        virtual void Prepare(gpstk::gnssRinex& gData);
+        virtual void Prepare(gpstk::IRinex& gData);
 
-        virtual void updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0) override;
+        virtual void updateH(const gpstk::IRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0) override;
 
         virtual void updatePhi(gpstk::Matrix<double>& Phi, int& index) const override;
 

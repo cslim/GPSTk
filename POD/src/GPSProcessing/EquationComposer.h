@@ -26,10 +26,10 @@ namespace pod
         virtual ~EquationComposer() {};
 
         //prepare equations according current data set 'gData'
-        virtual void Prepare(gpstk::gnssRinex& gData) ;
+        virtual void Prepare(gpstk::IRinex& gData) ;
 
         // compose design matrix
-        virtual void updateH(gpstk::gnssRinex& gData, gpstk::Matrix<double>& H);
+        virtual void updateH(gpstk::IRinex& gData, gpstk::Matrix<double>& H);
         
         /// compose state transition matrix
         virtual void updatePhi(gpstk::Matrix<double>& Phi) const;
@@ -38,10 +38,10 @@ namespace pod
         virtual void updateQ(gpstk::Matrix<double>& Q) const;
         
         // compose measurments errors matrix
-        virtual void updateW(const gpstk::gnssRinex& gData,  gpstk::Matrix<double>& R);
+        virtual void updateW(const gpstk::IRinex& gData,  gpstk::Matrix<double>& R);
 
         // compose vector of measurements (prefit residuals)
-        virtual void updateMeas(const gpstk::gnssRinex& gData, gpstk::Vector<double>& prefitResiduas);
+        virtual void updateMeas(const gpstk::IRinex& gData, gpstk::Vector<double>& prefitResiduas);
 
         // compose current state vector and covariance matrix
         virtual void updateKfState(gpstk::Vector<double>& state, gpstk::Matrix<double>& cov) const;
@@ -53,7 +53,7 @@ namespace pod
         virtual void initKfState(gpstk::Vector<double>& state, gpstk::Matrix<double>& cov) const;
         
         // insert current residuals vector into GNSS data structure
-        virtual void saveResiduals(gpstk::gnssRinex& gData, gpstk::Vector<double>& postfitResiduals) const;
+        virtual void saveResiduals(gpstk::IRinex& gData, gpstk::Vector<double>& postfitResiduals) const;
 
         // get curent number of unknowns
         virtual int getNumUnknowns() const;

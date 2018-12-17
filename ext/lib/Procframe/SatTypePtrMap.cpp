@@ -34,6 +34,16 @@ namespace gpstk
     }  // End of method 'SatTypePtrMap::getSatID()'
 
 
+	  // Returns a getSatSystems with only this satellite.
+	  // @param satellite Satellite to be extracted.
+	SatSystSet SatTypePtrMap::getSatSystems() const
+	{	
+		SatSystSet res;
+		for (auto && it:*this)
+			res.insert(it.first.system);
+		return res;
+	}
+
 
        // Returns a Vector with all the satellites present in this object.
     Vector<SatID> SatTypePtrMap::getVectorOfSatID() const
@@ -132,6 +142,29 @@ namespace gpstk
 
     }  // End of method 'SatTypePtrMap::extractSatID()'
 
+	SatTypePtrMap SatTypePtrMap::extractSatSyst(SatID::SatelliteSystem ss) const
+	{
+		SatSystSet sset{ ss };
+		return extractSatSyst(sset);
+	}
+
+
+	SatTypePtrMap& SatTypePtrMap::keepOnlySatSyst(const SatSystSet& satSystSet)
+	{
+		SatTypePtrMap stvMap(extractSatSyst(satSystSet));
+		(*this) = stvMap;
+
+		return (*this);
+
+	}
+
+	SatTypePtrMap& SatTypePtrMap::keepOnlySatSyst(SatID::SatelliteSystem ss) 
+	{
+		SatSystSet sset{ ss };
+		keepOnlySatSyst(sset);
+		return *this;
+	}
+
        // Modifies this object, keeping only this satellite.
        // @param satellite Satellite to be kept.
     SatTypePtrMap& SatTypePtrMap::keepOnlySatID(const SatID& satellite)
@@ -177,43 +210,37 @@ namespace gpstk
 
        // Returns a SatTypePtrMap with only this type of value.
        // @param type Type of value to be extracted.
-    //SatTypePtrMap SatTypePtrMap::extractTypeID(const TypeID& type) const
-    //{
+	satTypeValueMap SatTypePtrMap::extractTypeID(const TypeID& type) const
+    {
 
-    //    TypeIDSet typeSet;
-    //    typeSet.insert(type);
+        TypeIDSet typeSet;
+        typeSet.insert(type);
 
-    //    return extractTypeID(typeSet);
+        return extractTypeID(typeSet);
 
-    //}  // End of method 'SatTypePtrMap::extractTypeID()'
+    }  // End of method 'SatTypePtrMap::extractTypeID()'
 
 
 
-    //   // Returns a SatTypePtrMap with only these types of data.
-    //   // @param typeSet Set (TypeIDSet) containing the types of data
-    //   //                to be extracted.
-    //SatTypePtrMap SatTypePtrMap::extractTypeID(const TypeIDSet& typeSet)
-    //    const
-    //{
+       // Returns a SatTypePtrMap with only these types of data.
+       // @param typeSet Set (TypeIDSet) containing the types of data
+       //                to be extracted.
+    satTypeValueMap SatTypePtrMap::extractTypeID(const TypeIDSet& typeSet) const
+    {
 
-    //    SatTypePtrMap theMap;
+		satTypeValueMap theMap;
 
-    //    for (SatTypePtrMap::const_iterator it = (*this).begin();
-    //        it != (*this).end();
-    //        ++it)
-    //    {
+		for (auto&& it: *this)
+		{
+			auto tvMap = it.second->get_value().extractTypeID(typeSet);
+			if (tvMap.size() > 0)
+				theMap[it.first] = tvMap;
 
-    //        typeValueMap tvMap((*it).second.extractTypeID(typeSet));
-    //        if (tvMap.size() > 0)
-    //        {
-    //            theMap[(*it).first] = tvMap;
-    //        };
+		}
 
-    //    };
+        return theMap;
 
-    //    return theMap;
-
-    //}  // End of method 'SatTypePtrMap::extractTypeID()'
+    }  // End of method 'SatTypePtrMap::extractTypeID()'
 
 
 
@@ -288,6 +315,7 @@ namespace gpstk
         return removeSatSyst(ssset);
     }
 
+	
     // Modifies this object, removing this type of data.
     // @param type Type of value to be removed.
     SatTypePtrMap& SatTypePtrMap::removeTypeID(const TypeID& type)
@@ -523,4 +551,39 @@ in matrix and number of types do not match"));
     }  // End of method 'SatTypePtrMap::operator()'
 
 
+	// Convenience output method for structure satTypeValueMap
+	std::ostream& SatTypePtrMap::dump(std::ostream& s,
+		int mode) const
+	{
+
+		for (auto it = (*this).begin();
+			it != (*this).end();
+			it++)
+		{
+
+			// First, print satellite (system and PRN)
+			s << (*it).first << " ";
+
+			for (auto itObs = (*it).second->get_value().begin();
+				itObs != (*it).second->get_value().end();
+				itObs++)
+			{
+
+				if (mode == 1)
+				{
+					s << (*itObs).first << " ";
+				}
+
+				s << (*itObs).second << " ";
+
+			}  // End of 'for( typeValueMap::const_iterator itObs = ...'
+
+			s << endl;
+
+		}  // End of 'for( satTypeValueMap::const_iterator it = ...'
+
+		   // Let's return the 'std::ostream'
+		return s;
+
+	}  // End of method 'satTypeValueMap::dump()'
 }

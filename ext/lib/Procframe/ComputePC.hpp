@@ -107,7 +107,7 @@ namespace gpstk
           *
           * @param gData     Data object holding the data.
           */
-      virtual satTypeValueMap& Process(satTypeValueMap& gData)
+      virtual SatTypePtrMap& Process(SatTypePtrMap& gData)
          throw(ProcessingException)
       { ComputeCombination::Process(gData); return gData; };
 

@@ -57,7 +57,7 @@ namespace gpstk
        *
        * @param gData      Data object holding the data.
        */
-   satTypeValueMap& DoubleOp::Process(satTypeValueMap& gData)
+   SatTypePtrMap& DoubleOp::Process(SatTypePtrMap& gData)
       throw(ProcessingException)
    {
 
@@ -73,7 +73,7 @@ namespace gpstk
 
          if(refSatID.isValid())
          {
-            satTypeValueMap::iterator it = gData.find(refSatID);
+            auto it = gData.find(refSatID);
             if(it!=gData.end())
             {
                double elev = gData(it->first)(TypeID::elevation);
@@ -87,8 +87,7 @@ namespace gpstk
             
             // Loop through all satellites in reference station data set,
             // looking for reference satellite
-            satTypeValueMap::iterator it;
-            for (it = gData.begin(); it != gData.end(); ++it)
+            for (auto it = gData.begin(); it != gData.end(); ++it)
             {
 
                // The satellite with the highest elevation will usually be

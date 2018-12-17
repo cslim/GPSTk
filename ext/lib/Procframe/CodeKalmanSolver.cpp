@@ -297,51 +297,13 @@ covariance matrix.");
 
 
 
-      /* Returns a reference to a gnnsSatTypeValue object after
-       * solving the previously defined equation system.
-       *
-       * @param gData    Data object holding the data.
-       */
-   gnssSatTypeValue& CodeKalmanSolver::Process(gnssSatTypeValue& gData)
-      throw(ProcessingException)
-   {
-
-      try
-      {
-
-            // Build a gnssRinex object and fill it with data
-         gnssRinex g1;
-         g1.header = gData.header;
-         g1.body = gData.body;
-
-            // Call the Process() method with the appropriate input object
-         Process(g1);
-
-            // Update the original gnssSatTypeValue object with the results
-         gData.body = g1.body;
-
-         return gData;
-      }
-      catch(Exception& u)
-      {
-            // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + u.what() );
-
-         GPSTK_THROW(e);
-
-      }
-
-   }  // End of method 'CodeKalmanSolver::Process()'
-
-
 
       /* Returns a reference to a gnnsRinex object after solving
        * the previously defined equation system.
        *
        * @param gData     Data object holding the data.
        */
-   gnssRinex& CodeKalmanSolver::Process(gnssRinex& gData)
+   IRinex& CodeKalmanSolver::Process(IRinex& gData)
        throw(ProcessingException)
    {
 
@@ -352,7 +314,7 @@ covariance matrix.");
            numUnknowns = defaultEqDef.body.size();
 
            // Number of measurements equals the number of visible satellites
-           numMeas = gData.numSats();
+           numMeas = gData.getBody().numSats();
 
            // State Transition Matrix (PhiMatrix)
            phiMatrix.resize(numUnknowns, numUnknowns, 0.0);
@@ -370,12 +332,12 @@ covariance matrix.");
            measVector.resize(numMeas, 0.0);
 
            // Build the vector of measurements
-           measVector = gData.getVectorOfTypeID(defaultEqDef.header);
+           measVector = gData.getBody().getVectorOfTypeID(defaultEqDef.header);
 
 
            // Generate the appropriate weights matrix
            // Try to extract weights from GDS
-           satTypeValueMap dummy(gData.body.extractTypeID(TypeID::weight));
+           auto dummy(gData.getBody().extractTypeID(TypeID::weight));
 
            // Count the number of satellites with weights
            size_t nW(dummy.numSats());
@@ -383,7 +345,7 @@ covariance matrix.");
            {
                if (nW == numMeas)   // Check if weights match
                {
-                   Vector<double> weightsVector(gData.getVectorOfTypeID(TypeID::weight));
+                   Vector<double> weightsVector(gData.getBody().getVectorOfTypeID(TypeID::weight));
 
                    rMatrix(i, i) = weightsVector(i);
                }
@@ -395,7 +357,7 @@ covariance matrix.");
            }
 
            // Generate the corresponding geometry/design matrix
-           hMatrix = gData.body.getMatrixOfTypes((*this).defaultEqDef.body);
+           hMatrix = gData.getBody().getMatrixOfTypes((*this).defaultEqDef.body);
 
            SatID  dummySat;
 
@@ -486,7 +448,7 @@ covariance matrix.");
                ++row;
            }
 
-           gData.insertTypeIDVector(TypeID::postfitC, postfitResiduals);
+           gData.getBody().insertTypeIDVector(TypeID::postfitC, postfitResiduals);
 
            return gData;
 
@@ -517,7 +479,7 @@ covariance matrix.");
        * 'StochasticModel' (constant coordinates) or 'WhiteNoiseModel'.
        */
    CodeKalmanSolver& CodeKalmanSolver::setCoordinatesModel(
-                                                   StochasticModel* pModel)
+                                                   IStochasticModel* pModel)
    {
 
          // All coordinates will have the same model

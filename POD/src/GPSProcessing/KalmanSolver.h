@@ -18,10 +18,8 @@ namespace pod
 
         virtual ~KalmanSolver();
 
-        virtual gpstk::gnssSatTypeValue& Process(gpstk::gnssSatTypeValue& gData)
-            throw(gpstk::ProcessingException);
 
-        virtual gpstk::gnssRinex& Process(gpstk::gnssRinex& gData)
+        virtual gpstk::IRinex& Process(gpstk::IRinex& gData)
             throw(gpstk::ProcessingException);
 
         // Returns a string identifying this object.
@@ -65,15 +63,15 @@ namespace pod
     protected:
 
         //resolve carrier  phase ambiguities ot integer values
-        virtual void fixAmbiguities(gpstk::gnssRinex& gData);
+        virtual void fixAmbiguities(gpstk::IRinex& gData);
         
         //check data integrity 
-        virtual int check(gpstk::gnssRinex& gData);
+        virtual int check(gpstk::IRinex& gData);
 
-        int checkPhase(gpstk::gnssRinex& gData);
+        int checkPhase(gpstk::IRinex& gData);
 
         //reject bad observation using residuals value
-        virtual gpstk::gnssRinex& reject(gpstk::gnssRinex& gData, const gpstk::TypeIDSet& typeOfResid);
+        virtual gpstk::IRinex& reject(gpstk::IRinex& gData, const gpstk::TypeIDSet& typeOfResid);
 
         virtual void reset()
         {

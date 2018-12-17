@@ -57,8 +57,8 @@ namespace gpstk
        * @param time      Epoch corresponding to the data.
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& ComputeDOP::Process( const CommonTime& time,
-                                         satTypeValueMap& gData)
+   SatTypePtrMap& ComputeDOP::Process( const CommonTime& time,
+                                         SatTypePtrMap& gData)
       throw(ProcessingException)
    {
 

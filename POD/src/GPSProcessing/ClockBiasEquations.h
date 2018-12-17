@@ -15,8 +15,8 @@ namespace pod
         virtual ClockBiasEquations& setStochasicModel(gpstk::StochasticModel_sptr newModel);
 
         // Inherited via EquationBase
-        virtual void Prepare(gpstk::gnssRinex & gData) override;
-        virtual void updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0) override;
+        virtual void Prepare(gpstk::IRinex & gData) override;
+        virtual void updateH(const gpstk::IRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0) override;
       
         virtual ParametersSet getParameters() const override
         {

@@ -1,9 +1,12 @@
 #pragma once
-#include<memory>
 #include"ITypeValueMap.h"
+#include"Matrix.hpp"
+#include"satTypeValueMap.hpp"
 
 namespace gpstk
-{
+{   
+
+
     class SatTypePtrMap : public std::map<SatID, const std::shared_ptr<ITypeValueMap >>
     {
     public:
@@ -12,7 +15,6 @@ namespace gpstk
         {
             return (*this).size();
         }
-
 
         /** Returns the total number of data elements in the map.
          * This method DOES NOT suppose that all the satellites have
@@ -24,6 +26,8 @@ namespace gpstk
         /// Returns a SatIDSet with all the satellites present in this object.
         SatIDSet getSatID() const;
 
+		/// Returns a SatIDSet with all the satellites present in this object.
+		SatSystSet getSatSystems() const;
 
         /// Returns a Vector with all the satellites present in this object.
         Vector<SatID> getVectorOfSatID() const;
@@ -57,6 +61,10 @@ namespace gpstk
         /// @param satSet Set (SatSystSet) containing the Satellite system to
         ///               be extracted.
         SatTypePtrMap extractSatSyst(const SatSystSet& sustSet) const;
+        SatTypePtrMap extractSatSyst(SatID::SatelliteSystem s) const;
+
+		SatTypePtrMap& keepOnlySatSyst(const SatSystSet& satSystSet);
+		SatTypePtrMap& keepOnlySatSyst(SatID::SatelliteSystem s);
 
         /// Modifies this object, keeping only this satellite.
         /// @param satellite Satellite to be kept.
@@ -77,13 +85,12 @@ namespace gpstk
 
         /// Returns a SatTypePtrMap with only this type of value.
         /// @param type Type of value to be extracted.
-       // SatTypePtrMap extractTypeID(const TypeID& type) const;
-
+		satTypeValueMap extractTypeID(const TypeID & typeSet) const;
 
         /// Returns a SatTypePtrMap with only these types of data.
         /// @param typeSet Set (TypeIDSet) containing the types of data
         ///                to be extracted.
-        //SatTypePtrMap extractTypeID(const TypeIDSet& typeSet) const;
+		satTypeValueMap extractTypeID(const TypeIDSet& typeSet) const;
 
 
         /// Modifies this object, keeping only this type of data.

@@ -116,7 +116,7 @@ namespace gpstk
          GPSTK_THROW(e);
       }
 
-      int i, index;
+      int i(0), index;
       int numSVs(0), readSVs(0);
 
          // the map stores them sorted, so use svsAsWritten to determine

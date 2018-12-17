@@ -6,7 +6,7 @@ using namespace gpstk;
 namespace pod
 {
     SyncObs::SyncObs(const std::list<std::string>& files,
-        gpstk::gnssRinex& roverData,
+        gpstk::IRinex& roverData,
         const double tol)
         :Synchronize(roverData,tol), rinFiles(files)
     {
@@ -47,7 +47,7 @@ namespace pod
         firstTime = true;
     }
 
-    gnssRinex&  SyncObs::Process(gnssRinex& gData)
+	IRinex&  SyncObs::Process(IRinex& gData)
     {
         if (rin.fail())
         {

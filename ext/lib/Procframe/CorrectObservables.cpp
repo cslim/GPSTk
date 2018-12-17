@@ -59,8 +59,8 @@ namespace gpstk
        * @param time      Epoch corresponding to the data.
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& CorrectObservables::Process( const CommonTime& time,
-                                                 satTypeValueMap& gData )
+   SatTypePtrMap& CorrectObservables::Process( const CommonTime& time,
+                                                 SatTypePtrMap& gData )
       throw(ProcessingException)
    {
 
@@ -103,14 +103,13 @@ namespace gpstk
          SatIDSet satRejectedSet;
 
             // Loop through all the satellites
-         satTypeValueMap::iterator it;
-         for (it = gData.begin(); it != gData.end(); ++it)
+         for (auto it = gData.begin(); it != gData.end(); ++it)
          {
 
                // Use ephemeris if satellite position is not already computed
-            if( ( (*it).second.find(TypeID::satX) == (*it).second.end() ) ||
-                ( (*it).second.find(TypeID::satY) == (*it).second.end() ) ||
-                ( (*it).second.find(TypeID::satZ) == (*it).second.end() ) )
+            if( ( (*it).second->get_value().find(TypeID::satX) == (*it).second->get_value().end() ) ||
+                ( (*it).second->get_value().find(TypeID::satY) == (*it).second->get_value().end() ) ||
+                ( (*it).second->get_value().find(TypeID::satZ) == (*it).second->get_value().end() ) )
             {
 
                if(pEphemeris==NULL)
@@ -149,14 +148,14 @@ namespace gpstk
                   }
                }
 
-            }  // End of 'if( ( (*it).second.find(TypeID::satX) == ...'
+            }  // End of 'if( ( (*it).second->get_value().find(TypeID::satX) == ...'
             else
             {
 
                   // Get satellite position out of GDS
-               svPos[0] = (*it).second[TypeID::satX];
-               svPos[1] = (*it).second[TypeID::satY];
-               svPos[2] = (*it).second[TypeID::satZ];
+               svPos[0] = (*it).second->get_value()[TypeID::satX];
+               svPos[1] = (*it).second->get_value()[TypeID::satY];
+               svPos[2] = (*it).second->get_value()[TypeID::satZ];
 
             }
 
@@ -172,11 +171,11 @@ namespace gpstk
             {
 
                   // Check if we have elevation information
-               if( (*it).second.find(TypeID::elevation) != (*it).second.end() )
+               if( (*it).second->get_value().find(TypeID::elevation) != (*it).second->get_value().end() )
                {
 
                      // Get elevation value
-                  double elev( (*it).second[TypeID::elevation] );
+                  double elev( (*it).second->get_value()[TypeID::elevation] );
 
                      // Check if azimuth is also required
                   if( !useAzimuth )
@@ -209,12 +208,12 @@ namespace gpstk
                   {
 
                         // Check if we have azimuth information
-                     if( (*it).second.find(TypeID::azimuth) !=
-                                                            (*it).second.end() )
+                     if( (*it).second->get_value().find(TypeID::azimuth) !=
+                                                            (*it).second->get_value().end() )
                      {
 
                            // Get azimuth value
-                        double azim( (*it).second[TypeID::azimuth] );
+                        double azim( (*it).second->get_value()[TypeID::azimuth] );
 
                            // Use a gentle fallback mechanism to get antenna
                            // phase center variations
@@ -270,7 +269,7 @@ namespace gpstk
 
                         GPSTK_THROW(e);
 
-                     }  // End of 'if( (*it).second.find(TypeID::azimuth) !=...'
+                     }  // End of 'if( (*it).second->get_value().find(TypeID::azimuth) !=...'
 
                   }  // End of 'if( !useAzimuth )'
 
@@ -285,7 +284,7 @@ namespace gpstk
 
                   GPSTK_THROW(e);
 
-               }  // End of 'if( (*it).second.find(TypeID::elevation) != ...'
+               }  // End of 'if( (*it).second->get_value().find(TypeID::elevation) != ...'
 
 
             }  // End of 'if( antenna.isValid() )...'
@@ -322,87 +321,87 @@ namespace gpstk
                // apply corrections
 
                // Look for C1
-            if( (*it).second.find(TypeID::C1) != (*it).second.end() )
+            if( (*it).second->get_value().find(TypeID::C1) != (*it).second->get_value().end() )
             {
-               (*it).second[TypeID::C1] = (*it).second[TypeID::C1] + corrL1;
+               (*it).second->get_value()[TypeID::C1] = (*it).second->get_value()[TypeID::C1] + corrL1;
             };
 
                // Look for P1
-            if( (*it).second.find(TypeID::P1) != (*it).second.end() )
+            if( (*it).second->get_value().find(TypeID::P1) != (*it).second->get_value().end() )
             {
-               (*it).second[TypeID::P1] = (*it).second[TypeID::P1] + corrL1;
+               (*it).second->get_value()[TypeID::P1] = (*it).second->get_value()[TypeID::P1] + corrL1;
             };
 
                // Look for L1
-            if( (*it).second.find(TypeID::L1) != (*it).second.end() )
+            if( (*it).second->get_value().find(TypeID::L1) != (*it).second->get_value().end() )
             {
-               (*it).second[TypeID::L1] = (*it).second[TypeID::L1] + corrL1;
+               (*it).second->get_value()[TypeID::L1] = (*it).second->get_value()[TypeID::L1] + corrL1;
             };
 
                // Look for C2
-            if( (*it).second.find(TypeID::C2) != (*it).second.end() )
+            if( (*it).second->get_value().find(TypeID::C2) != (*it).second->get_value().end() )
             {
-               (*it).second[TypeID::C2] = (*it).second[TypeID::C2] + corrL2;
+               (*it).second->get_value()[TypeID::C2] = (*it).second->get_value()[TypeID::C2] + corrL2;
             };
 
                // Look for P2
-            if( (*it).second.find(TypeID::P2) != (*it).second.end() )
+            if( (*it).second->get_value().find(TypeID::P2) != (*it).second->get_value().end() )
             {
-               (*it).second[TypeID::P2] = (*it).second[TypeID::P2] + corrL2;
+               (*it).second->get_value()[TypeID::P2] = (*it).second->get_value()[TypeID::P2] + corrL2;
             };
 
                // Look for L2
-            if( (*it).second.find(TypeID::L2) != (*it).second.end() )
+            if( (*it).second->get_value().find(TypeID::L2) != (*it).second->get_value().end() )
             {
-               (*it).second[TypeID::L2] = (*it).second[TypeID::L2] + corrL2;
+               (*it).second->get_value()[TypeID::L2] = (*it).second->get_value()[TypeID::L2] + corrL2;
             };
 
                // Look for C5
-            if( (*it).second.find(TypeID::C5) != (*it).second.end() )
+            if( (*it).second->get_value().find(TypeID::C5) != (*it).second->get_value().end() )
             {
-               (*it).second[TypeID::C5] = (*it).second[TypeID::C5] + corrL5;
+               (*it).second->get_value()[TypeID::C5] = (*it).second->get_value()[TypeID::C5] + corrL5;
             };
 
                // Look for L5
-            if( (*it).second.find(TypeID::L5) != (*it).second.end() )
+            if( (*it).second->get_value().find(TypeID::L5) != (*it).second->get_value().end() )
             {
-               (*it).second[TypeID::L5] = (*it).second[TypeID::L5] + corrL5;
+               (*it).second->get_value()[TypeID::L5] = (*it).second->get_value()[TypeID::L5] + corrL5;
             };
 
                // Look for C6
-            if( (*it).second.find(TypeID::C6) != (*it).second.end() )
+            if( (*it).second->get_value().find(TypeID::C6) != (*it).second->get_value().end() )
             {
-               (*it).second[TypeID::C6] = (*it).second[TypeID::C6] + corrL6;
+               (*it).second->get_value()[TypeID::C6] = (*it).second->get_value()[TypeID::C6] + corrL6;
             };
 
                // Look for L6
-            if( (*it).second.find(TypeID::L6) != (*it).second.end() )
+            if( (*it).second->get_value().find(TypeID::L6) != (*it).second->get_value().end() )
             {
-               (*it).second[TypeID::L6] = (*it).second[TypeID::L6] + corrL6;
+               (*it).second->get_value()[TypeID::L6] = (*it).second->get_value()[TypeID::L6] + corrL6;
             };
 
                // Look for C7
-            if( (*it).second.find(TypeID::C7) != (*it).second.end() )
+            if( (*it).second->get_value().find(TypeID::C7) != (*it).second->get_value().end() )
             {
-               (*it).second[TypeID::C7] = (*it).second[TypeID::C7] + corrL7;
+               (*it).second->get_value()[TypeID::C7] = (*it).second->get_value()[TypeID::C7] + corrL7;
             };
 
                // Look for L7
-            if( (*it).second.find(TypeID::L7) != (*it).second.end() )
+            if( (*it).second->get_value().find(TypeID::L7) != (*it).second->get_value().end() )
             {
-               (*it).second[TypeID::L7] = (*it).second[TypeID::L7] + corrL7;
+               (*it).second->get_value()[TypeID::L7] = (*it).second->get_value()[TypeID::L7] + corrL7;
             };
 
                // Look for C8
-            if( (*it).second.find(TypeID::C8) != (*it).second.end() )
+            if( (*it).second->get_value().find(TypeID::C8) != (*it).second->get_value().end() )
             {
-               (*it).second[TypeID::C8] = (*it).second[TypeID::C8] + corrL8;
+               (*it).second->get_value()[TypeID::C8] = (*it).second->get_value()[TypeID::C8] + corrL8;
             };
 
                // Look for L8
-            if( (*it).second.find(TypeID::L8) != (*it).second.end() )
+            if( (*it).second->get_value().find(TypeID::L8) != (*it).second->get_value().end() )
             {
-               (*it).second[TypeID::L8] = (*it).second[TypeID::L8] + corrL8;
+               (*it).second->get_value()[TypeID::L8] = (*it).second->get_value()[TypeID::L8] + corrL8;
             };
 
          }

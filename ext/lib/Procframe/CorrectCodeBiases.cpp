@@ -111,8 +111,8 @@ namespace gpstk
        * @param time      Epoch corresponding to the data.
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& CorrectCodeBiases::Process( const CommonTime& time,
-                                                satTypeValueMap& gData )
+   SatTypePtrMap& CorrectCodeBiases::Process( const CommonTime& time,
+                                                SatTypePtrMap& gData )
       throw(ProcessingException)
    {
       try
@@ -120,25 +120,24 @@ namespace gpstk
          SatIDSet satRejectedSet;
 
             // Loop through all the satellites
-         satTypeValueMap::iterator it;
-         for (it = gData.begin(); it != gData.end(); ++it)
+         for (auto it = gData.begin(); it != gData.end(); ++it)
          {
             SatID sat = it->first;
-            for(typeValueMap::iterator itt = it->second.begin();
-                itt != it->second.end();
+            for(typeValueMap::iterator itt = it->second->get_value().begin();
+                itt != it->second->get_value().end();
                 ++itt)
             {
                TypeID type = itt->first;
-                  //itt->second += getDCBCorrection(receiverName, sat, type, usingC1);
+                  //itt->second->get_value() += getDCBCorrection(receiverName, sat, type, usingC1);
                   
                if( (type == TypeID::C1) || (type == TypeID::P1))
                {
-                  gData[sat][TypeID::instC1] = getDCBCorrection(receiverName,
+                  gData[sat]->get_value()[TypeID::instC1] = getDCBCorrection(receiverName,
                                                                 sat, type, usingC1);
                }
                else if(type == TypeID::P2)
                {
-                  gData[sat][TypeID::instC2] = getDCBCorrection(receiverName,
+                  gData[sat]->get_value()[TypeID::instC2] = getDCBCorrection(receiverName,
                                                                 sat, type, usingC1);
                }
 

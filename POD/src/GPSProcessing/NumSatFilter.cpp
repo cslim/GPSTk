@@ -15,16 +15,13 @@ namespace pod
         { SlnType::PPP_Float,1 },
     };
 
-    gnssSatTypeValue & pod::NumSatFilter::Process(gnssSatTypeValue & gData)
-    {
-        throw UnimplementedException( getClassName()+"::Process(gnssSatTypeValue & gData) has not been implemented.");
-    }
 
-    gnssRinex & pod::NumSatFilter::Process(gnssRinex & gData)
+
+    IRinex & pod::NumSatFilter::Process(IRinex & gData)
     {
-        auto svs = gData.getSatID();
+        auto svs = gData.getBody().getSatID();
         map<SatID::SatelliteSystem, int> counter;
-        auto  & rejTableItem = rejectedSatsTable[gData.header.epoch];
+        auto  & rejTableItem = rejectedSatsTable[gData.getHeader().epoch];
         for_each(svs.begin(), svs.end(), [&counter](const SatID& sv) {counter[sv.system]++; });
         SatSystSet ssset;
         for (auto&& it: counter)
@@ -37,7 +34,7 @@ namespace pod
             if (ssset.find(sv.system) == ssset.end())
                 rejTableItem.insert(sv);
         
-        gData.keepOnlySatSystems(ssset);
+        gData.getBody().keepOnlySatSyst(ssset);
         return gData;
     }
 

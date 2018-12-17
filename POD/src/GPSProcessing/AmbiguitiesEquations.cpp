@@ -27,9 +27,9 @@ namespace pod
         return ambSet;
     }
 
-    void AmbiguitiesEquations::Prepare(gpstk::gnssRinex & gData)
+    void AmbiguitiesEquations::Prepare(gpstk::IRinex & gData)
     {
-        svsInView = gData.getSatID();
+        svsInView = gData.getBody().getSatID();
         
         //update satellites set
         satSet.insert(svsInView.begin(), svsInView.end());
@@ -74,13 +74,13 @@ namespace pod
         }
     }
 
-    void AmbiguitiesEquations::updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0)
+    void AmbiguitiesEquations::updateH(const gpstk::IRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0)
     {
         //total number of  ambiguities
         int numAmbs(csFlags.size());
 
         //sv in view
-        auto currentSatSet = gData.getSatID();
+        auto currentSatSet = gData.getBody().getSatID();
 
         //total number of sv in view
         int numSv(currentSatSet.size());

@@ -64,7 +64,7 @@ namespace pod
         // Object to remove eclipsed satellites
         EclipsedSatFilter eclipsedSV;
 
-        gnssRinex gRin;
+        RinexEpoch gRin;
 
         //Object to decimate data
         Decimate decimateData(confReader().getValueAsDouble("decimationInterval"),
@@ -177,13 +177,13 @@ namespace pod
             while (rin >> gRin)
             {
 
-                if (gRin.body.size() == 0)
+                if (gRin.getBody().size() == 0)
                 {
-                    printMsg(gRin.header.epoch, "Empty epoch record in Rinex file");
+                    printMsg(gRin.getHeader().epoch, "Empty epoch record in Rinex file");
                     continue;
                 }
 
-                const auto& t = gRin.header.epoch;
+                const auto& t = gRin.getHeader().epoch;
 
                 //keep only satellites from satellites systems selecyted for processing
                 gRin.keepOnlySatSystems(opts().systems);
@@ -219,9 +219,9 @@ namespace pod
                 gRin >> CodeFilter;
                 gRin >> SNRFilter;
 
-                if (gRin.body.size() == 0)
+                if (gRin.getBody().size() == 0)
                 {
-                    printMsg(gRin.header.epoch, "Rover receiver: all SV has been rejected.");
+                    printMsg(gRin.getHeader().epoch, "Rover receiver: all SV has been rejected.");
 
                     continue;
                 }
@@ -250,7 +250,7 @@ namespace pod
                 gRin >> oMinusC;
                 gRin >> resCatcher;
 
-                DBOUT_LINE(">>" << CivilTime(gRin.header.epoch).asString());
+                DBOUT_LINE(">>" << CivilTime(gRin.getHeader().epoch).asString());
 
                 if (forwardBackwardCycles > 0)
                 {
@@ -259,7 +259,7 @@ namespace pod
                 else
                 {
                     gRin >> solver;
-                    auto ep = opts().fullOutput ? GnssEpoch(gRin) : GnssEpoch();
+                    auto ep = opts().fullOutput ? GnssEpoch(gRin.getBody()) : GnssEpoch();
                     // updateNomPos(solverFB);
                     printSolution( solver, t, ep);
                     gMap.data.insert(std::make_pair(t, ep));
@@ -270,14 +270,14 @@ namespace pod
         {
             cout << "Fw-Bw part started" << endl;
             solverFb.reProcess();
-            gnssRinex gRin;
+            RinexEpoch gRin;
             cout << "Last process part started" << endl;
             while (solverFb.lastProcess(gRin))
             {
-                auto ep = opts().fullOutput ? GnssEpoch(gRin) : GnssEpoch();
+                auto ep = opts().fullOutput ? GnssEpoch(gRin.getBody()) : GnssEpoch();
                 //updateNomPos(solverFB);
-                printSolution( solverFb, gRin.header.epoch, ep);
-                gMap.data.insert(std::make_pair(gRin.header.epoch, ep));
+                printSolution( solverFb, gRin.getHeader().epoch, ep);
+                gMap.data.insert(std::make_pair(gRin.getHeader().epoch, ep));
             }
             cout << "Measurments rejected: " << solverFb.rejectedMeasurements << endl;
         }
@@ -330,7 +330,7 @@ namespace pod
         double posSigma = confReader().getValueAsDouble("posSigma");
         if (opts().dynamics == GnssDataStore::Dynamics::Static)
         {
-            coord->setStochasicModel(make_shared<StochasticModel>());
+            coord->setStochasicModel(make_shared<ConstantModel>());
         }
         else  if (opts().dynamics == GnssDataStore::Dynamics::Kinematic)
         {

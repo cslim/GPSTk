@@ -80,7 +80,7 @@ namespace gpstk
           * @param forceCoef        Always use default coefficient.
           */
       Variable( const TypeID& type,
-                StochasticModel* pModel   = &Variable::defaultModel,
+                IStochasticModel* pModel   = &Variable::defaultModel,
                 bool sourceIndexed        = true,
                 bool satIndexed           = false,
                 double variance           = 4.0e14,
@@ -102,7 +102,7 @@ namespace gpstk
 
 
          /// Get variable model pointer
-      StochasticModel* getModel() const
+      IStochasticModel* getModel() const
       { return pVarModel; };
 
 
@@ -112,7 +112,7 @@ namespace gpstk
           *                    this variable. By default, it is a white
           *                    noise model.
           */
-      Variable& setModel(StochasticModel* pModel)
+      Variable& setModel(IStochasticModel* pModel)
       { pVarModel = pModel; return (*this); };
 
 
@@ -294,7 +294,7 @@ namespace gpstk
 
 
          /// Pointer stochastic model applying to variable
-      StochasticModel* pVarModel;
+	  IStochasticModel* pVarModel;
 
 
          /** Whether this variable is or not source-specific. By default
@@ -361,7 +361,7 @@ namespace gpstk
           * @param forceCoef   Always use default coefficient.
           */
       void Init( const TypeID& type,
-                 StochasticModel* pModel = &Variable::defaultModel,
+                 IStochasticModel* pModel = &Variable::defaultModel,
                  double variance = 4.0e14,
                  double coef     = 1.0,
                  bool forceCoef  = false,

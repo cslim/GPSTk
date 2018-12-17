@@ -126,17 +126,17 @@ namespace gpstk
 
     }  // End of method 'Decimate::Process()'
 
-    bool Decimate::check(gnssRinex& gData)
+    bool Decimate::check(IRinex& gData)
     {
         // Set a threshold
         double threshold(std::abs(sampling - tolerance));
 
         // Check if current epoch - lastEpoch is NOT within threshold,
         // implying that it must be decimated
-       if(!(std::abs(gData.header.epoch - lastEpoch) > threshold)) 
+       if(!(std::abs(gData.getHeader().epoch - lastEpoch) > threshold)) 
           return true;
         // Update reference epoch
-        lastEpoch = gData.header.epoch;
+        lastEpoch = gData.getHeader().epoch;
         return false;
     }
 

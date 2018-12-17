@@ -22,14 +22,14 @@ namespace pod
     GnssSolution::~GnssSolution() {}
 
     int GnssSolution::computeApprPos(
-        const gpstk::gnssRinex & gRin,
+        const gpstk::IRinex & gRin,
         const gpstk::XvtStore<gpstk::SatID>& Eph,
         gpstk::Position& pos)
     {
-        auto svs = gRin.getVectorOfSatID().toStdVector();
-        auto meas = gRin.getVectorOfTypeID(codeL1).toStdVector();
+        auto svs = gRin.getBody().getVectorOfSatID().toStdVector();
+        auto meas = gRin.getBody().getVectorOfTypeID(codeL1).toStdVector();
         Matrix<double> svp;
-        if (PRSolution2::PrepareAutonomousSolution(gRin.header.epoch, svs, meas, Eph, svp))
+        if (PRSolution2::PrepareAutonomousSolution(gRin.getHeader().epoch, svs, meas, Eph, svp))
             return -1;
        
         Bancroft ban;

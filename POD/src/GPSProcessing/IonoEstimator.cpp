@@ -28,21 +28,7 @@ namespace pod
     IonoEstimator::IonoEstimator()
        {}
 
-    gpstk::gnssSatTypeValue& IonoEstimator::Process(gpstk::gnssSatTypeValue& gData)
-        throw(gpstk::ProcessingException)
-    {
-        gpstk::UnimplementedException e(
-            "Vitrual method:\n"
-            "'gpstk::gnssSatTypeValue& Process(gpstk::gnssSatTypeValue& gData)'\n"
-            "has not been implemented in class:\n"
-            "'pod::IonoEstimator'.");
-
-        GPSTK_THROW(e)
-
-            return gData;
-    };
-
-    gnssRinex& IonoEstimator::Process(gnssRinex& gData)
+	IRinex& IonoEstimator::Process(IRinex& gData)
         throw(ProcessingException)
     {
 
@@ -50,7 +36,7 @@ namespace pod
         {
             SatIDSet satRejectedSet;
 
-            for (auto& it : gData.body)
+            for (auto& it : gData.getBody())
             {
                 try
                 {
@@ -77,7 +63,7 @@ namespace pod
             }
 
             // Remove satellites with missing data
-            gData.removeSatID(satRejectedSet);
+            gData.getBody().removeSatID(satRejectedSet);
 
             return gData;
         }
@@ -95,13 +81,13 @@ namespace pod
 
 
        ///
-    bool IonoEstimator::feed(const gpstk::SatID & sv, gnssRinex &gRin)
+    bool IonoEstimator::feed(const gpstk::SatID & sv, IRinex &gRin)
     {
         double ionoCode(.0);
-        if (!lcIonoCode.getCombination(sv, gRin.body[sv], ionoCode)) return false;
+        if (!lcIonoCode.getCombination(sv, gRin.getBody()[sv]->get_value(), ionoCode)) return false;
 
         double ionoPhase(.0);
-        if (!lcIonoPhase.getCombination(sv, gRin.body[sv], ionoPhase)) return false;
+        if (!lcIonoPhase.getCombination(sv, gRin.getBody()[sv]->get_value(), ionoPhase)) return false;
 
         //get reference to current sv data
         auto & data = filterData[sv];
@@ -157,7 +143,7 @@ namespace pod
         data.state.delay = state(0);
         data.state.bias = state(1);
 
-        gRin.body[sv][TypeID::ionoL1] = data.state.delay;
+        gRin.getBody()[sv]->get_value()[TypeID::ionoL1] = data.state.delay;
         
         return true;
     }

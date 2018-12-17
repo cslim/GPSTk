@@ -227,7 +227,7 @@ namespace pod
 
         // This is the GNSS data structure that will hold all the
         // GNSS-related information
-        gnssRinex gRin;
+        RinexEpoch gRin;
 
         #pragma region Output streams
 
@@ -264,13 +264,13 @@ namespace pod
             while (rin >> gRin)
             {
                 //work around for post header comments
-                if (gRin.body.size() == 0) continue;
+                if (gRin.getBody().size() == 0) continue;
                 //
                 gRin.keepOnlySatSystems(opts().systems);
 
                 /// update current time and nominal position
-                CommonTime time(gRin.header.epoch);
-                updateNomPos(gRin.header.epoch, nominalPos);
+                CommonTime time(gRin.getHeader().epoch);
+                updateNomPos(gRin.getHeader().epoch, nominalPos);
 
                 /// compute pole tide displacment
                 auto eop = data->eopStore.getEOP(MJD(time).mjd, IERSConvention::IERS2010);
@@ -329,8 +329,8 @@ namespace pod
                 // Check what type of solver we are using
                 if (cycles < 1)
                 {
-                    GnssEpoch ep(gRin);
-                    CommonTime time(gRin.header.epoch);
+                    GnssEpoch ep(gRin.getBody());
+                    CommonTime time(gRin.getHeader().epoch);
 
                     // Let's print to output file the results of this epoch
                     printSolution(outfile, pppSolver, time,  ep);
@@ -379,10 +379,10 @@ namespace pod
         while (fbpppSolver.LastProcess(gRin))
         {
             // update current time and nominal position
-            GnssEpoch ep(gRin);
-            updateNomPos(gRin.header.epoch,nominalPos);
-            printSolution(outfile, fbpppSolver, gRin.header.epoch, ep);
-            gMap.data.insert(pair<CommonTime, GnssEpoch>(gRin.header.epoch, ep));
+            GnssEpoch ep(gRin.getBody());
+            updateNomPos(gRin.getHeader().epoch,nominalPos);
+            printSolution(outfile, fbpppSolver, gRin.getHeader().epoch, ep);
+            gMap.data.insert(pair<CommonTime, GnssEpoch>(gRin.getHeader().epoch, ep));
 
         }  // End of 'while( fbpppSolver.LastProcess(gRin) )'
 

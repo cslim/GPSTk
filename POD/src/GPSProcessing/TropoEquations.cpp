@@ -9,18 +9,18 @@ namespace pod
         pStochasticModel(std::make_unique<RandomWalkModel>(qPrime))
     {}
 
-    void TropoEquations::Prepare(gpstk::gnssRinex & gData)
+    void TropoEquations::Prepare(gpstk::IRinex & gData)
     {
         
         pStochasticModel->Prepare(SatID::dummy, gData);
     }
 
-    void TropoEquations::updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet & obsTypes, gpstk::Matrix<double>& H, int & col_0)
+    void TropoEquations::updateH(const gpstk::IRinex& gData, const gpstk::TypeIDSet & obsTypes, gpstk::Matrix<double>& H, int & col_0)
     {
         int row(0);
         for (const auto& t : obsTypes)
-            for (const auto& it : gData.body)
-                H(row++, col_0) = it.second.at(type.type);
+            for (const auto& it : gData.getBody())
+                H(row++, col_0) = it.second->get_value().at(type.type);
 
         col_0++;
     }

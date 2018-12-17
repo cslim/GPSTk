@@ -7,6 +7,7 @@ namespace pod
 {
     typedef std::unique_ptr<gpstk::ProcessingClass> process_uptr;
    
+	//aggregator for 'scMarker' and 'CodeSmoother' objects
     class CodeSmoother2 : public gpstk::ProcessingClass
     {
     public:
@@ -22,10 +23,8 @@ namespace pod
         virtual CodeSmoother2& addScMarker(process_uptr scMarker);
 
         virtual CodeSmoother2& addSmoother(gpstk::CodeSmoother& smoother);
-        
-        virtual gpstk::gnssSatTypeValue& Process(gpstk::gnssSatTypeValue& gData) override;
 
-        virtual gpstk::gnssRinex& Process(gpstk::gnssRinex& gData) override;
+        virtual gpstk::IRinex& Process(gpstk::IRinex& gData) override;
  
         virtual std::string getClassName(void) const override
         {

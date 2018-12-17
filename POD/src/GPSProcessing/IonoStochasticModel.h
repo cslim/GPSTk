@@ -22,7 +22,7 @@ namespace pod
         * @param gData      Data object holding the data.
         *
         */
-        virtual void Prepare(const  gpstk::SatID& sat, gpstk::gnssRinex& gData) override;
+        virtual void Prepare(const  gpstk::SatID& sat, gpstk::IRinex& gData) override;
 
         virtual double getQ() const override;
         virtual double getPhi() const override;

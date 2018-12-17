@@ -26,28 +26,23 @@ namespace pod
         return(ratio > maxRatio);
     }
 
-    gnssSatTypeValue & PrefitResCatcher::Process(gnssSatTypeValue & gData)
-    {
-        // TODO: insert return statement here
-        throw UnimplementedException("pod::PrefitResCatcher::Process(gnssSatTypeValue & gData) has not been implemented.");
-    }
 
-    gnssRinex & PrefitResCatcher::Process(gnssRinex & gData)
+	IRinex & PrefitResCatcher::Process(IRinex & gData)
     {
-        auto & rejSatItem = rejectedSatsTable[gData.header.epoch];
+        auto & rejSatItem = rejectedSatsTable[gData.getHeader().epoch];
 
         for (auto && tid:resTypes)
         {
-            int s = gData.body.size();
-            auto svs = gData.getVectorOfSatID();
-            auto values = gData.getVectorOfTypeID(tid);
+            int s = gData.getBody().size();
+            auto svs = gData.getBody().getVectorOfSatID();
+            auto values = gData.getBody().getVectorOfTypeID(tid);
             double ratio(0);
             for (size_t i = 0; i < values.size(); i++)
             {
                 if (getDetection(values, i, 100, ratio))
                 {
                     DBOUT_LINE(getClassName()<<" "<<svs[i]<<" "<<tid<<" "<<ratio)
-                    gData.removeSatID(svs[i]);
+                    gData.getBody().removeSatID(svs[i]);
                     rejSatItem.insert(svs[i]);
                     break;
                 }

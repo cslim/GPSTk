@@ -277,13 +277,6 @@ namespace pod
          throw(InvalidSolver);
 
 
-         /** Returns a reference to a gnnsSatTypeValue object after
-          *  solving the previously defined equation system.
-          *
-          * @param gData    Data object holding the data.
-          */
-      virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
-         throw(ProcessingException);
 
 
          /** Returns a reference to a gnnsRinex object after solving
@@ -291,7 +284,7 @@ namespace pod
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssRinex& Process(gnssRinex& gData)
+      virtual IRinex& Process(IRinex& gData)
          throw(ProcessingException);
 
 
@@ -329,7 +322,7 @@ namespace pod
 
 
          /// Get stochastic model pointer for dx (or dLat) coordinate
-      StochasticModel* getXCoordinatesModel() const
+      IStochasticModel* getXCoordinatesModel() const
       { return pCoordXStoModel; };
 
 
@@ -338,12 +331,12 @@ namespace pod
           * @param pModel      Pointer to StochasticModel associated with
           *                    dx (or dLat) coordinate.
           */
-      SolverPPP& setXCoordinatesModel(StochasticModel* pModel)
+      SolverPPP& setXCoordinatesModel(IStochasticModel* pModel)
       { pCoordXStoModel = pModel; return (*this); };
 
 
          /// Get stochastic model pointer for dy (or dLon) coordinate
-      StochasticModel* getYCoordinatesModel() const
+	  IStochasticModel* getYCoordinatesModel() const
       { return pCoordYStoModel; };
 
 
@@ -352,16 +345,16 @@ namespace pod
           * @param pModel      Pointer to StochasticModel associated with
           *                    dy (or dLon) coordinate.
           */
-      SolverPPP& setYCoordinatesModel(StochasticModel* pModel)
+      SolverPPP& setYCoordinatesModel(IStochasticModel* pModel)
       { pCoordYStoModel = pModel; return (*this); };
     
-      SolverPPP& setISBModel(StochasticModel* pModel)
+      SolverPPP& setISBModel(IStochasticModel* pModel)
       {
           pBiasStoModel = pModel; return  (*this);
       }
 
          /// Get stochastic model pointer for dz (or dH) coordinate
-      StochasticModel* getZCoordinatesModel() const
+	  IStochasticModel* getZCoordinatesModel() const
       { return pCoordZStoModel; };
 
 
@@ -370,7 +363,7 @@ namespace pod
           * @param pModel      Pointer to StochasticModel associated with
           *                    dz (or dH) coordinate.
           */
-      SolverPPP& setZCoordinatesModel(StochasticModel* pModel)
+      SolverPPP& setZCoordinatesModel(IStochasticModel* pModel)
       { pCoordZStoModel = pModel; return (*this); };
 
       SolverPPP& setAdvClkModel(const AdvClockModel & pModel)
@@ -393,11 +386,11 @@ namespace pod
           * this method only with non-state-aware stochastic models like
           * 'StochasticModel' (constant coordinates) or 'WhiteNoiseModel'.
           */
-      virtual SolverPPP& setCoordinatesModel(StochasticModel* pModel);
+      virtual SolverPPP& setCoordinatesModel(IStochasticModel* pModel);
 
 
          /// Get wet troposphere stochastic model pointer
-      virtual StochasticModel* getTroposphereModel(void) const
+      virtual IStochasticModel* getTroposphereModel(void) const
       { return pTropoStoModel; };
 
 
@@ -411,12 +404,12 @@ namespace pod
           * If that is your case, you MUST NOT use the SAME model in DIFFERENT
           * solver objects.
           */
-      virtual SolverPPP& setTroposphereModel(StochasticModel* pModel)
+      virtual SolverPPP& setTroposphereModel(IStochasticModel* pModel)
       { pTropoStoModel = pModel; return (*this); };
 
 
          /// Get receiver clock stochastic model pointer
-      virtual StochasticModel* getReceiverClockModel(void) const
+      virtual IStochasticModel* getReceiverClockModel(void) const
       { return pClockStoModel; };
 
 
@@ -430,12 +423,12 @@ namespace pod
           * If that is your case, you MUST NOT use the SAME model in DIFFERENT
           * solver objects.
           */
-      virtual SolverPPP& setReceiverClockModel(StochasticModel* pModel)
+      virtual SolverPPP& setReceiverClockModel(IStochasticModel* pModel)
       { pClockStoModel = pModel; return (*this); };
 
 
          /// Get phase biases stochastic model pointer
-      virtual StochasticModel* getPhaseBiasesModel(void) const
+      virtual IStochasticModel* getPhaseBiasesModel(void) const
       { return pBiasStoModel; };
 
 
@@ -452,7 +445,7 @@ namespace pod
           * \warning This method should be used with caution, because model
           * must be of PhaseAmbiguityModel class in order to make sense.
           */
-      virtual SolverPPP& setPhaseBiasesModel(StochasticModel* pModel)
+      virtual SolverPPP& setPhaseBiasesModel(IStochasticModel* pModel)
       { pBiasStoModel = pModel; return (*this); };
 
 
@@ -533,29 +526,29 @@ namespace pod
 
 
          /// Pointer to stochastic model for dx (or dLat) coordinate
-      StochasticModel* pCoordXStoModel;
+	  IStochasticModel* pCoordXStoModel;
 
 
          /// Pointer to stochastic model for dy (or dLon) coordinate
-      StochasticModel* pCoordYStoModel;
+	  IStochasticModel* pCoordYStoModel;
 
 
          /// Pointer to stochastic model for dz (or dH) coordinate
-      StochasticModel* pCoordZStoModel;
+	  IStochasticModel* pCoordZStoModel;
 
 
          /// Pointer to stochastic model for troposphere
-      StochasticModel* pTropoStoModel;
+	  IStochasticModel* pTropoStoModel;
 
 
          /// Pointer to stochastic model for receiver clock
-      StochasticModel* pClockStoModel;
+	  IStochasticModel* pClockStoModel;
 
          /// Pointer to stochastic model for intersystem bias
-      StochasticModel* pInterSysBiasStoModel;
+	  IStochasticModel* pInterSysBiasStoModel;
 
          /// Pointer to stochastic model for phase biases
-      StochasticModel* pBiasStoModel;
+	  IStochasticModel* pBiasStoModel;
 
       //
       AdvClockModel advClkStoModel;
@@ -618,13 +611,13 @@ namespace pod
           );
 
         /// update transition (Phi) and process noise (Q) matrices
-      void updateMatrices(Matrix<double> & phiMatrix, Matrix<double> & qMatrix, gnssRinex& gData);
+      void updateMatrices(Matrix<double> & phiMatrix, Matrix<double> & qMatrix, IRinex& gData);
        
       ///update weight Matrix
-      void updateWeightMatrix(Matrix<double> & rMatrix, gnssRinex& gData, int numCurrentSV);
+      void updateWeightMatrix(Matrix<double> & rMatrix, IRinex& gData, int numCurrentSV);
 
          /// Constant stochastic model
-      StochasticModel constantModel;
+      ConstantModel constantModel;
 
          /// White noise stochastic model for position
       WhiteNoiseModel whitenoiseModelX;

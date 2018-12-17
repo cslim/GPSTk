@@ -2,6 +2,7 @@
 #include"TypeID.hpp"
 #include"SatID.hpp"
 #include"DataStructures.hpp"
+#include"RinexEpoch.h"
 
 #include<set>
 namespace pod

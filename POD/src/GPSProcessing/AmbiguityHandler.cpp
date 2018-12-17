@@ -18,7 +18,7 @@ namespace pod
         assert(pSdFloatSolution->size() == pSdCov->rows());
     };
 
-    void  AmbiguityHandler::fixL1L2(gpstk::gnssRinex& gData)
+    void  AmbiguityHandler::fixL1L2(gpstk::IRinex& gData)
     {
         //fill the vector of core parameters with float ambiguities
         Vector<double> coreParamsFloat(coreNum, .0);
@@ -27,8 +27,8 @@ namespace pod
 
         //fill sets of satellite systems and observation types,
         //presented in current set of carrier phase measurements
-        SatSystSet ss = gData.getSatSystems();
-        SatIDSet   svs = gData.getSatID();
+        SatSystSet ss = gData.getBody().getSatSystems();
+        SatIDSet   svs = gData.getBody().getSatID();
         TypeIDSet  types = FilterParameter::get_all_types(*pAmbs);
 
         // (numer of SD) = (numer of SV) x (Number of observables types)
@@ -145,20 +145,20 @@ namespace pod
 
     }
     void AmbiguityHandler::storeDDAmbiguities(
-        gpstk::gnssRinex & gData,
+        gpstk::IRinex & gData,
         const Vector<double> &ddFixedAmb,
         const gpstk::SatIDSet &refSVs) const
     {
         int i(0);
         for (const auto & amb : *pAmbs)
         {
-            auto  &it = gData.body.find(amb.sv);
-            if (it != gData.body.end())
+            auto  &it = gData.getBody().find(amb.sv);
+            if (it != gData.getBody().end())
             {
                 if (refSVs.find(amb.sv) == refSVs.end())
-                    gData.body[amb.sv][amb.type] = ddFixedAmb(i++);
+                    gData.getBody()[amb.sv]->get_value()[amb.type] = ddFixedAmb(i++);
                 else
-                    gData.body[amb.sv][amb.type] = 0.0;
+                    gData.getBody()[amb.sv]->get_value()[amb.type] = 0.0;
             }
         }
     }

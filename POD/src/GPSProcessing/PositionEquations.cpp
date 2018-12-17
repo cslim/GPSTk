@@ -36,23 +36,23 @@ namespace pod
     }
 
     void PositionEquations::
-        Prepare(gpstk::gnssRinex& gData)
+        Prepare(gpstk::IRinex& gData)
     {
         for (const auto& it : stochasticModels)
             it.second->Prepare(SatID::dummy, gData);
     }
 
     void PositionEquations::
-        updateH(const gpstk::gnssRinex & gData, const gpstk::TypeIDSet & obsTypes, gpstk::Matrix<double>& H, int & col_0)
+        updateH(const gpstk::IRinex & gData, const gpstk::TypeIDSet & obsTypes, gpstk::Matrix<double>& H, int & col_0)
     {
         int row(0);
 
         for (auto&& obs : obsTypes)
-            for (auto&& it : gData.body)
+            for (auto&& it : gData.getBody())
             {
                 int j(0);
                 for (auto&& t : types)
-                    H(row, col_0 + j++) = it.second.at(t.type);
+                    H(row, col_0 + j++) = it.second->get_value().at(t.type);
                 row++;
             }
         col_0 += 3;

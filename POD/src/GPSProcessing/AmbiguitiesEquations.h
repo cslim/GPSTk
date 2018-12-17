@@ -26,7 +26,7 @@ namespace pod
         virtual ~AmbiguitiesEquations() {};
 
         // Inherited via EquationBase
-        virtual void Prepare(gpstk::gnssRinex & gData) override;
+        virtual void Prepare(gpstk::IRinex & gData) override;
 
         virtual void updatePhi(gpstk::Matrix<double>& Phi, int & index) const override;
 
@@ -38,7 +38,7 @@ namespace pod
 
         virtual  ParametersSet getParameters() const override;
 
-        virtual void updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0) override;
+        virtual void updateH(const gpstk::IRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0) override;
 
         virtual ParametersSet getAmbSet() const override
         {

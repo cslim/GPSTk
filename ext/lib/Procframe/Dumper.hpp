@@ -178,24 +178,16 @@ namespace gpstk
           *
           * @param gData     Data object holding the data.
           */
-      virtual satTypeValueMap& Process( satTypeValueMap& gData )
+      virtual SatTypePtrMap& Process(SatTypePtrMap& gData )
          throw(ProcessingException);
 
-
-         /** Dumps data from a gnnsSatTypeValue object.
-          *
-          * @param gData    Data object holding the data.
-          */
-      virtual gnssSatTypeValue& Process( gnssSatTypeValue& gData )
-         throw(ProcessingException)
-      { gnssRinex gRin(gData); Process(gRin); return gData; };
 
 
          /** Dumps data from a gnnsRinex object.
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssRinex& Process( gnssRinex& gData )
+      virtual IRinex& Process( IRinex& gData )
          throw(ProcessingException);
 
 

@@ -12,29 +12,23 @@ namespace pod
             lc->setUseC1(useC1);
     }
 
-    gpstk::satTypeValueMap& ProcessLinear::Process(gpstk::satTypeValueMap& gData)
+    gpstk::SatTypePtrMap& ProcessLinear::Process(gpstk::SatTypePtrMap& gData)
     {
         for (auto& sv : gData)
         {
             for (const auto& lc : this->combs)
             {
                 double value;
-                if (lc->getCombination(sv.first, sv.second, value))
-                    sv.second.insert(make_pair(lc->getType(), value));
+				if (lc->getCombination(sv.first, sv.second->get_value(), value))
+					sv.second->get_value().emplace(lc->getType(), value);
             }
         }
         return gData;
     }
 
-    gpstk::gnssRinex& ProcessLinear::Process(gpstk::gnssRinex& gData)
+    gpstk::IRinex& ProcessLinear::Process(gpstk::IRinex& gData)
     {
-        Process(gData.body);
-        return gData;
-    }
-
-    gpstk::gnssSatTypeValue& ProcessLinear::Process(gpstk::gnssSatTypeValue& gData)
-    {
-        Process(gData.body);
+        Process(gData.getBody());
         return gData;
     }
 }

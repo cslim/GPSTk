@@ -246,7 +246,7 @@ namespace gpstk
           * @param coef             Default coefficient assigned.
           */
       virtual Equation& addVariable( const TypeID& type,
-                                     StochasticModel* pModel   =
+                                     IStochasticModel* pModel   =
                                                       &Variable::defaultModel,
                                      bool sourceIndexed        = true,
                                      bool satIndexed           = false,

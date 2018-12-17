@@ -1,5 +1,6 @@
 #pragma once
 #include"DataStructures.hpp"
+#include"RinexEpoch.h"
 #include"FilterParameter.h"
 
 namespace pod
@@ -12,7 +13,7 @@ namespace pod
         virtual ~EquationBase() {};
        
         /* update state of equations with new observational data */
-        virtual  void Prepare(gpstk::gnssRinex& gData) = 0;
+        virtual  void Prepare(gpstk::IRinex& gData) = 0;
       
         /* return set of FilerParameters, corresponding unknown parameters  for given equations */
         virtual  ParametersSet getParameters() const = 0;
@@ -35,7 +36,7 @@ namespace pod
         /* Put  partials of the measurements with respect to the unknowns into the design (geometry) matrix 
         starting with specific indices, indices will be incremented inside this method
         */
-        virtual void updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0) = 0;
+        virtual void updateH(const gpstk::IRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0) = 0;
 
         virtual ParametersSet getAmbSet() const
         {

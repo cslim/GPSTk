@@ -17,9 +17,9 @@ namespace pod
 
 #pragma region Inherited via EquationBase
 
-        virtual void Prepare(gpstk::gnssRinex & gData) override;
+        virtual void Prepare(gpstk::IRinex & gData) override;
 
-        virtual void updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0) override;
+        virtual void updateH(const gpstk::IRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0) override;
         
         virtual  ParametersSet getParameters() const override
         {
@@ -39,8 +39,8 @@ namespace pod
         TropoEquations& setModel( gpstk::StochasticModel_uptr model)
         { pStochasticModel = std::move(model); return *this; }
 
-        gpstk::StochasticModel getModel() const
-        { return  *pStochasticModel; }
+        gpstk::IStochasticModel* getModel() const
+        { return pStochasticModel.get(); }
 
 #pragma region Fields
 

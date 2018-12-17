@@ -1,6 +1,6 @@
 #pragma once
-#include"DataStructures.hpp"
-
+#include"typeValueMap.hpp"
+#include<memory>
 namespace gpstk
 {
     class ITypeValueMap
@@ -9,6 +9,7 @@ namespace gpstk
     public:
         virtual ~ITypeValueMap() {};
         virtual typeValueMap& get_value() = 0;
+		virtual const typeValueMap& get_value() const = 0;
     };
 
     class TypeValueMapPtr : public ITypeValueMap
@@ -17,11 +18,15 @@ namespace gpstk
         TypeValueMapPtr(typeValueMap * p) :ptr(p) {};
         TypeValueMapPtr(typeValueMap & p) :ptr(&p) {};
 
-        virtual typeValueMap& get_value()
+        virtual typeValueMap& get_value() override
         {
             return *ptr;
         };
 
+		virtual const typeValueMap& get_value() const override
+		{
+			return *ptr;
+		};
         std::shared_ptr<typeValueMap> ptr;
     };
 }

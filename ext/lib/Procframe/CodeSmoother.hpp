@@ -143,18 +143,10 @@ namespace gpstk
           *
           * @param gData     Data object holding the data.
           */
-      virtual satTypeValueMap& Process(satTypeValueMap& gData)
+      virtual SatTypePtrMap& Process(SatTypePtrMap& gData)
          throw(ProcessingException);
 
 
-         /** Returns a gnnsSatTypeValue object, adding the new data generated
-          *  when calling this object.
-          *
-          * @param gData    Data object holding the data.
-          */
-      virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
-         throw(ProcessingException)
-      { Process(gData.body); return gData; };
 
 
          /** Returns a gnnsRinex object, adding the new data generated when
@@ -162,9 +154,9 @@ namespace gpstk
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssRinex& Process(gnssRinex& gData)
+      virtual IRinex& Process(IRinex& gData)
          throw(ProcessingException)
-      { Process(gData.body); return gData; };
+      { Process(gData.getBody()); return gData; };
 
 
          /// Method to get the default code type being used.

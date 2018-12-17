@@ -17,21 +17,13 @@ namespace pod
         PPPSolverLEOFwBw(bool useNEU = false);
 
 
-        /** Returns a reference to a gnnsSatTypeValue object after
-        *  solving the previously defined equation system.
-        *
-        * @param gData    Data object holding the data.
-        */
-        virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
-            throw(ProcessingException);
-
 
         /** Returns a reference to a gnnsRinex object after solving
         *  the previously defined equation system.
         *
         * @param gData    Data object holding the data.
         */
-        virtual gnssRinex& Process(gnssRinex& gData)
+        virtual IRinex& Process(IRinex& gData)
             throw(ProcessingException);
 
 
@@ -56,15 +48,6 @@ namespace pod
             throw(ProcessingException);
 
 
-        /** Process the data stored during a previous 'ReProcess()' call, one
-        *  item at a time, and always in forward mode.
-        *
-        * @param gData      Data object that will hold the resulting data.
-        *
-        * @return FALSE when all data is processed, TRUE otherwise.
-        */
-        virtual bool LastProcess(gnssSatTypeValue& gData)
-            throw(ProcessingException);
 
 
         /** Process the data stored during a previous 'ReProcess()' call, one
@@ -74,7 +57,7 @@ namespace pod
         *
         * @return FALSE when all data is processed, TRUE otherwise.
         */
-        virtual bool LastProcess(gnssRinex& gData)
+        virtual bool LastProcess(IRinex& gData)
             throw(ProcessingException);
 
 
@@ -194,7 +177,7 @@ namespace pod
 
 
         /// List holding the information regarding every observation.
-        std::list<gnssRinex> ObsData;
+        std::list<gpstk::irinex_uptr> ObsData;
 
 
         /// Set storing the TypeID's that we want to keep.
@@ -218,7 +201,7 @@ namespace pod
 
 
         /// This method checks the limits and modifies 'gData' accordingly.
-        void checkLimits(gnssRinex& gData, double codeLimit, double phaseLimit);
+        void checkLimits(IRinex& gData, double codeLimit, double phaseLimit);
 
 
         // Some methods that we want to hide

@@ -5,23 +5,23 @@ using namespace gpstk;
 
 namespace pod
 {
-    SatIDSet RefSatHandler::getRefSats(gpstk::gnssRinex & gData)
+    SatIDSet RefSatHandler::getRefSats(gpstk::IRinex & gData)
     {
         SatIDSet results;
         SatSystSet satSystems;
 
-        auto it_pre = gData.body.end();
-        for (const auto& sv : gData.body)
+        auto it_pre = gData.getBody().end();
+        for (const auto& sv : gData.getBody())
             satSystems.insert(sv.first.system);
 
         for (const auto& ss : satSystems)
         {
             double maxEl = DBL_MIN;
             SatID sv_maxEl;
-            for (const auto& sv : gData.body)
+            for (const auto& sv : gData.getBody())
                 if (sv.first.system == ss)
                 {
-                    double ei = sv.second.at(TypeID::elevation);
+                    double ei = sv.second->get_value().at(TypeID::elevation);
                     if (ei > maxEl)
                     {
                         maxEl = ei;
@@ -36,7 +36,7 @@ namespace pod
 
     //
     Matrix<double> RefSatHandler::getSD2DDMatrix(
-        gpstk::gnssRinex & gData, 
+        gpstk::IRinex & gData, 
         const SatIDSet& svs,
         const SatSystSet& ss,
         gpstk::SatIDSet &refSvSet)

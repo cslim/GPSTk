@@ -75,7 +75,7 @@ namespace pod
 
         bool firstTime = true;
 
-        gnssRinex gRin;
+        RinexEpoch gRin;
 
         for (auto &obsFile : data->getObsFiles(opts().SiteRover))
         {
@@ -101,13 +101,13 @@ namespace pod
             while (rin >> gRin)
             {
                 //work around for post header comments 
-                if (gRin.body.size() == 0)
+                if (gRin.getBody().size() == 0)
                 {
-                    printMsg(gRin.header.epoch, "Empty epoch record in Rinex file");
+                    printMsg(gRin.getHeader().epoch, "Empty epoch record in Rinex file");
                     continue;
                 }
 
-                auto& t = gRin.header.epoch;
+                auto& t = gRin.getHeader().epoch;
 
                 //keep only satellites from satellites systems selected for processing
                 gRin.keepOnlySatSystems(opts().systems);
@@ -139,9 +139,9 @@ namespace pod
                 if (opts().isSmoothCode)
                     gRin >> codeSmoother;
 
-                if (gRin.body.size() == 0)
+                if (gRin.getBody().size() == 0)
                 {
-                    printMsg(gRin.header.epoch, "All SV has been rejected.");
+                    printMsg(gRin.getHeader().epoch, "All SV has been rejected.");
                     continue;
                 }
 
@@ -161,7 +161,7 @@ namespace pod
                 else
                 {
                     gRin >> solver;
-                    auto ep = opts().fullOutput ? GnssEpoch(gRin) : GnssEpoch();
+                    auto ep = opts().fullOutput ? GnssEpoch(gRin.getBody()) : GnssEpoch();
                     // updateNomPos(solverFB);
                     printSolution( solver, t, ep);
                     gMap.data.insert(std::make_pair(t, ep));
@@ -173,14 +173,14 @@ namespace pod
         {
             cout << "Fw-Bw part started" << endl;
             solverFb.reProcess();
-            gnssRinex gRin;
+            RinexEpoch gRin;
             cout << "Last process part started" << endl;
             while (solverFb.lastProcess(gRin))
             {
-                auto ep = opts().fullOutput ? GnssEpoch(gRin) : GnssEpoch();
+                auto ep = opts().fullOutput ? GnssEpoch(gRin.getBody()) : GnssEpoch();
                 //updateNomPos(solverFB);
-                printSolution( solverFb, gRin.header.epoch, ep);
-                gMap.data.insert(std::make_pair(gRin.header.epoch, ep));
+                printSolution( solverFb, gRin.getHeader().epoch, ep);
+                gMap.data.insert(std::make_pair(gRin.getHeader().epoch, ep));
             }
             cout << "measurments rejected: " << solverFb.rejectedMeasurements << endl;
         }
@@ -214,7 +214,7 @@ namespace pod
         double sigma = confReader().getValueAsDouble("posSigma");
         if (opts().dynamics == GnssDataStore::Dynamics::Static)
         {
-            coord->setStochasicModel(make_shared<StochasticModel>());
+            coord->setStochasicModel(make_shared<ConstantModel>());
         }
         else  if (opts().dynamics == GnssDataStore::Dynamics::Kinematic)
         {

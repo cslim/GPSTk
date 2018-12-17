@@ -140,7 +140,7 @@ namespace gpstk
        *
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& CodeSmoother::Process(satTypeValueMap& gData)
+   SatTypePtrMap& CodeSmoother::Process(SatTypePtrMap& gData)
       throw(ProcessingException)
    {
 
@@ -154,17 +154,16 @@ namespace gpstk
          SatIDSet satRejectedSet;
 
             // Loop through all satellites
-         satTypeValueMap::iterator it;
-         for (it = gData.begin(); it != gData.end(); ++it)
+         for (auto it = gData.begin(); it != gData.end(); ++it)
          {
 
             try
             {
 
                   // Try to extract the values
-               codeObs  = (*it).second(codeType);
-               phaseObs = (*it).second(phaseType);
-               flagObs  = (*it).second(csFlag);
+               codeObs  = (*it).second->get_value()(codeType);
+               phaseObs = (*it).second->get_value()(phaseType);
+               flagObs  = (*it).second->get_value()(csFlag);
 
                if(codeObs==0.0 ||phaseObs==0.0 )
                {
@@ -184,7 +183,7 @@ namespace gpstk
             }
 
                // If everything is OK, then call smoothing function
-            (*it).second[resultType] = getSmoothing( (*it).first,
+            (*it).second->get_value()[resultType] = getSmoothing( (*it).first,
                                                      codeObs,
                                                      phaseObs,
                                                      flagObs );

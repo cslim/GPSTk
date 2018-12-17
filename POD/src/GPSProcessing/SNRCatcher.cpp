@@ -21,12 +21,12 @@ namespace pod
         satThreshold(tresh), maxBufferSize(maxCount)
     {};
 
-    gnssRinex& SNRCatcher::Process(gnssRinex& gData)
+    IRinex& SNRCatcher::Process(IRinex& gData)
         throw(ProcessingException)
     {
         try
         {
-            Process(gData.header.epoch, gData.body);
+            Process(gData.getHeader().epoch, gData.getBody());
             return gData;
         }
         catch (Exception& u)
@@ -47,8 +47,8 @@ namespace pod
        * @param gData     Data object holding the data.
        * @param epochflag Epoch flag.
        */
-    satTypeValueMap& SNRCatcher::Process(const CommonTime& epoch,
-        satTypeValueMap& gData)
+	SatTypePtrMap& SNRCatcher::Process(const CommonTime& epoch,
+        SatTypePtrMap& gData)
         throw(ProcessingException)
     {
         try
@@ -64,7 +64,7 @@ namespace pod
                 try
                 {
                     // Try to extract the values
-                    value1 = it.second(obsType);
+                    value1 = it.second->get_value()(obsType);
                 }
                 catch (...)
                 {
@@ -74,7 +74,7 @@ namespace pod
                     continue;
                 }
 
-                if (getDetection(epoch, it.first, it.second, value1) > .0)
+                if (getDetection(epoch, it.first, it.second->get_value(), value1) > .0)
                     affectedSatSet.insert(it.first);
             }
 
@@ -89,9 +89,9 @@ namespace pod
                 {
                     rejTableItem.insert(sv);
                     auto & it = gData[sv];
-                    it[resultType1] += 1.0;
-                    if (it[resultType1] > 1.0)
-                        it[resultType1] = 1.0;
+                    it->get_value()[resultType1] += 1.0;
+                    if (it->get_value()[resultType1] > 1.0)
+                        it->get_value()[resultType1] = 1.0;
                 }
 
             return gData;
@@ -171,7 +171,6 @@ namespace pod
            // Get rid of oldest data, which is at the beginning of deque
            currData.epochs.pop_front();
            currData.buffer.pop_front();
-
        }
 
 

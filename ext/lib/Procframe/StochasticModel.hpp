@@ -45,7 +45,8 @@
 #define GPSTK_STOCHASTICMODEL_HPP
 
 #include "CommonTime.hpp"
-#include "DataStructures.hpp"
+//#include "DataStructures.hpp"
+#include"RinexEpoch.h"
 #include<memory>
 
 
@@ -57,42 +58,40 @@ namespace gpstk
 
 
       /** This is a base class to define stochastic models. It computes the
-       *  elements of Phi and Q matrices corresponding to a constant
-       *  stochastic model.
+       *  elements of Phi and Q matrices
        *
        * @sa RandomWalkModel, WhiteNoiseModel, PhaseAmbiguityModel
        *
        */
-   class StochasticModel
+	class IStochasticModel
+	{
+	public:
+		virtual double getPhi() const = 0;
+		virtual double getQ() const = 0;
+		virtual void Prepare(const SatID& sat, IRinex& gData) = 0;
+
+		/// Destructor
+		virtual ~IStochasticModel() = default;
+	};
+
+   class ConstantModel: public IStochasticModel
    {
    public:
 
          /// Default constructor
-      StochasticModel() {};
+	   ConstantModel() {};
 
 
          /// Get element of the state transition matrix Phi
-      virtual double getPhi() const 
+      virtual double getPhi() const override
       { return 1.0; };
 
 
          /// Get element of the process noise matrix Q
-      virtual double getQ() const 
+      virtual double getQ() const override
       { return 0.0; };
 
 
-         /** This method provides the stochastic model with all the available
-          *  information and takes appropriate actions. By default, it does
-          *  nothing.
-          *
-          * @param sat        Satellite.
-          * @param gData      Data object holding the data.
-          *
-          */
-      virtual void Prepare( const SatID& sat,
-                            gnssSatTypeValue& gData )
-      { return; };
-
 
          /** This method provides the stochastic model with all the available
           *  information and takes appropriate actions. By default, it does
@@ -102,13 +101,12 @@ namespace gpstk
           * @param gData      Data object holding the data.
           *
           */
-      virtual void Prepare( const SatID& sat,
-                            gnssRinex& gData )
+      virtual void Prepare( const SatID& sat, IRinex& gData )
       { return; };
 
 
          /// Destructor
-      virtual ~StochasticModel() {};
+      virtual ~ConstantModel() {};
 
 
    }; // End of class 'StochasticModel'
@@ -124,7 +122,7 @@ namespace gpstk
        * MUST NOT use the SAME object to process DIFFERENT data streams.
        *
        */
-   class RandomWalkModel : public StochasticModel
+   class RandomWalkModel : public IStochasticModel
    {
    public:
 
@@ -201,6 +199,8 @@ namespace gpstk
          /// Get element of the process noise matrix Q
       virtual double getQ() const;
 
+	  /// Get element of the process noise matrix Q
+	  virtual double getPhi() const { return 1.0; } ;
 
          /** This method provides the stochastic model with all the available
           *  information and takes appropriate actions.
@@ -209,19 +209,7 @@ namespace gpstk
           * @param gData      Data object holding the data.
           *
           */
-      virtual void Prepare( const SatID& sat,
-                            gnssSatTypeValue& gData );
-
-
-         /** This method provides the stochastic model with all the available
-          *  information and takes appropriate actions.
-          *
-          * @param sat        Satellite.
-          * @param gData      Data object holding the data.
-          *
-          */
-      virtual void Prepare( const SatID& sat,
-                            gnssRinex& gData );
+      virtual void Prepare( const SatID& sat, IRinex& gData ) override;
 
 
          /// Destructor
@@ -253,7 +241,7 @@ namespace gpstk
        * @sa StochasticModel, ConstantModel, RandomWalkModel
        *
        */
-   class WhiteNoiseModel : public StochasticModel
+   class WhiteNoiseModel : public IStochasticModel
    {
    public:
 
@@ -281,6 +269,8 @@ namespace gpstk
       virtual double getQ() const override
       { return variance; };
 
+	  virtual void Prepare( const SatID& sat, IRinex& gData )
+      { return; };
 
          /// Destructor
       virtual ~WhiteNoiseModel() {};
@@ -310,7 +300,7 @@ namespace gpstk
        * method to change this behaviour and use cycle slip flags directly.
        * By default, the 'TypeID' of the cycle slip flag is 'TypeID::CSL1'.
        */
-   class PhaseAmbiguityModel : public StochasticModel
+   class PhaseAmbiguityModel : public IStochasticModel
    {
    public:
 
@@ -374,17 +364,6 @@ namespace gpstk
       virtual double getQ()const override;
 
 
-         /** This method provides the stochastic model with all the available
-          *  information and takes appropriate actions.
-          *
-          * @param sat        Satellite.
-          * @param gData      Data object holding the data.
-          *
-          */
-      virtual void Prepare( const SatID& sat,
-                            gnssSatTypeValue& gData )
-      { checkCS(sat, gData.body, gData.header.source); return; };
-
 
          /** This method provides the stochastic model with all the available
           *  information and takes appropriate actions.
@@ -394,8 +373,8 @@ namespace gpstk
           *
           */
       virtual void Prepare( const SatID& sat,
-                            gnssRinex& gData )
-      { checkCS(sat, gData.body, gData.header.source); return; };
+                            IRinex& gData )
+      { checkCS(sat, gData.getBody(), gData.getHeader().source); return; };
 
 
          /// Destructor
@@ -429,7 +408,7 @@ namespace gpstk
           *
           */
       virtual void checkCS( const SatID& sat,
-                            satTypeValueMap& data,
+                            SatTypePtrMap& data,
                             SourceID& source );
 
 
@@ -446,7 +425,7 @@ namespace gpstk
        * @sa RandomWalkModel, StochasticModel, ConstantModel, WhiteNoiseModel
        *
        */
-   class TropoRandomWalkModel : public StochasticModel
+   class TropoRandomWalkModel : public IStochasticModel
    {
    public:
 
@@ -530,15 +509,6 @@ namespace gpstk
       { return variance; };
 
 
-         /** This method provides the stochastic model with all the available
-          *  information and takes appropriate actions.
-          *
-          * @param sat        Satellite.
-          * @param gData      Data object holding the data.
-          *
-          */
-      virtual void Prepare( const SatID& sat,
-                            gnssSatTypeValue& gData );
 
 
          /** This method provides the stochastic model with all the available
@@ -549,7 +519,7 @@ namespace gpstk
           *
           */
       virtual void Prepare( const SatID& sat,
-                            gnssRinex& gData );
+                            IRinex& gData );
 
 
          /// Destructor
@@ -590,14 +560,14 @@ namespace gpstk
           *
           */
       virtual void computeQ( const SatID& sat,
-                             satTypeValueMap& data,
+                             SatTypePtrMap& data,
                              SourceID& source );
 
 
    }; // End of class 'TropoRandomWalkModel'
 
-   typedef std::unique_ptr<StochasticModel> StochasticModel_uptr;
-   typedef std::shared_ptr<StochasticModel> StochasticModel_sptr;
+   typedef std::unique_ptr<IStochasticModel> StochasticModel_uptr;
+   typedef std::shared_ptr<IStochasticModel> StochasticModel_sptr;
       //@}
 
 }  // End of namespace gpstk

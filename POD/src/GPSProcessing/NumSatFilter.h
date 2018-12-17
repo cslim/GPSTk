@@ -13,10 +13,8 @@ namespace pod
         NumSatFilter(SlnType slnType) :minSvNum(minSatbySsForSt.at(slnType)) {};
         virtual ~NumSatFilter() {};
 
-        // Inherited via ProcessingClass
-        virtual gpstk::gnssSatTypeValue & Process(gpstk::gnssSatTypeValue & gData) override;
 
-        virtual gpstk::gnssRinex & Process(gpstk::gnssRinex & gData) override;
+        virtual gpstk::IRinex & Process(gpstk::IRinex & gData) override;
         
         virtual std::string getClassName(void) const override;
 

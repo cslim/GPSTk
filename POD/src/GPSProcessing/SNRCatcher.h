@@ -22,23 +22,17 @@ namespace pod
 
         virtual ~SNRCatcher() {};
 
-        virtual gpstk::gnssSatTypeValue& Process(gpstk::gnssSatTypeValue& gData)
-            throw(gpstk::ProcessingException)
-        {
-            Process(gData.header.epoch, gData.body); return gData;
-        };
-
 
         /** Returns a gnnsRinex object, adding the new data generated when
         *  calling this object.
         *
         * @param gData    Data object holding the data.
         */
-        virtual gpstk::gnssRinex& Process(gpstk::gnssRinex& gData)
+        virtual gpstk::IRinex& Process(gpstk::IRinex& gData)
             throw(gpstk::ProcessingException);
 
-        virtual  gpstk::satTypeValueMap& Process(const gpstk::CommonTime& epoch,
-            gpstk::satTypeValueMap& gData)
+        virtual  gpstk::SatTypePtrMap& Process(const gpstk::CommonTime& epoch,
+            gpstk::SatTypePtrMap& gData)
             throw(gpstk::ProcessingException);
 
         /** Method that implements the LI cycle slip detection algorithm

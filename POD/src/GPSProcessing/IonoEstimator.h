@@ -14,10 +14,8 @@ namespace pod
         IonoEstimator();
         virtual ~IonoEstimator() {};
 
-        virtual gpstk::gnssSatTypeValue& Process(gpstk::gnssSatTypeValue& gData);
 
-
-        virtual gpstk::gnssRinex& Process(gpstk::gnssRinex& gData)
+        virtual gpstk::IRinex& Process(gpstk::IRinex& gData)
             throw(gpstk::ProcessingException);
 
         /// Returns a string identifying this object.
@@ -30,7 +28,7 @@ namespace pod
 
     private:
         
-        bool feed(const gpstk::SatID & sv, gpstk::gnssRinex& gData);
+        bool feed(const gpstk::SatID & sv, gpstk::IRinex& gData);
         struct KalmanData
         {
             KalmanData()

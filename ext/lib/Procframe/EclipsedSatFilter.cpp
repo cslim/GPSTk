@@ -99,8 +99,8 @@ namespace gpstk
        * @param epoch     Time of observations.
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& EclipsedSatFilter::Process( const CommonTime& epoch,
-                                                satTypeValueMap& gData )
+   SatTypePtrMap& EclipsedSatFilter::Process( const CommonTime& epoch,
+                                                SatTypePtrMap& gData )
       throw(ProcessingException)
    {
 
@@ -121,13 +121,12 @@ namespace gpstk
          Triple svPos(0.0, 0.0, 0.0);
 
             // Loop through all the satellites
-         satTypeValueMap::iterator it;
-         for (it = gData.begin(); it != gData.end(); ++it) 
+         for (auto it = gData.begin(); it != gData.end(); ++it) 
          {
                // Check if satellite position is not already computed
-            if( ( (*it).second.find(TypeID::satX) == (*it).second.end() ) ||
-                ( (*it).second.find(TypeID::satY) == (*it).second.end() ) ||
-                ( (*it).second.find(TypeID::satZ) == (*it).second.end() ) )
+            if( ( (*it).second->get_value().find(TypeID::satX) == (*it).second->get_value().end() ) ||
+                ( (*it).second->get_value().find(TypeID::satY) == (*it).second->get_value().end() ) ||
+                ( (*it).second->get_value().find(TypeID::satZ) == (*it).second->get_value().end() ) )
             {
 
                   // If satellite position is missing, then schedule this 
@@ -138,9 +137,9 @@ namespace gpstk
             else
             {
                   // Get satellite position out of GDS
-               svPos[0] = (*it).second[TypeID::satX];
-               svPos[1] = (*it).second[TypeID::satY];
-               svPos[2] = (*it).second[TypeID::satZ];
+               svPos[0] = (*it).second->get_value()[TypeID::satX];
+               svPos[1] = (*it).second->get_value()[TypeID::satY];
+               svPos[2] = (*it).second->get_value()[TypeID::satZ];
             }
 
                // Unitary vector from Earth mass center to satellite
@@ -211,14 +210,14 @@ namespace gpstk
        *
        * @param gData    Data object holding the data.
        */
-   gnssRinex& EclipsedSatFilter::Process(gnssRinex& gData)
+   IRinex& EclipsedSatFilter::Process(IRinex& gData)
       throw(ProcessingException)
    {
 
       try
       {
 
-         Process(gData.header.epoch, gData.body);
+         Process(gData.getHeader().epoch, gData.getBody());
 
          return gData;
 

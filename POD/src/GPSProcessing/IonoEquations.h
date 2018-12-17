@@ -19,12 +19,12 @@ namespace pod
         ~IonoEquations(){};
 
         /* update state of equations with new observational data */
-        virtual  void Prepare(gpstk::gnssRinex& gData) override;
+        virtual  void Prepare(gpstk::IRinex& gData) override;
 
         /*Check, if unknown parameters currently observable, if so,
         put the corresponding TypeID into 'TypeIDSet'
         */
-        virtual void updateH(const gpstk::gnssRinex& gData,  const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0) override;
+        virtual void updateH(const gpstk::IRinex& gData,  const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0) override;
 
         /* return set of TypeID, corresponding unknown parameters  for given equations */
         virtual  ParametersSet getParameters() const override
@@ -51,10 +51,10 @@ namespace pod
         */
         virtual int getNumUnknowns() const override;
 
-        template<class T , typename = std::enable_if_t<std::is_base_of<gpstk::StochasticModel, T>::value> >
+        template<class T , typename = std::enable_if_t<std::is_base_of<gpstk::IStochasticModel, T>::value> >
         IonoEquations& setStocModel()
         {
-            if (std::is_same<T, gpstk::StochasticModel>::value)
+            if (std::is_same<T, gpstk::ConstantModel>::value)
                 stModelInitializer = &IonoEquations::constantModel;
             else if(std::is_same<T, gpstk::RandomWalkModel>::value)
                 stModelInitializer = &IonoEquations::rWalkModel;

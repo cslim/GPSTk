@@ -57,9 +57,7 @@ namespace pod
 
        void Prepare(const gpstk::CommonTime & ct);
 
-       void Prepare(const gpstk::SatID& sat, const gpstk::gnssSatTypeValue& gData);
-
-       void Prepare(const gpstk::SatID& sat, const gpstk::gnssRinex& gData);
+       void Prepare(const gpstk::SatID& sat, const gpstk::IRinex& gData);
 
     private:
 

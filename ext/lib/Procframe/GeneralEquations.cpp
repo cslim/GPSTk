@@ -65,9 +65,9 @@ namespace gpstk
       defaultYCoordinatesModel.setSigma(sigmaCoordXYZ);
       defaultZCoordinatesModel.setSigma(sigmaCoordXYZ);
 
-      pCoordXStoModel = &defaultStochasticModel;
-      pCoordYStoModel = &defaultStochasticModel;
-      pCoordZStoModel = &defaultStochasticModel;
+      pCoordXStoModel = &defaultConstatModel;
+      pCoordYStoModel = &defaultConstatModel;
+      pCoordZStoModel = &defaultConstatModel;
 
       pClockStoModel    = &defaultWhiteNoiseModel;
       pSatClockStoModel = &defaultWhiteNoiseModel;

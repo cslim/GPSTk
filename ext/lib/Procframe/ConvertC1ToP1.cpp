@@ -67,8 +67,8 @@ namespace gpstk
        * @param time      Epoch corresponding to the data.
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& ConvertC1ToP1::Process( const CommonTime& time,
-                                                satTypeValueMap& gData )
+   SatTypePtrMap& ConvertC1ToP1::Process( const CommonTime& time,
+                                                SatTypePtrMap& gData )
       throw(ProcessingException)
    {
       
@@ -80,27 +80,26 @@ namespace gpstk
          SatIDSet satRejectedSet;
 
          // Loop through all the satellites
-         satTypeValueMap::iterator it;
-         for (it = gData.begin(); it != gData.end(); ++it)
+         for (auto it = gData.begin(); it != gData.end(); ++it)
          {
             SatID sat = it->first;
             
-            typeValueMap::iterator ittC1 = it->second.find(TypeID::C1);
-            typeValueMap::iterator ittP1 = it->second.find(TypeID::P1);
+            typeValueMap::iterator ittC1 = it->second->get_value().find(TypeID::C1);
+            typeValueMap::iterator ittP1 = it->second->get_value().find(TypeID::P1);
 
-            bool hasC1( ittC1 != it->second.end() );
-            bool hasP1( ittP1 != it->second.end() );
+            bool hasC1( ittC1 != it->second->get_value().end() );
+            bool hasP1( ittP1 != it->second->get_value().end() );
 
             // filter out C1 and P1
             if(hasC1)
             {
-               if( it->second[TypeID::C1]<minLimit || 
-                   it->second[TypeID::C1]>maxLimit      ) { hasC1 = false;}
+               if( it->second->get_value()[TypeID::C1]<minLimit || 
+                   it->second->get_value()[TypeID::C1]>maxLimit      ) { hasC1 = false;}
             }
             if(hasP1)
             {
-               if( it->second[TypeID::P1]<minLimit || 
-                   it->second[TypeID::P1]>maxLimit      ) { hasP1 = false;}
+               if( it->second->get_value()[TypeID::P1]<minLimit || 
+                   it->second->get_value()[TypeID::P1]>maxLimit      ) { hasP1 = false;}
             }
 
                // If no desirable data, then schedule this satellite for removal
@@ -121,7 +120,7 @@ namespace gpstk
                   Bp1c1 = 0.0;
                }
 
-               it->second[TypeID::P1] = it->second[TypeID::C1] 
+               it->second->get_value()[TypeID::P1] = it->second->get_value()[TypeID::C1] 
                                        +Bp1c1*(C_MPS * 1.0e-9);
             }
 

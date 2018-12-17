@@ -241,7 +241,7 @@ namespace pod
 
         // This is the GNSS data structure that will hold all the
         // GNSS-related information
-        gnssRinex gRin;
+        RinexEpoch gRin;
 
 #pragma region Output streams
 
@@ -286,7 +286,7 @@ namespace pod
                 PPPSolutionBase::mapSNR(gRin);
 
                 // Store current epoch
-                CommonTime time(gRin.header.epoch);
+                CommonTime time(gRin.getHeader().epoch);
 
                 nominalPos = data->apprPos.at(time);
 
@@ -353,8 +353,8 @@ namespace pod
                 // Check what type of solver we are using
                 if (cycles < 1)
                 {
-                    GnssEpoch ep(gRin);
-                    CommonTime time(gRin.header.epoch);
+                    GnssEpoch ep(gRin.getBody());
+                    CommonTime time(gRin.getHeader().epoch);
                     if (b)
                     {
                         time0 = time;
@@ -414,8 +414,8 @@ namespace pod
     
         while (fbpppSolver.LastProcess(gRin))
         {
-            GnssEpoch ep(gRin);
-            CommonTime time(gRin.header.epoch);
+            GnssEpoch ep(gRin.getBody());
+            CommonTime time(gRin.getHeader().epoch);
 
             if (b)
             {

@@ -76,7 +76,7 @@ namespace pod
     protected: virtual void updateRequaredObs() = 0;
 
     protected: virtual int computeApprPos(
-        const gpstk::gnssRinex & gRin,
+        const gpstk::IRinex & gRin,
         const gpstk::XvtStore<gpstk::SatID>& Eph,
         gpstk::Position& pos);
 

@@ -19,7 +19,7 @@ namespace pod
         { TypeID::prefitLC, 10000.0 },
     };
 
-    void EquationComposer::Prepare(gnssRinex& gData)
+    void EquationComposer::Prepare(IRinex& gData)
     {
         //clear ambiguities set
         currAmb.clear();
@@ -34,9 +34,9 @@ namespace pod
         }
     }
 
-    void EquationComposer::updateH(gpstk::gnssRinex& gData, gpstk::Matrix<double>& H)
+    void EquationComposer::updateH(gpstk::IRinex& gData, gpstk::Matrix<double>& H)
     {
-        int numSVs = gData.body.size();
+        int numSVs = gData.getBody().size();
         int numMeasTypes = measTypes().size();
 
         //number of measurements are equals number of satellites times observation types number 
@@ -98,12 +98,12 @@ namespace pod
             eq->updateQ(Q, i);
     }
 
-    void EquationComposer::updateW(const gnssRinex& gData, gpstk::Matrix<double>& weigthMatrix)
+    void EquationComposer::updateW(const IRinex& gData, gpstk::Matrix<double>& weigthMatrix)
     {
-        size_t  numsv = gData.body.size();
+        size_t  numsv = gData.getBody().size();
         // Generate the appropriate weights matrix
         // Try to extract weights from GDS
-        satTypeValueMap dummy(gData.body.extractTypeID(TypeID::weight));
+        satTypeValueMap dummy(gData.getBody().extractTypeID(TypeID::weight));
 
         //prepare identy matrix
         weigthMatrix.resize(numMeas, numMeas, 0.0);
@@ -113,7 +113,7 @@ namespace pod
         // Check if weights match
         if (dummy.numSats() == numsv)
         {
-            auto weigths = gData.getVectorOfTypeID(TypeID::weight);
+            auto weigths = gData.getBody().getVectorOfTypeID(TypeID::weight);
 
             for (size_t i = 0; i < numsv; i++)
                 weigthMatrix(i, i) = weigthMatrix(i, i) * weigths(i);
@@ -140,13 +140,13 @@ namespace pod
         }
     }
 
-    void EquationComposer::updateMeas(const gnssRinex& gData, gpstk::Vector<double>& measVector)
+    void EquationComposer::updateMeas(const IRinex& gData, gpstk::Vector<double>& measVector)
     {
         measVector.resize(numMeas, 0.0);
         int j = 0;
         for (const auto& it : measTypes())
         {
-            auto meas = gData.getVectorOfTypeID(it);
+            auto meas = gData.getBody().getVectorOfTypeID(it);
             int numSat = meas.size();
             for (int i = 0; i <numSat; i++)
                 measVector(i + j*numSat) = meas(i);
@@ -215,19 +215,19 @@ namespace pod
             eq->defStateAndCovariance(state, cov, i);
     }
 
-    void EquationComposer::saveResiduals(gpstk::gnssRinex& gData, gpstk::Vector<double>& postfitResiduals) const
+    void EquationComposer::saveResiduals(gpstk::IRinex& gData, gpstk::Vector<double>& postfitResiduals) const
     {
         int resNum = postfitResiduals.size();
-        int satNum = gData.body.size();
+        int satNum = gData.getBody().size();
         int numResTypes = (residTypes()).size();
 
         assert(satNum * numResTypes == resNum);
 
         int i_res = 0;
         for (const auto& resType : residTypes())
-            for (auto& itSat : gData.body)
+            for (auto& itSat : gData.getBody())
             {
-                itSat.second[resType] = postfitResiduals(i_res);
+                itSat.second->get_value()[resType] = postfitResiduals(i_res);
                 i_res++;
             }
     }

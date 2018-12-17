@@ -226,18 +226,9 @@ namespace gpstk
           * @param gData      satTypeValueMap data object holding reference
           *                   station data.
           */
-      virtual DoubleOp& setRefData(const satTypeValueMap& gData)
+      virtual DoubleOp& setRefData(const SatTypePtrMap& gData)
       { sdStations.setRefData(gData); return (*this); };
 
-
-         /** Method to set the gnssSatTypeValue data object holding reference
-          *  station data.
-          *
-          * @param gData      gnssSatTypeValue data object holding reference
-          *                   station data.
-          */
-      virtual DoubleOp& setRefData(const gnssSatTypeValue& gData)
-      { return setRefData( gData.body ); };
 
 
          /** Method to set the gnssRinex data object holding reference
@@ -246,13 +237,13 @@ namespace gpstk
           * @param gData      gnssRinex data object holding reference
           *                   station data.
           */
-      virtual DoubleOp& setRefData(const gnssRinex& gData)
-      { return setRefData( gData.body ); };
+      virtual DoubleOp& setRefData(const IRinex& gData)
+      { return setRefData( gData.getBody() ); };
 
 
          /// Method to get the satTypeValueMap data object holding reference
          /// station data.
-      virtual satTypeValueMap getRefData(void) const
+      virtual SatTypePtrMap getRefData(void) const
       { return sdStations.getRefData(); };
 
 
@@ -305,19 +296,10 @@ namespace gpstk
           *
           * @param gData      Data object holding the data.
           */
-      virtual satTypeValueMap& Process(satTypeValueMap& gData)
+      virtual SatTypePtrMap& Process(SatTypePtrMap& gData)
          throw(ProcessingException);
 
 
-         /** Returns a reference to a gnssSatTypeValue object after
-          *  differencing data type values given in 'diffTypes' field with
-          *  respect to reference station data in 'refData' field.
-          *
-          * @param gData      Data object holding the data.
-          */
-      virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
-         throw(ProcessingException)
-      { Process(gData.body); return gData; };
 
 
          /** Returns a reference to a gnnsRinex object after differencing
@@ -326,9 +308,9 @@ namespace gpstk
           *
           * @param gData      Data object holding the data.
           */
-      virtual gnssRinex& Process(gnssRinex& gData)
+      virtual IRinex& Process(IRinex& gData)
          throw(ProcessingException)
-      { Process(gData.body); return gData; };
+      { Process(gData.getBody()); return gData; };
 
 
          /// Returns a string identifying this object.

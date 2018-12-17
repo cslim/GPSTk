@@ -142,9 +142,9 @@ namespace gpstk
 
       GeneralEquations& setCoordinatesStatic()
       { 
-         pCoordXStoModel = &defaultStochasticModel;
-         pCoordYStoModel = &defaultStochasticModel;
-         pCoordZStoModel = &defaultStochasticModel; 
+         pCoordXStoModel = &defaultConstatModel;
+         pCoordYStoModel = &defaultConstatModel;
+         pCoordZStoModel = &defaultConstatModel;
 
          return (*this); 
       };
@@ -165,62 +165,62 @@ namespace gpstk
       };
 
 
-      StochasticModel* getXCoordinatesModel() const
+      IStochasticModel* getXCoordinatesModel() const
       { return pCoordXStoModel; };
 
 
-      GeneralEquations& setXCoordinatesModel(StochasticModel* pModel)
+      GeneralEquations& setXCoordinatesModel(IStochasticModel* pModel)
       { pCoordXStoModel = pModel; return (*this); };
 
 
-      StochasticModel* getYCoordinatesModel() const
+      IStochasticModel* getYCoordinatesModel() const
       { return pCoordYStoModel; };
 
 
-      GeneralEquations& setYCoordinatesModel(StochasticModel* pModel)
+      GeneralEquations& setYCoordinatesModel(IStochasticModel* pModel)
       { pCoordYStoModel = pModel; return (*this); };
 
 
-      StochasticModel* getZCoordinatesModel() const
+      IStochasticModel* getZCoordinatesModel() const
       { return pCoordZStoModel; };
 
 
-      GeneralEquations& setZCoordinatesModel(StochasticModel* pModel)
+      GeneralEquations& setZCoordinatesModel(IStochasticModel* pModel)
       { pCoordZStoModel = pModel; return (*this); };
 
 
-      GeneralEquations& setCoordinatesModel(StochasticModel* pModel);
+      GeneralEquations& setCoordinatesModel(IStochasticModel* pModel);
 
 
-      StochasticModel* getTroposphereModel(void) const
+      IStochasticModel* getTroposphereModel(void) const
       { return pTropStoModel; };
 
 
-      GeneralEquations& setTroposphereModel(StochasticModel* pModel)
+      GeneralEquations& setTroposphereModel(IStochasticModel* pModel)
       { pTropStoModel = pModel; return (*this); };
 
 
-      virtual StochasticModel* getIonosphereModel(void) const
+      virtual IStochasticModel* getIonosphereModel(void) const
       { return pIonoStoModel; };
 
 
-      virtual GeneralEquations& setIonosphereModel(StochasticModel* pModel)
+      virtual GeneralEquations& setIonosphereModel(IStochasticModel* pModel)
       { pIonoStoModel = pModel; return (*this); };
 
 
-      virtual StochasticModel* getReceiverClockModel(void) const
+      virtual IStochasticModel* getReceiverClockModel(void) const
       { return pClockStoModel; };
 
 
-      virtual GeneralEquations& setReceiverClockModel(StochasticModel* pModel)
+      virtual GeneralEquations& setReceiverClockModel(IStochasticModel* pModel)
       { pClockStoModel = pModel; return (*this); };
 
 
-      virtual StochasticModel* getSatClockModel(void) const
+      virtual IStochasticModel* getSatClockModel(void) const
       { return pSatClockStoModel; };
 
 
-      virtual GeneralEquations& setSatClockModel(StochasticModel* pModel)
+      virtual GeneralEquations& setSatClockModel(IStochasticModel* pModel)
       { pSatClockStoModel = pModel; return (*this); };
 
 
@@ -323,39 +323,39 @@ namespace gpstk
       bool estimateIonosphere;
 
          /// Pointer to stochastic model for dx dy dz (or dLat dLon dH)
-      StochasticModel* pCoordXStoModel;
-      StochasticModel* pCoordYStoModel;
-      StochasticModel* pCoordZStoModel;
+      IStochasticModel* pCoordXStoModel;
+      IStochasticModel* pCoordYStoModel;
+      IStochasticModel* pCoordZStoModel;
 
          /// Pointer to stochastic model for receiver clock
-      StochasticModel* pClockStoModel;
+      IStochasticModel* pClockStoModel;
 
          /// Pointer to stochastic model for satellite clock
-      StochasticModel* pSatClockStoModel;
+      IStochasticModel* pSatClockStoModel;
 
          /// Pointer to stochastic model for troposphere
-      StochasticModel* pTropStoModel;
+      IStochasticModel* pTropStoModel;
 
          /// Pointer to stochastic model for troposphere
-      StochasticModel* pIonoStoModel;
+      IStochasticModel* pIonoStoModel;
 
          /// Pointer to stochastic model for phase biases
-      StochasticModel* pBiasStoModelL1;
+      IStochasticModel* pBiasStoModelL1;
 
          /// Pointer to stochastic model for phase biases
-      StochasticModel* pBiasStoModelL2;
+      IStochasticModel* pBiasStoModelL2;
 
          /// Pointer to stochastic model for phase biases LC
-      StochasticModel* pBiasStoModelLC;
+      IStochasticModel* pBiasStoModelLC;
 
          /// Pointer to stochastic model for phase biases WL
-      StochasticModel* pBiasStoModelWL;
+      IStochasticModel* pBiasStoModelWL;
 
          /// Pointer to stochastic model for phase biases WL2
-      StochasticModel* pBiasStoModelWL2;
+      IStochasticModel* pBiasStoModelWL2;
 
          /// Pointer to stochastic model for phase biases WL3
-      StochasticModel* pBiasStoModelWL3;
+      IStochasticModel* pBiasStoModelWL3;
 
          /// Object holding the useful satellite data for pick up reference sat.
       SourceSatDataMap sourceSatDataMap;
@@ -371,7 +371,7 @@ namespace gpstk
 
 
          /// default stochastic model
-      StochasticModel defaultStochasticModel;
+      ConstantModel defaultConstatModel;
       WhiteNoiseModel defaultWhiteNoiseModel;
       RandomWalkModel defaultTropModel;
       WhiteNoiseModel defaultIonoModel;

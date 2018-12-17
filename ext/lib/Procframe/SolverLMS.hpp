@@ -222,7 +222,7 @@ namespace gpstk
 
    protected:
 
-       void SolverLMS::updateCurPar(gnssRinex& gRin);
+       void SolverLMS::updateCurPar(IRinex& gRin);
 
          /** Default equation definition to be used when fed with
           *  GNSS data structures.

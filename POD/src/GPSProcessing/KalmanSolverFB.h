@@ -1,6 +1,7 @@
 #pragma once
 #include "KalmanSolver.h"
 #include"ProcessingClass.hpp"
+#include"RinexEpoch.h"
 
 namespace pod
 {
@@ -108,10 +109,10 @@ namespace pod
             return *this;
         }
 
-        gpstk::gnssRinex & Process(gpstk::gnssRinex & gRin);
+        gpstk::IRinex & Process(gpstk::IRinex & gRin);
 
         //last forward process cycle
-        bool lastProcess(gpstk::gnssRinex & gRin);
+        bool lastProcess(gpstk::IRinex & gRin);
 
         //Reprocess the data stored during a previous 'Process()' call.
         void reProcess(int numCycles);
@@ -122,7 +123,7 @@ namespace pod
         
     private:
         //This method checks the residuals and modifies 'gData' accordingly.
-        void checkLimits(gpstk::gnssRinex& gData, size_t cycleNumber);
+        void checkLimits(gpstk::IRinex& gData, size_t cycleNumber);
 
         double getLimit(const gpstk::TypeID& type, size_t cycleNumber);
 
@@ -146,7 +147,7 @@ namespace pod
     private:
 
         //Number of measurements rejected because they were off limits.
-        std::list<gpstk::gnssRinex> ObsData;
+        std::list<gpstk::irinex_uptr> ObsData;
 
         // is current iteration first
         bool firstIteration;

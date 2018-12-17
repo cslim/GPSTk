@@ -61,7 +61,6 @@ namespace gpstk
    }  // End of method 'PhaseAmbiguityModel::getQ()'
 
 
-
       /* This method provides the stochastic model with all the available
        * information and takes appropriate actions.
        *
@@ -70,35 +69,13 @@ namespace gpstk
        *
        */
    void RandomWalkModel::Prepare( const SatID& sat,
-                                  gnssSatTypeValue& gData )
+                                  IRinex& gData )
    {
 
          // Update previous epoch
       setPreviousTime(currentTime);
 
-      setCurrentTime(gData.header.epoch);
-
-      return;
-
-   }  // End of method 'RandomWalkModel::Prepare()'
-
-
-
-      /* This method provides the stochastic model with all the available
-       * information and takes appropriate actions.
-       *
-       * @param sat        Satellite.
-       * @param gData      Data object holding the data.
-       *
-       */
-   void RandomWalkModel::Prepare( const SatID& sat,
-                                  gnssRinex& gData )
-   {
-
-         // Update previous epoch
-      setPreviousTime(currentTime);
-
-      setCurrentTime(gData.header.epoch);
+      setCurrentTime(gData.getHeader().epoch);
 
       return;
 
@@ -149,7 +126,7 @@ namespace gpstk
        *
        */
    void PhaseAmbiguityModel::checkCS( const SatID& sat,
-                                      satTypeValueMap& data,
+                                      SatTypePtrMap& data,
                                       SourceID& source )
    {
 
@@ -229,13 +206,8 @@ namespace gpstk
    {
 
          // Look at each source being currently managed
-      for( std::map<SourceID, tropModelData>::iterator it = tmData.begin();
-           it != tmData.end();
-           ++it )
-      {
-            // Assign new process spectral density value
-         (*it).second.qprime = qp;
-      }
+      for( auto &&it :tmData )
+         it.second.qprime = qp;
 
       return (*this);
 
@@ -243,34 +215,6 @@ namespace gpstk
 
 
 
-      /* This method provides the stochastic model with all the available
-       *  information and takes appropriate actions.
-       *
-       * @param sat        Satellite.
-       * @param gData      Data object holding the data.
-       *
-       */
-   void TropoRandomWalkModel::Prepare( const SatID& sat,
-                                       gnssSatTypeValue& gData )
-   {
-
-         // First, get current source
-      SourceID source( gData.header.source );
-
-         // Second, let's update current epoch for this source
-      setCurrentTime(source, gData.header.epoch );
-
-         // Third, compute Q value
-      computeQ(sat, gData.body, source);
-
-         // Fourth, prepare for next iteration updating previous epoch
-      setPreviousTime(source, tmData[source].currentTime);
-
-      return;
-
-   }  // End of method 'TropoRandomWalkModel::Prepare()'
-
-
 
       /* This method provides the stochastic model with all the available
        *  information and takes appropriate actions.
@@ -280,17 +224,17 @@ namespace gpstk
        *
        */
    void TropoRandomWalkModel::Prepare( const SatID& sat,
-                                       gnssRinex& gData )
+                                       IRinex& gData )
    {
 
          // First, get current source
-      SourceID source( gData.header.source );
+      SourceID source( gData.getHeader().source );
 
          // Second, let's update current epoch for this source
-      setCurrentTime(source, gData.header.epoch );
+      setCurrentTime(source, gData.getHeader().epoch );
 
          // Third, compute Q value
-      computeQ(sat, gData.body, source);
+      computeQ(sat, gData.getBody(), source);
 
          // Fourth, prepare for next iteration updating previous epoch
       setPreviousTime(source, tmData[source].currentTime);
@@ -310,7 +254,7 @@ namespace gpstk
        *
        */
    void TropoRandomWalkModel::computeQ( const SatID& sat,
-                                        satTypeValueMap& data,
+                                        SatTypePtrMap& data,
                                         SourceID& source )
    {
 

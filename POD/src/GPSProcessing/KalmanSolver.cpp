@@ -30,13 +30,13 @@ namespace pod
     KalmanSolver::~KalmanSolver()
     {}
 
-    gnssRinex& KalmanSolver::Process(gnssRinex& gData)
+    IRinex& KalmanSolver::Process(IRinex& gData)
     {
         //invalidate solution
         isValid_ = false;
 
-        double dt = abs(t_pre - gData.header.epoch);
-        t_pre = gData.header.epoch;
+        double dt = abs(t_pre - gData.getHeader().epoch);
+        t_pre = gData.getHeader().epoch;
 
         if (dt > maxGap)
         {
@@ -45,7 +45,7 @@ namespace pod
         }
 
         //workaround: reset PPP engine every day 
-        double  sec = gData.header.epoch.getSecondOfDay();
+        double  sec = gData.getHeader().epoch.getSecondOfDay();
         if ((int)sec % 86400 == 0 && equations->getSlnType() == SlnType::PPP_Float)
             equations->clearSvData();
 
@@ -54,9 +54,9 @@ namespace pod
 
         //if number of satellies passed to processing is less than 'MIN_NUM_SV'
         //clear all SV data except observable
-        if (gData.body.size() < minSatNumber)
+        if (gData.getBody().size() < minSatNumber)
         {
-            equations->keepOnlySv(gData.getSatID());
+            equations->keepOnlySv(gData.getBody().getSatID());
 
             return gData;
         }
@@ -80,9 +80,9 @@ namespace pod
 
             //if number of satellies passed to processing is less than 'MIN_NUM_SV'
             //clear all SV data except observable
-            if (gData.body.size() < minSatNumber)
+            if (gData.getBody().size() < minSatNumber)
             {
-                equations->keepOnlySv(gData.getSatID());
+                equations->keepOnlySv(gData.getBody().getSatID());
 
                 return gData;
             }
@@ -218,13 +218,13 @@ namespace pod
         v = v1;
     }
 
-    int KalmanSolver::checkPhase(gnssRinex& gData)
+    int KalmanSolver::checkPhase(IRinex& gData)
     {
         static const double codeLim(DBL_MAX);
         static const double phaseLim(0.06);
         static const TypeIDSet phaseTypes{ TypeID::postfitL1, TypeID::postfitL2, TypeID::postfitLC };
 
-        auto svSet = gData.getSatID();
+        auto svSet = gData.getBody().getSatID();
         resid maxPhaseResid;
 
         int i_res = 0;
@@ -284,13 +284,13 @@ namespace pod
             }
             
             //remove sv 
-            gData.removeSatID(maxPhaseResid.sv);
+            gData.getBody().removeSatID(maxPhaseResid.sv);
 
             return 1;
         }
     }
 
-    int KalmanSolver::check(gnssRinex& gData)
+    int KalmanSolver::check(IRinex& gData)
     {
         Matrix<double> res(PostfitResiduals().size(), 1, 0.0);
 
@@ -308,7 +308,7 @@ namespace pod
 
         if (sigma / stDev3D > 3)
         {
-            cout << "Epoch: " << CivilTime(gData.header.epoch) << " catched " << endl;
+            cout << "Epoch: " << CivilTime(gData.getHeader().epoch) << " catched " << endl;
             cout << "sigma: " << sigma << " sigma: " << stDev3D << endl;
             return 1;
         }
@@ -316,9 +316,9 @@ namespace pod
             return 0;
     }
 
-    void  KalmanSolver::fixAmbiguities(gnssRinex& gData)
+    void  KalmanSolver::fixAmbiguities(IRinex& gData)
     {
-        if (equations->getSlnType() == SlnType::PD_Fixed && gData.body.size() > 5)
+        if (equations->getSlnType() == SlnType::PD_Fixed && gData.getBody().size() > 5)
         {
             int core_num = equations->currentUnknowns().size() - equations->currentAmb().size();
 
@@ -331,9 +331,9 @@ namespace pod
     }
 
     //reject by code postfit residual 
-    gnssRinex& KalmanSolver::reject(gnssRinex& gData, const TypeIDSet&  typeIds)
+	IRinex& KalmanSolver::reject(IRinex& gData, const TypeIDSet&  typeIds)
     {
-        using type = decltype(gnssRinex::body)::value_type;
+		typedef SatTypePtrMap::value_type type;
         SatIDSet rejSat;
         ///!!!
         ///here we use only last type of postfit residuals, because in case of
@@ -345,11 +345,11 @@ namespace pod
         //get the sv - typeMap pair with largest residual value
 
         auto svWithMaxResidual = std::max_element(
-            gData.body.begin(), gData.body.end(),
+            gData.getBody().begin(), gData.getBody().end(),
             [&](const type& it1, const type& it2)-> bool
         {
-            double val1 = ::abs(it1.second.at(*id));
-            double val2 = ::abs(it2.second.at(*id));
+			double val1 = ::abs(it1.second->get_value().at(*id));
+            double val2 = ::abs(it2.second->get_value().at(*id));
             return(val1 < val2);
         }
         );
@@ -357,42 +357,14 @@ namespace pod
         //report detection
         cout << "Removed SV: " << svWithMaxResidual->first;
         cout << " with " << TypeID::tStrings[id->type] << " = ";
-        cout << svWithMaxResidual->second[*id] << endl;
+        cout << svWithMaxResidual->second->get_value()[*id] << endl;
         
         //remove sv
         rejSat.insert(svWithMaxResidual->first);
 
-        gData.removeSatID(rejSat);
+        gData.getBody().removeSatID(rejSat);
 
         return gData;
-    }
-
-    gnssSatTypeValue& KalmanSolver::Process(gnssSatTypeValue& gData)
-        throw(ProcessingException)
-    {
-        try
-        {
-            // Build a gnssRinex object and fill it with data
-            gnssRinex g1;
-            g1.header = gData.header;
-            g1.body = gData.body;
-
-            // Call the Process() method with the appropriate input object
-            Process(g1);
-
-            // Update the original gnssSatTypeValue object with the results
-            gData.body = g1.body;
-
-            return gData;
-
-        }
-        catch (Exception& u)
-        {
-            // Throw an exception if something unexpected happens
-            ProcessingException e(getClassName() + ":" + u.what());
-
-            GPSTK_THROW(e);
-        }
     }
 
     double KalmanSolver::getSolution(const FilterParameter& parameter) const

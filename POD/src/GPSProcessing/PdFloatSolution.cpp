@@ -96,7 +96,7 @@ namespace pod
         BasicModel modelRover(modelRef);
         modelRef.rxPos = refPos;
         plRov.push_back(&modelRover);
-        gnssRinex gRin, gRef;
+        RinexEpoch gRin, gRef;
         SyncObs sync(data->getObsFiles(opts().SiteBase), gRin);
 
         //Object to decimate data
@@ -276,13 +276,13 @@ namespace pod
             while (rin >> gRin)
             {
                
-                if (gRin.body.size() == 0)
+                if (gRin.getBody().size() == 0)
                 {
-                    printMsg(gRin.header.epoch, "Empty epoch record in Rinex file");
+                    printMsg(gRin.getHeader().epoch, "Empty epoch record in Rinex file");
                     continue;
                 }
                 
-                const auto& t = gRin.header.epoch;
+                const auto& t = gRin.getHeader().epoch;
                 bool b;
 #if _DEBUG
                 CATCH_TIME(t,2012,12,27,19,48,0,b)
@@ -325,9 +325,9 @@ namespace pod
                 gRin >> CodePhaseFilterRover;
                 gRin >> SNRFilterRover;
 
-                if (gRin.body.size() == 0)
+                if (gRin.getBody().size() == 0)
                 {
-                    printMsg(gRin.header.epoch, "Rover receiver: all SV has been rejected.");
+                    printMsg(gRin.getHeader().epoch, "Rover receiver: all SV has been rejected.");
                     continue;
                 }
 
@@ -384,7 +384,7 @@ namespace pod
                     gRef >> linearIonoFree;
                     gRef >> oMinusC;
 
-                    delta.setRefData(gRef.body);
+                    delta.setRefData(gRef.getBody());
                 }
                 catch (SyncNextRoverEpoch &e)
                 {
@@ -413,7 +413,7 @@ namespace pod
                 gRin >> resCatcher;
                 gRin >> minSatFilter;
 
-                DBOUT_LINE(">>" << CivilTime(gRin.header.epoch).asString());
+                DBOUT_LINE(">>" << CivilTime(gRin.getHeader().epoch).asString());
                 if (forwardBackwardCycles > 0)
                 {
                     gRin >> solverFb;
@@ -421,7 +421,7 @@ namespace pod
                 else
                 {
                     gRin >> solver;
-                    auto ep = opts().fullOutput ? GnssEpoch(gRin) : GnssEpoch();
+                    auto ep = opts().fullOutput ? GnssEpoch(gRin.getBody()) : GnssEpoch();
                     // updateNomPos(solverFB);
                     printSolution( solver, t, ep);
                     gMap.data.insert(std::make_pair(t, ep));
@@ -432,14 +432,14 @@ namespace pod
         {
             cout << "Fw-Bw part started" << endl;
             solverFb.reProcess();
-            gnssRinex gRin;
+            RinexEpoch gRin;
             cout << "Last process part started" << endl;
             while (solverFb.lastProcess(gRin))
             {
-                auto ep = opts().fullOutput ? GnssEpoch(gRin) : GnssEpoch();
+                auto ep = opts().fullOutput ? GnssEpoch(gRin.getBody()) : GnssEpoch();
                 //updateNomPos(solverFB);
-                printSolution( solverFb, gRin.header.epoch, ep);
-                gMap.data.insert(std::make_pair(gRin.header.epoch, ep));
+                printSolution( solverFb, gRin.getHeader().epoch, ep);
+                gMap.data.insert(std::make_pair(gRin.getHeader().epoch, ep));
             }
             cout << "Measurments rejected: " << solverFb.rejectedMeasurements << endl;
         }
@@ -519,7 +519,7 @@ namespace pod
         double posSigma = confReader().getValueAsDouble("posSigma");
         if (opts().dynamics == GnssDataStore::Dynamics::Static)
         {
-            coord->setStochasicModel(make_shared<StochasticModel>());
+            coord->setStochasicModel(make_shared<ConstantModel>());
         }
         else  if (opts().dynamics == GnssDataStore::Dynamics::Kinematic)
         {

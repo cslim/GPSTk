@@ -164,7 +164,7 @@ namespace gpstk
        * @param coef             Default coefficient assigned.
        */
    Equation& Equation::addVariable( const TypeID& type,
-                                    StochasticModel* pModel,
+                                    IStochasticModel* pModel,
                                     bool sourceIndexed,
                                     bool satIndexed,
                                     double variance,

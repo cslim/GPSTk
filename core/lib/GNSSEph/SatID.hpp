@@ -41,6 +41,7 @@
 #include <iomanip>
 #include <sstream>
 #include<map>
+#include<set>
 
 #include"Exception.hpp"
 #include "gps_constants.hpp"
@@ -52,6 +53,8 @@
 
 namespace gpstk
 {
+
+
       // forward declarations
    class SatID;
 //   std::istream& operator<<(std::istream& s, SatID& p);
@@ -208,6 +211,11 @@ namespace gpstk
       }
    }
 
+   /// Set containing SatID objects.
+   typedef std::set<SatID> SatIDSet;
+
+   /// Set containing SatSyst objects.
+   typedef std::set<SatID::SatelliteSystem> SatSystSet;
 } // namespace gpstk
 
 #endif

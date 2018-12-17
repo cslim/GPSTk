@@ -46,20 +46,7 @@ namespace pod
         return *this;
     }
 
-    gpstk::gnssSatTypeValue& CodeSmoother2::Process(gpstk::gnssSatTypeValue& gData)
-    {
-         //first, mark cycle slips
-        for (auto& it : this->scMarkers)
-            gData >> *it;
-
-         //then, smooth pseudoranges
-        for (auto& it : smoothers)
-            gData >> it;
-
-        return gData;
-    }
-
-    gpstk::gnssRinex& CodeSmoother2::Process(gpstk::gnssRinex& gData)
+    gpstk::IRinex& CodeSmoother2::Process(gpstk::IRinex& gData)
     {
          //first, mark cycle slips
         for (auto& it : this->scMarkers)

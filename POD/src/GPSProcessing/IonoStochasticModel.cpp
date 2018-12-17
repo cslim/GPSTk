@@ -5,14 +5,14 @@ using namespace std;
 
 namespace pod
 {
-    void IonoStochasticModel::Prepare(const gpstk::SatID & sat, gpstk::gnssRinex & gData)
+    void IonoStochasticModel::Prepare(const gpstk::SatID & sat, gpstk::IRinex & gData)
     {
         RandomWalkModel::Prepare(sat, gData);
 
         try
         {
-            csFlag = (gData.getValue(sat, TypeID::CSL1) > 1) ? true : false;
-            el = gData.getValue(sat, TypeID::elevation);
+            csFlag = (gData.getBody().getValue(sat, TypeID::CSL1) > 1) ? true : false;
+			el = gData.getBody().getValue(sat, TypeID::elevation);
             return;
         }
         catch (SatIDNotFound &e)

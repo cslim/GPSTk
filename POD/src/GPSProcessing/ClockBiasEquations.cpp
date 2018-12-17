@@ -20,12 +20,12 @@ namespace pod
         return *this;
     }
 
-    void ClockBiasEquations::Prepare(gnssRinex & gData)
+    void ClockBiasEquations::Prepare(IRinex & gData)
     {
         stochModel->Prepare(SatID::dummy, gData);
     }
 
-    void ClockBiasEquations::updateH(const gpstk::gnssRinex& svs, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0)
+    void ClockBiasEquations::updateH(const gpstk::IRinex& svs, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0)
     {
         for (size_t i = 0; i < H.rows(); i++)
             H(i, col_0) = 1.0;

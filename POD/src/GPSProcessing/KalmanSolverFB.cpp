@@ -39,7 +39,7 @@ namespace pod
     {
     }
 
-    gpstk::gnssRinex & KalmanSolverFB::Process(gpstk::gnssRinex & gRin)
+    gpstk::IRinex & KalmanSolverFB::Process(gpstk::IRinex & gRin)
     {
         solver.Process(gRin);
 
@@ -51,10 +51,10 @@ namespace pod
             //gnssRinex gBak(gData.extractTypeID(keepTypeSet));
 
             // Store observation data
-            ObsData.push_back(gRin);
+            ObsData.push_back(gRin.clone());
 
             // Update the number of processed measurements
-            processedMeasurements += gRin.numSats();
+            processedMeasurements += gRin.getBody().numSats();
 
         }
 
@@ -62,7 +62,7 @@ namespace pod
     }
 
 
-    bool KalmanSolverFB::lastProcess(gpstk::gnssRinex & gRin)
+    bool KalmanSolverFB::lastProcess(gpstk::IRinex & gRin)
     {
 
         // Keep processing while 'ObsData' is not empty
@@ -71,7 +71,7 @@ namespace pod
 
             // Get the first data epoch in 'ObsData' and process it. The
             // result will be stored in 'gData'
-            gRin = solver.Process(ObsData.front());
+            gRin = solver.Process(*ObsData.front());
             // gData = ObsData.front();
             // Remove the first data epoch in 'ObsData', freeing some
             // memory and preparing for next epoch
@@ -95,24 +95,19 @@ namespace pod
         // Backwards iteration. We must do this at least once
         for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
         {
-            solver.Process((*rpos));
+            solver.Process(**rpos);
         }
 
         // If 'cycles > 1', let's do the other iterations
         for (int i = 0; i < (cycles - 1); i++)
         {
-
             // Forwards iteration
             for (auto pos = ObsData.begin(); pos != ObsData.end(); ++pos)
-            {
-                solver.Process((*pos));
-            }
+                solver.Process(**pos);
 
             // Backwards iteration.
             for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
-            {
-                solver.Process((*rpos));
-            }
+				solver.Process(**rpos);
 
         }  // End of 'for (int i=0; i<(cycles-1), i++)'
         return;
@@ -122,18 +117,18 @@ namespace pod
         firstIteration = false;
         // Backwards iteration. We must do this at least once
         for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
-            solver.Process((*rpos));
+            solver.Process(**rpos);
 
         for (size_t cycle = 0; cycle < cyclesNumber; cycle++)
         {
             for (auto &it : ObsData)
             {
-                checkLimits(it, cycle);
-                solver.Process(it);
+                checkLimits(*it, cycle);
+                solver.Process(*it);
             }
 
             for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
-                solver.Process((*rpos));
+                solver.Process(**rpos);
         }
     }
     KalmanSolverFB& KalmanSolverFB::setLimits(const std::list<double>& codeLims, const std::list<double>& phaseLims)
@@ -169,7 +164,7 @@ namespace pod
         GPSTK_THROW(e);
 
     }
-    void KalmanSolverFB::checkLimits(gnssRinex& gData, size_t cycleNumber)
+    void KalmanSolverFB::checkLimits(IRinex& gData, size_t cycleNumber)
     {
         // Set to store rejected satellites
         SatIDSet satRejectedSet;
@@ -178,10 +173,10 @@ namespace pod
         for (const auto& type : solver.eqComposer().residTypes())
         {
             double limit = getLimit(type, cycleNumber);
-            for (const auto& it : gData.body)
+            for (const auto& it : gData.getBody())
             {
                 // Check postfit values and mark satellites as rejected
-                if (std::abs(it.second.at(type)) > limit)
+                if (std::abs(it.second->get_value().at(type)) > limit)
                     satRejectedSet.insert(it.first);
 
             }
@@ -190,8 +185,6 @@ namespace pod
         rejectedMeasurements += satRejectedSet.size();
 
         // Remove satellites with missing data
-        gData.removeSatID(satRejectedSet);
-
+        gData.getBody().removeSatID(satRejectedSet);
     }
-
 }

@@ -233,7 +233,7 @@ of designMatrix");
        *
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& SolverWMS::Process(satTypeValueMap& gData)
+   SatTypePtrMap& SolverWMS::Process(SatTypePtrMap& gData)
       throw(ProcessingException)
    {
 

@@ -119,19 +119,10 @@ namespace gpstk
           * @param time      Epoch corresponding to the data.
           * @param gData     Data object holding the data.
           */
-      virtual satTypeValueMap& Process( const CommonTime& time,
-                                        satTypeValueMap& gData )
+      virtual SatTypePtrMap& Process( const CommonTime& time,
+                                        SatTypePtrMap& gData )
          throw(ProcessingException);
 
-
-         /** Returns a gnnsSatTypeValue object, adding the new data 
-          *  generated when calling this object.
-          *
-          * @param gData    Data object holding the data.
-          */
-      virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
-         throw(ProcessingException)
-      { Process(gData.header.epoch, gData.body); return gData; };
 
 
          /** Returns a gnnsRinex object, adding the new data generated 
@@ -139,9 +130,9 @@ namespace gpstk
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssRinex& Process(gnssRinex& gData)
+      virtual IRinex& Process(IRinex& gData)
          throw(ProcessingException)
-      { Process(gData.header.epoch, gData.body); return gData; };
+      { Process(gData.getHeader().epoch, gData.getBody()); return gData; };
 
 
          /// Returns GDOP.

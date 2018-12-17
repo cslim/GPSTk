@@ -16,9 +16,9 @@ namespace pod
         InterFrequencyBiases();
         virtual ~InterFrequencyBiases() {};
 
-        virtual  void Prepare(gpstk::gnssRinex& gData);
+        virtual  void Prepare(gpstk::IRinex& gData);
 
-        void updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0);
+        void updateH(const gpstk::IRinex& gData, const gpstk::TypeIDSet& types, gpstk::Matrix<double>& H, int& col_0);
 
         virtual ParametersSet getParameters() const override
         {

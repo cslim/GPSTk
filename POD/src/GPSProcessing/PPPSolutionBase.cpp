@@ -32,19 +32,19 @@ namespace pod
         solverPR.release();
     }
 
-    void PPPSolutionBase::mapSNR(gnssRinex & gRin)
+    void PPPSolutionBase::mapSNR(IRinex & gRin)
     {
-        for (auto &it1 : gRin.body)
+        for (auto &it1 : gRin.getBody())
         {
             auto  ts1 = TypeID(TypeID::S1);
             auto  ts2 = TypeID(TypeID::S2);
            
-            auto s1 = it1.second.find(ts1);
-            if (s1 != it1.second.end())
+            auto s1 = it1.second->get_value().find(ts1);
+            if (s1 != it1.second->get_value().end())
                 s1->second =  mapSNR(s1->second);
 
-            auto s2 = it1.second.find(ts1);
-            if (s2 != it1.second.end())
+            auto s2 = it1.second->get_value().find(ts1);
+            if (s2 != it1.second->get_value().end())
                 s2->second = mapSNR(s2->second);
         }
     }

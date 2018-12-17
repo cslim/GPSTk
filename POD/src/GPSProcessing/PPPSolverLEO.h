@@ -75,21 +75,12 @@ namespace pod
             throw(InvalidSolver);
 
 
-        /** Returns a reference to a gnnsSatTypeValue object after
-        *  solving the previously defined equation system.
-        *
-        * @param gData    Data object holding the data.
-        */
-        virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
-            throw(ProcessingException);
-
-
         /** Returns a reference to a gnnsRinex object after solving
         *  the previously defined equation system.
         *
         * @param gData    Data object holding the data.
         */
-        virtual gnssRinex& Process(gnssRinex& gData)
+        virtual IRinex& Process(IRinex& gData)
             throw(ProcessingException);
 
 
@@ -142,7 +133,7 @@ namespace pod
 
 
         /// Get stochastic model pointer for dx (or dLat) coordinate
-        StochasticModel* getXCoordinatesModel() const
+        IStochasticModel* getXCoordinatesModel() const
         {
             return pCoordXStoModel;
         };
@@ -150,17 +141,17 @@ namespace pod
 
         /** Set coordinates stochastic model for dx (or dLat) coordinate
         *
-        * @param pModel      Pointer to StochasticModel associated with
+        * @param pModel      Pointer to IStochasticModel associated with
         *                    dx (or dLat) coordinate.
         */
-        PPPSolverLEO& setXCoordinatesModel(StochasticModel* pModel)
+        PPPSolverLEO& setXCoordinatesModel(IStochasticModel* pModel)
         {
             pCoordXStoModel = pModel; return (*this);
         };
 
 
         /// Get stochastic model pointer for dy (or dLon) coordinate
-        StochasticModel* getYCoordinatesModel() const
+        IStochasticModel* getYCoordinatesModel() const
         {
             return pCoordYStoModel;
         };
@@ -168,17 +159,17 @@ namespace pod
 
         /** Set coordinates stochastic model for dy (or dLon) coordinate
         *
-        * @param pModel      Pointer to StochasticModel associated with
+        * @param pModel      Pointer to IStochasticModel associated with
         *                    dy (or dLon) coordinate.
         */
-        PPPSolverLEO& setYCoordinatesModel(StochasticModel* pModel)
+        PPPSolverLEO& setYCoordinatesModel(IStochasticModel* pModel)
         {
             pCoordYStoModel = pModel; return (*this);
         };
 
 
         /// Get stochastic model pointer for dz (or dH) coordinate
-        StochasticModel* getZCoordinatesModel() const
+        IStochasticModel* getZCoordinatesModel() const
         {
             return pCoordZStoModel;
         };
@@ -186,10 +177,10 @@ namespace pod
 
         /** Set coordinates stochastic model for dz (or dH) coordinate
         *
-        * @param pModel      Pointer to StochasticModel associated with
+        * @param pModel      Pointer to IStochasticModel associated with
         *                    dz (or dH) coordinate.
         */
-        PPPSolverLEO& setZCoordinatesModel(StochasticModel* pModel)
+        PPPSolverLEO& setZCoordinatesModel(IStochasticModel* pModel)
         {
             pCoordZStoModel = pModel; return (*this);
         };
@@ -197,21 +188,21 @@ namespace pod
 
         /** Set a single coordinates stochastic model to ALL coordinates.
         *
-        * @param pModel      Pointer to StochasticModel associated with
+        * @param pModel      Pointer to IStochasticModel associated with
         *                    coordinates.
         *
         * @warning Do NOT use this method to set the SAME state-aware
         * stochastic model (like RandomWalkModel, for instance) to ALL
         * coordinates, because the results will certainly be erroneous. Use
         * this method only with non-state-aware stochastic models like
-        * 'StochasticModel' (constant coordinates) or 'WhiteNoiseModel'.
+        * 'IStochasticModel' (constant coordinates) or 'WhiteNoiseModel'.
         */
-        virtual PPPSolverLEO& setCoordinatesModel(StochasticModel* pModel);
+        virtual PPPSolverLEO& setCoordinatesModel(IStochasticModel* pModel);
 
 
 
         /// Get receiver clock stochastic model pointer
-        virtual StochasticModel* getReceiverClockModel(void) const
+        virtual IStochasticModel* getReceiverClockModel(void) const
         {
             return pClockStoModel;
         };
@@ -219,7 +210,7 @@ namespace pod
 
         /** Set receiver clock stochastic model
         *
-        * @param pModel      Pointer to StochasticModel associated with
+        * @param pModel      Pointer to IStochasticModel associated with
         *                    receiver clock.
         *
         * \warning Be aware that some stochastic models store their internal
@@ -227,14 +218,14 @@ namespace pod
         * If that is your case, you MUST NOT use the SAME model in DIFFERENT
         * solver objects.
         */
-        virtual PPPSolverLEO& setReceiverClockModel(StochasticModel* pModel)
+        virtual PPPSolverLEO& setReceiverClockModel(IStochasticModel* pModel)
         {
             pClockStoModel = pModel; return (*this);
         };
 
 
         /// Get phase biases stochastic model pointer
-        virtual StochasticModel* getPhaseBiasesModel(void) const
+        virtual IStochasticModel* getPhaseBiasesModel(void) const
         {
             return pBiasStoModel;
         };
@@ -242,7 +233,7 @@ namespace pod
 
         /** Set phase biases stochastic model.
         *
-        * @param pModel      Pointer to StochasticModel associated with
+        * @param pModel      Pointer to IStochasticModel associated with
         *                    phase biases.
         *
         * \warning Be aware that some stochastic models store their internal
@@ -253,7 +244,7 @@ namespace pod
         * \warning This method should be used with caution, because model
         * must be of PhaseAmbiguityModel class in order to make sense.
         */
-        virtual PPPSolverLEO& setPhaseBiasesModel(StochasticModel* pModel)
+        virtual PPPSolverLEO& setPhaseBiasesModel(IStochasticModel* pModel)
         {
             pBiasStoModel = pModel; return (*this);
         };
@@ -347,22 +338,22 @@ namespace pod
 
 
         /// Pointer to stochastic model for dx (or dLat) coordinate
-        StochasticModel* pCoordXStoModel;
+        IStochasticModel* pCoordXStoModel;
 
 
         /// Pointer to stochastic model for dy (or dLon) coordinate
-        StochasticModel* pCoordYStoModel;
+        IStochasticModel* pCoordYStoModel;
 
 
         /// Pointer to stochastic model for dz (or dH) coordinate
-        StochasticModel* pCoordZStoModel;
+        IStochasticModel* pCoordZStoModel;
 
         /// Pointer to stochastic model for receiver clock
-        StochasticModel* pClockStoModel;
+        IStochasticModel* pClockStoModel;
 
 
         /// Pointer to stochastic model for phase biases
-        StochasticModel* pBiasStoModel;
+        IStochasticModel* pBiasStoModel;
 
 
         /// State Transition Matrix (PhiMatrix)
@@ -418,7 +409,7 @@ namespace pod
         void Init(void);
 
         /// Constant stochastic model
-        StochasticModel constantModel;
+        ConstantModel constantModel;
 
         /// White noise stochastic model for position
         WhiteNoiseModel whitenoiseModelX;

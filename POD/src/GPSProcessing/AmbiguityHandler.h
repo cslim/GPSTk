@@ -27,7 +27,7 @@ namespace pod
             return *this;
         };
 
-        void fixL1L2(gpstk::gnssRinex& gData);
+        void fixL1L2(gpstk::IRinex& gData);
         
         const gpstk::Vector<double> & CoreParamFixed()
         {
@@ -47,7 +47,7 @@ namespace pod
     private:
         
         void storeDDAmbiguities(
-            gpstk::gnssRinex & gData, 
+            gpstk::IRinex & gData, 
             const gpstk::Vector<double> &ddFixedAmb, 
             const gpstk::SatIDSet &refSVs) const;
 

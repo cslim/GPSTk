@@ -209,7 +209,7 @@ namespace gpstk
        *
        * @param gData    Data object holding the data.
        */
-      virtual bool check(gnssRinex& gData);
+      virtual bool check(IRinex& gData);
 
          /// Returns sampling interval, in seconds.
       virtual double getSampleInterval(void) const

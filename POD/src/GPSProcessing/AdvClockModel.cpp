@@ -45,24 +45,15 @@ namespace pod
 
         return;
     }
-    void AdvClockModel::Prepare(const SatID& sat, const gnssSatTypeValue& gData)
+
+
+    void AdvClockModel::Prepare(const SatID& sat, const IRinex& gData)
     {
 
         // Update previous epoch
         setPreviousTime(currentTime);
 
-        setCurrentTime(gData.header.epoch);
-
-        return;
-    }
-
-    void AdvClockModel::Prepare(const SatID& sat, const gnssRinex& gData)
-    {
-
-        // Update previous epoch
-        setPreviousTime(currentTime);
-
-        setCurrentTime(gData.header.epoch);
+        setCurrentTime(gData.getHeader().epoch);
 
         return;
     }

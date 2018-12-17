@@ -268,17 +268,15 @@ of designMatrix");
        * 
        * @param gRin     Data object holding the data.
        */
-   void SolverLMS::updateCurPar(gnssRinex& gRin)
+   void SolverLMS::updateCurPar(IRinex& gRin)
    {
        int numGLN = 0;
-       for (const auto &it : gRin.body)
-       {
+       for (const auto &it : gRin.getBody())
            if (it.first.system == SatID::SatelliteSystem::systemGlonass)
                numGLN++;
-       }
 
        if (numGLN < 2)
-           gRin.keepOnlySatSystems(SatID::SatelliteSystem::systemGPS);
+		   gRin.getBody().keepOnlySatSyst(SatID::SatelliteSystem::systemGPS);
        else
            defaultEqDef.body.insert(TypeID::recISB_GLN);
    }

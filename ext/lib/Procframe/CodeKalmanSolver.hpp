@@ -129,7 +129,7 @@ namespace gpstk
        * @endcode
        *
        * By default, this class assigns a 'constant' stochastic model
-       * (StochasticModel) to coordinates and a 'white noise' stochastic model
+       * (IStochasticModel) to coordinates and a 'white noise' stochastic model
        * (WhiteNoiseModel) to the receiver clock (cdt). This may be changed at
        * will using the appropriate methods.
        *
@@ -148,7 +148,7 @@ namespace gpstk
        * state-aware stochastic model (like RandomWalkModel, for instance)
        * to ALL coordinates, because the results will certainly be erroneous.
        * Use this method ONLY with non-state-aware stochastic models like
-       * 'StochasticModel' (constant coordinates) or 'WhiteNoiseModel'.
+       * 'IStochasticModel' (constant coordinates) or 'WhiteNoiseModel'.
        *
        * In order to overcome the former limitation, this class provides methods
        * to set different, specific stochastic models for each coordinate, like:
@@ -242,91 +242,83 @@ namespace gpstk
          throw(InvalidSolver);
 #pragma clang diagnostic pop
 
-         /** Returns a reference to a gnnsSatTypeValue object after
-          *  solving the previously defined equation system.
-          *
-          * @param gData    Data object holding the data.
-          */
-      virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
-         throw(ProcessingException);
-
 
          /** Returns a reference to a gnnsRinex object after solving
           *  the previously defined equation system.
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssRinex& Process(gnssRinex& gData)
+      virtual IRinex& Process(IRinex& gData)
          throw(ProcessingException);
 
 
          /// Get stochastic model pointer for dx (or dLat) coordinate
-      StochasticModel* getXCoordinatesModel() const
+      IStochasticModel* getXCoordinatesModel() const
       { return pCoordXStoModel; };
 
 
          /** Set coordinates stochastic model for dx (or dLat) coordinate
           *
-          * @param pModel      Pointer to StochasticModel associated with
+          * @param pModel      Pointer to IStochasticModel associated with
           *                    dx (or dLat) coordinate.
           */
-      CodeKalmanSolver& setXCoordinatesModel(StochasticModel* pModel)
+      CodeKalmanSolver& setXCoordinatesModel(IStochasticModel* pModel)
       { pCoordXStoModel = pModel; return (*this); };
 
 
          /// Get stochastic model pointer for dy (or dLon) coordinate
-      StochasticModel* getYCoordinatesModel() const
+      IStochasticModel* getYCoordinatesModel() const
       { return pCoordYStoModel; };
 
 
          /** Set coordinates stochastic model for dy (or dLon) coordinate
           *
-          * @param pModel      Pointer to StochasticModel associated with
+          * @param pModel      Pointer to IStochasticModel associated with
           *                    dy (or dLon) coordinate.
           */
-      CodeKalmanSolver& setYCoordinatesModel(StochasticModel* pModel)
+      CodeKalmanSolver& setYCoordinatesModel(IStochasticModel* pModel)
       { pCoordYStoModel = pModel; return (*this); };
 
 
          /// Get stochastic model pointer for dz (or dH) coordinate
-      StochasticModel* getZCoordinatesModel() const
+      IStochasticModel* getZCoordinatesModel() const
       { return pCoordZStoModel; };
 
 
          /** Set coordinates stochastic model for dz (or dH) coordinate
           *
-          * @param pModel      Pointer to StochasticModel associated with
+          * @param pModel      Pointer to IStochasticModel associated with
           *                    dz (or dH) coordinate.
           */
-      CodeKalmanSolver& setZCoordinatesModel(StochasticModel* pModel)
+      CodeKalmanSolver& setZCoordinatesModel(IStochasticModel* pModel)
       { pCoordZStoModel = pModel; return (*this); };
 
 
          /** Set a single coordinates stochastic model to ALL coordinates.
           *
-          * @param pModel      Pointer to StochasticModel associated with
+          * @param pModel      Pointer to IStochasticModel associated with
           *                    coordinates.
           *
           * @warning Do NOT use this method to set the SAME state-aware
           * stochastic model (like RandomWalkModel, for instance) to ALL
           * coordinates, because the results will certainly be erroneous. Use
           * this method only with non-state-aware stochastic models like
-          * 'StochasticModel' (constant coordinates) or 'WhiteNoiseModel'.
+          * 'IStochasticModel' (constant coordinates) or 'WhiteNoiseModel'.
           */
-      CodeKalmanSolver& setCoordinatesModel(StochasticModel* pModel);
+      CodeKalmanSolver& setCoordinatesModel(IStochasticModel* pModel);
 
 
          /// Get receiver clock stochastic model pointer
-      StochasticModel* getReceiverClockModel() const
+      IStochasticModel* getReceiverClockModel() const
       { return pClockStoModel; };
 
 
          /** Set receiver clock stochastic model
           *
-          * @param pModel      Pointer to StochasticModel associated with
+          * @param pModel      Pointer to IStochasticModel associated with
           *                    receiver clock.
           */
-      CodeKalmanSolver& setReceiverClockModel(StochasticModel* pModel)
+      CodeKalmanSolver& setReceiverClockModel(IStochasticModel* pModel)
       { pClockStoModel = pModel; return (*this); };
 
 
@@ -400,22 +392,22 @@ namespace gpstk
 
 
          /// Pointer to stochastic model for dx (or dLat) coordinate
-      StochasticModel* pCoordXStoModel;
+      IStochasticModel* pCoordXStoModel;
 
 
          /// Pointer to stochastic model for dy (or dLon) coordinate
-      StochasticModel* pCoordYStoModel;
+      IStochasticModel* pCoordYStoModel;
 
 
          /// Pointer to stochastic model for dz (or dH) coordinate
-      StochasticModel* pCoordZStoModel;
+      IStochasticModel* pCoordZStoModel;
 
 
          /// Pointer to stochastic model for receiver clock
-      StochasticModel* pClockStoModel;
+      IStochasticModel* pClockStoModel;
 
       /// Pointer to stochastic model for intersystem bias
-      StochasticModel* pIsbStoModel;
+      IStochasticModel* pIsbStoModel;
 
          /// State Transition Matrix (PhiMatrix)
       Matrix<double> phiMatrix;
@@ -446,7 +438,7 @@ namespace gpstk
 
 
          /// Constant stochastic model
-      StochasticModel constantModel;
+      ConstantModel constantModel;
 
 
          /// White noise stochastic model

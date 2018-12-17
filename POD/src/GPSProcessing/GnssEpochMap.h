@@ -13,6 +13,7 @@ namespace pod
         GnssEpoch();
 
         GnssEpoch(const gpstk::satTypeValueMap&  sData);
+        GnssEpoch(const gpstk::SatTypePtrMap&  stpMap);
         GnssEpoch(const gpstk::gnssRinex& gRin);
         ~GnssEpoch();
 

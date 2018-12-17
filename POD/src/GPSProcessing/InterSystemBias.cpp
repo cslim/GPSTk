@@ -26,14 +26,14 @@ namespace pod
     InterSystemBias::InterSystemBias()
     {
         for (auto& it : isb2ss)
-            stochasticModels[it.first] = std::make_unique<StochasticModel>();
+            stochasticModels[it.first] = std::make_unique<ConstantModel>();
     }
 
-    void InterSystemBias::Prepare(gnssRinex& gData)
+    void InterSystemBias::Prepare(IRinex& gData)
     {
         //update current set of Satellite systems
         types.clear();
-        for (const auto& it : gData.body)
+        for (const auto& it : gData.getBody())
             if (it.first.system != SatID::SatelliteSystem::systemGPS)
                 types.insert(ss2isb[it.first.system]);
         
@@ -41,9 +41,9 @@ namespace pod
             stochasticModels[ss]->Prepare(SatID::dummy, gData);
     }
     
-    void InterSystemBias::updateH(const gpstk::gnssRinex& gData, const gpstk::TypeIDSet& obsTypes, gpstk::Matrix<double>& H, int& col_0)
+    void InterSystemBias::updateH(const gpstk::IRinex& gData, const gpstk::TypeIDSet& obsTypes, gpstk::Matrix<double>& H, int& col_0)
     {
-        auto currentSatSet = gData.getSatID();
+        auto currentSatSet = gData.getBody().getSatID();
         int row(0);
         for (const auto& obs : obsTypes)
         {

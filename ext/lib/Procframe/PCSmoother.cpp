@@ -58,7 +58,7 @@ namespace gpstk
        *
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& PCSmoother::Process(satTypeValueMap& gData)
+   SatTypePtrMap& PCSmoother::Process(SatTypePtrMap& gData)
       throw(ProcessingException)
    {
 
@@ -73,16 +73,15 @@ namespace gpstk
          SatIDSet satRejectedSet;
 
             // Loop through all satellites
-         satTypeValueMap::iterator it;
-         for (it = gData.begin(); it != gData.end(); ++it)
+         for (auto it = gData.begin(); it != gData.end(); ++it)
          {
 
             try
             {
 
                   // Try to extract the values
-               codeObs  = (*it).second(codeType);
-               phaseObs = (*it).second(phaseType);
+               codeObs  = (*it).second->get_value()(codeType);
+               phaseObs = (*it).second->get_value()(phaseType);
 
             }
             catch(...)
@@ -100,7 +99,7 @@ namespace gpstk
             {
 
                   // Try to get the first cycle slip flag
-               flagObs1  = (*it).second(csFlag1);
+               flagObs1  = (*it).second->get_value()(csFlag1);
 
             }
             catch(...)
@@ -116,7 +115,7 @@ namespace gpstk
             {
 
                   // Try to get the second cycle slip flag
-               flagObs2  = (*it).second(csFlag2);
+               flagObs2  = (*it).second->get_value()(csFlag2);
 
             }
             catch(...)
@@ -129,7 +128,7 @@ namespace gpstk
             }
 
                // Get the smoothed PC.
-            (*it).second[resultType] = getSmoothing( (*it).first,
+            (*it).second->get_value()[resultType] = getSmoothing( (*it).first,
                                                      codeObs,
                                                      phaseObs,
                                                      flagObs1,

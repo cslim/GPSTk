@@ -68,7 +68,7 @@ namespace gpstk
        *
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& ComputeMelbourneWubbena::Process(satTypeValueMap& gData)
+   SatTypePtrMap& ComputeMelbourneWubbena::Process(SatTypePtrMap& gData)
       throw(ProcessingException)
    {
 
@@ -83,16 +83,15 @@ namespace gpstk
          SatIDSet satRejectedSet;
 
             // Loop through all the satellites
-         satTypeValueMap::iterator it;
-         for (it = gData.begin(); it != gData.end(); ++it) 
+         for (auto it = gData.begin(); it != gData.end(); ++it) 
          {
             try
             {
                   // Try to extract the values
-               value1 = (*it).second(type1);
-               value2 = (*it).second(type2);
-               value3 = (*it).second(type3);
-               value4 = (*it).second(type4);
+               value1 = (*it).second->get_value()(type1);
+               value2 = (*it).second->get_value()(type2);
+               value3 = (*it).second->get_value()(type3);
+               value4 = (*it).second->get_value()(type4);
             }
             catch(...)
             {
@@ -104,7 +103,7 @@ namespace gpstk
 
                // If everything is OK, then get the new value inside
                // the structure
-            (*it).second[resultType] = getCombination( value1,
+            (*it).second->get_value()[resultType] = getCombination( value1,
                                                        value2,
                                                        value3,
                                                        value4 );

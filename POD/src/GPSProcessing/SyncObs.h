@@ -9,7 +9,7 @@ namespace pod
     {
     public:
         SyncObs(const std::list<std::string>& files,
-            gpstk::gnssRinex& roverData,
+            gpstk::IRinex& roverData,
             const double tol = 1 );
 
         virtual ~SyncObs();
@@ -18,7 +18,7 @@ namespace pod
         virtual const  gpstk::Rinex3ObsHeader& getRefHeader() const
         { return header; }
 
-        virtual gpstk::gnssRinex& Process(gpstk::gnssRinex& gData);
+        virtual gpstk::IRinex& Process(gpstk::IRinex& gData);
 
     private:
 

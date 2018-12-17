@@ -310,47 +310,9 @@ namespace pod
 
     }  // End of method 'SolverPPP::Compute()'
 
-
-
-       /* Returns a reference to a gnnsSatTypeValue object after
-        * solving the previously defined equation system.
-        *
-        * @param gData    Data object holding the data.
-        */
-    gnssSatTypeValue& SolverPPP::Process(gnssSatTypeValue& gData)
-        throw(ProcessingException)
-    {
-        try
-        {
-            // Build a gnssRinex object and fill it with data
-            gnssRinex g1;
-            g1.header = gData.header;
-            g1.body = gData.body;
-
-            // Call the Process() method with the appropriate input object
-            Process(g1);
-
-            // Update the original gnssSatTypeValue object with the results
-            gData.body = g1.body;
-
-            return gData;
-
-        }
-        catch (Exception& u)
-        {
-            // Throw an exception if something unexpected happens
-            ProcessingException e(getClassName() + ":"
-                + u.what());
-
-            GPSTK_THROW(e);
-
-        }
-
-    }  // End of method 'SolverPPP::Process()'
-
   
     /// update transition (Phi) and process noise (Q) matrices
-    void SolverPPP::updateMatrices(Matrix<double> & phiMatrix, Matrix<double> & qMatrix, gnssRinex& gData)
+    void SolverPPP::updateMatrices(Matrix<double> & phiMatrix, Matrix<double> & qMatrix, IRinex& gData)
     {
         // Now, let's fill the Phi and Q matrices
         SatID  dummySat;
@@ -420,21 +382,21 @@ namespace pod
         }
     }
 
-    void SolverPPP::updateWeightMatrix(Matrix<double> & rMatrix, gnssRinex& gData, int numCurrentSV)
+    void SolverPPP::updateWeightMatrix(Matrix<double> & rMatrix, IRinex& gData, int numCurrentSV)
     {
         // Weights matrix
         rMatrix.resize(numMeas, numMeas, 0.0);
 
         // Generate the appropriate weights matrix
         // Try to extract weights from GDS
-        satTypeValueMap dummy(gData.body.extractTypeID(TypeID::weight));
+        satTypeValueMap dummy(gData.getBody().extractTypeID(TypeID::weight));
 
         // Check if weights match
         if (dummy.numSats() == (size_t)numCurrentSV)
         {
             // If we have weights information, let's load it
-            Vector<double> weightsVector(gData.getVectorOfTypeID(TypeID::weight));
-
+            Vector<double> weightsVector(gData.getBody().getVectorOfTypeID(TypeID::weight));
+			 
             for (int i = 0; i < numCurrentSV; i++)
             {
                 rMatrix(i, i) = weightsVector(i);
@@ -467,7 +429,7 @@ namespace pod
      *
      * @param gData     Data object holding the data.
      */
-    gnssRinex& SolverPPP::Process(gnssRinex& gData)
+	IRinex& SolverPPP::Process(IRinex& gData)
         throw(ProcessingException)
     {
         try
@@ -486,10 +448,10 @@ namespace pod
             //
 
             // Get a set with all satellites present in this GDS
-            SatIDSet currSatSet(gData.body.getSatID());
+            SatIDSet currSatSet(gData.getBody().getSatID());
 
             // Get the number of satellites currently visible
-            size_t numCurrentSV(gData.numSats());
+            size_t numCurrentSV(gData.getBody().numSats());
 
             // Update set with satellites being processed so far
             satSet.insert(currSatSet.begin(), currSatSet.end());
@@ -516,8 +478,8 @@ namespace pod
             // Build the vector of measurements (Prefit-residuals): Code + phase
             measVector.resize(numMeas, 0.0);
 
-            Vector<double> prefitC(gData.getVectorOfTypeID(defaultEqDef.header));
-            Vector<double> prefitL(gData.getVectorOfTypeID(TypeID::prefitL));
+            Vector<double> prefitC(gData.getBody().getVectorOfTypeID(defaultEqDef.header));
+            Vector<double> prefitL(gData.getBody().getVectorOfTypeID(TypeID::prefitL));
             for (size_t i = 0; i < numCurrentSV; i++)
             {
                 measVector(i) = prefitC(i);
@@ -534,7 +496,7 @@ namespace pod
             hMatrix.resize(numMeas, numUnknowns, 0.0);
 
             // Get the values corresponding to 'core' variables
-            Matrix<double> dMatrix(gData.body.getMatrixOfTypes(defaultEqDef.body));
+            Matrix<double> dMatrix(gData.getBody().getMatrixOfTypes(defaultEqDef.body));
 
             // Let's fill 'hMatrix'
             for (size_t i = 0; i < numCurrentSV; i++)
@@ -672,8 +634,8 @@ namespace pod
 
             kFilter.Reset(currState, currentCovariance);
             DBOUT_LINE("----------------------------------------------------------------------------------------");
-            DBOUT_LINE(CivilTime(gData.header.epoch));
-            auto svset = gData.getSatID();
+            DBOUT_LINE(CivilTime(gData.getHeader().epoch));
+            auto svset = gData.getBody().getSatID();
             for (auto& it : svset)
                 DBOUT(it << " ");
             DBOUT_LINE("\ncovPre\n" << currentCovariance);
@@ -723,8 +685,8 @@ namespace pod
                 postfitPhase(i) = postfitResiduals(i + numCurrentSV);
             }
 
-            gData.insertTypeIDVector(TypeID::postfitC, postfitCode);
-            gData.insertTypeIDVector(TypeID::postfitL, postfitPhase);
+            gData.getBody().insertTypeIDVector(TypeID::postfitC, postfitCode);
+            gData.getBody().insertTypeIDVector(TypeID::postfitL, postfitPhase);
 
             // Update set of satellites to be used in next epoch
             satSet = currSatSet;
@@ -752,7 +714,7 @@ namespace pod
         * this method only with non-state-aware stochastic models like
         * 'StochasticModel' (constant coordinates) or 'WhiteNoiseModel'.
         */
-    SolverPPP& SolverPPP::setCoordinatesModel(StochasticModel* pModel)
+    SolverPPP& SolverPPP::setCoordinatesModel(IStochasticModel* pModel)
     {
 
         // All coordinates will have the same model

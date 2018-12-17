@@ -54,52 +54,12 @@ namespace pod
 
 
 
-       /* Returns a reference to a gnnsSatTypeValue object after
-       * solving the previously defined equation system.
-       *
-       * @param gData    Data object holding the data.
-       */
-    gnssSatTypeValue& PPPSolverLEOFwBw::Process(gnssSatTypeValue& gData)
-        throw(ProcessingException)
-    {
-
-        try
-        {
-
-            // Build a gnssRinex object and fill it with data
-            gnssRinex g1;
-            g1.header = gData.header;
-            g1.body = gData.body;
-
-            // Call the Process() method with the appropriate input object
-            Process(g1);
-
-            // Update the original gnssSatTypeValue object with the results
-            gData.body = g1.body;
-
-            return gData;
-
-        }
-        catch (Exception& u)
-        {
-            // Throw an exception if something unexpected happens
-            ProcessingException e(getClassName() + ":"
-                                  + u.what());
-
-            GPSTK_THROW(e);
-
-        }
-
-    }  // End of method 'PPPSolverLEOFwBw::Process()'
-
-
-
        /* Returns a reference to a gnnsRinex object after solving
        * the previously defined equation system.
        *
        * @param gData     Data object holding the data.
        */
-    gnssRinex& PPPSolverLEOFwBw::Process(gnssRinex& gData)
+	IRinex& PPPSolverLEOFwBw::Process(IRinex& gData)
         throw(ProcessingException)
     {
 
@@ -117,10 +77,10 @@ namespace pod
                 //gnssRinex gBak(gData.extractTypeID(keepTypeSet));
 
                 // Store observation data
-                ObsData.push_back(gData);
+                ObsData.push_back(gData.clone());
 
                 // Update the number of processed measurements
-                processedMeasurements += gData.numSats();
+                processedMeasurements += gData.getBody().numSats();
 
             }
 
@@ -164,15 +124,11 @@ namespace pod
 
         try
         {
-
-            std::list<gnssRinex>::iterator pos;
-            std::list<gnssRinex>::reverse_iterator rpos;
-
             // Backwards iteration. We must do this at least once
-            for (rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
+            for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
             {
 
-                PPPSolverLEO::Process((*rpos));
+                PPPSolverLEO::Process(**rpos);
 
             }
 
@@ -181,15 +137,15 @@ namespace pod
             {
 
                 // Forwards iteration
-                for (pos = ObsData.begin(); pos != ObsData.end(); ++pos)
+                for (auto pos = ObsData.begin(); pos != ObsData.end(); ++pos)
                 {
-                    PPPSolverLEO::Process((*pos));
+                    PPPSolverLEO::Process(**pos);
                 }
 
                 // Backwards iteration.
-                for (rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
+                for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
                 {
-                    PPPSolverLEO::Process((*rpos));
+                    PPPSolverLEO::Process(**rpos);
                 }
 
             }  // End of 'for (int i=0; i<(cycles-1), i++)'
@@ -236,14 +192,12 @@ namespace pod
         try
         {
 
-            std::list<gnssRinex>::iterator pos;
-            std::list<gnssRinex>::reverse_iterator rpos;
 
             // Backwards iteration. We must do this at least once
-            for (rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
+            for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
             {
 
-                PPPSolverLEO::Process((*rpos));
+                PPPSolverLEO::Process(**rpos);
 
             }
 
@@ -282,23 +236,23 @@ namespace pod
 
 
                 // Forwards iteration
-                for (pos = ObsData.begin(); pos != ObsData.end(); ++pos)
+                for (auto pos = ObsData.begin(); pos != ObsData.end(); ++pos)
                 {
                     // Let's check limits
-                    checkLimits((*pos), codeLimit, phaseLimit);
+					checkLimits(**pos, codeLimit, phaseLimit);
 
                     // Process data
-                    PPPSolverLEO::Process((*pos));
+                    PPPSolverLEO::Process( **pos );
                 }
 
                 // Backwards iteration.
-                for (rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
+                for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
                 {
                     // Let's check limits
-                    checkLimits((*rpos), codeLimit, phaseLimit);
+					checkLimits(**rpos, codeLimit, phaseLimit);
 
                     // Process data
-                    PPPSolverLEO::Process((*rpos));
+					PPPSolverLEO::Process(**rpos);
                 }
 
             }  // End of 'for (int i=0; i<(cycles-1), i++)'
@@ -327,51 +281,7 @@ namespace pod
        *
        * @return FALSE when all data is processed, TRUE otherwise.
        */
-    bool PPPSolverLEOFwBw::LastProcess(gnssSatTypeValue& gData)
-        throw(ProcessingException)
-    {
-
-        try
-        {
-
-            // Declare a gnssRinex object
-            gnssRinex g1;
-
-            // Call the 'LastProcess()' method and store the result
-            bool result(LastProcess(g1));
-
-            if (result)
-            {
-                // Convert from 'gnssRinex' to 'gnnsSatTypeValue'
-                gData.header = g1.header;
-                gData.body = g1.body;
-            }
-
-            return result;
-
-        }
-        catch (Exception& u)
-        {
-            // Throw an exception if something unexpected happens
-            ProcessingException e(getClassName() + ":"
-                                  + u.what());
-
-            GPSTK_THROW(e);
-
-        }
-
-    }  // End of method 'PPPSolverLEOFwBw::LastProcess()'
-
-
-
-       /* Process the data stored during a previous 'ReProcess()' call, one
-       * item at a time, and always in forward mode.
-       *
-       * @param gData      Data object that will hold the resulting data.
-       *
-       * @return FALSE when all data is processed, TRUE otherwise.
-       */
-    bool PPPSolverLEOFwBw::LastProcess(gnssRinex& gData)
+    bool PPPSolverLEOFwBw::LastProcess(IRinex& gData)
         throw(ProcessingException)
     {
 
@@ -383,7 +293,7 @@ namespace pod
 
                 // Get the first data epoch in 'ObsData' and process it. The
                 // result will be stored in 'gData'
-                gData = PPPSolverLEO::Process(ObsData.front());
+                gData = PPPSolverLEO::Process(*ObsData.front());
 
                 // Remove the first data epoch in 'ObsData', freeing some
                 // memory and preparing for next epoch
@@ -425,7 +335,7 @@ namespace pod
 
 
        // This method checks the limits and modifies 'gData' accordingly.
-    void PPPSolverLEOFwBw::checkLimits(gnssRinex& gData,
+    void PPPSolverLEOFwBw::checkLimits(IRinex& gData,
                                        double codeLimit,
                                        double phaseLimit)
     {
@@ -434,21 +344,16 @@ namespace pod
         SatIDSet satRejectedSet;
 
         // Let's check limits
-        for (satTypeValueMap::iterator it = gData.body.begin();
-             it != gData.body.end();
-             ++it)
+        for (auto && it: gData.getBody())
         {
 
             // Check postfit values and mark satellites as rejected
-            if (std::abs((*it).second(TypeID::postfitC)) > codeLimit)
-            {
-                satRejectedSet.insert((*it).first);
-            }
+            if (std::abs(it.second->get_value()(TypeID::postfitC)) > codeLimit)
+                satRejectedSet.insert(it.first);
+            
 
-            if (std::abs((*it).second(TypeID::postfitL)) > phaseLimit)
-            {
-                satRejectedSet.insert((*it).first);
-            }
+            if (std::abs(it.second->get_value()(TypeID::postfitL)) > phaseLimit)
+                satRejectedSet.insert(it.first);
 
         }  // End of 'for( satTypeValueMap::iterator it = gds.body.begin();...'
 
@@ -457,7 +362,7 @@ namespace pod
         rejectedMeasurements += satRejectedSet.size();
 
         // Remove satellites with missing data
-        gData.removeSatID(satRejectedSet);
+        gData.getBody().removeSatID(satRejectedSet);
 
         return;
 

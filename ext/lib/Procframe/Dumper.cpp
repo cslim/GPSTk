@@ -56,7 +56,7 @@ namespace gpstk
        *
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& Dumper::Process( satTypeValueMap& gData )
+   SatTypePtrMap& Dumper::Process(SatTypePtrMap& gData )
       throw(ProcessingException)
    {
 
@@ -64,7 +64,7 @@ namespace gpstk
       {
 
             // Iterate through all items in the GNSS Data Structure
-         for( satTypeValueMap::const_iterator it = gData.begin();
+         for( auto it = gData.begin();
               it!= gData.end();
               it++ )
          {
@@ -73,7 +73,7 @@ namespace gpstk
             *outStr << (*it).first << " ";
 
                // Now, print TypeIDs
-            printTypeID( (*it).second );
+            printTypeID( (*it).second->get_value() );
 
                // Print end of line
             *outStr << std::endl;
@@ -101,7 +101,7 @@ namespace gpstk
        *
        * @param gData    Data object holding the data.
        */
-   gnssRinex& Dumper::Process( gnssRinex& gData )
+   IRinex& Dumper::Process(IRinex& gData )
       throw(ProcessingException)
    {
 
@@ -109,8 +109,8 @@ namespace gpstk
       {
 
             // Iterate through all items in the GNSS Data Structure
-         for( satTypeValueMap::const_iterator it = gData.body.begin();
-              it!= gData.body.end();
+         for( auto it = gData.getBody().begin();
+              it!= gData.getBody().end();
               it++ )
          {
 
@@ -118,7 +118,7 @@ namespace gpstk
             if( printTime )
             {
                   // Declare a 'YDSTime' object to ease printing
-               YDSTime time( gData.header.epoch );
+               YDSTime time( gData.getHeader().epoch );
 
                *outStr << time.year << " "
                        << time.doy << " "
@@ -128,14 +128,14 @@ namespace gpstk
                // Second, print SourceID information (if enabled)
             if( printStation )
             {
-               *outStr << gData.header.source << " ";
+               *outStr << gData.getHeader().source << " ";
             }
 
                // Then, print satellite (system and PRN)
             *outStr << (*it).first << " ";
 
                // Now, print TypeIDs
-            printTypeID( (*it).second );
+            printTypeID( (*it).second->get_value() );
 
                // Print end of line
             *outStr << std::endl;

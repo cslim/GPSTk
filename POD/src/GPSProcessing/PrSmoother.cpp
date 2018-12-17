@@ -64,7 +64,7 @@ namespace pod
         ofstream fStat(sPath, ios::out);
 
         RinexObsHeader head;
-        gnssRinex gRin;
+        RinexEpoch gRin;
 
 
         rin >> head;
@@ -76,18 +76,18 @@ namespace pod
                 gRin >> it;
 
             bool isEpochFirstTime = true;
-            for (auto &it : gRin.body)
+            for (auto &it : gRin.getBody())
             {
                 bool isSVFirstTime = true;
                 for (auto& it1 : csList)
                 {
                     auto csType = it1.getResultType();
-                    double CS = it.second.getValue(csType);
+                    double CS = it.second->get_value().getValue(csType);
                     if (CS > 0)
                     {
                         if (isEpochFirstTime)
                         {
-                            fStat << CivilTime(gRin.header.epoch) << " " << endl;
+                            fStat << CivilTime(gRin.getHeader().epoch) << " " << endl;
                             isEpochFirstTime = false;
                         }
 
