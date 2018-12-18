@@ -295,13 +295,13 @@ namespace pod
         if (useC1)
         {
             codeL1 = TypeID::C1;
-            oMinusC.add(make_unique<PrefitC1>());
+			oMinusC.add(make_unique<PrefitC1>(false));
             Equations->measTypes() = { TypeID::prefitC };
         }
         else
         {
             codeL1 = TypeID::P1;
-            oMinusC.add(make_unique<PrefitP1>());
+            oMinusC.add(make_unique<PrefitP1>(false));
             Equations->measTypes() = { TypeID::prefitP1 };
         }
 

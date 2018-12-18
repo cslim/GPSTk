@@ -224,20 +224,6 @@ namespace pod
         else
             value -= it->second;
 
-        //grav Delay
-        it = tvMap.find(TypeID::gravDelay);
-        if (it == tvMap.end())
-            return false;
-        else
-            value -= it->second;
-
-        //sv phase center 
-        it = tvMap.find(TypeID::satPCenter);
-        if (it == tvMap.end())
-            return false;
-        else
-            value -= it->second;
-
         //tropo
         it = tvMap.find(TypeID::tropoSlant);
         if (it == tvMap.end())
@@ -250,12 +236,27 @@ namespace pod
         if (it != tvMap.end())
             value -= it->second;
 
-        //wind Up
-        it = tvMap.find(TypeID::instC1);
-        if (it != tvMap.end())
-            value -= it->second;//*getWavelength(sv, 1, sv.getGloFcn()) / TWO_PI;
+		if (!isPrecise)
+			return true;
 
-        //multipath L1
+		//grav Delay
+		it = tvMap.find(TypeID::gravDelay);
+		if (it != tvMap.end())
+			value -= it->second;
+
+		//sv phase center 
+		it = tvMap.find(TypeID::satPCenter);
+		if (it == tvMap.end())
+			return false;
+		else
+			value -= it->second;
+
+		//instrument delays
+		it = tvMap.find(TypeID::instC1);
+		if (it != tvMap.end())
+			value -= it->second;
+        
+		//multipath L1
         it = tvMap.find(TypeID::mpC1);
         if (it != tvMap.end())
             value -= it->second;
@@ -303,20 +304,6 @@ namespace pod
         else
             value -= it->second;
 
-        //grav Delay
-        it = tvMap.find(TypeID::gravDelay);
-        if (it == tvMap.end())
-            return false;
-        else
-            value -= it->second;
-
-        //sv phase center 
-        it = tvMap.find(TypeID::satPCenter);
-        if (it == tvMap.end())
-            return false;
-        else
-            value -= it->second;
-
         //tropo
         it = tvMap.find(TypeID::tropoSlant);
         if (it == tvMap.end())
@@ -329,12 +316,29 @@ namespace pod
         if (it != tvMap.end())
             value -= it->second;
 
-        //wind Up
+		if (!isPrecise)
+			return true;
+
+        //grav Delay
+        it = tvMap.find(TypeID::gravDelay);
+        if (it == tvMap.end())
+			return false;
+		else
+            value -= it->second;
+
+        //sv phase center 
+        it = tvMap.find(TypeID::satPCenter);
+		if (it == tvMap.end())
+			return false;
+		else
+			value -= it->second;
+
+        //instrument delay
         it = tvMap.find(TypeID::instC1);
         if (it != tvMap.end())
             value -= it->second;//*getWavelength(sv, 1, sv.getGloFcn()) / TWO_PI;
 
-                                //multipath L1
+        //multipath L1
         it = tvMap.find(TypeID::mpC1);
         if (it != tvMap.end())
             value -= it->second;
@@ -385,16 +389,12 @@ namespace pod
 
         //grav Delay
         it = tvMap.find(TypeID::gravDelay);
-        if (it == tvMap.end())
-            return false;
-        else
+        if (it != tvMap.end())
             value -= it->second;
 
         //sv phase center 
         it = tvMap.find(TypeID::satPCenter);
-        if (it == tvMap.end())
-            return false;
-        else
+        if (it != tvMap.end())
             value -= it->second;
 
         //tropo
@@ -424,167 +424,6 @@ namespace pod
     }
 
    #pragma endregion
-
-    #pragma region PrefitL1
-    bool PrefitL1::getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const
-    {
-        value = NAN;
-
-        // L1 phase pseudorange
-        auto& it = tvMap.find(TypeID::L1);
-        if (it == tvMap.end())
-            return false;
-        else
-            value = it->second;
-
-        // calculated distance
-        it = tvMap.find(TypeID::rho);
-        if (it == tvMap.end())
-            return false;
-        else
-            value -= it->second;
-
-        //SV clock offset
-        it = tvMap.find(TypeID::dtSat);
-        if (it == tvMap.end())
-            return false;
-        else
-            value += it->second;
-
-        //rel 
-        it = tvMap.find(TypeID::rel);
-        if (it == tvMap.end())
-            return false;
-        else
-            value -= it->second;
-
-        //grav Delay
-        it = tvMap.find(TypeID::gravDelay);
-        if (it == tvMap.end())
-            return false;
-        else
-            value -= it->second;
-
-        //sv phase center 
-        it = tvMap.find(TypeID::satPCenter);
-        if (it == tvMap.end())
-            return false;
-        else
-            value -= it->second;
-
-        //tropo
-        it = tvMap.find(TypeID::tropoSlant);
-        if (it == tvMap.end())
-            return false;
-        else
-            value -= it->second;
-
-        //ionospheric delay on L1
-        it = tvMap.find(TypeID::ionoL1);
-        if (it != tvMap.end())
-            value += it->second;
-
-        //wind Up
-        it = tvMap.find(TypeID::windUp);
-        if (it == tvMap.end())
-            return false;
-        else
-            value -= it->second*getWavelength(sv, 1, sv.getGloFcn()) / TWO_PI;
-
-        //multipath L1
-        it = tvMap.find(TypeID::mpL1);
-        if (it != tvMap.end())
-            value -= it->second;
-
-        return true;
-    }
-
-    TypeID PrefitL1::getType() const
-    {
-        return TypeID::prefitL1;
-    }
-    #pragma endregion
-
-    #pragma region PrefitL2
-    bool PrefitL2::getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const
-    {
-        value = NAN;
-
-        // L1 phase pseudorange
-        auto& it = tvMap.find(TypeID::L2);
-        if (it == tvMap.end())
-            return false;
-        else
-            value = it->second;
-
-        // calculated distance
-        it = tvMap.find(TypeID::rho);
-        if (it == tvMap.end())
-            return false;
-        else
-            value -= it->second;
-
-        //SV clock offset
-        it = tvMap.find(TypeID::dtSat);
-        if (it == tvMap.end())
-            return false;
-        else
-            value += it->second;
-
-        //rel 
-        it = tvMap.find(TypeID::rel);
-        if (it == tvMap.end())
-            return false;
-        else
-            value -= it->second;
-
-        //grav Delay
-        it = tvMap.find(TypeID::gravDelay);
-        if (it == tvMap.end())
-            return false;
-        else
-            value -= it->second;
-
-        //sv phase center 
-        it = tvMap.find(TypeID::satPCenter);
-        if (it == tvMap.end())
-            return false;
-        else
-            value -= it->second;
-
-        //tropo
-        it = tvMap.find(TypeID::tropoSlant);
-        if (it == tvMap.end())
-            return false;
-        else
-            value -= it->second;
-
-        //ionospheric delay on L1
-        it = tvMap.find(TypeID::ionoL2);
-        if (it != tvMap.end())
-            value += it->second;
-
-        //wind Up
-        it = tvMap.find(TypeID::windUp);
-        if (it == tvMap.end())
-            return false;
-        else
-            value -= it->second*getWavelength(sv, 2, sv.getGloFcn()) / TWO_PI;
-
-        //multipath L1
-        it = tvMap.find(TypeID::mpL2);
-        if (it != tvMap.end())
-            value -= it->second;
-
-        return true;
-    }
-
-    TypeID PrefitL2::getType() const
-    {
-        return TypeID::prefitL2;
-    }
-
-    #pragma endregion
 
     #pragma region PrefitPC
     bool PrefitPC::getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const
@@ -619,26 +458,29 @@ namespace pod
         else
             value -= it->second;
 
-        //grav Delay
-        it = tvMap.find(TypeID::gravDelay);
-        if (it == tvMap.end())
-            return false;
-        else
-            value -= it->second;
-
-        //sv phase center 
-        it = tvMap.find(TypeID::satPCenter);
-        if (it == tvMap.end())
-            return false;
-        else
-            value -= it->second;
-
         //tropo
         it = tvMap.find(TypeID::tropoSlant);
         if (it == tvMap.end())
             return false;
         else
             value -= it->second;
+
+		if (!isPrecise)
+			return true;
+		
+		//grav Delay
+		it = tvMap.find(TypeID::gravDelay);
+		if (it == tvMap.end())
+			return false;
+		else
+			value -= it->second;
+
+		//sv phase center 
+		it = tvMap.find(TypeID::satPCenter);
+		if (it == tvMap.end())
+			return false;
+		else
+			value -= it->second;
 
         //wind Up
         it = tvMap.find(TypeID::windUp);
@@ -656,7 +498,171 @@ namespace pod
     {
         return TypeID::prefitPC;
     }
+
     #pragma endregion
+
+
+#pragma region PrefitL1
+	bool PrefitL1::getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const
+	{
+		value = NAN;
+
+		// L1 phase pseudorange
+		auto& it = tvMap.find(TypeID::L1);
+		if (it == tvMap.end())
+			return false;
+		else
+			value = it->second;
+
+		// calculated distance
+		it = tvMap.find(TypeID::rho);
+		if (it == tvMap.end())
+			return false;
+		else
+			value -= it->second;
+
+		//SV clock offset
+		it = tvMap.find(TypeID::dtSat);
+		if (it == tvMap.end())
+			return false;
+		else
+			value += it->second;
+
+		//rel 
+		it = tvMap.find(TypeID::rel);
+		if (it == tvMap.end())
+			return false;
+		else
+			value -= it->second;
+
+		//grav Delay
+		it = tvMap.find(TypeID::gravDelay);
+		if (it == tvMap.end())
+			return false;
+		else
+			value -= it->second;
+
+		//sv phase center 
+		it = tvMap.find(TypeID::satPCenter);
+		if (it == tvMap.end())
+			return false;
+		else
+			value -= it->second;
+
+		//tropo
+		it = tvMap.find(TypeID::tropoSlant);
+		if (it == tvMap.end())
+			return false;
+		else
+			value -= it->second;
+
+		//ionospheric delay on L1
+		it = tvMap.find(TypeID::ionoL1);
+		if (it != tvMap.end())
+			value += it->second;
+
+		//wind Up
+		it = tvMap.find(TypeID::windUp);
+		if (it == tvMap.end())
+			return false;
+		else
+			value -= it->second*getWavelength(sv, 1, sv.getGloFcn()) / TWO_PI;
+
+		//multipath L1
+		it = tvMap.find(TypeID::mpL1);
+		if (it != tvMap.end())
+			value -= it->second;
+
+		return true;
+	}
+
+	TypeID PrefitL1::getType() const
+	{
+		return TypeID::prefitL1;
+	}
+#pragma endregion
+
+	#pragma region PrefitL2
+	bool PrefitL2::getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const
+	{
+		value = NAN;
+
+		// L1 phase pseudorange
+		auto& it = tvMap.find(TypeID::L2);
+		if (it == tvMap.end())
+			return false;
+		else
+			value = it->second;
+
+		// calculated distance
+		it = tvMap.find(TypeID::rho);
+		if (it == tvMap.end())
+			return false;
+		else
+			value -= it->second;
+
+		//SV clock offset
+		it = tvMap.find(TypeID::dtSat);
+		if (it == tvMap.end())
+			return false;
+		else
+			value += it->second;
+
+		//rel 
+		it = tvMap.find(TypeID::rel);
+		if (it == tvMap.end())
+			return false;
+		else
+			value -= it->second;
+
+		//grav Delay
+		it = tvMap.find(TypeID::gravDelay);
+		if (it == tvMap.end())
+			return false;
+		else
+			value -= it->second;
+
+		//sv phase center 
+		it = tvMap.find(TypeID::satPCenter);
+		if (it == tvMap.end())
+			return false;
+		else
+			value -= it->second;
+
+		//tropo
+		it = tvMap.find(TypeID::tropoSlant);
+		if (it == tvMap.end())
+			return false;
+		else
+			value -= it->second;
+
+		//ionospheric delay on L1
+		it = tvMap.find(TypeID::ionoL2);
+		if (it != tvMap.end())
+			value += it->second;
+
+		//wind Up
+		it = tvMap.find(TypeID::windUp);
+		if (it == tvMap.end())
+			return false;
+		else
+			value -= it->second*getWavelength(sv, 2, sv.getGloFcn()) / TWO_PI;
+
+		//multipath L1
+		it = tvMap.find(TypeID::mpL2);
+		if (it != tvMap.end())
+			value -= it->second;
+
+		return true;
+	}
+
+	TypeID PrefitL2::getType() const
+	{
+		return TypeID::prefitL2;
+	}
+
+#pragma endregion
+
 
     #pragma region PrefitLC
     bool PrefitLC::getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const

@@ -101,52 +101,66 @@ namespace pod
         virtual TypeID getType() const override;
     };
 
-    class PrefitC1 :public LinearCombination
+	class PrefitCode :public LinearCombination
+	{
+	public:
+		PrefitCode() = delete;
+		PrefitCode(bool isPreciseModel)
+			:isPrecise(isPreciseModel)
+		{};
+
+	protected:
+		bool isPrecise;
+
+	};
+
+    class PrefitC1 :public PrefitCode
     {
     public:
-        PrefitC1() {};
+		PrefitC1() = delete;
+		PrefitC1(bool isPreciseModel):
+			PrefitCode(isPreciseModel)
+		{};
+
         virtual ~PrefitC1() {};
         virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
         virtual TypeID getType() const override;
+
     };
 
-    class PrefitP1 :public LinearCombination
+    class PrefitP1 :public PrefitCode
     {
     public:
-        PrefitP1() {};
+		PrefitP1() = delete;
+		PrefitP1(bool isPreciseModel) :
+			PrefitCode(isPreciseModel)
+		{};
         virtual ~PrefitP1() {};
         virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
         virtual TypeID getType() const override;
+	protected:
+		bool isPrecise;
     };
-    class PrefitP2 :public LinearCombination
+
+    class PrefitP2 :public PrefitCode
     {
     public:
-        PrefitP2() {};
+		PrefitP2() = delete;
+		PrefitP2(bool isPreciseModel) :
+			PrefitCode(isPreciseModel)
+		{};
         virtual ~PrefitP2() {};
         virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
         virtual TypeID getType() const override;
     };
-    class PrefitL1 :public LinearCombination
-    {
-    public:
-        PrefitL1() {};
-        virtual ~PrefitL1() {};
-        virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
-        virtual TypeID getType() const override;
-    };
 
-    class PrefitL2 :public LinearCombination
+    class PrefitPC :public PrefitCode
     {
     public:
-        PrefitL2() {};
-        virtual ~PrefitL2() {};
-        virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
-        virtual TypeID getType() const override;
-    };
-    class PrefitPC :public LinearCombination
-    {
-    public:
-        PrefitPC() {};
+		PrefitPC() = delete;
+		PrefitPC(bool isPreciseModel) :
+			PrefitCode(isPreciseModel)
+		{};
         virtual ~PrefitPC() {};
         virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
         virtual TypeID getType() const override;
@@ -160,6 +174,24 @@ namespace pod
         virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
         virtual TypeID getType() const override;
     };
+
+	class PrefitL1 :public LinearCombination
+	{
+	public:
+		PrefitL1() {};
+		virtual ~PrefitL1() {};
+		virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
+		virtual TypeID getType() const override;
+	};
+
+	class PrefitL2 :public LinearCombination
+	{
+	public:
+		PrefitL2() {};
+		virtual ~PrefitL2() {};
+		virtual bool getCombination(const SatID & sv, const typeValueMap & tvMap, double & value) const override;
+		virtual TypeID getType() const override;
+	};
 
     class CodeIonoDelayL1 :public LinearCombination
     {

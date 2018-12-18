@@ -66,7 +66,9 @@ namespace pod
         //
         ComputeWeightSimple w;
         KalmanSolver solver(Equations);
+
         KalmanSolverFB solverFb(Equations);
+
         if (forwardBackwardCycles > 0)
         {
             solverFb.setCyclesNumber(forwardBackwardCycles);
@@ -153,13 +155,15 @@ namespace pod
                 gRin >> data->ionoCorrector;
                 gRin >> oMinusC;
                 gRin >> w;
-
+				int minSvNum = gRin.getBody().getSatSystems().size() + 3;
                 if (forwardBackwardCycles > 0)
                 {
+					solverFb.setMinSatNumber(minSvNum);
                     gRin >> solverFb;
                 }
                 else
                 {
+					solver.setMinSatNumber(minSvNum);
                     gRin >> solver;
                     auto ep = opts().fullOutput ? GnssEpoch(gRin.getBody()) : GnssEpoch();
                     // updateNomPos(solverFB);
@@ -252,14 +256,14 @@ namespace pod
         if (useC1)
         {
             codeL1 = TypeID::C1;
-            oMinusC.add(make_unique<PrefitC1>());
+            oMinusC.add(make_unique<PrefitC1>(false));
             Equations->measTypes() = TypeIDSet{ TypeID::prefitC };
         }
         else
         {
             codeL1 = TypeID::P1;
             Equations->measTypes() = TypeIDSet{ TypeID::prefitP1 };
-            oMinusC.add(make_unique<PrefitP1>());
+            oMinusC.add(make_unique<PrefitP1>(false));
         }
 
         requireObs.addRequiredType(codeL1);

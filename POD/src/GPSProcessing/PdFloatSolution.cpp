@@ -478,9 +478,9 @@ namespace pod
         if (opts().carrierBands.find(CarrierBand::L1) != opts().carrierBands.end())
         {
             if (useC1)
-                oMinusC.add(make_unique<PrefitC1>());
+                oMinusC.add(make_unique<PrefitC1>(true));
             else
-                oMinusC.add(make_unique<PrefitP1>());
+                oMinusC.add(make_unique<PrefitP1>(true));
 
             oMinusC.add(make_unique<PrefitL1>());
             
@@ -492,7 +492,7 @@ namespace pod
         }
         if (opts().carrierBands.find(CarrierBand::L2) != opts().carrierBands.end())
         {
-            oMinusC.add(make_unique<PrefitP2>());
+            oMinusC.add(make_unique<PrefitP2>(true));
             oMinusC.add(make_unique<PrefitL2>());
 
             Equations->measTypes().insert(TypeID::prefitP2);

@@ -307,7 +307,7 @@ namespace pod
 
         requireObs.addRequiredType(TypeID::S1);
 
-        oMinusC.add(make_unique<PrefitPC>());
+        oMinusC.add(make_unique<PrefitPC>(true));
         oMinusC.add(make_unique<PrefitLC>());
 
         Equations->measTypes().insert(TypeID::prefitPC);
