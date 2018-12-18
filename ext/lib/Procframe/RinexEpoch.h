@@ -71,10 +71,8 @@ namespace gpstk
             return rinex.header;
         }
 
-		std::istream& read(std::istream& i)
-		{
-			return i >> rinex;
-		}
+		std::istream& read(std::istream& i);
+
 
 		std::ostream& print(std::ostream& i)
 		{

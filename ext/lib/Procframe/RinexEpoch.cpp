@@ -3,7 +3,6 @@ using namespace std;
 namespace gpstk
 {
 
-
     RinexEpoch::
         RinexEpoch()
     { }
@@ -11,7 +10,9 @@ namespace gpstk
     RinexEpoch::
         RinexEpoch(const gpstk::gnssRinex & gRin)
         :rinex(gRin)
-    { }
+    {
+		resetCurrData();
+	}
 
     RinexEpoch::
         ~RinexEpoch()
@@ -24,6 +25,14 @@ namespace gpstk
         for (auto && it : rinex.body)
             currData.emplace(it.first, make_unique<TypeValueMapPtr>(it.second));
     }
+
+	std::istream& RinexEpoch::
+		read(std::istream& i)
+	{
+		i >> rinex;
+		resetCurrData();
+		return i;
+	}
 
     RinexEpoch RinexEpoch::
         extractSatID(const gpstk::SatID& satellite) const
@@ -50,37 +59,37 @@ namespace gpstk
     }
 
     RinexEpoch& RinexEpoch::
-        keepOnlySatID(const gpstk::SatID& satellite)
+        keepOnlySatID(const gpstk::SatID& sv)
     {
-        rinex.keepOnlySatID(satellite);
-        return *this;
+		return keepOnlySatID(SatIDSet{ sv });
     }
 
     RinexEpoch& RinexEpoch::
-        keepOnlySatID(const int& p, const GpstkSatSystem& s)
-    {
-        rinex.keepOnlySatID(p,s);
-        return *this;
-    }
+		keepOnlySatID(const int& p, const GpstkSatSystem& s)
+	{
+		return keepOnlySatID(SatID(p, s));
+	}
 
     RinexEpoch& RinexEpoch::
         keepOnlySatID(const gpstk::SatIDSet& satSet)
     {
         rinex.keepOnlySatID(satSet);
+		resetCurrData();
         return *this;
     }
 
     RinexEpoch& RinexEpoch::
         keepOnlySatSystems(GpstkSatSystem satSyst)
     {
-        rinex.keepOnlySatSystems(satSyst);
-        return *this;
+		SatSystSet sss{ satSyst };
+        return keepOnlySatSystems(sss);
     }
 
     RinexEpoch& RinexEpoch::
         keepOnlySatSystems(const gpstk::SatSystSet& satSet)
     {
         rinex.keepOnlySatSystems(satSet);
+		resetCurrData();
         return *this;
     }
 
@@ -99,14 +108,14 @@ namespace gpstk
     RinexEpoch& RinexEpoch::
         keepOnlyTypeID(const gpstk::TypeID& type)
     {
-        rinex.keepOnlyTypeID(type);
-        return *this;
+		return keepOnlyTypeID(TypeIDSet{ type });
     }
 
     RinexEpoch& RinexEpoch::
         keepOnlyTypeID(const gpstk::TypeIDSet& typeSet)
     {
         rinex.keepOnlyTypeID(typeSet);
+		resetCurrData();
         return *this;
     }
 }

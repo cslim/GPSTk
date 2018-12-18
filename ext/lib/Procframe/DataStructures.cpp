@@ -618,7 +618,7 @@ namespace gpstk
 
       satTypeValueMap stvMap( (*this).body.extractTypeID(typeSet) );
       (*this).body = stvMap;
-
+	  
       return (*this);
 
    }  // End of method 'gnssRinex::keepOnlyTypeID()'

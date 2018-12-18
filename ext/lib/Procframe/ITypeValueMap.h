@@ -27,7 +27,7 @@ namespace gpstk
 		{
 			return *ptr;
 		};
-        std::shared_ptr<typeValueMap> ptr;
+       typeValueMap* ptr;
     };
 }
 

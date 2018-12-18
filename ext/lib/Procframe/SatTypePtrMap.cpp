@@ -280,7 +280,10 @@ namespace gpstk
 
     }  // End of method 'SatTypePtrMap::keepOnlyTypeID()'
 
-
+	SatTypePtrMap& SatTypePtrMap::removeSatID(const SatID& satellite)
+	{
+		return removeSatID(SatIDSet{ satellite });
+	}
 
        // Modifies this object, removing these satellites.
        // @param satSet Set (SatIDSet) containing the satellites

@@ -7,9 +7,11 @@ namespace gpstk
 {   
 
 
-    class SatTypePtrMap : public std::map<SatID, const std::shared_ptr<ITypeValueMap >>
+    class SatTypePtrMap : public std::map<SatID,  std::shared_ptr<ITypeValueMap> >
     {
+
     public:
+
         /// Returns the number of available satellites.
         size_t numSats() const
         {
@@ -106,10 +108,7 @@ namespace gpstk
 
         /// Modifies this object, removing this satellite.
         /// @param satellite Satellite to be removed.
-        SatTypePtrMap& removeSatID(const SatID& satellite)
-        {
-            (*this).erase(satellite); return (*this);
-        }
+		SatTypePtrMap& removeSatID(const SatID& satellite);
 
 
         /// Modifies this object, removing these satellites.
