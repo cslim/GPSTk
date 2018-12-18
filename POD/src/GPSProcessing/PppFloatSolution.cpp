@@ -184,7 +184,12 @@ namespace pod
                 }
 
                 const auto& t = gRin.getHeader().epoch;
-
+				bool b;
+#if _DEBUG
+				CATCH_TIME(t, 2014, 12, 19, 0, 14, 15, b)
+					if (b)
+						DBOUT_LINE("catched")
+#endif
                 //keep only satellites from satellites systems selecyted for processing
                 gRin.keepOnlySatSystems(opts().systems);
 
@@ -254,10 +259,12 @@ namespace pod
 
                 if (forwardBackwardCycles > 0)
                 {
+					solverFb.setMinSatNumber(4 + gRin.getBody().getSatSystems().size());
                     gRin >> solverFb;
                 }
                 else
                 {
+					solver.setMinSatNumber(4 + gRin.getBody().getSatSystems().size());
                     gRin >> solver;
                     auto ep = opts().fullOutput ? GnssEpoch(gRin.getBody()) : GnssEpoch();
                     // updateNomPos(solverFB);

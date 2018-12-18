@@ -285,7 +285,7 @@ namespace pod
                 const auto& t = gRin.getHeader().epoch;
                 bool b;
 #if _DEBUG
-                CATCH_TIME(t,2012,12,27,19,48,0,b)
+                CATCH_TIME(t,2014,12,19,0,14,15,b)
                 if(b)
                     DBOUT_LINE("catched")
 #endif

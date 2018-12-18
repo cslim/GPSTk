@@ -93,8 +93,8 @@ namespace pod
                 DBOUT(it << " ");
             //DBOUT_LINE("")
             DBOUT_LINE("meas Vector\n" << setprecision(10) << measVector);
-            //DBOUT_LINE("H\n" << hMatrix);
-            //DBOUT_LINE("Cov\n" << covMatrix);
+            DBOUT_LINE("H\n" << hMatrix);
+            DBOUT_LINE("Cov\n" << covMatrix);
             DBOUT_LINE("phiMatrix\n" << phiMatrix.diagCopy());
             DBOUT_LINE("qMatrix\n" << qMatrix.diagCopy());
 
@@ -143,8 +143,10 @@ namespace pod
             //sigma = sqrt(vpv(0) / (numMeas - numPar));
             sigma = vpv(0);
 
-            if (checkPhase(gData) == 0)
+            if (i==0 && checkPhase(gData) == 0)
                 break;
+			else
+				DBOUT_LINE("Catched by residuals\n")
         }
 
         equations->saveResiduals(gData, postfitResiduals);
@@ -248,8 +250,7 @@ namespace pod
             }
         }
         if (maxPhaseResid.value < phaseLim)
-        {
-            
+        {           
             return 0;
         }
         else
@@ -273,7 +274,7 @@ namespace pod
             auto ambSet = equations->currentAmb();
             auto typeSet = FilterParameter::get_all_types(ambSet);
 
-            int corParNum = equations->getNumUnknowns()- ambSet.size();
+            int corParNum = equations->getNumUnknowns() - ambSet.size();
             
             //update Phi and Q marices
             for (size_t i = 0; i < typeSet.size(); i++)
