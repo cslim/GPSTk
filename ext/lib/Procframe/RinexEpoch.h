@@ -39,7 +39,8 @@ namespace gpstk
 
     public:
 
-        RinexEpoch( );
+        RinexEpoch( ); 
+		RinexEpoch(const RinexEpoch & other);
         RinexEpoch(const gnssRinex & gRin);
 
         virtual ~RinexEpoch();

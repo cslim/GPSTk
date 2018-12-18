@@ -7,6 +7,13 @@ namespace gpstk
         RinexEpoch()
     { }
 
+	RinexEpoch::
+		RinexEpoch(const RinexEpoch & other)
+		:rinex(other.rinex)
+	{
+		resetCurrData();
+	}
+	
     RinexEpoch::
         RinexEpoch(const gpstk::gnssRinex & gRin)
         :rinex(gRin)
