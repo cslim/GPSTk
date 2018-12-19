@@ -98,7 +98,7 @@ namespace gpstk
          (*pRinexRef) >> gData;      // Get data out of ref station RINEX file
 
          gnssRinexBuffer.clear();
-         gnssRinexBuffer.emplace_back(&gData);
+         gnssRinexBuffer.emplace_back(gData.clone());
 
          firstTime = false;          // Mark that first data batch was read
       }

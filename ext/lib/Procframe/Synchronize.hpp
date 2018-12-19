@@ -51,7 +51,7 @@
 
 namespace gpstk
 {
-	typedef std::unique_ptr<IRinex> IRinexUPtr;
+
       /// Thrown when synchronization was not possible at a given epoch
       /// @ingroup exceptiongroup
    NEW_EXCEPTION_CLASS(SynchronizeException, gpstk::Exception);
@@ -230,7 +230,7 @@ namespace gpstk
           * @param roverData     gnssSatTypeValue that holds ROVER receiver data
           */
       virtual Synchronize& setRoverData(IRinex& roverData)
-      { pgRov1.reset(&roverData); return (*this); }
+      { pgRov1 = &roverData; return (*this); }
 
          /// Returns a string identifying this object.
       virtual std::string getClassName(void) const;
@@ -246,7 +246,7 @@ namespace gpstk
          throw(SynchronizeException);
 
          /// gnssRinex data buffer
-      std::list<IRinexUPtr> gnssRinexBuffer;
+      std::list<irinex_uptr> gnssRinexBuffer;
 
 
          /// Pointer to input observation file stream for reference station.
@@ -255,7 +255,7 @@ namespace gpstk
 
 
          /// Pointer to gnnsRinex data structure (GDS) that holds ROVER data.
-	  IRinexUPtr pgRov1;
+	  IRinex* pgRov1;
 
 
          /// Tolerance, in seconds.
