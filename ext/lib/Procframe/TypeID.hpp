@@ -87,7 +87,7 @@ namespace gpstk
    public:
 
          /// The type of the data value.
-      enum ValueType
+      enum ValueType: uint16_t
       {
          Unknown,
             // Observation-related types
