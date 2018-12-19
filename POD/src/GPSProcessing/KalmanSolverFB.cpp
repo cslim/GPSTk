@@ -164,6 +164,7 @@ namespace pod
         GPSTK_THROW(e);
 
     }
+
     void KalmanSolverFB::checkLimits(IRinex& gData, size_t cycleNumber)
     {
         // Set to store rejected satellites

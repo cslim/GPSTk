@@ -133,7 +133,7 @@ namespace pod
         char* sql = "INSERT INTO `RinexTypePairs`(`Type`,`Value`) VALUES (@Type, @Value);";
         sqlite3_stmt *comm;
         sqlite3_prepare_v2(db, sql, -1, &comm, NULL);
-        sqlite3_bind_int(comm, 1, (int)typeValuePair.first.type);
+        sqlite3_bind_int(comm, 1, typeValuePair.first.type);
         sqlite3_bind_double(comm, 2, typeValuePair.second);
 
         lastTypeValuePairID = tryExecuteNonQueryAndGetRowId(comm);
@@ -169,7 +169,7 @@ namespace pod
                 sqlite3_stmt *comm;
                 int rc  =  sqlite3_prepare_v2(db, sql, -1, &comm, NULL);
                 sqlite3_bind_int(comm, 1, satId.id);
-                sqlite3_bind_int(comm, 2, (int)satId.system);
+                sqlite3_bind_int(comm, 2, satId.system);
                 sqlite3_bind_int64(comm, 3, lastTypeValuePairID);
                 sqlite3_bind_int(comm, 4, lastEpochID);
 

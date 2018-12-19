@@ -217,10 +217,12 @@ namespace pod
                 
                 if (forwardBackwardCycles > 0)
                 {
+					solverFb.setMinSatNumber(3 + gRin.getBody().getSatSystems().size());
                     gRin >> solverFb;
                 }
                 else
                 {
+					solver.setMinSatNumber(3 + gRin.getBody().getSatSystems().size());
                     gRin >> solver;
                     auto ep = opts().fullOutput? GnssEpoch(gRin.getBody()): GnssEpoch();
                     // updateNomPos(solverFB);

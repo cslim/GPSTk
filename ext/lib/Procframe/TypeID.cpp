@@ -658,7 +658,10 @@ namespace gpstk
          else if(roi.band==ObsID::cbL2)
          {
             if(roi.type == ObsID::otRange)
-               return (roi.code == ObsID::tcCA || roi.code == ObsID::tcC2LM) ? TypeID::C2 : TypeID::P2;
+               return (roi.code == ObsID::tcCA ||
+				       roi.code == ObsID::tcC2LM || 
+				       roi.code == ObsID::tcC2L || 
+				       roi.code == ObsID::tcC2M) ? TypeID::C2 : TypeID::P2;
 
             if(roi.type == ObsID::otPhase) return TypeID::L2;
             if(roi.type == ObsID::otDoppler) return TypeID::D2;

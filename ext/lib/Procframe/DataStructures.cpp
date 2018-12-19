@@ -2467,16 +2467,14 @@ namespace gpstk
                    TypeID type = ConvertToTypeID(types[i], sat);
 
                    const int n = GetCarrierBand(types[i]);
-
+				   double value = it->second[i].data;
+				   if (value == 0) continue;
                    if (types[i].type == ObsID::otPhase)   // Phase
                    {
                        // TODO:: handle glonass data later(yanweigps)
 
                        int fcn = static_cast<SatID>(sat).getGloFcn();
-                       tvMap[type] = it->second[i].data*getWavelength(sat, n, fcn);
-
-
-
+                       tvMap[type] = value *getWavelength(sat, n, fcn);
 
                        // n=1 2 5 6 7 8
                        if (n == 1)
@@ -2512,7 +2510,7 @@ namespace gpstk
                    }
                    else
                    {
-                       tvMap[type] = it->second[i].data;
+					   tvMap[type] = value;
                    }
                }
            }
