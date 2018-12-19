@@ -1,4 +1,5 @@
 //============================================================================
+//============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
@@ -393,7 +394,6 @@ namespace gpstk
       tStrings[recAntDyn] = "Rx Antenna Dynamics";
       tStrings[satStatus] = "SV status code";
       tStrings[recSiteID] = "RxSiteId";
-      tStrings[SvStatus] = "Satellite status code";
       tStrings[Baseline] = "Baseleine length ";
 
       tStrings[iura]       = "iura";
