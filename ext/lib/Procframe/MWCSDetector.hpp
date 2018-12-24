@@ -140,7 +140,7 @@ namespace gpstk
       MWCSDetector() : obsType(TypeID::MWubbena), lliType1(TypeID::LLI1),
                        lliType2(TypeID::LLI2), resultType1(TypeID::CSL1),
                        resultType2(TypeID::CSL2), deltaTMax(61.0),
-                       maxNumLambdas(10.0), useLLI(true), useEpochFlag(false)
+                       maxNumLambdas(10.0), useLLI(true), useEpochFlag(false),isReprocess(false)
       { };
 
 
@@ -226,6 +226,16 @@ namespace gpstk
       };
 
 
+	  virtual MWCSDetector& setIsReprocess(bool isrepro)
+	  {
+		  isReprocess = isrepro;
+		  return *this;
+	  }
+
+	  virtual bool getIsReprocess() const
+	  {
+		  return isReprocess;
+	  }
 
          /** Returns a gnnsRinex object, adding the new data generated when
           *  calling this object.
@@ -266,6 +276,9 @@ namespace gpstk
          /// Type of result #2.
       TypeID resultType2;
 
+	   //indicates, if CS marker will has to only reset CS flags for REJECTED satellites(SatStaatus==RelectedByCsCatcher) 
+       // false by default
+	  bool isReprocess;
 
          /** Maximum interval of time allowed between two successive
           *  epochs, in seconds.

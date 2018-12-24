@@ -68,7 +68,7 @@ namespace gpstk
                                  const double& dtMax,
                                  const bool& use )
       : obsType(TypeID::LI), lliType1(TypeID::LLI1), lliType2(TypeID::LLI2),
-        resultType1(TypeID::CSL1), resultType2(TypeID::CSL2), useLLI(use), useEpochFlag(false)
+        resultType1(TypeID::CSL1), resultType2(TypeID::CSL2), useLLI(use), useEpochFlag(false), isReprocess(false)
    {
       setDeltaTMax(dtMax);
       setSatThreshold(satThr);
@@ -144,6 +144,7 @@ namespace gpstk
                  }
              }
 
+
              // If everything is OK, then get the new values inside the
              // structure. This way of computing it allows concatenation of
              // several different cycle slip detectors
@@ -154,12 +155,21 @@ namespace gpstk
                                          value1,
                                          lli1,
                                          lli2);
-
+			 if (isReprocess)
+			 {
+				 
+				 auto csst = it->second->get_value().find(TypeID::satStatus);
+				 if (csst != it->second->get_value().end()
+					 && csst->second != SatUsedStatus::RejectedByCsCatcher)
+					 continue;
+			 }
              it->second->get_value()[resultType1] += res;
 
-             if (res > 0)
-                 rejTableItem.insert(it->first);
-
+			 if (res > 0)
+			 {
+				 rejTableItem.insert(it->first);
+				 it->second->get_value()[TypeID::satStatus] = SatUsedStatus::RejectedByCsCatcher;
+			 }
              if (it->second->get_value()[resultType1] > 1.0)
                  it->second->get_value()[resultType1] = 1.0;
              
@@ -269,7 +279,7 @@ namespace gpstk
        * \warning You must not set a value under minBufferSize, which
        * usually is 5.
        */
-   LICSDetector2& LICSDetector2::setMaxBufferSize(const int& maxBufSize)
+   LICSDetector2& LICSDetector2::setMaxBufferSize(int maxBufSize)
    {
          // Don't allow buffer sizes less than minBufferSize
       if (maxBufSize >= minBufferSize)

@@ -144,7 +144,7 @@ namespace gpstk
                         lliType2(TypeID::LLI2), resultType1(TypeID::CSL1),
                         resultType2(TypeID::CSL2), deltaTMax(61.0),
                         satThreshold(0.08), timeConst(60.0), useLLI(true),
-                        useEpochFlag(false), maxBufferSize(12)
+                        useEpochFlag(false), maxBufferSize(12),isReprocess(false)
       { };
 
 
@@ -237,7 +237,7 @@ namespace gpstk
           *
           * @param use   Boolean value enabling/disabling LLI check
           */
-      virtual LICSDetector2& setUseLLI(const bool& use)
+      virtual LICSDetector2& setUseLLI(bool use)
       { useLLI = use; return (*this); };
 
         /** Method to set whether the epoch flag indexes will be used as an aid
@@ -245,7 +245,7 @@ namespace gpstk
         *
         * @param use   Boolean value enabling/disabling epoch flag check
         */
-      virtual LICSDetector2& setUseEpochFlag(const bool& use)
+      virtual LICSDetector2& setUseEpochFlag(bool use)
       {
           useEpochFlag = use; return (*this);
       };
@@ -263,17 +263,18 @@ namespace gpstk
           * \warning You must not set a value under minBufferSize, which
           * usually is 5.
           */
-      virtual LICSDetector2& setMaxBufferSize(const int& maxBufSize);
+      virtual LICSDetector2& setMaxBufferSize( int maxBufSize);
 
+	  virtual LICSDetector2& setIsReprocess(bool isrepro)
+	  {
+		  isReprocess = isrepro;
+		  return *this;
+	  }
 
-         /** Returns a gnnsSatTypeValue object, adding the new data generated
-          *  when calling this object.
-          *
-          * @param gData    Data object holding the data.
-          */
-      //virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
-      //   throw(ProcessingException)
-      //{ Process(gData.header.epoch, gData.body); return gData; };
+	  virtual bool getIsReprocess() const
+	  {
+		  return isReprocess;
+	  }
 
 
          /** Returns a gnnsRinex object, adding the new data generated when
@@ -315,6 +316,9 @@ namespace gpstk
          /// Type of result #2.
       TypeID resultType2;
 
+	   //indicates, if CS marker will has to only reset CS flags for REJECTED satellites(SatStaatus==RelectedByCsCatcher) 
+	   // false by default
+	  bool isReprocess;
 
          /// Maximum interval of time allowed between two successive epochs,
          /// in seconds.

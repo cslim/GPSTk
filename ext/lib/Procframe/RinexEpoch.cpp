@@ -25,6 +25,26 @@ namespace gpstk
         ~RinexEpoch()
     { }
 
+	IRinex& RinexEpoch::
+		operator=(const RinexEpoch & other)
+	{
+		this->rinex = other.rinex;
+		resetCurrData();
+
+		return	*this;
+	}
+
+	IRinex& RinexEpoch::
+		operator=(const IRinex & other)
+	{
+		const RinexEpoch& ep = dynamic_cast<const RinexEpoch&>(other);
+
+		this->rinex = ep.rinex;
+		resetCurrData();
+
+		return	*this;
+	}
+
     void RinexEpoch::
         resetCurrData()
     {

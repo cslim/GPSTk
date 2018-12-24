@@ -94,6 +94,12 @@ namespace gpstk
    {
    public:
 
+	   enum SatUsedStatus
+	   {
+		   RejectedByCsCatcher = -1,
+		   NotUsedInPVT = 0,
+		   UsedInPVT = 1
+	   };
 
          /** Abstract method. It returns a gnnsSatTypeValue object.
           *

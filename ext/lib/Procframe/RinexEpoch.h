@@ -21,6 +21,7 @@ namespace gpstk
 		{
 			return f.print(i);
 		}
+		virtual IRinex& operator=(const IRinex & other) { return *this; };
 
 		virtual irinex_uptr clone() const =0;
 		
@@ -51,6 +52,11 @@ namespace gpstk
         {
             return currData;
         };
+
+		virtual IRinex& operator=(const RinexEpoch & other);
+
+		virtual IRinex& operator=(const IRinex & other) override;
+
 
 		virtual irinex_uptr clone() const override
 		{

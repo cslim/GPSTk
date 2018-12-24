@@ -67,7 +67,7 @@ namespace gpstk
                                const bool& use )
       : obsType(TypeID::MWubbena), lliType1(TypeID::LLI1),
         lliType2(TypeID::LLI2), resultType1(TypeID::CSL1),
-        resultType2(TypeID::CSL2), useLLI(use),useEpochFlag(false)
+        resultType2(TypeID::CSL2), useLLI(use),useEpochFlag(false),isReprocess(false)
    {
       setDeltaTMax(dtMax);
       setMaxNumLambdas(mLambdas);
@@ -152,10 +152,22 @@ namespace gpstk
                 lli1,
                 lli2);
 
+			if (isReprocess)
+			{
+
+				auto csst = it->second->get_value().find(TypeID::satStatus);
+				if (csst != it->second->get_value().end()
+					&& csst->second != SatUsedStatus::RejectedByCsCatcher)
+					continue;
+			}
+
             it->second->get_value()[resultType1] += res;
 
-            if (res > 0)
-                rejTableItem.insert(it->first);
+			if (res > 0)
+			{
+				rejTableItem.insert(it->first);
+				it->second->get_value()[TypeID::satStatus] = SatUsedStatus::RejectedByCsCatcher;
+			}
 
             if (it->second->get_value()[resultType1] > 1.0)
                 it->second->get_value()[resultType1] = 1.0;
