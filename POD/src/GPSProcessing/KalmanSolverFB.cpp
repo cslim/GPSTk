@@ -68,10 +68,9 @@ namespace pod
         // Keep processing while 'ObsData' is not empty
         if (!(ObsData.empty()))
         {
-
-            // Get the first data epoch in 'ObsData' and process it. The
-            // result will be stored in 'gData'
-            gRin = solver.Process(*ObsData.front());
+            // Get the first data epoch in 'ObsData' and process it. 
+            // The result will be stored in 'gData'
+			gRin = ReProcessOneEpoch(*ObsData.front());
             // gData = ObsData.front();
             // Remove the first data epoch in 'ObsData', freeing some
             // memory and preparing for next epoch
@@ -84,54 +83,37 @@ namespace pod
         }
     }
 
-    void KalmanSolverFB::reProcess(int cycles)
-    {
-        // Check number of cycles. The minimum allowed is "1".
-        if (cycles < 1)
-        {
-            cycles = 1;
-        }
-        firstIteration = false;
-        // Backwards iteration. We must do this at least once
-        for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
-        {
-            solver.Process(**rpos);
-        }
+	void KalmanSolverFB::reProcess()
+	{
+		firstIteration = false;
+		// Backwards iteration. We must do this at least once
+		for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
+			ReProcessOneEpoch(**rpos);
 
-        // If 'cycles > 1', let's do the other iterations
-        for (int i = 0; i < (cycles - 1); i++)
-        {
-            // Forwards iteration
-            for (auto pos = ObsData.begin(); pos != ObsData.end(); ++pos)
-                solver.Process(**pos);
+		for (size_t cycle = 0; cycle < cyclesNumber - 1; cycle++)
+		{
+			for (auto &it : ObsData)
+			{
+				checkLimits(*it, cycle);
+				ReProcessOneEpoch(*it);
+			}
 
-            // Backwards iteration.
-            for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
-				solver.Process(**rpos);
+			for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
+				ReProcessOneEpoch(**rpos);
+		}
+	}
 
-        }  // End of 'for (int i=0; i<(cycles-1), i++)'
-        return;
-    }
-    void KalmanSolverFB::reProcess()
-    {
-        firstIteration = false;
-        // Backwards iteration. We must do this at least once
-        for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
-            solver.Process(**rpos);
+	gpstk::IRinex & KalmanSolverFB::ReProcessOneEpoch(gpstk::IRinex & gRin)
+	{
+		usedSvMarker.keepOnlyUsed(gRin.getBody());
+		usedSvMarker.CleanSatArcFlags(gRin.getBody());
+		usedSvMarker.CleanScFlags(gRin.getBody());
 
-        for (size_t cycle = 0; cycle < cyclesNumber; cycle++)
-        {
-            for (auto &it : ObsData)
-            {
-                checkLimits(*it, cycle);
-                solver.Process(*it);
-            }
+		gRin >> reProcList;
+		return	solver.Process(gRin);
+	}
 
-            for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
-                solver.Process(**rpos);
-        }
-    }
-    KalmanSolverFB& KalmanSolverFB::setLimits(const std::list<double>& codeLims, const std::list<double>& phaseLims)
+	KalmanSolverFB& KalmanSolverFB::setLimits(const std::list<double>& codeLims, const std::list<double>& phaseLims)
     {
         size_t i = 0;
         tresholds.codeLimits.resize(codeLims.size());

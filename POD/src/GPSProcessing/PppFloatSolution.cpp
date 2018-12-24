@@ -37,6 +37,8 @@
 #include"IonoStochasticModel.h"
 #include"KalmanSolverFB.h"
 #include"PrefitResCatcher.h"
+#include"UsedInPvtMarker.hpp"
+
 #include"WinUtils.h"
 
 using namespace std;
@@ -147,12 +149,16 @@ namespace pod
         linearIonoFree.add(make_unique<PCCombimnation>());
         linearIonoFree.add(make_unique<LCCombimnation>());
 
+		UsedInPvtMarker useMarker;
         KalmanSolver solver(Equations);
         KalmanSolverFB solverFb(Equations);
         if (forwardBackwardCycles > 0)
         {
             solverFb.setCyclesNumber(forwardBackwardCycles);
             solverFb.setLimits(confReader().getListValueAsDouble("codeLimList"), confReader().getListValueAsDouble("phaseLimList"));
+			solverFb.ReProcList().push_back(markCSLI2Rover);
+			solverFb.ReProcList().push_back(markCSMW2Rover);
+			solverFb.ReProcList().push_back(markArcRover);
         }
 
         bool firstTime = true;
@@ -231,10 +237,7 @@ namespace pod
                     continue;
                 }
                 gRin >> computeLinear;
-                gRin >> markCSLI2Rover;
-                gRin >> markCSMW2Rover;
-                //gRin >> snrCatcherL1Rover;
-                gRin >> markArcRover;
+
 
                 auto eop = data->eopStore.getEOP(MJD(t).mjd, IERSConvention::IERS2010);
                 pole.setXY(eop.xp, eop.yp);
@@ -254,6 +257,13 @@ namespace pod
                 gRin >> linearIonoFree;
                 gRin >> oMinusC;
                 gRin >> resCatcher;
+
+				gRin >> useMarker;
+				gRin >> markCSLI2Rover;
+				gRin >> markCSMW2Rover;
+				gRin >> markArcRover;
+				//gRin >> snrCatcherL1Rover;
+
 
                 DBOUT_LINE(">>" << CivilTime(gRin.getHeader().epoch).asString());
 
@@ -275,6 +285,9 @@ namespace pod
         }
         if (forwardBackwardCycles > 0)
         {
+			markCSLI2Rover.setIsReprocess(true);
+			markCSMW2Rover.setIsReprocess(true);
+
             cout << "Fw-Bw part started" << endl;
             solverFb.reProcess();
             RinexEpoch gRin;

@@ -44,6 +44,7 @@
 #include"PoleTides.hpp"
 #include"MJD.hpp"
 #include"IonexModel.hpp"
+#include"UsedInPvtMarker.hpp"
 
 #include<memory>
 
@@ -64,18 +65,14 @@ namespace pod
 
     void  PdFloatSolution::process()
     {
-        list<ProcessingClass*> plBase, plRov;
+        list<ProcessingClass*> reProcList;
         updateRequaredObs();
 
         SimpleFilter CodePhaseFilterBase(TypeIDSet{ codeL1,TypeID::P2,TypeID::L1,TypeID::L2 });
-        plBase.push_back(&CodePhaseFilterBase);
         SimpleFilter CodePhaseFilterRover(CodePhaseFilterBase);
-        plRov.push_back(&CodePhaseFilterRover);
 
         SimpleFilter SNRFilterBase(TypeID::S1, confReader().getValueAsInt("SNRmask"), DBL_MAX);
-        plBase.push_back(&SNRFilterBase);
         SimpleFilter SNRFilterRover(SNRFilterBase);
-        plRov.push_back(&SNRFilterRover);
 
         // Object to remove eclipsed satellites
         EclipsedSatFilter eclipsedSV;
@@ -91,11 +88,9 @@ namespace pod
         modelRef.setDefaultEphemeris(data->SP3EphList);
         modelRef.setDefaultObservable(codeL1);
         modelRef.setMinElev(opts().maskEl);
-        plBase.push_back(&modelRef);
         // basic model object for rover has the same settings as BasicModel for ref. station
         BasicModel modelRover(modelRef);
         modelRef.rxPos = refPos;
-        plRov.push_back(&modelRover);
         RinexEpoch gRin, gRef;
         SyncObs sync(data->getObsFiles(opts().SiteBase), gRin);
 
@@ -122,9 +117,6 @@ namespace pod
         GravitationalDelay grDelayBase(refPos);
         GravitationalDelay grDelayRover;
 
-        plBase.push_back(&grDelayBase);
-        plRov.push_back(&grDelayRover);
-
 #pragma region Catcher objects 
 
         // Objects to mark cycle slips
@@ -138,23 +130,12 @@ namespace pod
         markCSMW2Base.setMaxNumLambdas(confReader().getValueAsDouble("MWNLambdas"));
         markCSMW2Rover.setMaxNumLambdas(confReader().getValueAsDouble("MWNLambdas"));
 
-        plBase.push_back(&markCSLI2Base);
-        plBase.push_back(&markCSMW2Base);
-        plRov.push_back(&markCSLI2Rover);
-        plRov.push_back(&markCSMW2Rover);
-
 
         // check sharp SNR drops 
         SNRCatcher snrCatcherL1Base(TypeID::S1, TypeID::CSL1,901.0,5,30);
         SNRCatcher snrCatcherL1Rover(TypeID::S1, TypeID::CSL1, 901.0, 5, 30);
         PrefitResCatcher resCatcher(Equations->measTypes());
         NumSatFilter minSatFilter(desiredSlnType());
-        
-        plBase.push_back(&snrCatcherL1Base);
-
-        plRov.push_back(&snrCatcherL1Rover);
-        plRov.push_back(&resCatcher);
-        plRov.push_back(&minSatFilter);
 
         // Object to keep track of satellite arcs
         SatArcMarker markArcBase(TypeID::CSL1, true, 31.0);
@@ -178,9 +159,6 @@ namespace pod
         corrBase.setNominalPosition(refPos);
 
         CorrectObservables corrRover(data->SP3EphList);
-
-        plBase.push_back(&corrBase);
-        plRov.push_back(&corrRover);
 
         // Vector from monument to antenna ARP [UEN], in meters
         //for base
@@ -215,9 +193,6 @@ namespace pod
 
         ComputeWindUp windupBase(data->SP3EphList, refPos, opts().genericFilesDirectory + confReader().getValue("satDataFile"));
         ComputeWindUp windupRover(data->SP3EphList, refPos, opts().genericFilesDirectory + confReader().getValue("satDataFile"));
-        
-        plBase.push_back(&windupBase);
-        plRov.push_back(&windupRover);
 
         ComputeSatPCenter svPcenterBase(refPos);
         svPcenterBase.setAntexReader(antexReader);
@@ -225,15 +200,13 @@ namespace pod
         ComputeSatPCenter svPcenterRover;
         svPcenterRover.setAntexReader(antexReader);
 
-        plBase.push_back(&svPcenterBase);
-        plRov.push_back(&svPcenterRover);
-
         ProcessLinear linearIonoFree;
         linearIonoFree.add(make_unique<PCCombimnation>());
         linearIonoFree.add(make_unique<LCCombimnation>());
 
         //Compute single differences opreator
         DeltaOp delta;
+		UsedInPvtMarker useMarker;
 
         //configure single differences operator with appropriate measurements types
         TypeIDSet diffTypeSet;
@@ -412,6 +385,7 @@ namespace pod
                 gRin >> delta;
                 gRin >> resCatcher;
                 gRin >> minSatFilter;
+				gRin >> useMarker;
 
                 DBOUT_LINE(">>" << CivilTime(gRin.getHeader().epoch).asString());
                 if (forwardBackwardCycles > 0)

@@ -1,7 +1,8 @@
 #pragma once
 #include "KalmanSolver.h"
-#include"ProcessingClass.hpp"
+#include"ProcessingList.hpp"
 #include"RinexEpoch.h"
+#include"UsedInPvtMarker.hpp"
 
 namespace pod
 {
@@ -82,6 +83,26 @@ namespace pod
             return solver.isValid();
         }
 
+		virtual gpstk::ProcessingList& ReProcList()
+		{
+			return reProcList;
+		}
+
+		virtual const gpstk::ProcessingList& ReProcList() const
+		{
+			return reProcList;
+		}
+
+		virtual UsedInPvtMarker& UsedSvMarker()
+		{
+			return usedSvMarker;
+		}
+
+		virtual const UsedInPvtMarker& UsedSvMarker() const
+		{
+			return usedSvMarker;
+		}
+
         //set minimum number of satellites requared for state esimation
         virtual KalmanSolverFB& setMinSatNumber(int value) override
         {
@@ -115,13 +136,13 @@ namespace pod
         bool lastProcess(gpstk::IRinex & gRin);
 
         //Reprocess the data stored during a previous 'Process()' call.
-        void reProcess(int numCycles);
-
-        //Reprocess the data stored during a previous 'Process()' call.
         void reProcess(void);
 
         
     private:
+		
+		gpstk::IRinex & ReProcessOneEpoch(gpstk::IRinex & gRin);
+
         //This method checks the residuals and modifies 'gData' accordingly.
         void checkLimits(gpstk::IRinex& gData, size_t cycleNumber);
 
@@ -157,6 +178,12 @@ namespace pod
 
         //number of forward-backward cycles
         size_t cyclesNumber;
+
+		//
+		gpstk::ProcessingList reProcList;
+
+		//
+		UsedInPvtMarker usedSvMarker;
 
 #pragma endregion
 
