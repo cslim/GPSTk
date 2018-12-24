@@ -345,6 +345,8 @@ RELATIONAL_OPERATORS(SourceID)
 %include"SourceID.hpp"
 %include"DataHeaders.hpp"
 %include"DataStructures.hpp"
+%include"typeValueMap.hpp"
+%include"satTypeValueMap.hpp"
 %include"gnssRinex.i"
 // GNSS data structure with source and epoch as header (common indexes) and satTypeValueMap as body.
 %template(GnssDataSatTypeValue)    gpstk::gnssData<gpstk::sourceEpochHeader, std::map<gpstk::SatID, std::map<gpstk::TypeID, double>>>;
