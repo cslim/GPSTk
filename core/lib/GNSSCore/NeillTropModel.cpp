@@ -452,7 +452,14 @@ namespace gpstk
 
    }  // end NeillTropModel::wet_mapping_function()
 
-
+		/// Compute and return the tropospheric gradient mapping function
+		/// @param elevation Elevation of satellite as seen at receiver, in degrees
+   double NeillTropModel::gradient_mapping_function(double elevation) const throw(InvalidTropModel)
+   {
+	   const double  c = 0.0032;
+	   double el_rad = elevation * DEG_TO_RAD;
+	   return 1.0 / (::sin(el_rad)*::tan(el_rad) + c);
+   }
       // This method configure the model to estimate the weather using height,
       // latitude and day of year (DOY). It is called automatically when
       // setting those parameters.

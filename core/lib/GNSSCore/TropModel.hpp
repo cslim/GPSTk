@@ -170,6 +170,13 @@ namespace gpstk
       virtual double wet_mapping_function(double elevation)
          const throw(InvalidTropModel) = 0;
 
+	    /// Compute and return the tropospheric gradient mapping function
+        /// @param elevation Elevation of satellite as seen at receiver, in degrees
+	  virtual double gradient_mapping_function(double elevation)
+		  const throw(InvalidTropModel) {
+		  return .0;
+	  };
+
          /// Re-define the tropospheric model with explicit weather data.
          /// Typically called just before correction().
          /// @param T temperature in degrees Celsius
