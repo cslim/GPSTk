@@ -460,6 +460,7 @@ namespace pod
             
             Equations->measTypes().insert(TypeID::prefitC);
             Equations->measTypes().insert(TypeID::prefitL1);
+
             Equations->residTypes().insert(TypeID::postfitC);
             Equations->residTypes().insert(TypeID::postfitL1);
 
@@ -483,10 +484,11 @@ namespace pod
         //tropo
         if (opts().computeTropo)
         {
-            double qPrime = confReader().getValueAsDouble("tropoQ");
-            Equations->addEquation(make_unique<TropoEquations>(qPrime));
+            double qPrimeVert = confReader().getValueAsDouble("tropoQVertical");
+            Equations->addEquation(make_unique<TropoEquations>(qPrimeVert));
         }
-       //  Equations->addEquation(std::make_unique<IonoEquations>(confReader().getValueAsDouble("ionoQ")));
+
+        //  Equations->addEquation(std::make_unique<IonoEquations>(confReader().getValueAsDouble("ionoQ")));
         // White noise stochastic models
         auto  coord = make_unique<PositionEquations>();
 

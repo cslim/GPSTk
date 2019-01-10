@@ -152,6 +152,9 @@ namespace pod
         // Estimate zenith troposperic delay?
         bool computeTropo = false;
 
+		// Compute tropospheric delay gradient
+		bool useTropoGradient = false;
+
         // Is data relate to the spacecraft-based receiver?
         bool isSpaceborneRcv = false;
 

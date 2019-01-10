@@ -27,6 +27,7 @@
 #include"IonexModel.hpp"
 
 #include"TropoEquations.h"
+#include"TropoGradEquations.h"
 #include"ClockBiasEquations.h"
 #include"PositionEquations.h"
 #include"InterSystemBias.h"
@@ -49,9 +50,11 @@ namespace pod
     PppFloatSolution::PppFloatSolution(GnssDataStore_sptr data_ptr)
         :GnssSolution(data_ptr, 50.0)
     { }
+
     PppFloatSolution::PppFloatSolution(GnssDataStore_sptr data_ptr, double max_sigma)
         : GnssSolution(data_ptr, max_sigma)
     { }
+
     void  PppFloatSolution::process()
     {
         updateRequaredObs();
@@ -77,7 +80,7 @@ namespace pod
 
         //for rover
         NeillTropModel tropoRovPtr;
-        ComputeTropModel computeTropoRover(tropoRovPtr);
+		ComputeTropModel computeTropoRover(tropoRovPtr, true);
 
 #pragma endregion
 
@@ -341,8 +344,17 @@ namespace pod
         Equations->clearEquations();
 
 
-        double qPrime = confReader().getValueAsDouble("tropoQ");
-        Equations->addEquation(make_unique<TropoEquations>(qPrime));
+        double qPrimeVert = confReader().getValueAsDouble("tropoQVertical");
+        double qPrimeHor = confReader().getValueAsDouble("tropoQHorizontal");
+		if (opts().useTropoGradient)
+		{
+			Equations->addEquation(make_unique<TropoGradEquations>(qPrimeVert, qPrimeHor, qPrimeHor));
+		}
+		else
+		{
+			Equations->addEquation(make_unique<TropoEquations>(qPrimeVert));
+		}
+       
 
         // White noise stochastic models
         auto  coord = make_unique<PositionEquations>();

@@ -1,5 +1,6 @@
 #include"FsUtils.h"
 #include<regex>
+#include<iostream>
 
 using namespace std;
 
@@ -23,6 +24,7 @@ namespace pod
         if (!fs::exists(p))
         {
             string  message = "directory: " + dir + " doesn't exist.";
+			cerr << message << endl;
             throw std::exception(message.c_str());
         }
 

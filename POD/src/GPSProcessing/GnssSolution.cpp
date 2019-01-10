@@ -40,6 +40,7 @@ namespace pod
 
         return 0;
     }
+
     void GnssSolution::printSolution(const KalmanSolver& solver, const gpstk::CommonTime& time, GnssEpoch& gEpoch)
     {
        
@@ -54,6 +55,10 @@ namespace pod
                     gEpoch.slnData[TypeID::recCdt] = solver.getSolution(it);
                 else if (it.type == TypeID::wetMap)
                     gEpoch.slnData[TypeID::recZTropo] = solver.getSolution(it);
+				else if (it.type == TypeID::wetMapNorth)
+					gEpoch.slnData[TypeID::recTropoNorth] = solver.getSolution(it);
+				else if (it.type == TypeID::wetMapEast)
+					gEpoch.slnData[TypeID::recTropoEast] = solver.getSolution(it);
                 else
                     gEpoch.slnData[it.type] = solver.getSolution(it);
             }

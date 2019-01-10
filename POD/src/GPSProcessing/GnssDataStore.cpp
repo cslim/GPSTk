@@ -66,6 +66,8 @@ namespace pod
             opts.isSmoothCode = confReader->getValueAsBoolean("IsSmoothCode");
             
             opts.computeTropo = confReader->getValueAsBoolean("computeTropo");
+
+            opts.useTropoGradient = confReader->getValueAsBoolean("useTropoGradient");
             
             opts.maskEl = confReader->getValueAsDouble("ElMask");
             
@@ -237,7 +239,6 @@ namespace pod
         for (auto& file : files)
         {
             ionexStore.loadFile(file);
-           
         }
       
         return ionexStore.size() > 0;

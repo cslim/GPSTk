@@ -121,6 +121,7 @@ void codeSmoother(const char * iPath, int window)
 
 int main(int argc, char* argv[])
 {
+	cout << "Build: \n" << __DATE__" " << __TIME__ << endl << endl;
     //cout << CivilTime(CommonTime::BEGINNING_OF_TIME) << endl;
     //Solution sol(argv[1]);
     //sol.chekObs();
@@ -132,7 +133,7 @@ int main(int argc, char* argv[])
     //testRinParse(argv[1]);
     cout << argv[1] << endl;
 
-    //testPod(argv[1]);
+    testPod(argv[1]);
     //system("pause");
     return 0;
 }
