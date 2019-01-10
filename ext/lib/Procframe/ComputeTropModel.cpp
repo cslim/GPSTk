@@ -93,8 +93,9 @@ namespace gpstk
 
                   // Scalar to hold satellite elevation
                double elevation( (*stv).second->get_value()(TypeID::elevation) );
+               double azimuth( (*stv).second->get_value()(TypeID::azimuth) );
                double tropoCorr(0.0), dryZDelay(0.0), wetZDelay(0.0);
-               double dryMap(0.0), wetMap(0.0);
+               double dryMap(0.0), wetMap(0.0), gradientMap(0.0);
 
                try
                {
@@ -104,6 +105,7 @@ namespace gpstk
                   wetZDelay = pTropModel->wet_zenith_delay();
                   dryMap = pTropModel->dry_mapping_function(elevation);
                   wetMap = pTropModel->wet_mapping_function(elevation);
+				  gradientMap = pTropModel->gradient_mapping_function(elevation);
 
                      // Check validity
                   if( !(pTropModel->isValid()) )
@@ -113,6 +115,7 @@ namespace gpstk
                      wetZDelay = 0.0;
                      dryMap    = 0.0;
                      wetMap    = 0.0;
+					 gradientMap = 0.0;
                   }
 
                }
@@ -130,6 +133,12 @@ namespace gpstk
                (*stv).second->get_value()[TypeID::wetTropo] = wetZDelay;
                (*stv).second->get_value()[TypeID::dryMap] = dryMap;
                (*stv).second->get_value()[TypeID::wetMap] = wetMap;
+			   
+			   if (useGraients)
+			   {
+				   (*stv).second->get_value()[TypeID::wetMapNorth] = gradientMap* ::cos(azimuth);
+				   (*stv).second->get_value()[TypeID::wetMapEast] = gradientMap * ::sin(azimuth);
+			   }
 
             }
 

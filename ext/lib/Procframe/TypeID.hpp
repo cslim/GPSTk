@@ -193,6 +193,8 @@ namespace gpstk
                     dryMap,    ///< Tropospheric mapping function, dry component
                     wetTropo,  ///< Vertical tropospheric delay, wet component
                     wetMap,    ///< Tropospheric mapping function, wet component
+                    wetMapNorth, ///< Tropospheric gradient mapping function, wet component
+                    wetMapEast, ///< Tropospheric gradient mapping function, wet component
                     tropoSlant, ///< Slant tropospheric delay, total
             // Cycle slip flags
          CSL1,      ///< Cycle slip in L1
@@ -269,6 +271,8 @@ namespace gpstk
          recZTropo,  ///< full ZTD
          recZTropoWet,  ///< Wet component of ZTD
          recZTropoDry,  ///< Dry component of ZTD
+         recTropoNorth,  ///< North component of tropospheric delay gradient
+         recTropoEast,  ///< East component of tropospheric delay gradient
 
          recStDevX, ///< Receiver position, X component satndard deviation
          recStDevY, ///< Receiver position, Y component satndard deviation

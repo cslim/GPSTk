@@ -160,6 +160,8 @@ namespace gpstk
       tStrings[dryMap]     = "dryTropoMap";
       tStrings[wetTropo]   = "wetTropo";
       tStrings[wetMap]     = "wetTropoMap";
+      tStrings[wetMapNorth]= "wetTropoMap north component";
+      tStrings[wetMapEast] = "wetTropoMap east component";
       tStrings[tropoSlant] = "slantTropo";
       tStrings[iono]       = "verticalIono";
       tStrings[ionoTEC]    = "TotalElectronContent";
@@ -340,6 +342,8 @@ namespace gpstk
       tStrings[recZTropo]  = "RxZenithTropo";
       tStrings[recZTropoWet] = "RxZenithTropoWet";
       tStrings[recZTropoDry] = "RxZenithTropoDry";
+	  tStrings[recTropoNorth] = "North component of tropospheric delay gradient";
+	  tStrings[recTropoEast] = "East component of tropospheric delay gradient";
       tStrings[recStDevX]  = "Rx Position StDev X";
       tStrings[recStDevY]  = "Rx Position St.Dev. Y";
       tStrings[recStDevZ]  = "Rx Position St.Dev. Z";

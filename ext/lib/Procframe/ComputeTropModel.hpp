@@ -111,7 +111,7 @@ namespace gpstk
 
          /// Default constructor.
       ComputeTropModel()
-         : pTropModel(NULL)
+         : pTropModel(NULL), useGraients(false)
       { };
 
 
@@ -124,10 +124,19 @@ namespace gpstk
           *                      corrected from TGD effect.
           *
           */
-      ComputeTropModel(TropModel& tropoModel)
-      { pTropModel = &tropoModel; };
+	  ComputeTropModel(TropModel& tropoModel, bool useGrad = false)
+		  :useGraients(useGrad), pTropModel(&tropoModel)
+	  { };
 
+	  bool &UseGraients()
+	  {
+		  return useGraients;
+	  }
 
+	  bool UseGraients() const
+	  {
+		  return useGraients;
+	  }
          /** Returns a satTypeValueMap object, adding the new data generated
           *  when calling a modeling object.
           *
@@ -179,6 +188,8 @@ namespace gpstk
          /// Pointer to default TropModel object when working with GNSS
          /// data structures.
       TropModel *pTropModel;
+	  
+	  bool useGraients;
 
 
    }; // End of class 'ComputeTropModel'
