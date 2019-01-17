@@ -132,6 +132,7 @@ namespace pod
         corrRover.setMonument(offsetARP);
 
         Antenna roverAnt(antexReader.getAntenna(confReader().getValue("antennaModel", opts().SiteRover)));
+		corrRover.setUsePcv(confReader().getValueAsBoolean("usePCPatterns", opts().SiteRover));
         corrRover.setAntenna(roverAnt);
         corrRover.setUseAzimuth(confReader().getValueAsBoolean("useAzim", opts().SiteRover));
 
