@@ -98,47 +98,49 @@ namespace pod
             eq->updateQ(Q, i);
     }
 
-    void EquationComposer::updateW(const IRinex& gData, gpstk::Matrix<double>& weigthMatrix)
-    {
-        size_t  numsv = gData.getBody().size();
-        // Generate the appropriate weights matrix
-        // Try to extract weights from GDS
-        satTypeValueMap dummy(gData.getBody().extractTypeID(TypeID::weight));
+	void EquationComposer::updateW(const IRinex& gData, gpstk::Matrix<double>& weigthMatrix)
+	{
+		size_t  numsv = gData.getBody().size();
+		// Generate the appropriate weights matrix
+		// Try to extract weights from GDS
+		satTypeValueMap dummy(gData.getBody().extractTypeID(TypeID::weight));
 
-        //prepare identy matrix
-        weigthMatrix.resize(numMeas, numMeas, 0.0);
-        for (size_t i = 0; i < numMeas; i++)
-            weigthMatrix(i, i) = 1.0;
+		//prepare identy matrix
+		weigthMatrix.resize(numMeas, numMeas, 0.0);
+		for (size_t i = 0; i < numMeas; i++)
+			weigthMatrix(i, i) = 1.0;
 
-        // Check if weights match
-        if (dummy.numSats() == numsv)
-        {
-            auto weigths = gData.getBody().getVectorOfTypeID(TypeID::weight);
+		// Check if weights match
+		if (dummy.numSats() == numsv)
+		{
+			auto weigths = gData.getBody().getVectorOfTypeID(TypeID::weight);
+			size_t k(0);
+			for (const auto& observable : measTypes())
+			{
+				for (size_t i = 0; i < numsv; i++)
+					weigthMatrix(i + numsv * k, i + numsv * k) = weigthMatrix(i + numsv * k, i + numsv * k) * weigths(i);
+				k++;
+			}
+		}
 
-            for (size_t i = 0; i < numsv; i++)
-                weigthMatrix(i, i) = weigthMatrix(i, i) * weigths(i);
-        }
-        else
-        {
-            size_t n(0);
-            for (const auto& observable : measTypes())
-            {
-                const auto weigthFactor = weigthFactors.find(observable);
-                if (weigthFactor == weigthFactors.end())
-                {
-                    std::string msg = "Can't find weigth factor for TypeID:: " 
-                        + TypeID::tStrings[observable.type];
+		size_t n(0);
+		for (const auto& observable : measTypes())
+		{
+			const auto weigthFactor = weigthFactors.find(observable);
+			if (weigthFactor == weigthFactors.end())
+			{
+				std::string msg = "Can't find weigth factor for TypeID:: "
+					+ TypeID::tStrings[observable.type];
 
-                    InvalidRequest e(msg);
-                    GPSTK_THROW(e)
-                }
+				InvalidRequest e(msg);
+				GPSTK_THROW(e)
+			}
 
-                for (size_t i = 0; i < numsv; i++)
-                    weigthMatrix(i+ numsv*n, i+ numsv*n) *= weigthFactor->second;
-                n++;
-            }
-        }
-    }
+			for (size_t i = 0; i < numsv; i++)
+				weigthMatrix(i + numsv * n, i + numsv * n) *= weigthFactor->second;
+			n++;
+		}
+	}
 
     void EquationComposer::updateMeas(const IRinex& gData, gpstk::Vector<double>& measVector)
     {

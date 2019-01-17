@@ -76,6 +76,7 @@ namespace pod
 
         // Object to remove eclipsed satellites
         EclipsedSatFilter eclipsedSV;
+		ComputeWeightSimple computeWeightSimple(1);
 
         Triple pos;
         int i = 0;
@@ -130,9 +131,8 @@ namespace pod
         markCSMW2Base.setMaxNumLambdas(confReader().getValueAsDouble("MWNLambdas"));
         markCSMW2Rover.setMaxNumLambdas(confReader().getValueAsDouble("MWNLambdas"));
 
-
         // check sharp SNR drops 
-        SNRCatcher snrCatcherL1Base(TypeID::S1, TypeID::CSL1,901.0,5,30);
+        SNRCatcher snrCatcherL1Base(TypeID::S1, TypeID::CSL1, 901.0, 5, 30);
         SNRCatcher snrCatcherL1Rover(TypeID::S1, TypeID::CSL1, 901.0, 5, 30);
         PrefitResCatcher resCatcher(Equations->measTypes());
         NumSatFilter minSatFilter(desiredSlnType());
@@ -176,10 +176,12 @@ namespace pod
 
         Antenna baseAnt(antexReader.getAntenna(confReader().getValue("antennaModel", opts().SiteBase)));
         corrBase.setAntenna(baseAnt);
+		corrBase.setUsePcv(confReader().getValueAsBoolean("usePCPatterns", opts().SiteBase));
         corrBase.setUseAzimuth(confReader().getValueAsBoolean("useAzim", opts().SiteBase));
 
         Antenna roverAnt(antexReader.getAntenna(confReader().getValue("antennaModel", opts().SiteRover)));
         corrRover.setAntenna(roverAnt);
+		corrRover.setUsePcv(confReader().getValueAsBoolean("usePCPatterns", opts().SiteRover));
         corrRover.setUseAzimuth(confReader().getValueAsBoolean("useAzim", opts().SiteRover));
 
 #pragma endregion
@@ -384,6 +386,8 @@ namespace pod
                 gRin >> oMinusC;
                 gRin >> delta;
                 gRin >> resCatcher;
+				gRin >> computeWeightSimple;
+
                 gRin >> minSatFilter;
 				gRin >> useMarker;
 

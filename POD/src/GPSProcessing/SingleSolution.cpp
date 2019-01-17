@@ -64,7 +64,7 @@ namespace pod
         ComputeTropModel computeTropo(*uptrTropModel);
 
         //
-        ComputeWeightSimple w;
+        ComputeWeightSimple w(2);
         KalmanSolver solver(Equations);
 
         KalmanSolverFB solverFb(Equations);

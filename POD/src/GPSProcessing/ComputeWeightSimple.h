@@ -11,10 +11,9 @@ namespace pod
 
         static const double sin0;
 
-        static const double glnSigmaFactor;
+		ComputeWeightSimple(double glnFactor = 1) :glnSigmaFactor(glnFactor)
+		{ }
 
-
-        ComputeWeightSimple();
         virtual ~ComputeWeightSimple();
 
 
@@ -23,6 +22,10 @@ namespace pod
         gpstk::SatTypePtrMap& Process(gpstk::SatTypePtrMap& gData);
 
         virtual std::string getClassName(void) const override { return "ComputeWeightSimple"; }
+
+	private:
+
+		double glnSigmaFactor;
 
     };
 }

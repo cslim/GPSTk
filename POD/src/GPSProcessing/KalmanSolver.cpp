@@ -93,10 +93,10 @@ namespace pod
                 DBOUT(it << " ");
             //DBOUT_LINE("")
             DBOUT_LINE("meas Vector\n" << setprecision(10) << measVector);
-            DBOUT_LINE("H\n" << hMatrix);
-            DBOUT_LINE("Cov\n" << covMatrix);
-            DBOUT_LINE("phiMatrix\n" << phiMatrix.diagCopy());
-            DBOUT_LINE("qMatrix\n" << qMatrix.diagCopy());
+            //DBOUT_LINE("H\n" << hMatrix);
+            //DBOUT_LINE("Cov\n" << covMatrix);
+            DBOUT_LINE("weigthMatrix\n" << weigthMatrix.diagCopy());
+            //DBOUT_LINE("qMatrix\n" << qMatrix.diagCopy());
 
 
             //prepare

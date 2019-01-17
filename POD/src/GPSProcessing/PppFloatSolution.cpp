@@ -6,6 +6,7 @@
 #include"MWCSDetector.hpp"
 #include"Decimate.hpp"
 #include"BasicModel.hpp"
+#include"ComputeWeightSimple.h"
 #include"NeillTropModel.hpp"
 #include"PowerSum.hpp"
 #include"ComputeTropModel.hpp"
@@ -136,6 +137,7 @@ namespace pod
 
 #pragma endregion
 
+		ComputeWeightSimple computeWeightSimple(2);
         // Objects to compute tidal effects
         SolidTides solid;
         PoleTides pole;
@@ -236,7 +238,6 @@ namespace pod
                 if (gRin.getBody().size() == 0)
                 {
                     printMsg(gRin.getHeader().epoch, "Rover receiver: all SV has been rejected.");
-
                     continue;
                 }
                 gRin >> computeLinear;
@@ -260,6 +261,7 @@ namespace pod
                 gRin >> linearIonoFree;
                 gRin >> oMinusC;
                 gRin >> resCatcher;
+				gRin >> computeWeightSimple;
 
 				gRin >> useMarker;
 				gRin >> markCSLI2Rover;
