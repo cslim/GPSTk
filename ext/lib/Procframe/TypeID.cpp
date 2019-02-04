@@ -544,6 +544,11 @@ namespace gpstk
          if(rot == RinexObsHeader::L5) return TypeID::L5;
          if(rot == RinexObsHeader::D5) return TypeID::D5;
          if(rot == RinexObsHeader::S5) return TypeID::S5;
+
+		 if (rot == RinexObsHeader::C6) return TypeID::C6;
+		 if (rot == RinexObsHeader::L6) return TypeID::L6;
+		 if (rot == RinexObsHeader::D6) return TypeID::D6;
+		 if (rot == RinexObsHeader::S6) return TypeID::S6;
       }
       else if(sat.system==SatID::systemGlonass)
       {
@@ -829,6 +834,13 @@ namespace gpstk
 			   if (roi.type == ObsID::otPhase) return TypeID::L5;
 			   if (roi.type == ObsID::otDoppler) return TypeID::D5;
 			   if (roi.type == ObsID::otSNR) return TypeID::S5;
+		   }
+		   else if (roi.band == ObsID::cbE6)
+		   {
+			   if (roi.type == ObsID::otRange) return TypeID::C6;
+			   if (roi.type == ObsID::otPhase) return TypeID::L6;
+			   if (roi.type == ObsID::otDoppler) return TypeID::D6;
+			   if (roi.type == ObsID::otSNR) return TypeID::S6;
 		   }
 	   }
 
