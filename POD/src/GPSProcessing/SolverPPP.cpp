@@ -312,75 +312,58 @@ namespace pod
 
   
     /// update transition (Phi) and process noise (Q) matrices
-    void SolverPPP::updateMatrices(Matrix<double> & phiMatrix, Matrix<double> & qMatrix, IRinex& gData)
-    {
-        // Now, let's fill the Phi and Q matrices
-        SatID  dummySat;
+	void SolverPPP::updateMatrices(Matrix<double> & phiMatrix, Matrix<double> & qMatrix, IRinex& gData)
+	{
+		// Now, let's fill the Phi and Q matrices
+		SatID  dummySat;
 
-        // First, the troposphere
-        pTropoStoModel->Prepare(dummySat, gData);
-        phiMatrix(0, 0) = pTropoStoModel->getPhi();
-        qMatrix(0, 0) = pTropoStoModel->getQ();
+		// First, the troposphere
+		pTropoStoModel->Prepare(dummySat, gData);
+		phiMatrix(0, 0) = pTropoStoModel->getPhi();
+		qMatrix(0, 0) = pTropoStoModel->getQ();
 
-        // Second, the coordinates
-        pCoordXStoModel->Prepare(dummySat, gData);
-        phiMatrix(1, 1) = pCoordXStoModel->getPhi();
-        qMatrix(1, 1) = pCoordXStoModel->getQ();
+		// Second, the coordinates
+		pCoordXStoModel->Prepare(dummySat, gData);
+		phiMatrix(1, 1) = pCoordXStoModel->getPhi();
+		qMatrix(1, 1) = pCoordXStoModel->getQ();
 
-        pCoordYStoModel->Prepare(dummySat, gData);
-        phiMatrix(2, 2) = pCoordYStoModel->getPhi();
-        qMatrix(2, 2) = pCoordYStoModel->getQ();
+		pCoordYStoModel->Prepare(dummySat, gData);
+		phiMatrix(2, 2) = pCoordYStoModel->getPhi();
+		qMatrix(2, 2) = pCoordYStoModel->getQ();
 
-        pCoordZStoModel->Prepare(dummySat, gData);
-        phiMatrix(3, 3) = pCoordZStoModel->getPhi();
-        qMatrix(3, 3) = pCoordZStoModel->getQ();
-        
-       // int offst = 0;
-        
-        if(useAdvClkModel)
-        { 
-            advClkStoModel.Prepare(dummySat, gData);
-            auto Fi = advClkStoModel.getPhi();
-            auto Q = advClkStoModel.getQ();
-            for (size_t i = 0; i < 2; i++)
-                for (size_t j = 0; j < 2; j++)
-                { 
-                    phiMatrix(i + 4, j + 4) = Fi(i, j);
-                    qMatrix(i + 4, j + 4) = Q(i, j);
-                }
-        }
-        else
-        {
-            // Third, the receiver clock
-            pClockStoModel->Prepare(dummySat, gData);
-            phiMatrix(4, 4) = pClockStoModel->getPhi();
-            qMatrix(4, 4) = pClockStoModel->getQ();
-        }
+		pCoordZStoModel->Prepare(dummySat, gData);
+		phiMatrix(3, 3) = pCoordZStoModel->getPhi();
+		qMatrix(3, 3) = pCoordZStoModel->getQ();
 
-        if (defaultEqDef.body.find(TypeID::recISB_GLN) != defaultEqDef.body.end())
-        {
-            pInterSysBiasStoModel->Prepare(dummySat, gData);
-            phiMatrix(numVar - 1, numVar - 1) = pInterSysBiasStoModel->getPhi();
-            qMatrix(numVar - 1, numVar - 1) = pInterSysBiasStoModel->getQ();
-        }
+		// Third, the receiver clock
+		pClockStoModel->Prepare(dummySat, gData);
+		phiMatrix(4, 4) = pClockStoModel->getPhi();
+		qMatrix(4, 4) = pClockStoModel->getQ();
 
-        // Finally, the phase biases
-        int count2(numVar);    
-        for (SatIDSet::const_iterator itSat = satSet.begin();
-            itSat != satSet.end();
-            ++itSat)
-        {
+		if (defaultEqDef.body.find(TypeID::recISB_GLN) != defaultEqDef.body.end())
+		{
+			pInterSysBiasStoModel->Prepare(dummySat, gData);
+			phiMatrix(numVar - 1, numVar - 1) = pInterSysBiasStoModel->getPhi();
+			qMatrix(numVar - 1, numVar - 1) = pInterSysBiasStoModel->getQ();
+		}
 
-            // Prepare stochastic model
-            pBiasStoModel->Prepare(*itSat, gData);
+		// Finally, the phase biases
+		int count2(numVar);
+		for (SatIDSet::const_iterator itSat = satSet.begin();
+			itSat != satSet.end();
+			++itSat)
+		{
 
-            // Get values into phi and q matrices
-            phiMatrix(count2, count2) = pBiasStoModel->getPhi();
-            qMatrix(count2, count2) = pBiasStoModel->getQ();
+			// Prepare stochastic model
+			pBiasStoModel->Prepare(*itSat, gData);
 
-            ++count2;
-        }
-    }
+			// Get values into phi and q matrices
+			phiMatrix(count2, count2) = pBiasStoModel->getPhi();
+			qMatrix(count2, count2) = pBiasStoModel->getQ();
+
+			++count2;
+		}
+	}
 
     void SolverPPP::updateWeightMatrix(Matrix<double> & rMatrix, IRinex& gData, int numCurrentSV)
     {

@@ -5,56 +5,66 @@ using namespace gpstk;
 namespace pod
 {
 
-    Matrix<double> AdvClockModel::getQ() const
-    {
-        double dt = isFirstTime?30.0: std::abs(currentTime - previousTime);
-        Matrix<double> res(2, 2);
+	void AdvClockModel::Prepare(gpstk::IRinex & gData)
+	{
 
-        double dt2 = dt*dt;
-        double dt3 = dt2*dt;
+		// Update previous epoch
+		setPreviousTime(currentTime);
 
-        res(0, 0) = q1*dt+q2*dt3/3.0;
-        res(0, 1) = q2*dt2 / 2.0;
-        res(1, 0) = res(0, 1);
-        res(1, 1) = q2*dt;
+		setCurrentTime(gData.getHeader().epoch);
 
-        isFirstTime = false;
-        
-        return res;
-    }
+		double d = std::abs(currentTime - previousTime);
+		dt = isFirstTime || d < DBL_EPSILON ? 30.0 : d;
+		isFirstTime = false;
+	}
 
-    Matrix<double> AdvClockModel::getPhi() const
-    {
-        double dt = isFirstTime ? 30.0 : std::abs(currentTime - previousTime);
-        Matrix<double> res(2, 2);
+	ParametersSet AdvClockModel::getParameters() const
+	{
+		return types;
+	}
 
-        res(0, 0) = 1.0;
-        res(0, 1) = dt;
-        res(1, 0) = 0;
-        res(1, 1) = 1.0;
-        
-        return res;
-    }
-    void AdvClockModel::Prepare(const CommonTime & ct)
-    {
+	void AdvClockModel::updatePhi(gpstk::Matrix<double>& Phi, int & index) const
+	{
+		Phi(index, index) = 1.0;
+		Phi(index, index + 1) = dt;
+		Phi(index + 1, index) = 0;
+		Phi(index, index) = 1.0;
+		index += 2;
+	}
 
-        // Update previous epoch
-        setPreviousTime(currentTime);
+	void AdvClockModel::updateQ(gpstk::Matrix<double>& Q, int & index) const
+	{
+		double dt2 = dt * dt;
+		double dt3 = dt2 * dt;
 
-        setCurrentTime(ct);
+		Q(index, index) = q1 * dt+ q2 * dt3 / 3.0;
+		Q(index, index + 1) = Q(index + 1, index) = q2 * dt2 / 2.0;
+		Q(index + 1, index + 1) = q2 * dt;
+		index += 2;
+	}
+	
+	void AdvClockModel::defStateAndCovariance(gpstk::Vector<double>& x, gpstk::Matrix<double>& P, int & index) const
+	{
+		x(index) = 0;
+		P(index, index) = 1e9;
+		++index;
+		x(index) = 0;
+		P(index, index) = 1e9;
+		++index;
+	}
 
-        return;
-    }
+	void AdvClockModel::updateH(const gpstk::IRinex & gData, const gpstk::TypeIDSet & types, gpstk::Matrix<double>& H, int & col_0)
+	{
+		for (size_t i = 0; i < H.rows(); i++)
+		{
+			H(i, col_0) = 1.0;
+			H(i, col_0 + 1) = dt;
+		}
+		col_0 += 2;
+	}
 
-
-    void AdvClockModel::Prepare(const SatID& sat, const IRinex& gData)
-    {
-
-        // Update previous epoch
-        setPreviousTime(currentTime);
-
-        setCurrentTime(gData.getHeader().epoch);
-
-        return;
-    }
+	int AdvClockModel::getNumUnknowns() const
+	{
+		return 2;
+	}
 }

@@ -44,14 +44,14 @@ void testRinNav(char* path)
    // nrin.getXvt(sid, t);
 }
 
-void testRinParse(char* path)
+void testRinParse(char* path1)
 {
-
+	fs::path path("D:\\_temp\\RINEX\\N183012a__.19O");
     // Create the input file stream
-    Rinex3ObsStream rin(path);
-
+	Rinex3ObsStream rin(path.string());
+	
     // Create the output file stream
-    ofstream rout("_cng2182a_.17o", ios::out);
+    ofstream rout(path.append("_"), ios::out);
     gnssRinex  gRin;
     // Read the RINEX header
     Rinex3ObsHeader head;    //RINEX header object
@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
     //Solution sol(argv[1]);
     //sol.chekObs();
     //codeSmoother(argv[1], atoi(argv[2]));
-    //testRinNav(argv[1]);
+    //testRinParse(argv[1]);
     //SQLiteAdapter:: testSQLite(argv[1], argv[2]);
     //test();
 

@@ -67,7 +67,7 @@ namespace pod
             
             opts.computeTropo = confReader->getValueAsBoolean("computeTropo");
 
-            opts.useTropoGradient = confReader->getValueAsBoolean("useTropoGradient");
+            opts.tropoModelType = (TropoModelType)confReader->getValueAsInt("tropoModelType");
             
             opts.maskEl = confReader->getValueAsDouble("ElMask");
             

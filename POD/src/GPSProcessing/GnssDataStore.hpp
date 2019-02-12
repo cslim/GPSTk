@@ -26,6 +26,12 @@ namespace pod
         L2,
         L5
     };
+	enum TropoModelType
+	{
+		Simple = 1,
+		SimpleWithGradients,
+		Advanced
+	};
 
     // desired type of GNSS solution
     enum SlnType
@@ -153,7 +159,7 @@ namespace pod
         bool computeTropo = false;
 
 		// Compute tropospheric delay gradient
-		bool useTropoGradient = false;
+		TropoModelType tropoModelType = TropoModelType::Simple;
 
         // Is data relate to the spacecraft-based receiver?
         bool isSpaceborneRcv = false;

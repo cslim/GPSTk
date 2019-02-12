@@ -29,7 +29,9 @@
 
 #include"TropoEquations.h"
 #include"TropoGradEquations.h"
+#include"TropoEquationsAdv.hpp"
 #include"ClockBiasEquations.h"
+#include"AdvClockModel.h"
 #include"PositionEquations.h"
 #include"InterSystemBias.h"
 #include"InterFrequencyBiases.h"
@@ -347,17 +349,17 @@ namespace pod
         Equations->clearEquations();
 
 
-        double qPrimeVert = confReader().getValueAsDouble("tropoQVertical");
-        double qPrimeHor = confReader().getValueAsDouble("tropoQHorizontal");
-		if (opts().useTropoGradient)
-		{
-			Equations->addEquation(make_unique<TropoGradEquations>(qPrimeVert, qPrimeHor, qPrimeHor));
-		}
-		else
-		{
+        double qPrimeVert = confReader().getValueAsDouble("tropoQ1");
+        double qPrimeHor = confReader().getValueAsDouble("tropoQ2");
+
+		if (opts().tropoModelType == TropoModelType::Simple)
 			Equations->addEquation(make_unique<TropoEquations>(qPrimeVert));
-		}
-       
+
+		else if (opts().tropoModelType == TropoModelType::SimpleWithGradients)
+			Equations->addEquation(make_unique<TropoGradEquations>(qPrimeVert, qPrimeHor, qPrimeHor));
+
+		else if (opts().tropoModelType == TropoModelType::Advanced)
+			Equations->addEquation(make_unique<TropoEquationsAdv>(qPrimeVert, qPrimeHor));
 
         // White noise stochastic models
         auto  coord = make_unique<PositionEquations>();
@@ -379,8 +381,12 @@ namespace pod
 
         //add position equations
         Equations->addEquation(std::move(coord));
-
-        Equations->addEquation(std::make_unique<ClockBiasEquations>());
+		if (confReader().getValueAsBoolean("useAdvClkModel"))
+			Equations->addEquation(std::make_unique <AdvClockModel>(
+				confReader().getValueAsDouble("q1Clk"),
+				confReader().getValueAsDouble("q2Clk")));
+		else
+			Equations->addEquation(std::make_unique<ClockBiasEquations>());
 
         if (opts().systems.size() > 1)
             Equations->addEquation(std::make_unique<InterSystemBias>());

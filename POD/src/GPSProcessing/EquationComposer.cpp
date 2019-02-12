@@ -48,12 +48,11 @@ namespace pod
             auto&& t = eq->getParameters();
             unknowns.insert(t.cbegin(), t.cend());
         }
-          
-
+        
         numUnknowns = getNumUnknowns();
 
-        // set resize design matrix 
-        H.resize(numMeas, numUnknowns, 0.0);
+        // set resize design matrix
+		H.resize(numMeas, numUnknowns, 0.0);
 
         /*
         form the design martix H:

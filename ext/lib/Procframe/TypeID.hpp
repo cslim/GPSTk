@@ -195,6 +195,7 @@ namespace gpstk
                     wetMap,    ///< Tropospheric mapping function, wet component
                     wetMapNorth, ///< Tropospheric gradient mapping function, wet component
                     wetMapEast, ///< Tropospheric gradient mapping function, wet component
+                    wetMapDot, ///< Tropospheric gradient mapping function first derivative, wet component
                     tropoSlant, ///< Slant tropospheric delay, total
             // Cycle slip flags
          CSL1,      ///< Cycle slip in L1

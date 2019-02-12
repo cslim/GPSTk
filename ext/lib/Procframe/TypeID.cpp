@@ -160,6 +160,7 @@ namespace gpstk
       tStrings[dryMap]     = "dryTropoMap";
       tStrings[wetTropo]   = "wetTropo";
       tStrings[wetMap]     = "wetTropoMap";
+      tStrings[wetMapDot]     = "wetTropoMapDot";
       tStrings[wetMapNorth]= "wetTropoMap north component";
       tStrings[wetMapEast] = "wetTropoMap east component";
       tStrings[tropoSlant] = "slantTropo";

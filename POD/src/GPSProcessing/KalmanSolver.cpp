@@ -87,18 +87,17 @@ namespace pod
                 return gData;
             }
 
-            DBOUT_LINE("--" << i << "--");
+            //DBOUT_LINE("--" << i << "--");
 
-            for (auto& it : equations->currentUnknowns())
-                DBOUT(it << " ");
+            //for (auto& it : equations->currentUnknowns())
+            //    DBOUT(it << " ");
             //DBOUT_LINE("")
-            DBOUT_LINE("meas Vector\n" << setprecision(10) << measVector);
-            //DBOUT_LINE("H\n" << hMatrix);
-            //DBOUT_LINE("Cov\n" << covMatrix);
-            DBOUT_LINE("weigthMatrix\n" << weigthMatrix.diagCopy());
-            //DBOUT_LINE("qMatrix\n" << qMatrix.diagCopy());
-
-
+           // DBOUT_LINE("meas Vector\n" << setprecision(10) << measVector);
+            DBOUT_LINE("H\n" << hMatrix);
+            DBOUT_LINE("Cov\n" << covMatrix);
+            //DBOUT_LINE("weigthMatrix\n" << weigthMatrix.diagCopy());
+			DBOUT_LINE("qMatrix\n" << qMatrix.diagCopy());
+			
             //prepare
             Matrix<double> hMatrixTr = transpose(hMatrix);
             Matrix<double> phiMatrixTr = transpose(phiMatrix);
@@ -113,21 +112,21 @@ namespace pod
             try
             {
                 Matrix<double> invPminus = inverseChol(Pminus);
-                covMatrix = inverseChol(hTrTimesW*hMatrix + invPminus);
-                solution = covMatrix * (hTrTimesW*measVector + (invPminus*xminus));
+				covMatrix = inverseChol(hTrTimesW*hMatrix + invPminus);
+				solution = covMatrix * (hTrTimesW*measVector + invPminus * xminus);
             }
             catch (const gpstk::MatrixException &e)
             {
                 std::cerr << e << endl;
 
                 Matrix<double> invPminus = inverseSVD(Pminus);
-                covMatrix = inverseSVD(hTrTimesW*hMatrix + invPminus);
-                solution = covMatrix * (hTrTimesW*measVector + (invPminus*xminus));
+				covMatrix = inverseSVD(hTrTimesW*hMatrix + invPminus);
+				solution = covMatrix * (hTrTimesW*measVector + invPminus * xminus);
             }
 
             postfitResiduals = measVector - hMatrix * solution;
-            DBOUT_LINE("solution\n" << solution);
-            DBOUT_LINE("postfit Residuals\n" << postfitResiduals);
+            //DBOUT_LINE("solution\n" << solution);
+            //DBOUT_LINE("postfit Residuals\n" << postfitResiduals);
             //DBOUT_LINE("CovPost\n" << covMatrix.diagCopy());
             //DBOUT_LINE("CorrPost\n" << corrMatrix(covMatrix));
 

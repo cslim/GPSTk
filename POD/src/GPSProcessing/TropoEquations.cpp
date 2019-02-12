@@ -21,7 +21,6 @@ namespace pod
         for (const auto& t : obsTypes)
             for (const auto& it : gData.getBody())
                 H(row++, col_0) = it.second->get_value().at(type.type);
-
         col_0++;
     }
     

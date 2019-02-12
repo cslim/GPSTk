@@ -12,8 +12,8 @@ namespace pod
             :type(gpstk::TypeID::wetMap),
             pStochasticModel(std::make_unique<gpstk::RandomWalkModel>())
         {};
-        TropoEquations(double qPrime) ;
-        virtual ~TropoEquations() {};
+		TropoEquations(double qPrime);
+		virtual ~TropoEquations() {};
 
 #pragma region Inherited via EquationBase
 
@@ -23,7 +23,7 @@ namespace pod
         
         virtual  ParametersSet getParameters() const override
         {
-            return ParametersSet{ type };
+			return ParametersSet{ type };
         }
         
         virtual void updatePhi(gpstk::Matrix<double>& Phi, int & index) const override;

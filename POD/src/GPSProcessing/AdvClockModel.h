@@ -2,22 +2,36 @@
 #define POD_ADV_CLOCK_MODEL_H
 
 #include"StochasticModel.hpp"
-#include"CommonTime.hpp"
+#include"EquationBase.h"
 
 namespace pod
 {
     // linear clock model 
-    class AdvClockModel
+    class AdvClockModel: public EquationBase
     {
     public:
-        AdvClockModel() : q1(1e-29), q2(1e-30), previousTime(gpstk::CommonTime::BEGINNING_OF_TIME),
-            currentTime(gpstk::CommonTime::END_OF_TIME) {};
+        AdvClockModel() :
+			q1(1e-29), q2(1e-30),
+			previousTime(gpstk::CommonTime::BEGINNING_OF_TIME),
+            currentTime(gpstk::CommonTime::END_OF_TIME),
+			types(ParametersSet{FilterParameter(gpstk::TypeID::recCdt),FilterParameter(gpstk::TypeID::recCdtdot) }),
+			isFirstTime(true), dt(DBL_MAX)
+		{};
 
         AdvClockModel(double q1_, double q2_) :
-            q1(q1_), q2(q2_), previousTime(gpstk::CommonTime::BEGINNING_OF_TIME), currentTime(gpstk::CommonTime::END_OF_TIME) {};
+            q1(q1_), q2(q2_),
+			previousTime(gpstk::CommonTime::BEGINNING_OF_TIME), 
+			currentTime(gpstk::CommonTime::END_OF_TIME),
+			types(ParametersSet{ FilterParameter(gpstk::TypeID::recCdt),FilterParameter(gpstk::TypeID::recCdtdot) }),
+			isFirstTime(true), dt(DBL_MAX)
+		{};
        
         AdvClockModel(double q1_, double q2_, const gpstk::CommonTime & t1, const gpstk::CommonTime & t2) :
-            q1(q1_), q2(q2_), previousTime(t1), currentTime(t2) {};
+            q1(q1_), q2(q2_),
+			previousTime(t1), currentTime(t2),
+			types(ParametersSet{ FilterParameter(gpstk::TypeID::recCdt),FilterParameter(gpstk::TypeID::recCdtdot) }),
+			isFirstTime(true), dt(DBL_MAX)
+		{};
 
        virtual ~AdvClockModel() {};
 
@@ -51,17 +65,29 @@ namespace pod
            q2 = q2_; return (*this);
        }
 
-       gpstk::Matrix<double> getQ() const;
+	   // Inherited via EquationBase
+	   virtual void Prepare(gpstk::IRinex & gData) override;
 
-       gpstk::Matrix<double> getPhi() const;
+	   virtual ParametersSet getParameters() const override;
 
-       void Prepare(const gpstk::CommonTime & ct);
+	   virtual void updatePhi(gpstk::Matrix<double>& Phi, int & index) const override;
 
-       void Prepare(const gpstk::SatID& sat, const gpstk::IRinex& gData);
+	   virtual void updateQ(gpstk::Matrix<double>& Q, int & index) const override;
+
+	   virtual void defStateAndCovariance(gpstk::Vector<double>& x, gpstk::Matrix<double>& P, int & index) const override;
+
+	   virtual void updateH(const gpstk::IRinex & gData, const gpstk::TypeIDSet & types, gpstk::Matrix<double>& H, int & col_0) override;
+
+	   virtual int getNumUnknowns() const override;
+
 
     private:
 
-        ///the diffusion coefficients, denoting the impact
+		ParametersSet types;
+		
+		double dt;
+        
+		///the diffusion coefficients, denoting the impact
         /// of white frequency noise
         double q1;
 
@@ -76,6 +102,8 @@ namespace pod
         gpstk::CommonTime currentTime;
 
         mutable bool isFirstTime;
-    };
+
+
+	};
 }
 #endif // !POD_ADV_CLOCK_MODEL_H
