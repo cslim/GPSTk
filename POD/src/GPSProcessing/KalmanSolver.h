@@ -82,31 +82,31 @@ namespace pod
 
         bool firstTime;
 
-        //indicate, is current filter state valid
+        // Indicator of current filter state validity
         bool isValid_;
 
-        //minimum number of satellites requared for state esimation
+        // Minimum satellites number required for state computation
         size_t minSatNumber;
 
-        //state transition matrix
+        // State transition matrix
         gpstk::Matrix<double> phiMatrix;
 
-        //process noise matrix
+        // Process noise matrix
         gpstk::Matrix<double> qMatrix;
 
-        // Geometry matrix
+        // Geometry matrix (derivative of observations wrt state)
         gpstk::Matrix<double> hMatrix;
 
         // weights matrix
         gpstk::Matrix<double> weigthMatrix;
 
-        // Measurements vector (Prefit-residuals)
+        // Measurements vector (prefit-residuals)
         gpstk::Vector<double> measVector;
 
-        //sqrt(vpv/(n-p))
+        //Weight unit error (sqrt(vpv/(n-p)))
         double sigma;
 
-        //object to prepare Matrix for filter
+        //object to prepare h, phi, q  matrices for filter
         eqComposer_sptr equations;
 
     };

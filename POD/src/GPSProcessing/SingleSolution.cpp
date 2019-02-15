@@ -118,13 +118,14 @@ namespace pod
                 gRin.keepOnlyTypeID(requireObs.getRequiredType());
 
                 //compute approximate position
-                if (firstTime)
-                {
-                    if (computeApprPos(gRin, data->SP3EphList, nominalPos))
-                        continue;
-                    cout << setprecision(10) << nominalPos << endl;
-                    firstTime = false;
-                }
+
+				if (apprPos().getPosition(gRin, nominalPos))
+					continue;
+				if (firstTime)
+				{
+					cout << setprecision(10) << nominalPos << endl;
+					firstTime = false;
+				}
 
                 //update approximate position 
                 data->ionoCorrector.setNominalPosition(nominalPos);

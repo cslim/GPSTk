@@ -155,6 +155,8 @@ namespace gpstk
       std::string getSystemName()
          throw();
 
+	  static const Position CENTER_OF_EARTH;
+
          // ----------- Part  2: member functions: tolerance ------------------
          //
          /// One millimeter tolerance.

@@ -1,5 +1,5 @@
-#ifndef POD_AUXILIARY_H
-#define POD_AUXILIARY_H
+#ifndef POD_FS_UTILS_H
+#define POD_FS_UTILS_H
 
 
 #include<string>
@@ -8,16 +8,16 @@
 
 namespace pod
 {
-    namespace fs = std::experimental::filesystem;
     class FsUtils
     {
     public:
         static void  getAllFilesInDir(const std::string &dir, std::list<std::string> &files);
-        static void  getAllFilesInDir(const std::string &dir, std::list<fs::path> &files);
+        static void  getAllFilesInDir(const std::string &dir, std::list<std::experimental::filesystem::path> &files);
 
         static void  getAllFilesInDir(const std::string &dir, const std::string &ext, std::list<std::string> &files);
-        static void  getAllFilesInDir(const std::string &dir, const std::string &ext, std::list<fs::path> &files);
+        static void  getAllFilesInDir(const std::string &dir, const std::string &ext, std::list<std::experimental::filesystem::path> &files);
     };
 }
-#endif // ! POD_AUXILIARY_H
+
+#endif // ! POD_FS_UTILS_H
 

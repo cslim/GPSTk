@@ -23,7 +23,6 @@ namespace pod
 
     protected:  void printSolution(ofstream& of, const gpstk::SolverLMS& solver, const gpstk::CommonTime& time, GnssEpoch& gEpoch) ;
 
-    protected: virtual void updateNomPos(const gpstk::CommonTime & t, gpstk::Position & pos) override;
 
 
 

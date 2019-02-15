@@ -9,6 +9,7 @@ using namespace std;
 using namespace gpstk;
 namespace pod
 {
+	namespace fs = std::experimental::filesystem;
 
     Solution::Solution(const char* path) :
         BasicFramework("pod",

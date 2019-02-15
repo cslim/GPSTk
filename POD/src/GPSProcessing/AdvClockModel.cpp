@@ -7,10 +7,8 @@ namespace pod
 
 	void AdvClockModel::Prepare(gpstk::IRinex & gData)
 	{
-
 		// Update previous epoch
 		setPreviousTime(currentTime);
-
 		setCurrentTime(gData.getHeader().epoch);
 
 		double d = std::abs(currentTime - previousTime);

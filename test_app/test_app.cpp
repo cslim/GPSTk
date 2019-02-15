@@ -1,34 +1,14 @@
-
-#include "CommonTime.hpp"
-#include "SystemTime.hpp"
-#include"CommonTime.hpp"
-#include"CivilTime.hpp"
-#include"OrbitSim.h"
-#include"SphericalHarmonicsModel.h"
-#include"Rinex3ObsStream.hpp"
-#include"Rinex3ObsData.hpp"
-#include"Rinex3EphemerisStore.hpp"
-#include"Exception.hpp"
-#include"DataStructures.hpp"
-#include"Rinex3EphemerisStore.hpp"
-
-#include "PrSmoother.h"
+#include "Rinex3EphemerisStore.hpp"
 #include"Solution.h"
 #include"Action.h"
-#include"PPPSolution.h"
-#include"SQLiteAdapter.h"
-#include"ComputeStatistic.h"
 
 #include <iostream>
 #include<filesystem>
-#include<chrono>
-#include <iostream>
-#include <iomanip>
-
 
 using namespace std;
 using namespace gpstk;
 using namespace pod;
+namespace fs = std::experimental::filesystem;
 
 void testRinNav(char* path)
 {
@@ -109,15 +89,6 @@ void testPod(char * path)
     //gMap.dump(f);
     //f.close();
 }
-
-void codeSmoother(const char * iPath, int window)
-{
-    list<TypeID> ids{ TypeID::C1,TypeID::P1,TypeID::P2 };
-    PrSmoother prsm(ids, window);
-    prsm.smooth(iPath);
-
-}
-
 
 int main(int argc, char* argv[])
 {

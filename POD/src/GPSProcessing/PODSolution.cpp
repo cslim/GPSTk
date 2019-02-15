@@ -272,7 +272,7 @@ namespace pod
             Rinex3ObsHeader roh;
             Rinex3ObsData rod;
 
-            auto it = data->apprPos.begin();
+          
             //read the header
             rin >> roh;
             gMap.header = roh;
@@ -287,8 +287,8 @@ namespace pod
 
                 // Store current epoch
                 CommonTime time(gRin.getHeader().epoch);
-
-                nominalPos = data->apprPos.at(time);
+				if (apprPos().getPosition(gRin, nominalPos))
+					continue;
 
                 ///update the nominal position in processing objects
                 XYZ2NEU baseChange(nominalPos);
@@ -422,8 +422,8 @@ namespace pod
                 time0 = time;
                 b = false;
             }
-                    
-            nominalPos = data->apprPos.at(time);
+			if (apprPos().getPosition(gRin, nominalPos))
+				continue;
             double fm = fmod(((GPSWeekSecond)time).getSOW(), outInt);
             if (fm < 0.1)
                 fbpppSolver.printSolution(outfile, time0, time, cDOP, ep, 0.0, stats, nominalPos);
@@ -506,27 +506,20 @@ namespace pod
         outfile << gEpoch.satData.size() << endl;    // Number of satellites - #12
 
     }
-    void PODSolution::updateNomPos(const CommonTime & time, Position & pos)
-    {
-        auto it_pos = data->apprPos.find(time);
-        if (it_pos != data->apprPos.end())
-            nominalPos = it_pos->second;
-    }
-
+  
     //
     void PODSolution::process()
     {
-        if (opts().isComputeApprPos)
-        {
-            PRProcess();
-        }
-        else
-        {
-            cout << "Approximate Positions loading from \n" + opts().workingDir + "\\" + data->apprPosFile + "\n... ";
+        //if (opts().isComputeApprPos)
+        //{
+        //    PRProcess();
+        //}
+        //else
+        //{
+        //    cout << "Approximate Positions loading from \n" + opts().workingDir + "\\" + data->apprPosFile + "\n... ";
 
-            data->loadApprPos();
-            cout << "\nComplete." << endl;
-        }
+        //    cout << "\nComplete." << endl;
+        //}
         try
         {
             processCore();

@@ -79,6 +79,9 @@ namespace pod
             confReader().getValueAsDouble("decimationTolerance"),
             data->SP3EphList.getInitialTime());
 
+		// Object to compute gravitational delay effects
+		GravitationalDelay grDelayRover;
+
 #pragma region troposhere modeling objects
 
         //for rover
@@ -86,11 +89,6 @@ namespace pod
 		ComputeTropModel computeTropoRover(tropoRovPtr, true);
 
 #pragma endregion
-
-        IonexModel ionoModel(nominalPos, data->ionexStore, TypeID::C1, false);
-
-        // Object to compute gravitational delay effects
-        GravitationalDelay grDelayRover;
 
 #pragma region CS detectors
 
@@ -190,7 +188,6 @@ namespace pod
             //read all epochs
             while (rin >> gRin)
             {
-
                 if (gRin.getBody().size() == 0)
                 {
                     printMsg(gRin.getHeader().epoch, "Empty epoch record in Rinex file");
@@ -198,8 +195,9 @@ namespace pod
                 }
 
                 const auto& t = gRin.getHeader().epoch;
-				bool b;
 #if _DEBUG
+				bool b;
+
 				CATCH_TIME(t, 2014, 12, 19, 0, 14, 15, b)
 					if (b)
 						DBOUT_LINE("catched")
@@ -210,24 +208,13 @@ namespace pod
                 //keep only types used for processing
                 // gRin.keepOnlyTypeID(requireObs.getRequiredType());
 
-                //compute approximate position
-                if (firstTime)
-                {
-                    /* if (computeApprPos(gRin, data->SP3EphList, nominalPos))
-                    continue;*/
-                    Triple pos;
-                    i = 0;
-                    for (auto& it : confReader().getListValueAsDouble("nominalPosition", opts().SiteRover))
-                        pos[i++] = it;
-                    nominalPos = Position(pos);
-
-                 firstTime = false;
-                }
-
+                //get approximate position
+				if (apprPos().getPosition(gRin, nominalPos))
+					continue;
+				//cout << nominalPos << endl;
                 grDelayRover.setNominalPosition(nominalPos);
 
                 tropoRovPtr.setAllParameters(t, nominalPos);
-                ionoModel.setInitialRxPosition(nominalPos);
 
                 corrRover.setNominalPosition(nominalPos);
                 windupRover.setNominalPosition(nominalPos);
@@ -300,11 +287,19 @@ namespace pod
             solverFb.reProcess();
             RinexEpoch gRin;
             cout << "Last process part started" << endl;
+
             while (solverFb.lastProcess(gRin))
             {
+				//fill GnssEpoch by IRinex object data
                 auto ep = opts().fullOutput ? GnssEpoch(gRin.getBody()) : GnssEpoch();
-                //updateNomPos(solverFB);
+				
+				//uptate nominal position
+				apprPos().getPosition(gRin, nominalPos);
+
+				//fill GnssEpoch by filter state data 
                 printSolution( solverFb, gRin.getHeader().epoch, ep);
+				
+				//add epoch to map
                 gMap.data.insert(std::make_pair(gRin.getHeader().epoch, ep));
             }
             cout << "Measurments rejected: " << solverFb.rejectedMeasurements << endl;
@@ -395,6 +390,4 @@ namespace pod
 
         forwardBackwardCycles = confReader().getValueAsInt("forwardBackwardCycles");
     }
-
-
 }

@@ -53,8 +53,6 @@ namespace pod
     {
         NeillTropModel NeillModel = solverPR->initTropoModel(nominalPos, opts().DoY);
 
-        data->apprPos.clear();
-
         cout << "solverType " << solverPR->getName() << endl;
 
         solverPR->maskEl = 5;
@@ -137,7 +135,7 @@ namespace pod
                         Xvt xvt;
                         xvt.x = Triple(solverPR->Sol(0), solverPR->Sol(1), solverPR->Sol(2));
                         xvt.clkbias = solverPR->Sol(3);
-                        data->apprPos.insert(pair<CommonTime, Xvt>(rod.time, xvt));
+                        //data->apprPos.insert(pair<CommonTime, Xvt>(rod.time, xvt));
                     }
                     else
                     {

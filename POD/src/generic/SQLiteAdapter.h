@@ -14,6 +14,7 @@ namespace pod
     public: static const unsigned  SCHEMA_VERSION;
     public: static const std::string createSchemaCommand;
     public: static const gpstk::TypeIDSet requaredTypes;
+
 #pragma endregion
 
 #pragma region Create methods
@@ -64,7 +65,7 @@ namespace pod
 
     private: void updateTransaction();
     private: void finalizeTransactionsSequence();
-    private: std::string formatTime(const gpstk::CommonTime &t);
+
 #pragma endregion
 
     public: ~SQLiteAdapter()

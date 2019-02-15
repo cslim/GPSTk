@@ -8,6 +8,8 @@ using namespace gpstk;
 
 namespace pod
 {
+	namespace fs = std::experimental::filesystem;
+
     std::map<SlnType, std::string> pod::slnType2Str;
     std::map<CarrierBand, std::string> pod::carrierBand2Str;
     GnssDataStore::Initializer::Initializer()
@@ -114,8 +116,10 @@ namespace pod
             //load clock data from RINEX clk files, if required
             if (confReader->getValueAsBoolean("UseRinexClock"))
             {
+#if !_DEBUG
                 cout << "Load Rinex clock data ... ";
                 cout << loadClocks() << endl;
+#endif
             }
 
             cout << "Load ionospheric data ... ";
@@ -127,6 +131,9 @@ namespace pod
             cout << "Load Earth orientation data... ";
             cout << loadEOPData() << endl;
 
+			cout << "Appr. position  source: ";
+			if (createPosProvider())
+				cout << IApprPosProvider::posSource2Str[apprPos->getSource()] << endl;
         }
         catch (const Exception& e)
         {
@@ -140,6 +147,7 @@ namespace pod
         }
     }
 
+	
     //
     bool GnssDataStore::loadEphemeris()
     {
@@ -268,7 +276,7 @@ namespace pod
                 if (rNavHeader.fileAgency == "AIUB")
                 {
 
-                    for (auto it : rNavHeader.commentList)
+                    for (auto&& it : rNavHeader.commentList)
                     {
                         int doy = -1, yr = -1;
                         std::cmatch res;
@@ -338,7 +346,7 @@ namespace pod
         return  i > 0;
     }
 
-    bool  GnssDataStore::loadFcn()
+    bool GnssDataStore::loadFcn()
     {
         const string glnObsExt = ".[\\d]{2}[gG]";
         list<string> files;
@@ -470,55 +478,44 @@ namespace pod
         }
     }
 
-    bool GnssDataStore::loadApprPos()
-    {
-        apprPos.clear();
-        try
-        {
-            ifstream file(opts.workingDir + "\\" + apprPosFile);
-            if (file.is_open())
-            {
-                unsigned int Y(0), m(0), d(0), D(0), M(0), S(0);
-                double sow(0.0), x(0.0), y(0.0), z(0.0), rco(0.0), dt(0);
-                int solType(0);
-                string sTS;
+	bool GnssDataStore::createPosProvider()
+	{
+		auto apprPosProvider = (IApprPosProvider::PositionSource)confReader->getValueAsInt("ApprPosProvider");
+		switch (apprPosProvider)
+		{
+		case IApprPosProvider::FromConfig:
+			apprPos = make_unique<ApprPosSimple>(getPosition(opts.SiteRover));
+			return true;
+		case IApprPosProvider::ComputeForEachEpoch:
+			apprPos = make_unique<ComputeOnePos>(SP3EphList);
+			return true;
+		case IApprPosProvider::ComputeForFirstEpoch:
+			apprPos = make_unique<ComputeOnePos>(SP3EphList);
+			return true;
+		case IApprPosProvider::LoadFromFile:
+			apprPos = make_unique<PositionFromFile>(opts.workingDir + "\\" + confReader->getValue("ApprPosFile"));
+			return true;
+		default:
+			return false;
+		}
+	}
 
-                string line;
-                while (file >> Y >> m >> d >> D >> M >> S >> sTS >> dt >> solType >> x >> y >> z >> rco)
-                {
-                    if (!solType)
-                    {
-                        CivilTime ct = CivilTime(Y, m, d, D, M, S, TimeSystem::GPS);
-                        CommonTime time = static_cast<CommonTime> (ct);
-                        Xvt xvt;
-                        xvt.x = Triple(x, y, z);
-                        xvt.clkbias = rco;
-                        apprPos.insert(pair<CommonTime, Xvt>(time, xvt));
-                    }
-                    string line;
-                    getline(file, line);
-                }
-            }
-            else
-            {
-                auto mess = "Can't load data from file: " + apprPosFile;
-                std::exception e(mess.c_str());
-                throw e;
-            }
-        }
-        catch (const std::exception& e)
-        {
-            cout << e.what() << endl;
-            throw e;
-        }
-        return true;
-    }
+	gpstk::Position GnssDataStore::getPosition(std::string siteId)
+	{
+		Position pos;
+		int i = 0;
+		for (auto& it : confReader->getListValueAsDouble("nominalPosition", opts.SiteRover))
+			pos[i++] = it;
+		return pos;
+	}
 
-    std::list<string> GnssDataStore::getObsFiles(const std::string & siteID)const
+    list<string> GnssDataStore::getObsFiles(const string & siteID)const
     {
-        std::list<string> ObsFiles;
+        list<string> ObsFiles;
         string  subdir = confReader->getValue("RinesObsDir");
         FsUtils::getAllFilesInDir(opts.workingDir + "\\" + subdir + "\\" + siteID, ObsFiles);
         return ObsFiles;
     }
+
+
 }

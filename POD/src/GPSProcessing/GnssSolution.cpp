@@ -21,26 +21,6 @@ namespace pod
 
     GnssSolution::~GnssSolution() {}
 
-    int GnssSolution::computeApprPos(
-        const gpstk::IRinex & gRin,
-        const gpstk::XvtStore<gpstk::SatID>& Eph,
-        gpstk::Position& pos)
-    {
-        auto svs = gRin.getBody().getVectorOfSatID().toStdVector();
-        auto meas = gRin.getBody().getVectorOfTypeID(codeL1).toStdVector();
-        Matrix<double> svp;
-        if (PRSolution2::PrepareAutonomousSolution(gRin.getHeader().epoch, svs, meas, Eph, svp))
-            return -1;
-       
-        Bancroft ban;
-        Vector<double> res;
-        if (ban.Compute(svp, res))
-            return -2;
-        pos = Position(res(0), res(1), res(2));
-
-        return 0;
-    }
-
     void GnssSolution::printSolution(const KalmanSolver& solver, const gpstk::CommonTime& time, GnssEpoch& gEpoch)
     {
        
@@ -69,7 +49,6 @@ namespace pod
         double stDev3D(NAN);
         if (solver.isValid())
         {
-
             newPos[0] = nominalPos.X() + solver.getSolution(FilterParameter(TypeID::dx));    // dx    - #4
             newPos[1] = nominalPos.Y() + solver.getSolution(FilterParameter(TypeID::dy));    // dy    - #5
             newPos[2] = nominalPos.Z() + solver.getSolution(FilterParameter(TypeID::dz));    // dz    - #6

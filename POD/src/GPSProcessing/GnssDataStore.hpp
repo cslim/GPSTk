@@ -10,6 +10,7 @@
 #include"ComputeIonoModel.hpp"
 #include"IonoModelStore.hpp"
 #include"IonexStore.hpp"
+#include"ApprPosProvider.hpp"
 
 #include<memory>
 #include<string>
@@ -74,7 +75,6 @@ namespace pod
 
 #pragma region Methods
 
-    public: bool loadApprPos();
     public: void checkObservable();
     public: void LoadData(const char* path);
 
@@ -89,7 +89,8 @@ namespace pod
     private: bool loadClocks();
     private: bool loadEOPData();
     private: bool loadCodeBiades();
-
+	private: bool createPosProvider();
+	private: gpstk::Position getPosition(std::string siteId);
     public: std::list<std::string> getObsFiles(const std::string & siteID) const;
 
 #pragma endregion
@@ -119,7 +120,8 @@ namespace pod
     public: std::string apprPosFile;
 
             //store of  approximate position and code clock bias 
-    public: std::map<gpstk::CommonTime, gpstk::Xvt, std::less<gpstk::CommonTime>> apprPos;
+    //public: std::map<gpstk::CommonTime, gpstk::Xvt, std::less<gpstk::CommonTime>> apprPos;
+	public: posProvider_uptr apprPos;
 
             //class to corrects observables from differential code biases
     public: gpstk::CorrectCodeBiases DCBData;
@@ -166,9 +168,6 @@ namespace pod
 
         // Day of year. Used for tropospheric model object  initialization 
         int DoY = 0;
-
-        // Compute approximate position by standalone positioning engin or import it from file
-        bool isComputeApprPos = true;
 
         // Satellite systems used for position computation 
         gpstk::SatSystSet systems;

@@ -69,6 +69,8 @@ namespace gpstk
       throw()
    { return SystemNames[system]; }
 
+   const Position Position::CENTER_OF_EARTH = Position(0.,0.,0., CoordinateSystem::Cartesian);
+
    // ----------- Part  2: tolerance -----------------------------------------
       // One millimeter tolerance.
    const double Position::ONE_MM_TOLERANCE = 0.001;
@@ -98,7 +100,7 @@ namespace gpstk
       throw()
    {
       WGS84Ellipsoid WGS84;
-      initialize(0.0,0.0,0.0,Unknown,&WGS84);
+      initialize(0.0,0.0,0.0,Cartesian,&WGS84);
    }
 
    Position::Position(const double& a,

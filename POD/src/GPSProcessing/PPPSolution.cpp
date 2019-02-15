@@ -270,7 +270,7 @@ namespace pod
 
                 /// update current time and nominal position
                 CommonTime time(gRin.getHeader().epoch);
-                updateNomPos(gRin.getHeader().epoch, nominalPos);
+                apprPos().getPosition(gRin, nominalPos);
 
                 /// compute pole tide displacment
                 auto eop = data->eopStore.getEOP(MJD(time).mjd, IERSConvention::IERS2010);
@@ -380,7 +380,7 @@ namespace pod
         {
             // update current time and nominal position
             GnssEpoch ep(gRin.getBody());
-            updateNomPos(gRin.getHeader().epoch,nominalPos);
+			apprPos().getPosition(gRin, nominalPos);
             printSolution(outfile, fbpppSolver, gRin.getHeader().epoch, ep);
             gMap.data.insert(pair<CommonTime, GnssEpoch>(gRin.getHeader().epoch, ep));
 
@@ -468,11 +468,6 @@ namespace pod
         gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recSlnType, desiredSlnType()));
 
         outfile << gEpoch.satData.size() << endl;
-    }
-
-    void PPPSolution::updateNomPos(const CommonTime& t, Position &pos)
-    {
-        //
     }
 
     void PPPSolution::process()

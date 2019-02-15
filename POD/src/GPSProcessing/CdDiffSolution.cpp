@@ -138,13 +138,15 @@ namespace pod
                 gRin.keepOnlyTypeID(requireObs.getRequiredType());
 
                 //compute approximate position
-                if (firstTime)
-                {
-                    if (computeApprPos(gRin, data->SP3EphList, nominalPos))
-                        continue;
-                    cout << "Baseline: " << setprecision(4) << (nominalPos-refPos).mag()/1000 <<" km"<< endl;
-                    firstTime = false;
-                }
+               
+					if (apprPos().getPosition(gRin, nominalPos))
+						continue;
+
+					if (firstTime)
+					{
+						cout << "Baseline: " << setprecision(4) << (nominalPos - refPos).mag() / 1000 << " km" << endl;
+						firstTime = false;
+					}
                 
                 tropoRov.setAllParameters(t, nominalPos);
                 tropoBase.setAllParameters(t, refPos);

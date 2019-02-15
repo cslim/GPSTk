@@ -1,9 +1,13 @@
 #include "SQLiteAdapter.h"
 #include<boost\format.hpp>
+#include<regex>
 #include"WinUtils.h"
+#include"StringUtils.h"
+
 using namespace std;
 using namespace gpstk;
 using boost::format;
+
 namespace pod
 {
     void SQLiteAdapter::testSQLite(const char* path2obs, const char* path2GlnNav)
@@ -185,7 +189,7 @@ namespace pod
         sqlite3_stmt *comm;
         sqlite3_prepare_v2(db, sql, -1, &comm, NULL);
         
-        string occId = formatTime(epoch.first);
+        string occId = StringUtils::formatTime(epoch.first);
         sqlite3_bind_text(comm, 1, occId.c_str(), -1, 0);
         sqlite3_bind_int(comm,  2, lastFileID);
         sqlite3_bind_text(comm, 3, "", - 1, 0);
@@ -283,7 +287,7 @@ namespace pod
         DBOUT(error);
         std::exception ex(error);
 
-       // sqlite3_free(error);
+        //sqlite3_free(error);
         throw ex;
     }
 
@@ -309,11 +313,7 @@ namespace pod
          firstTime = true;
      }
     
-     std::string SQLiteAdapter::formatTime(const CommonTime &t)
-     {
-         const char* fmt = "%Y-%02m-%02d %02H:%02M:%5.3f";
-         return CivilTime(t).printf(fmt);
-     }
+
 #pragma endregion
     const  gpstk::TypeIDSet SQLiteAdapter::requaredTypes{
          TypeID::C1 ,
@@ -323,17 +323,17 @@ namespace pod
          TypeID::L2 ,
          TypeID::S1 ,
          TypeID::LI          ,
-         TypeID::MWubbena          ,
-         TypeID::ionoL1          ,
-         //TypeID::rho             ,
-         //TypeID::dtSat           ,
-         TypeID::elevation         ,
-         TypeID::azimuth           ,
-         //TypeID::CSL1              ,
-         //TypeID::CSL2              ,
-         TypeID::satArc            ,
+         TypeID::MWubbena         ,
+         TypeID::ionoL1           ,
+         //TypeID::rho            ,
+         //TypeID::dtSat          ,
+         TypeID::elevation        ,
+         TypeID::azimuth          ,
+         //TypeID::CSL1           ,
+         //TypeID::CSL2           ,
+         TypeID::satArc           ,
          /* 
-         TypeID::prefitC           ,
+         TypeID::prefitC          ,
          TypeID::prefitL          ,
          TypeID::prefitL1         ,
   

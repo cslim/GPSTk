@@ -42,8 +42,6 @@ namespace pod
 
     protected: virtual double mapSNR(double value) { return value; };
 
-    protected: virtual void updateNomPos(const gpstk::CommonTime& time, gpstk::Position& nominalPos) = 0;
-
 #pragma endregion
 
 #pragma region Fields

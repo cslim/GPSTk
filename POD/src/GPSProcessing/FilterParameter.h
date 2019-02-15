@@ -73,9 +73,11 @@ namespace pod
         else
             return parameter1.type < parameter2.type;
     }
-    inline std::ostream& operator<<(std::ostream& os, const FilterParameter& parameter1)
+    inline std::ostream& operator<<(std::ostream& os, const FilterParameter& par)
     {
-        os << parameter1.type << ' ' << parameter1.sv ;
+		os << par.type;
+		if (par.sv.isValid())
+			os << ' ' << par.sv;
 
         return os;
     }
