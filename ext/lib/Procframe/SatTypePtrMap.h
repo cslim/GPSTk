@@ -108,6 +108,9 @@ namespace gpstk
 
         /// Modifies this object, removing this satellite.
         /// @param satellite Satellite to be removed.
+
+		SatTypePtrMap& removeSatID(int id, SatID::SatelliteSystem system);
+
 		SatTypePtrMap& removeSatID(const SatID& satellite);
 
 

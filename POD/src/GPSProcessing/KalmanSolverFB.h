@@ -115,7 +115,7 @@ namespace pod
         {
             return solver.getSolution(type);
         }
-
+ 
         //get current varince value for given filter parameter
         double getVariance(const FilterParameter& type) const override
         {
@@ -170,14 +170,14 @@ namespace pod
         //Number of measurements rejected because they were off limits.
         std::list<gpstk::irinex_uptr> ObsData;
 
-        // is current iteration first
-        bool firstIteration;
-
         //internal kalman solver object, which do main part of real work
         KalmanSolver solver;
 
         //number of forward-backward cycles
         size_t cyclesNumber;
+		
+		//current  forward-backward cycle
+        size_t currCycle;
 
 		//
 		gpstk::ProcessingList reProcList;

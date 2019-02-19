@@ -136,8 +136,8 @@ namespace gpstk
 			   
 			   if (useGraients)
 			   {
-				   (*stv).second->get_value()[TypeID::wetMapNorth] = gradientMap* ::cos(azimuth);
-				   (*stv).second->get_value()[TypeID::wetMapEast] = gradientMap * ::sin(azimuth);
+				   (*stv).second->get_value()[TypeID::wetMapNorth] = gradientMap* ::cos(azimuth*DEG_TO_RAD);
+				   (*stv).second->get_value()[TypeID::wetMapEast] = gradientMap * ::sin(azimuth*DEG_TO_RAD);
 			   }
 
             }

@@ -58,6 +58,8 @@ namespace pod
             return (this->type == parameter.type && this->sv == parameter.sv);
         }
 
+		std::string toString() const;
+
         gpstk::TypeID type;
 
         gpstk::SatID sv;

@@ -145,4 +145,29 @@ namespace gpstk
 		resetCurrData();
         return *this;
     }
+
+	RinexEpoch& RinexEpoch::
+		removeSatID(int id, SatID::SatelliteSystem system)
+	{
+		SatID sv(id, system);
+		(*this).rinex.removeSatID(sv);
+
+		return (*this);
+	}
+
+	RinexEpoch& RinexEpoch::
+		removeSatID(const SatIDSet& satSet)
+	{
+		(*this).rinex.removeSatID(satSet);
+
+		return (*this);
+	}
+
+	RinexEpoch& RinexEpoch::
+		removeSatID(const SatID & sv)
+	{
+		(*this).rinex.removeSatID(sv);
+
+		return (*this);
+	}
 }

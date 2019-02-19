@@ -92,7 +92,7 @@ void testPod(char * path)
 
 int main(int argc, char* argv[])
 {
-	cout << "Build: \n" << __DATE__" " << __TIME__ << endl << endl;
+	cout << "Build: " << __DATE__" " << __TIME__ << endl << endl;
     //cout << CivilTime(CommonTime::BEGINNING_OF_TIME) << endl;
     //Solution sol(argv[1]);
     //sol.chekObs();

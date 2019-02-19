@@ -56,8 +56,7 @@ namespace gpstk
 		virtual IRinex& operator=(const RinexEpoch & other);
 
 		virtual IRinex& operator=(const IRinex & other) override;
-
-
+		
 		virtual irinex_uptr clone() const override
 		{
 			return std::make_unique<RinexEpoch>(*this);
@@ -111,6 +110,17 @@ namespace gpstk
         RinexEpoch& keepOnlyTypeID(const TypeID& type);
 
         RinexEpoch& keepOnlyTypeID(const TypeIDSet& typeSet);
+
+
+		RinexEpoch& removeSatID(int id, SatID::SatelliteSystem system);
+
+		RinexEpoch& removeSatID(const SatID & satSet);
+
+		RinexEpoch& removeSatID(const SatIDSet& satSet);
+
+		//RinexEpoch& removeSatSyst(const SatSystSet& satSet);
+
+		//RinexEpoch& removeSatSyst(SatID::SatelliteSystem syst);
 
     protected:
         SatTypePtrMap currData;

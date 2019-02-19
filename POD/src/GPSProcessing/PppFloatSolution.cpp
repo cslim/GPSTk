@@ -188,11 +188,15 @@ namespace pod
             //read all epochs
             while (rin >> gRin)
             {
-                if (gRin.getBody().size() == 0)
-                {
-                    printMsg(gRin.getHeader().epoch, "Empty epoch record in Rinex file");
-                    continue;
-                }
+				//gRin.removeSatID(18, SatID::SatelliteSystem::systemGPS);
+				if (decimateData.check(gRin))
+					continue;
+
+				if (gRin.getBody().size() == 0)
+				{
+					printMsg(gRin.getHeader().epoch, "Empty epoch record in Rinex file");
+					continue;
+				}
 
                 const auto& t = gRin.getHeader().epoch;
 #if _DEBUG

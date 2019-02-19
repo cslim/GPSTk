@@ -54,13 +54,15 @@ namespace pod
              return *this;
         }
 
-        // get solution variance
+        // get solution 
         virtual double getSolution(const FilterParameter& type) const;
-        
+
         // get solution variance
         virtual double getVariance(const FilterParameter& type) const;
 
     protected:
+
+		int getUnknownIndex(const FilterParameter& parameter) const;
 
         //resolve carrier  phase ambiguities ot integer values
         virtual void fixAmbiguities(gpstk::IRinex& gData);

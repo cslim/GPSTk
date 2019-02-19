@@ -216,11 +216,11 @@ namespace pod
             eq->defStateAndCovariance(state, cov, i);
     }
 
-    void EquationComposer::saveResiduals(gpstk::IRinex& gData, gpstk::Vector<double>& postfitResiduals) const
+    void EquationComposer::saveResiduals(gpstk::IRinex& gData, gpstk::Vector<double>& residuals) const
     {
-        int resNum = postfitResiduals.size();
+        int resNum = residuals.size();
         int satNum = gData.getBody().size();
-        int numResTypes = (residTypes()).size();
+        int numResTypes = residTypes().size();
 
         assert(satNum * numResTypes == resNum);
 
@@ -228,7 +228,7 @@ namespace pod
         for (const auto& resType : residTypes())
             for (auto& itSat : gData.getBody())
             {
-                itSat.second->get_value()[resType] = postfitResiduals(i_res);
+                itSat.second->get_value()[resType] = residuals(i_res);
                 i_res++;
             }
     }

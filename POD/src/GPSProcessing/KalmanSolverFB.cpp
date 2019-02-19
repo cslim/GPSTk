@@ -1,5 +1,6 @@
 #include "KalmanSolverFB.h"
 #include"PowerSum.hpp"
+#include"WinUtils.h"
 
 using namespace gpstk;
 using namespace std;
@@ -25,12 +26,12 @@ namespace pod
     };
 
     KalmanSolverFB::KalmanSolverFB()
-        :firstIteration(true), processedMeasurements(0), rejectedMeasurements(0)
+        :currCycle(0), processedMeasurements(0), rejectedMeasurements(0)
     {
     }
 
     KalmanSolverFB::KalmanSolverFB(eqComposer_sptr eqs)
-        : firstIteration(true), processedMeasurements(0), rejectedMeasurements(0)
+        : currCycle(0), processedMeasurements(0), rejectedMeasurements(0)
     {
         solver = KalmanSolver(eqs);
     }
@@ -45,7 +46,7 @@ namespace pod
 
 
         // Before returning, store the results for a future iteration
-        if (firstIteration)
+        if (currCycle==0)
         {
             // Create a new gnssRinex structure with just the data we need
             //gnssRinex gBak(gData.extractTypeID(keepTypeSet));
@@ -55,7 +56,6 @@ namespace pod
 
             // Update the number of processed measurements
             processedMeasurements += gRin.getBody().numSats();
-
         }
 
         return gRin;
@@ -85,16 +85,15 @@ namespace pod
 
 	void KalmanSolverFB::reProcess()
 	{
-		firstIteration = false;
 		// Backwards iteration. We must do this at least once
 		for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
 			ReProcessOneEpoch(**rpos);
 
-		for (size_t cycle = 0; cycle < cyclesNumber - 1; cycle++)
+		for ( currCycle = 0; currCycle < cyclesNumber - 1; ++currCycle)
 		{
 			for (auto &it : ObsData)
 			{
-				checkLimits(*it, cycle);
+				
 				ReProcessOneEpoch(*it);
 			}
 
@@ -108,6 +107,7 @@ namespace pod
 		usedSvMarker.keepOnlyUsed(gRin.getBody());
 		usedSvMarker.CleanSatArcFlags(gRin.getBody());
 		usedSvMarker.CleanScFlags(gRin.getBody());
+		checkLimits(gRin, currCycle);
 
 		gRin >> reProcList;
 		return	solver.Process(gRin);
@@ -153,21 +153,26 @@ namespace pod
         SatIDSet satRejectedSet;
 
         // Let's check limits
-        for (const auto& type : solver.eqComposer().residTypes())
+        for (auto&& type : solver.eqComposer().residTypes())
         {
             double limit = getLimit(type, cycleNumber);
-            for (const auto& it : gData.getBody())
-            {
-                // Check postfit values and mark satellites as rejected
-                if (std::abs(it.second->get_value().at(type)) > limit)
-                    satRejectedSet.insert(it.first);
-
-            }
+			for (auto&& it : gData.getBody())
+			{
+				// Check postfit values and mark satellites as rejected
+				auto itRes = it.second->get_value().find(type);
+				if (itRes != it.second->get_value().end() && std::abs(itRes->second) > limit)
+				{
+					it.second->get_value().erase(type);
+					satRejectedSet.insert(it.first);
+				}
+			}
         }
+
         // Update the number of rejected measurements
         rejectedMeasurements += satRejectedSet.size();
 
         // Remove satellites with missing data
         gData.getBody().removeSatID(satRejectedSet);
+		DBOUT_LINE("rej. meas" << rejectedMeasurements)
     }
 }

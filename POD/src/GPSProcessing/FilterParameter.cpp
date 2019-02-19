@@ -41,6 +41,10 @@ namespace pod
 
         return types;
     }
-  
-
+	std::string FilterParameter::toString() const
+	{
+		std::ostringstream ss;
+		ss << *this;
+		return ss.str();
+	}
 }

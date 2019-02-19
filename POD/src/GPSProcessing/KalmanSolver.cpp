@@ -14,390 +14,382 @@ using namespace gpstk;
 namespace pod
 {
 
-    //maximum time interval (in seconds) without data
-    double KalmanSolver::maxGap = 3600.0;
+	//maximum time interval (in seconds) without data
+	double KalmanSolver::maxGap = 3600.0;
 
-   
 
-    KalmanSolver::KalmanSolver()
-        :firstTime(true), isValid_(false)
-    {}
 
-    KalmanSolver::KalmanSolver(eqComposer_sptr eqs) 
-        :firstTime(true),equations(eqs), isValid_(false)
-    {}
+	KalmanSolver::KalmanSolver()
+		:firstTime(true), isValid_(false)
+	{}
 
-    KalmanSolver::~KalmanSolver()
-    {}
+	KalmanSolver::KalmanSolver(eqComposer_sptr eqs)
+		: firstTime(true), equations(eqs), isValid_(false)
+	{}
 
-    IRinex& KalmanSolver::Process(IRinex& gData)
-    {
-        //invalidate solution
-        isValid_ = false;
+	KalmanSolver::~KalmanSolver()
+	{}
 
-        double dt = abs(t_pre - gData.getHeader().epoch);
-        t_pre = gData.getHeader().epoch;
+	IRinex& KalmanSolver::Process(IRinex& gData)
+	{
+		//invalidate solution
+		isValid_ = false;
 
-        if (dt > maxGap)
-        {
-            reset();
-            DBOUT_LINE("dt= " << dt << "->RESET")
-        }
+		double dt = abs(t_pre - gData.getHeader().epoch);
+		t_pre = gData.getHeader().epoch;
 
-        //workaround: reset PPP engine every day 
-        double  sec = gData.getHeader().epoch.getSecondOfDay();
-        if ((int)sec % 86400 == 0 && equations->getSlnType() == SlnType::PPP_Float)
-            equations->clearSvData();
+		if (dt > maxGap)
+		{
+			reset();
+			DBOUT_LINE("dt= " << dt << "->RESET")
+		}
 
-        equations->Prepare(gData);
-        Vector<double> floatSolution;
+		//workaround: reset PPP engine every day 
+		double  sec = gData.getHeader().epoch.getSecondOfDay();
+		if ((int)sec % 86400 == 0 && equations->getSlnType() == SlnType::PPP_Float)
+			equations->clearSvData();
 
-        //if number of satellies passed to processing is less than 'MIN_NUM_SV'
-        //clear all SV data except observable
-        if (gData.getBody().size() < minSatNumber)
-        {
-            equations->keepOnlySv(gData.getBody().getSatID());
+		equations->Prepare(gData);
+		Vector<double> floatSolution;
 
-            return gData;
-        }
+		//if number of satellies passed to processing is less than 'MIN_NUM_SV'
+		//clear all SV data except observable
+		if (gData.getBody().size() < minSatNumber)
+		{
+			equations->keepOnlySv(gData.getBody().getSatID());
 
-        equations->updateH(gData, hMatrix);
-        equations->updateMeas(gData, measVector);
-        equations->updateW(gData, weigthMatrix);
+			return gData;
+		}
 
-        equations->updatePhi(phiMatrix);
-        equations->updateQ(qMatrix);
+		equations->updateH(gData, hMatrix);
+		equations->updateMeas(gData, measVector);
+		equations->updateW(gData, weigthMatrix);
 
-        if (dt > maxGap)
-            equations->initKfState(solution, covMatrix);
-        else
-            equations->updateKfState(solution, covMatrix);
+		equations->updatePhi(phiMatrix);
+		equations->updateQ(qMatrix);
 
-        firstTime = false;
-       
-        for (int i = 0; i < 2; i++)
-        {
+		if (dt > maxGap)
+			equations->initKfState(solution, covMatrix);
+		else
+			equations->updateKfState(solution, covMatrix);
 
-            //if number of satellies passed to processing is less than 'MIN_NUM_SV'
-            //clear all SV data except observable
-            if (gData.getBody().size() < minSatNumber)
-            {
-                equations->keepOnlySv(gData.getBody().getSatID());
+		firstTime = false;
 
-                return gData;
-            }
+		for (int i = 0; i < 2; i++)
+		{
 
-            DBOUT_LINE("--" << i << "--");
+			//if number of satellies passed to processing is less than 'MIN_NUM_SV'
+			//clear all SV data except observable
+			if (gData.getBody().size() < minSatNumber)
+			{
+				equations->keepOnlySv(gData.getBody().getSatID());
 
-            for (auto& it : equations->currentUnknowns())
-                DBOUT(it << " ");
-            DBOUT_LINE("")
-            DBOUT_LINE("meas Vector\n" << setprecision(10) << measVector);
-            //DBOUT_LINE("H\n" << hMatrix);
-           //DBOUT_LINE("Cov\n" << covMatrix);
-            //DBOUT_LINE("weigthMatrix\n" << weigthMatrix.diagCopy());
+				return gData;
+			}
+
+			DBOUT_LINE("--" << i << "--");
+
+			//for (auto& it : equations->currentUnknowns())
+			//    DBOUT(it << " ");
+			//DBOUT_LINE("")
+		   // DBOUT_LINE("meas Vector\n" << setprecision(10) << measVector);
+		   // DBOUT_LINE("H\n" << hMatrix);
+		   //DBOUT_LINE("Cov\n" << covMatrix);
+			//DBOUT_LINE("weigthMatrix\n" << weigthMatrix.diagCopy());
 			//DBOUT_LINE("qMatrix\n" << qMatrix.diagCopy());
-			
-            //prepare
-            Matrix<double> hMatrixTr = transpose(hMatrix);
-            Matrix<double> phiMatrixTr = transpose(phiMatrix);
-            Matrix<double> hTrTimesW = hMatrixTr * weigthMatrix;
+			//DBOUT_LINE("phiMatrix\n" << phiMatrix.diagCopy());
 
-            //predict
-            Matrix<double> Pminus = phiMatrix * covMatrix*phiMatrixTr + qMatrix;
-            Vector<double> xminus = phiMatrix * solution;
+			//prepare
+			Matrix<double> hMatrixTr = transpose(hMatrix);
+			Matrix<double> phiMatrixTr = transpose(phiMatrix);
+			Matrix<double> hTrTimesW = hMatrixTr * weigthMatrix;
 
-            //DBOUT_LINE("Pminus\n" << Pminus);
-            //correct
-            try
-            {
-                Matrix<double> invPminus = inverseChol(Pminus);
+			//predict
+			Matrix<double> Pminus = phiMatrix * covMatrix*phiMatrixTr + qMatrix;
+			Vector<double> xminus = phiMatrix * solution;
+
+			//DBOUT_LINE("Pminus\n" << Pminus);
+			//correct
+			try
+			{
+				Matrix<double> invPminus = inverseChol(Pminus);
 				covMatrix = inverseChol(hTrTimesW*hMatrix + invPminus);
 				solution = covMatrix * (hTrTimesW*measVector + invPminus * xminus);
-            }
-            catch (const gpstk::MatrixException &e)
-            {
-                std::cerr << e << endl;
+			}
+			catch (const gpstk::MatrixException &e)
+			{
+				std::cerr << e << endl;
 
-                Matrix<double> invPminus = inverseSVD(Pminus);
+				Matrix<double> invPminus = inverseSVD(Pminus);
 				covMatrix = inverseSVD(hTrTimesW*hMatrix + invPminus);
 				solution = covMatrix * (hTrTimesW*measVector + invPminus * xminus);
-            }
+			}
 
-            postfitResiduals = measVector - hMatrix * solution;
-            DBOUT_LINE("solution\n" << solution);
-            DBOUT_LINE("postfit Residuals\n" << postfitResiduals);
-            //DBOUT_LINE("CovPost\n" << covMatrix.diagCopy());
-            //DBOUT_LINE("CorrPost\n" << corrMatrix(covMatrix));
+			postfitResiduals = measVector - hMatrix * solution;
+			//DBOUT_LINE("solution\n" << solution);
+			//DBOUT_LINE("postfit Residuals\n" << postfitResiduals);
+			//DBOUT_LINE("CovPost\n" << covMatrix.diagCopy());
+			//DBOUT_LINE("CorrPost\n" << corrMatrix(covMatrix));
 
-            floatSolution = solution;
+			floatSolution = solution;
 
-            fixAmbiguities(gData);
-            //storeAmbiguities(gData);
+			fixAmbiguities(gData);
+			//storeAmbiguities(gData);
 
-            auto vpv = postfitResiduals * weigthMatrix*postfitResiduals;
-            int numMeas = postfitResiduals.size();
-            int numPar = solution.size();
+			auto vpv = postfitResiduals * weigthMatrix*postfitResiduals;
+			int numMeas = postfitResiduals.size();
+			int numPar = solution.size();
 
-            //sigma = sqrt(vpv(0) / (numMeas - numPar));
-            sigma = vpv(0);
+			//sigma = sqrt(vpv(0) / (numMeas - numPar));
+			sigma = vpv(0);
 
-            if (i==0 && checkPhase(gData) == 0)
-                break;
+			if (i == 0 && checkPhase(gData) == 0)
+				break;
 			else
 				DBOUT_LINE("Catched by residuals\n")
-        }
+		}
 
-        equations->saveResiduals(gData, postfitResiduals);
+		equations->saveResiduals(gData, postfitResiduals);
 
-        equations->storeKfState(floatSolution, covMatrix);
+		equations->storeKfState(floatSolution, covMatrix);
 
-        //everything is OK => set solutiuon status to VALID
-        isValid_ = true;
-        return gData;
-    }
-    struct resid
-    {
-        resid() 
-            :type(TypeID::dummy0),sv(SatID::dummy), value(0)
-        {};
+		//everything is OK => set solutiuon status to VALID
+		isValid_ = true;
+		return gData;
+	}
+	struct resid
+	{
+		resid()
+			:type(TypeID::dummy0), sv(SatID::dummy), value(0)
+		{};
 
-        TypeID type;
-        SatID sv;
-        double value;
-    };
+		TypeID type;
+		SatID sv;
+		double value;
+	};
 
-    void removeColumns(Matrix<double>& m, std::set<int> cols)
-    {
-        int newCols = m.cols() - cols.size();
-        Matrix<double> m1(m.rows(), newCols, .0);
-        int k = 0;
+	void removeColumns(Matrix<double>& m, std::set<int> cols)
+	{
+		int newCols = m.cols() - cols.size();
+		Matrix<double> m1(m.rows(), newCols, .0);
+		int k = 0;
 
-        for (size_t i = 0; i < m.cols(); i++)
-        {
-            if (cols.find(i) != cols.end())
-                continue;
+		for (size_t i = 0; i < m.cols(); i++)
+		{
+			if (cols.find(i) != cols.end())
+				continue;
 
-            for (size_t j = 0; j < m.rows(); j++)
-                m1(j, k) = m(j, i);
-            k++;
-        }
-        m = m1;
-    }
+			for (size_t j = 0; j < m.rows(); j++)
+				m1(j, k) = m(j, i);
+			k++;
+		}
+		m = m1;
+	}
 
-    void removeRows(Matrix<double>& m, std::set<int> rows)
-    {
-        int newRows = m.rows() - rows.size();
-        Matrix<double> m1(newRows, m.cols(), .0);
-        int k = 0;
+	void removeRows(Matrix<double>& m, std::set<int> rows)
+	{
+		int newRows = m.rows() - rows.size();
+		Matrix<double> m1(newRows, m.cols(), .0);
+		int k = 0;
 
-        for (size_t i = 0; i < m.rows(); i++)
-        {
-            if (rows.find(i) != rows.end())
-                continue;
+		for (size_t i = 0; i < m.rows(); i++)
+		{
+			if (rows.find(i) != rows.end())
+				continue;
 
-            for (size_t j = 0; j < m.cols(); j++)
-                m1(k, j) = m(i, j);
-            k++;
-        }
-        m = m1;
-    }
+			for (size_t j = 0; j < m.cols(); j++)
+				m1(k, j) = m(i, j);
+			k++;
+		}
+		m = m1;
+	}
 
-    void removeElms(Vector<double>& v, std::set<int> elms)
-    {
-        int newSize = v.size() - elms.size();
-        Vector<double> v1(newSize, .0);
+	void removeElms(Vector<double>& v, std::set<int> elms)
+	{
+		int newSize = v.size() - elms.size();
+		Vector<double> v1(newSize, .0);
 
-        int k = 0;
-        for (size_t i = 0; i < v.size(); i++)
-        {
-            if (elms.find(i) != elms.end())
-                continue;
-            v1(k) = v(i);
-            k++;
-        }
-        v = v1;
-    }
+		int k = 0;
+		for (size_t i = 0; i < v.size(); i++)
+		{
+			if (elms.find(i) != elms.end())
+				continue;
+			v1(k) = v(i);
+			k++;
+		}
+		v = v1;
+	}
 
-    int KalmanSolver::checkPhase(IRinex& gData)
-    {
-        static const double codeLim(DBL_MAX);
-        static const double phaseLim(0.06);
-        static const TypeIDSet phaseTypes{ TypeID::postfitL1, TypeID::postfitL2, TypeID::postfitLC };
+	int KalmanSolver::checkPhase(IRinex& gData)
+	{
+		static const double codeLim(DBL_MAX);
+		static const double phaseLim(0.06);
+		static const TypeIDSet phaseTypes{ TypeID::postfitL1, TypeID::postfitL2, TypeID::postfitLC };
 
-        auto svSet = gData.getBody().getSatID();
-        resid maxPhaseResid;
+		auto svSet = gData.getBody().getSatID();
+		resid maxPhaseResid;
 
-        int i_res = 0;
-        for (const auto& type : equations->residTypes())
-        {
-            if (phaseTypes.find(type) == phaseTypes.end())
-            {
-                i_res += svSet.size();
-                continue;
-            }
-            for (auto& sv : svSet)
-            {
-                double vali = ::abs(postfitResiduals(i_res));
-                if (maxPhaseResid.value < vali)
-                {
-                    maxPhaseResid.value = vali;
-                    maxPhaseResid.sv = sv;
-                    maxPhaseResid.type = type;
-                }
-                i_res++;
-            }
-        }
-        if (maxPhaseResid.value < phaseLim)
-        {           
-            return 0;
-        }
-        else
-        {
-            auto dist = std::distance(svSet.begin(), svSet.find(maxPhaseResid.sv));
-            
-            std::set<int> indeces;
-            for (size_t i = 0; i < equations->residTypes().size(); i++)
-                indeces.insert(i*svSet.size() + dist);
+		int i_res = 0;
+		for (const auto& type : equations->residTypes())
+		{
+			if (phaseTypes.find(type) == phaseTypes.end())
+			{
+				i_res += svSet.size();
+				continue;
+			}
+			for (auto& sv : svSet)
+			{
+				double vali = ::abs(postfitResiduals(i_res));
+				if (maxPhaseResid.value < vali)
+				{
+					maxPhaseResid.value = vali;
+					maxPhaseResid.sv = sv;
+					maxPhaseResid.type = type;
+				}
+				i_res++;
+			}
+		}
+		if (maxPhaseResid.value < phaseLim)
+		{
+			return 0;
+		}
+		else
+		{
+			auto dist = std::distance(svSet.begin(), svSet.find(maxPhaseResid.sv));
 
-            //update H
-            removeRows(hMatrix, indeces);
-            
-            //update observations
-            removeElms(measVector, indeces);
-            
-            //update weigths
-            removeRows(weigthMatrix, indeces);
-            removeColumns(weigthMatrix, indeces);
+			std::set<int> indeces;
+			for (size_t i = 0; i < equations->residTypes().size(); i++)
+				indeces.insert(i*svSet.size() + dist);
 
-            auto ambSet = equations->currentAmb();
-            auto typeSet = FilterParameter::get_all_types(ambSet);
+			//update H
+			removeRows(hMatrix, indeces);
 
-            int corParNum = equations->getNumUnknowns() - ambSet.size();
-            
-            //update Phi and Q marices
-            for (size_t i = 0; i < typeSet.size(); i++)
-            {
-                int ind = corParNum + i * svSet.size();
-                phiMatrix(ind, ind) = 0;
-                qMatrix(ind, ind) = 4e14;
-            }
-            
-            //remove sv 
-            gData.getBody().removeSatID(maxPhaseResid.sv);
+			//update observations
+			removeElms(measVector, indeces);
 
-            return 1;
-        }
-    }
+			//update weigths
+			removeRows(weigthMatrix, indeces);
+			removeColumns(weigthMatrix, indeces);
 
-    int KalmanSolver::check(IRinex& gData)
-    {
-        Matrix<double> res(PostfitResiduals().size(), 1, 0.0);
+			auto ambSet = equations->currentAmb();
+			auto typeSet = FilterParameter::get_all_types(ambSet);
 
-        res = res.assignFrom(PostfitResiduals());
-        
-        //compute v'pv
-        auto vpv = transpose(res)*weigthMatrix*res;
+			int corParNum = equations->getNumUnknowns() - ambSet.size();
 
-        double sigma = sqrt(vpv(0,0));
+			//update Phi and Q marices
+			for (size_t i = 0; i < typeSet.size(); i++)
+			{
+				int ind = corParNum + i * svSet.size();
+				phiMatrix(ind, ind) = 0;
+				qMatrix(ind, ind) = 4e14;
+			}
 
-        double varX = getVariance(FilterParameter(TypeID::dx));     // Cov dx    - #8
-        double varY = getVariance(FilterParameter(TypeID::dy));     // Cov dy    - #9
-        double varZ = getVariance(FilterParameter(TypeID::dz));     // Cov dz    - #10
-        double stDev3D = sqrt(varX + varY + varZ);
+			//remove sv 
+			gData.getBody().removeSatID(maxPhaseResid.sv);
 
-        if (sigma / stDev3D > 3)
-        {
-            cout << "Epoch: " << CivilTime(gData.getHeader().epoch) << " catched " << endl;
-            cout << "sigma: " << sigma << " sigma: " << stDev3D << endl;
-            return 1;
-        }
-        else
-            return 0;
-    }
+			return 1;
+		}
+	}
 
-    void  KalmanSolver::fixAmbiguities(IRinex& gData)
-    {
-        if (equations->getSlnType() == SlnType::PD_Fixed && gData.getBody().size() > 5)
-        {
-            int core_num = equations->currentUnknowns().size() - equations->currentAmb().size();
+	int KalmanSolver::check(IRinex& gData)
+	{
+		Matrix<double> res(PostfitResiduals().size(), 1, 0.0);
 
-            AmbiguityHandler ar(equations->currentAmb(), solution, covMatrix, core_num);
-            ar.fixL1L2(gData);
+		res = res.assignFrom(PostfitResiduals());
 
-            for (int k = 0; k < core_num; k++)
-                solution(k) = ar.CoreParamFixed()(k);
-        }
-    }
+		//compute v'pv
+		auto vpv = transpose(res)*weigthMatrix*res;
 
-    //reject by code postfit residual 
+		double sigma = sqrt(vpv(0, 0));
+
+		double varX = getVariance(FilterParameter(TypeID::dx));     // Cov dx    - #8
+		double varY = getVariance(FilterParameter(TypeID::dy));     // Cov dy    - #9
+		double varZ = getVariance(FilterParameter(TypeID::dz));     // Cov dz    - #10
+		double stDev3D = sqrt(varX + varY + varZ);
+
+		if (sigma / stDev3D > 3)
+		{
+			cout << "Epoch: " << CivilTime(gData.getHeader().epoch) << " catched " << endl;
+			cout << "sigma: " << sigma << " sigma: " << stDev3D << endl;
+			return 1;
+		}
+		else
+			return 0;
+	}
+
+	void  KalmanSolver::fixAmbiguities(IRinex& gData)
+	{
+		if (equations->getSlnType() == SlnType::PD_Fixed && gData.getBody().size() > 5)
+		{
+			int core_num = equations->currentUnknowns().size() - equations->currentAmb().size();
+
+			AmbiguityHandler ar(equations->currentAmb(), solution, covMatrix, core_num);
+			ar.fixL1L2(gData);
+
+			for (int k = 0; k < core_num; k++)
+				solution(k) = ar.CoreParamFixed()(k);
+		}
+	}
+
+	//reject by code postfit residual 
 	IRinex& KalmanSolver::reject(IRinex& gData, const TypeIDSet&  typeIds)
-    {
+	{
 		typedef SatTypePtrMap::value_type type;
-        SatIDSet rejSat;
-        ///!!!
-        ///here we use only last type of postfit residuals, because in case of
-        ///combined code/phase measurements processing this part contans carrier phase residuals
-        //in case code/phase only processing we have only one element in @typeIds, which one will be used
-        ///!!!
-        const auto& id = typeIds.rbegin();
+		SatIDSet rejSat;
+		///!!!
+		///here we use only last type of postfit residuals, because in case of
+		///combined code/phase measurements processing this part contans carrier phase residuals
+		//in case code/phase only processing we have only one element in @typeIds, which one will be used
+		///!!!
+		const auto& id = typeIds.rbegin();
 
-        //get the sv - typeMap pair with largest residual value
+		//get the sv - typeMap pair with largest residual value
 
-        auto svWithMaxResidual = std::max_element(
-            gData.getBody().begin(), gData.getBody().end(),
-            [&](const type& it1, const type& it2)-> bool
-        {
+		auto svWithMaxResidual = std::max_element(
+			gData.getBody().begin(), gData.getBody().end(),
+			[&](const type& it1, const type& it2)-> bool
+		{
 			double val1 = ::abs(it1.second->get_value().at(*id));
-            double val2 = ::abs(it2.second->get_value().at(*id));
-            return(val1 < val2);
-        }
-        );
+			double val2 = ::abs(it2.second->get_value().at(*id));
+			return(val1 < val2);
+		}
+		);
 
-        //report detection
-        cout << "Removed SV: " << svWithMaxResidual->first;
-        cout << " with " << TypeID::tStrings[id->type] << " = ";
-        cout << svWithMaxResidual->second->get_value()[*id] << endl;
-        
-        //remove sv
-        rejSat.insert(svWithMaxResidual->first);
+		//report detection
+		cout << "Removed SV: " << svWithMaxResidual->first;
+		cout << " with " << TypeID::tStrings[id->type] << " = ";
+		cout << svWithMaxResidual->second->get_value()[*id] << endl;
 
-        gData.getBody().removeSatID(rejSat);
+		//remove sv
+		rejSat.insert(svWithMaxResidual->first);
 
-        return gData;
-    }
+		gData.getBody().removeSatID(rejSat);
 
-    double KalmanSolver::getSolution(const FilterParameter& parameter) const
-    {
-        
-        // Define counter
-        int counter(0);
+		return gData;
+	}
 
-        for (const auto& it2 : equations->currentUnknowns())
-        {
-            if (it2 == parameter)
-                return solution(counter);
-            counter++;
-        }
+	int KalmanSolver::getUnknownIndex(const FilterParameter& parameter) const
+	{
+		auto it = equations->currentUnknowns().find(parameter);
+		if (it == equations->currentUnknowns().end())
+		{
+			InvalidRequest e("Type: '" + parameter.toString() + "' not found in  current set of unknowns.");
+			GPSTK_THROW(e);
+		}
+		return std::distance(equations->currentUnknowns().begin(), it);
+	}
 
-        InvalidRequest e("Type: '" + TypeID::tStrings.at(parameter.type.type) + "' not found in  current set of unknowns.");
-        GPSTK_THROW(e);
+	double KalmanSolver::getSolution(const FilterParameter& parameter) const
+	{
+		int i = getUnknownIndex(parameter);
+		return solution(i);
 
-    }  // End of method 'SolverLMS::getSolution()'
+	}  // End of method 'SolverLMS::getSolution()'
 
-    double KalmanSolver::getVariance(const FilterParameter& parameter) const
-    {
-        int counter(0);
+	double KalmanSolver::getVariance(const FilterParameter& parameter) const
+	{
+		int i = getUnknownIndex(parameter);
+		return covMatrix(i, i);
 
-        for (const auto& it2 : equations->currentUnknowns())
-        {
-            if (it2 == parameter)
-                return covMatrix(counter, counter);
-            ++counter;
-        }
-
-        InvalidRequest e("Type: '" + TypeID::tStrings.at(parameter.type.type)+"' not found in current set of unknowns.");
-        GPSTK_THROW(e);
-
-    }  // End of method 'SolverLMS::getVariance()'
+	}  // End of method 'SolverLMS::getVariance()'
 }
