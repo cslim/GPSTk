@@ -16,8 +16,8 @@ RinexNavFilesDir = NAV
 
 #site IDs
 ##############################################################################
-SiteRover        = DRB1
-SiteBase         = DRB2
+SiteRover        = DLG1
+SiteBase         = DRD1
 
 #PROCESS SETTINGS
 ##############################################################################
@@ -26,57 +26,66 @@ SiteBase         = DRB2
 #DGNSS = 2,       ///< Code pseudoranges single differenses solution
 #PD_float = 3,    ///< Phase Differntial solution with float ambiguities 
 #PD_fixed = 4,    ///< Phase Differntial solution with fixed ambiguities 
-#PPP_float = 5,   ///< PPP with float ambiguities 
-slnType = 4
+#PPP_float = 16,  ///< PPP with float ambiguities 
+slnType = 16
+
+useC1 = true
 
 satSystems = 1 3
 carrierBands = 1 2
 
-computeTropo = TRUE
+#'computeTropo' for differeintial solutions only
+computeTropo = false 
 
-forwardBackwardCycles = 0
-phaseLimList = 0.10 0.05
-codeLimList = 10.0 5.0
-#masks
-ElMask =  15, deg
-SNRmask = 30,  dB*Hz
+UseRinexClock = TRUE
 
-calcApprPos = TRUE
-apprposfile = file
+tropoModelType = 2
+tropoQ1 = 1e-10
+tropoQ2= 1e-12
+
+# advansed clock model parameters
+useAdvClkModel = false
+q1Clk = 5e-9
+q2Clk = 5e-9
+
+computeIono = false
+
+#stochastic model for ionospheric delay  
+#white noise = 0
+#random walk = 1
+ionoModelType = 0
+
+#iono model sigma, m
+ionoSigma = 10
+
 #ionospheric correction for code pseudoranges  
 #Zero = 0,      ///< do not apply ionospheric delay correction
 #Klobuchar = 1, ///< GPS broadcast (Klobuchar) model
 #Ionex = 2,     ///< Ionospheric maps
 #DualFreq = 3   ///< Compute IF combination from C1(P1) and P2
 CodeIonoCorrType = 0
-
 # apply carrier-smoothing of code pseudoranges
 IsSmoothCode = TRUE
 #
 IsSpaceborneRcv = FALSE
-#
-#solver configurations
-#-----------------------------------------------------------------------------
+
 #Dynamic mode 
 #0 == Static
 #1 == Kinamatic
 Dynamics = 1
 
-ISBasWN = false
-ISBasWNSigma = 10000
-useC1 = TRUE
+#masks
+ElMask =  7.5, deg
+SNRmask = 29,  dB*Hz
 
-UseRinexClock = FALSE
+#fw-bw processing
+forwardBackwardCycles = 1
+phaseLimList = 0.02 
+codeLimList = 20.0 
 
-# advansed clock model parameters
-useAdvClkModel = FALSE
-q1Clk = 1e-14
-q2Clk = 1e-14
-
-tropoQ = 1e-9
-posSigma = 1000
-clkSigma = 300000
-weightFactor = 10000000
+posSigma = 10000
+clkSigma = 30000000
+weightFactor = 10000
 LISatThreshold = 0.08
 MWNLambdas = 2.0
 
@@ -84,6 +93,14 @@ MWNLambdas = 2.0
 decimationInterval = 30
 decimationTolerance = 0.1
 
+fullOutput  = false
+
+#FromConfig = 1
+#ComputeForEachEpoch = 2
+#ComputeForFirstEpoch = 3
+#LoadFromFile = 4
+ApprPosProvider = 1
+ApprPosFile = CNC9_PPP_Float.pos
 
 # all coordinates from "MOSCOW NETWORK OFFICIAL_2018_2008.xlsx"
 [DRB1]
@@ -163,11 +180,11 @@ nominalPosition = 2846195.78367 2185232.36392 5255555.83274
 #Antenna parameters
 offsetARP = 0.0 0.0 0.0   , antenna reference point offset
 antennaModel = TPSCR.G5        SCIS
-usePCPatterns = TRUE
+usePCPatterns = FALSE
 useAzim = FALSE
 
 [ODIN]
-nominalPosition = 2868618.36514 182248.34488 5244759.67924
+nominalPosition = 2868618.36514 2182248.34488 5244759.67924
 #Antenna parameters
 offsetARP = 0.0 0.0 0.0   , antenna reference point offset
 antennaModel = TPSCR.G5        NONE
@@ -227,5 +244,28 @@ nominalPosition = 2822740.42469 2204989.02651 5259902.98967
 #Antenna parameters
 offsetARP = 0.0 0.0 0.0   , antenna reference point offset
 antennaModel = TPSCR.G5        TPSH
+usePCPatterns = TRUE
+useAzim = FALSE
+
+[CNC0]
+nominalPosition = 4440526.03259 863890.32898 4481244.70038
+#Antenna parameters
+offsetARP = 0.0 0.0 0.0   , antenna reference point offset
+antennaModel = TPSPN.A5        TPSH
+usePCPatterns = TRUE
+useAzim = FALSE
+
+[CNC9]
+nominalPosition = 4440665.72479 863844.18675 4481104.38414
+#Antenna parameters
+offsetARP = 0.0 0.0 0.0   , antenna reference point offset
+antennaModel = TPSPN.A5        TPSH
+usePCPatterns = TRUE
+useAzim = FALSE
+
+[MADR]
+nominalPosition = 4849202.3940  -360328.9929  4114913.1862
+offsetARP = 0.0 0.0 0.0   , antenna reference point offset
+antennaModel = AOAD/M_T        NONE
 usePCPatterns = TRUE
 useAzim = FALSE
