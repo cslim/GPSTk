@@ -447,74 +447,72 @@ namespace gpstk
          Matrix<double> covMatrix( MT * M );
 
          // Let's try to invert MT*M   matrix
-         try
-         {
-            covMatrix = inverseChol( covMatrix );
-         }
-         catch(...)
-         {
-               // If covMatrix can't be inverted we have a serious problem
-               // with data, so reset buffer and declare cycle slip
-            LIData[sat].LIEpoch.clear();
-            LIData[sat].LIBuffer.clear();
-
-            reportCS = true;
-         }
+		 try
+		 {
+			 covMatrix = inverseChol(covMatrix);
 
 
-            // Now, compute the Vector holding the results of adjustment to
-            // second order curve
-         Vector<double> a(covMatrix * MT * y);
+			 // Now, compute the Vector holding the results of adjustment to
+			 // second order curve
+			 Vector<double> a(covMatrix * MT * y);
 
-            // The next step is to compute the maximum deviation from
-            // adjustment, in order to assess if our adjustment is too noisy
-         double maxDeltaLI(0.0);
+			 // The next step is to compute the maximum deviation from
+			 // adjustment, in order to assess if our adjustment is too noisy
+			 double maxDeltaLI(0.0);
 
-         for(size_t i=0; i<s; i++)
-         {
-               // Compute epoch difference with respect to FIRST epoch
-            double dT( LIData[sat].LIEpoch[s-1-i] - firstEpoch );
+			 for (size_t i = 0; i < s; i++)
+			 {
+				 // Compute epoch difference with respect to FIRST epoch
+				 double dT(LIData[sat].LIEpoch[s - 1 - i] - firstEpoch);
 
-               // Compute adjusted LI value
-            double LIa( a(0) + a(1)*dT + a(2)*dT*dT );
+				 // Compute adjusted LI value
+				 double LIa(a(0) + a(1)*dT + a(2)*dT*dT);
 
-               // Find maximum deviation in current data buffer
-            double deltaLI( std::abs(LIa - LIData[sat].LIBuffer[s-1-i]) );
-            if( deltaLI > maxDeltaLI )
-            {
-                maxDeltaLI = deltaLI;
-            }
-         }
+				 // Find maximum deviation in current data buffer
+				 double deltaLI(std::abs(LIa - LIData[sat].LIBuffer[s - 1 - i]));
+				 if (deltaLI > maxDeltaLI)
+				 {
+					 maxDeltaLI = deltaLI;
+				 }
+			 }
 
-            // Compute epoch difference with respect to FIRST epoch
-         double deltaT( epoch - firstEpoch );
+			 // Compute epoch difference with respect to FIRST epoch
+			 double deltaT(epoch - firstEpoch);
 
-            // Compute current adjusted LI value
-         double currentLIa( a(0) + a(1)*deltaT + a(2)*deltaT*deltaT );
+			 // Compute current adjusted LI value
+			 double currentLIa(a(0) + a(1)*deltaT + a(2)*deltaT*deltaT);
 
-            // Difference between current and adjusted LI values
-         double currentBias( std::abs( currentLIa - li ) );
+			 // Difference between current and adjusted LI values
+			 double currentBias(std::abs(currentLIa - li));
 
-            // We will continue processing only if we trust our current
-            // adjustment, i.e: it is NOT too noisy
-         if( (2.0*maxDeltaLI) < currentBias )
-         {
-               // Compute limit to declare cycle slip
-            double deltaLimit( satThreshold / ( 1.0 + ( 1.0 / std::exp(currentDeltaT/timeConst) )));
+			 // We will continue processing only if we trust our current
+			 // adjustment, i.e: it is NOT too noisy
+			 if ((2.0*maxDeltaLI) < currentBias)
+			 {
+				 // Compute limit to declare cycle slip
+				 double deltaLimit(satThreshold / (1.0 + (1.0 / std::exp(currentDeltaT / timeConst))));
 
-               // Check if current LI deviation is above deltaLimit threshold
-            if( currentBias > deltaLimit )
-            {
-                  // Reset buffer and declare cycle slip
-               LIData[sat].LIEpoch.clear();
-               LIData[sat].LIBuffer.clear();
+				 // Check if current LI deviation is above deltaLimit threshold
+				 if (currentBias > deltaLimit)
+				 {
+					 // Reset buffer and declare cycle slip
+					 LIData[sat].LIEpoch.clear();
+					 LIData[sat].LIBuffer.clear();
 
-               reportCS = true;
+					 reportCS = true;
 
-            }
+				 }
+			 }
+		 }
+		 catch(MatrixException &exc)
+		 {
+			 // If covMatrix can't be inverted we have a serious problem
+			 // with data, so reset buffer and declare cycle slip
+			 LIData[sat].LIEpoch.clear();
+			 LIData[sat].LIBuffer.clear();
 
-         }
-
+			 reportCS = true;
+		 }
       }
       else
       {

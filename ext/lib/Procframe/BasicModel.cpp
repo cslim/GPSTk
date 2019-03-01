@@ -174,6 +174,9 @@ namespace gpstk
             }
             catch(InvalidRequest& e)
             {
+#if _DEBUG
+				//std::cout << e << std::endl;
+#endif // DEBUG
 
                   // If some problem appears, then schedule this satellite
                   // for removal
