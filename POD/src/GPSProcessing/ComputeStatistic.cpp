@@ -44,6 +44,8 @@ namespace pod
                 res.push_back(resi);
             }
         }
+		goodEpochs = i;
+		totalEpochs = data.size();
 
         //calculate sum squares 
         for (auto&& it : res)

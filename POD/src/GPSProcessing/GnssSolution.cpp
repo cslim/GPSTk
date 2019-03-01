@@ -58,22 +58,18 @@ namespace pod
             double varZ = solver.getVariance(FilterParameter(TypeID::dz));     // Cov dz    - #10
             stDev3D = sqrt(varX + varY + varZ);
         }
-        int numSats = gEpoch.satData.size();
-       // int slnType = ( solver.getSigma() < getMaxSigma() && numSats >= 4) ? desiredSlnType() : 0;
-        //if (solver.getSigma() > getMaxSigma())
-        //{
-         
-       // }
+		gEpoch.slnData.insert(make_pair(TypeID::recX, newPos.X()));
+		gEpoch.slnData.insert(make_pair(TypeID::recY, newPos.Y()));
+		gEpoch.slnData.insert(make_pair(TypeID::recZ, newPos.Z()));
+		gEpoch.slnData.insert(make_pair(TypeID::recStDev3D, stDev3D));
+
+		//number of used sats = number of residuals/number of measurement types
+        int numUsedSats = solver.PostfitResiduals().size() / Equations->measTypes().size();
+		gEpoch.slnData.insert(make_pair(TypeID::recUsedSV, numUsedSats));
+
         SlnType slnType = solver.isValid() ? desiredSlnType() : SlnType::NONE_SOLUTION;
 
         gEpoch.slnData.insert(make_pair(TypeID::recSlnType, slnType));
-
-        gEpoch.slnData.insert(make_pair(TypeID::recX, newPos.X()));
-        gEpoch.slnData.insert(make_pair(TypeID::recY, newPos.Y()));
-        gEpoch.slnData.insert(make_pair(TypeID::recZ, newPos.Z()));
-
-        gEpoch.slnData.insert(make_pair(TypeID::recStDev3D, stDev3D));
-
         gEpoch.slnData.insert(make_pair(TypeID::sigma, solver.getSigma()));
 
     };

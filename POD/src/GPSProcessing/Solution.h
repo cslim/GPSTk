@@ -29,6 +29,11 @@ namespace pod
             return solver.getData();
         };
 
+		CustomSolution&  getSolver()
+		{
+			return solver;
+		};
+
     protected:
         
         GnssDataStore_sptr data;

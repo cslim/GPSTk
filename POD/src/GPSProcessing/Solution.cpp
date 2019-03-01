@@ -55,7 +55,8 @@ namespace pod
         Matrix<double> covar;
         st.compute(gMap, sln, covar);
         int summ(0);
-        double avgSvNum(0);
+        double avgSvInView(0);
+        double avgSvInUse(0);
        
         //calculate number of desired sln types
         for_each(
@@ -66,7 +67,8 @@ namespace pod
             if ((SlnType)(int)ep.second.slnData.getValue(TypeID::recSlnType) == solver.desiredSlnType())
             {
                 summ++;
-                avgSvNum += ep.second.satData.size();
+				avgSvInView += ep.second.satData.size();
+				avgSvInUse += ep.second.slnData.at(TypeID::recUsedSV);
             }
         }
         );
@@ -82,11 +84,12 @@ namespace pod
         wrt << CivilTime(gMap.getInitialTime()).printf(fmt) << sep << CivilTime(gMap.getFinalTime()).printf(fmt) << sep;
         
         //XYZ coordinates
-        for (auto x : sln)
-            wrt << std::fixed << std::setw(13) << std::setprecision(4) << std::setfill(' ') << x << sep;
+		for (auto x : sln)
+			wrt << std::fixed << std::setw(13) << std::setprecision(4) << std::setfill(' ') << x << sep;
+		wrt << solver.desiredSlnType() << sep;
         
         //number of good solutions
-        wrt << summ << sep << gMap.size() << sep << std::setprecision(1) << avgSvNum / summ << sep;
+        wrt << summ << sep << gMap.size() << sep << std::setprecision(1) << avgSvInView/ summ << sep<< avgSvInUse / summ << sep;
 
         //print rms3d
         wrt << std::fixed << std::scientific << std::setprecision(3) << std::setfill(' ') << rms3d << sep;

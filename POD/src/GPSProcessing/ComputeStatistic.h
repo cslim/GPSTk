@@ -14,7 +14,7 @@ namespace pod
         static  gpstk::Matrix<double> corrMatrix(const gpstk::Matrix<double>& covar);
 
         ComputeStatistic(SlnType st, gpstk::TypeIDSet tIDs)
-            :slnType(st), types(tIDs)
+            :slnType(st), types(tIDs), goodEpochs(0)
         {};
         ~ComputeStatistic() {};
         
@@ -30,11 +30,14 @@ namespace pod
 
         void compute(const GnssEpochMap& data, gpstk::Vector<double>& sln, gpstk::Matrix<double>& cov);
 
+		int goodEpochs;
+		int totalEpochs;
 
     private:
 
         SlnType slnType;
         gpstk::TypeIDSet types;
+
     };
 }
 

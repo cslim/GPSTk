@@ -15,9 +15,7 @@ namespace pod
 {
 
 	//maximum time interval (in seconds) without data
-	double KalmanSolver::maxGap = 3600.0;
-
-
+	double KalmanSolver::maxGap = 500.;
 
 	KalmanSolver::KalmanSolver()
 		:firstTime(true), isValid_(false)
@@ -43,7 +41,6 @@ namespace pod
 			reset();
 			DBOUT_LINE("dt= " << dt << "->RESET")
 		}
-
 		//workaround: reset PPP engine every day 
 		double  sec = gData.getHeader().epoch.getSecondOfDay();
 		if ((int)sec % 86400 == 0 && equations->getSlnType() == SlnType::PPP_Float)
@@ -77,7 +74,6 @@ namespace pod
 
 		for (int i = 0; i < 2; i++)
 		{
-
 			//if number of satellies passed to processing is less than 'MIN_NUM_SV'
 			//clear all SV data except observable
 			if (gData.getBody().size() < minSatNumber)
@@ -87,7 +83,7 @@ namespace pod
 				return gData;
 			}
 
-			DBOUT_LINE("--" << i << "--");
+			//DBOUT_LINE("--" << i << "--");
 
 			//for (auto& it : equations->currentUnknowns())
 			//    DBOUT(it << " ");
@@ -126,8 +122,8 @@ namespace pod
 			}
 
 			postfitResiduals = measVector - hMatrix * solution;
-			//DBOUT_LINE("solution\n" << solution);
-			//DBOUT_LINE("postfit Residuals\n" << postfitResiduals);
+			DBOUT_LINE("solution\n" << solution);
+			DBOUT_LINE("postfit Residuals\n" << postfitResiduals);
 			//DBOUT_LINE("CovPost\n" << covMatrix.diagCopy());
 			//DBOUT_LINE("CorrPost\n" << corrMatrix(covMatrix));
 

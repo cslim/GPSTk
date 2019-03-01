@@ -14,10 +14,10 @@ namespace pod
 {
 	std::map<IApprPosProvider::PositionSource, std::string> IApprPosProvider::posSource2Str
 	{
-		{FromConfig,            "From ini file"               },
+		{FromConfig,            "ini file"               },
 		{ComputeForEachEpoch,   "Statndalone for each epoch"  },
 		{ComputeForFirstEpoch,  "Statndalone for first epoch" },
-		{LoadFromFile,          "Load from file"              },
+		{LoadFromFile,          "*.pos file"              },
 	};
 
 	int IApprPosProvider::ComputeApprSol(const gpstk::IRinex & gRin, 
