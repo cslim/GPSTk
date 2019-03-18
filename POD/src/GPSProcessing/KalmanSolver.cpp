@@ -40,6 +40,7 @@ namespace pod
 		{
 			reset();
 			DBOUT_LINE("dt= " << dt << "->RESET")
+			resetEpoches.insert(gData.getHeader().epoch);
 		}
 		//workaround: reset PPP engine every day 
 		double  sec = gData.getHeader().epoch.getSecondOfDay();
@@ -85,9 +86,9 @@ namespace pod
 
 			//DBOUT_LINE("--" << i << "--");
 
-			//for (auto& it : equations->currentUnknowns())
-			//    DBOUT(it << " ");
-			//DBOUT_LINE("")
+			for (auto& it : equations->currentUnknowns())
+			    DBOUT(it << " ");
+			DBOUT_LINE("")
 		   // DBOUT_LINE("meas Vector\n" << setprecision(10) << measVector);
 		   // DBOUT_LINE("H\n" << hMatrix);
 		   //DBOUT_LINE("Cov\n" << covMatrix);
@@ -122,8 +123,8 @@ namespace pod
 			}
 
 			postfitResiduals = measVector - hMatrix * solution;
-			DBOUT_LINE("solution\n" << solution);
-			DBOUT_LINE("postfit Residuals\n" << postfitResiduals);
+			DBOUT_LINE("solution: " << solution);
+			DBOUT_LINE("postfit Residuals: " << postfitResiduals);
 			//DBOUT_LINE("CovPost\n" << covMatrix.diagCopy());
 			//DBOUT_LINE("CorrPost\n" << corrMatrix(covMatrix));
 
@@ -219,7 +220,7 @@ namespace pod
 	int KalmanSolver::checkPhase(IRinex& gData)
 	{
 		static const double codeLim(DBL_MAX);
-		static const double phaseLim(0.06);
+		static const double phaseLim(0.1);
 		static const TypeIDSet phaseTypes{ TypeID::postfitL1, TypeID::postfitL2, TypeID::postfitLC };
 
 		auto svSet = gData.getBody().getSatID();
