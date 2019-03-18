@@ -60,6 +60,11 @@ namespace pod
         // get solution variance
         virtual double getVariance(const FilterParameter& type) const;
 
+		virtual bool isReset(const gpstk::CommonTime & t) const
+		{
+			return  resetEpoches.find(t) != resetEpoches.end();
+		}
+
     protected:
 
 		int getUnknownIndex(const FilterParameter& parameter) const;
@@ -111,5 +116,7 @@ namespace pod
         //object to prepare h, phi, q  matrices for filter
         eqComposer_sptr equations;
 
+		//times of filter reset
+		std::set<gpstk::CommonTime > resetEpoches;
     };
 }

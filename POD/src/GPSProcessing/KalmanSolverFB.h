@@ -167,10 +167,17 @@ namespace pod
        
     private:
 
-        //Number of measurements rejected because they were off limits.
-        std::list<gpstk::irinex_uptr> ObsData;
+		void updateCurrList();
 
-        //internal kalman solver object, which do main part of real work
+		void addData(gpstk::IRinex & gRin);
+
+		//all observational data
+		std::list < std::list<gpstk::irinex_uptr>> obsData;
+		
+		//current list of epoches
+		std::list < std::list<gpstk::irinex_uptr>>::iterator currList;
+
+	    //internal kalman solver object, which do main part of real work
         KalmanSolver solver;
 
         //number of forward-backward cycles
