@@ -7,7 +7,7 @@ namespace pod
 {
      std::string StringUtils::formatTime(const CommonTime &t)
      {
-         const char* fmt = "%Y-%02m-%02d %02H:%02M:%05.3f";
+         const char* fmt = "%Y-%02m-%02d %02H:%02M:%06.3f";
          return CivilTime(t).printf(fmt);
      }
 	 

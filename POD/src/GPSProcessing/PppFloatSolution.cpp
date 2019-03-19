@@ -23,6 +23,7 @@
 #include"SolidTides.hpp"
 #include"OceanLoading.hpp"
 #include"PoleTides.hpp"
+#include"ElevationMask.hpp"
 
 #include"MJD.hpp"
 #include"IonexModel.hpp"
@@ -64,7 +65,9 @@ namespace pod
         BasicModel model;
         model.setDefaultEphemeris(data->SP3EphList);
         model.setDefaultObservable(codeL1);
-        model.setMinElev(opts().maskEl);
+        model.setMinElev(.0);
+		
+		ElevationMask elMask(opts().maskEl);
 
         SimpleFilter CodeFilter(TypeIDSet{ codeL1,TypeID::P2,TypeID::L1,TypeID::L2 });
         SimpleFilter SNRFilter(TypeID::S1, confReader().getValueAsInt("SNRmask"), DBL_MAX);
@@ -93,12 +96,12 @@ namespace pod
 
         // Objects to mark cycle slips
         // Checks LI cycle slips
-        LICSDetector2  markCSLI2Rover;
-               markCSLI2Rover.setSatThreshold(confReader().getValueAsDouble("LISatThreshold"));
+        LICSDetector2 markCSLI2Rover;
+		markCSLI2Rover.setSatThreshold(confReader().getValueAsDouble("LISatThreshold"));
 
         // Checks Merbourne-Wubbena cycle slips
-        MWCSDetector   markCSMW2Rover;
-              markCSMW2Rover.setMaxNumLambdas(confReader().getValueAsDouble("MWNLambdas"));
+        MWCSDetector markCSMW2Rover;
+		markCSMW2Rover.setMaxNumLambdas(confReader().getValueAsDouble("MWNLambdas"));
 
         // check sharp SNR drops 
         SNRCatcher snrCatcherL1Rover;
@@ -157,6 +160,7 @@ namespace pod
 		UsedInPvtMarker useMarker;
         KalmanSolver solver(Equations);
         KalmanSolverFB solverFb(Equations);
+
         if (forwardBackwardCycles > 0)
         {
             solverFb.setCyclesNumber(forwardBackwardCycles);
@@ -164,6 +168,7 @@ namespace pod
 			solverFb.ReProcList().push_back(markCSLI2Rover);
 			solverFb.ReProcList().push_back(markCSMW2Rover);
 			solverFb.ReProcList().push_back(markArcRover);
+			solverFb.ReProcList().push_back(elMask);
         }
 
         bool firstTime = true;
@@ -235,7 +240,6 @@ namespace pod
                 }
                 gRin >> computeLinear;
 
-
                 auto eop = data->eopStore.getEOP(MJD(t).mjd, IERSConvention::IERS2010);
                 pole.setXY(eop.xp, eop.yp);
 
@@ -260,6 +264,7 @@ namespace pod
 				gRin >> markCSLI2Rover;
 				gRin >> markCSMW2Rover;
 				gRin >> markArcRover;
+				gRin >> elMask;
 				//gRin >> snrCatcherL1Rover;
 
 

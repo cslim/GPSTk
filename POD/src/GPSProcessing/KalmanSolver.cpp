@@ -204,7 +204,7 @@ namespace pod
 	int KalmanSolver::checkPhase(IRinex& gData)
 	{
 		static const double codeLim(DBL_MAX);
-		static const double phaseLim(0.1);
+		static const double phaseLim(10.1);
 		
 
 		auto svSet = gData.getBody().getSatID();
@@ -268,8 +268,7 @@ namespace pod
 			//remove sv 
 			gData.getBody().removeSatID(maxPhaseResid.sv);
 
-			cout << "Epoch: " << StringUtils::formatTime(gData.getHeader().epoch) << " catched " << endl;
-			cout << maxPhaseResid.asString() << endl;
+			cout << StringUtils::formatTime(gData.getHeader().epoch) << " : " << maxPhaseResid.asString() << endl;
 
 			return 1;
 		}

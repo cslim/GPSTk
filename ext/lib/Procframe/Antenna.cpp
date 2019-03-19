@@ -218,8 +218,9 @@ namespace gpstk
       if( ( angle < zen1 ) ||
           ( angle > zen2 ) )
       {
-         InvalidRequest e("Elevation is out of allowed range.");
-         GPSTK_THROW(e);
+         //InvalidRequest e("Elevation is out of allowed range.");
+         //GPSTK_THROW(e);
+		  return Triple();
       }
 
          // Reduce azimuth to 0 <= azimuth < 360 interval
