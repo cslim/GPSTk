@@ -2,10 +2,13 @@
 
 #include"WinUtils.h"
 #include"AmbiguityHandler.h"
+#include"StringUtils.h"
 
 #include"PowerSum.hpp"
 #include"ARSimple.hpp"
 #include"ARMLambda.hpp"
+#include"MatrixExtensions.h"
+
 #include <algorithm>
 
 using namespace std;
@@ -13,6 +16,24 @@ using namespace gpstk;
 
 namespace pod
 {
+	//set of all possible TypeID for code pseudorange postfit residuals 
+	const std::set<gpstk::TypeID> KalmanSolver::codeResTypes
+	{
+		TypeID::postfitC,
+		TypeID::postfitP1,
+		TypeID::postfitP2,
+		TypeID::postfitPC,
+	};
+
+	//set of all possible TypeID for  carrier phase postfit residuals 
+	const std::set<gpstk::TypeID> KalmanSolver::phaseResTypes
+	{
+		TypeID::postfitL,
+		TypeID::postfitL1,
+		TypeID::postfitL2,
+		TypeID::postfitLC,
+	};
+
 
 	//maximum time interval (in seconds) without data
 	double KalmanSolver::maxGap = 500.;
@@ -89,9 +110,9 @@ namespace pod
 			for (auto& it : equations->currentUnknowns())
 			    DBOUT(it << " ");
 			DBOUT_LINE("")
-		   // DBOUT_LINE("meas Vector\n" << setprecision(10) << measVector);
-		   // DBOUT_LINE("H\n" << hMatrix);
-		   //DBOUT_LINE("Cov\n" << covMatrix);
+		    // DBOUT_LINE("meas Vector\n" << setprecision(10) << measVector);
+		    // DBOUT_LINE("H\n" << hMatrix);
+		    //DBOUT_LINE("Cov\n" << covMatrix);
 			//DBOUT_LINE("weigthMatrix\n" << weigthMatrix.diagCopy());
 			//DBOUT_LINE("qMatrix\n" << qMatrix.diagCopy());
 			//DBOUT_LINE("phiMatrix\n" << phiMatrix.diagCopy());
@@ -137,8 +158,12 @@ namespace pod
 			int numMeas = postfitResiduals.size();
 			int numPar = solution.size();
 
-			//sigma = sqrt(vpv(0) / (numMeas - numPar));
-			sigma = vpv(0);
+			sigma = sqrt(vpv(0) / (numMeas - numPar));
+			phaseSigma = getSigma(phaseResTypes);
+
+			//codeSigma = getSigma(codeResTypes);
+
+			//sigma = vpv(0);
 
 			if (i == 0 && checkPhase(gData) == 0)
 				break;
@@ -154,6 +179,7 @@ namespace pod
 		isValid_ = true;
 		return gData;
 	}
+
 	struct resid
 	{
 		resid()
@@ -163,65 +189,23 @@ namespace pod
 		TypeID type;
 		SatID sv;
 		double value;
+
+		std::string asString()
+		{
+			std::stringstream ss;
+			ss << TypeID::tStrings[type.type] << " " << sv << " value: " << value  ;
+			return ss.str();
+		}
+
 	};
 
-	void removeColumns(Matrix<double>& m, std::set<int> cols)
-	{
-		int newCols = m.cols() - cols.size();
-		Matrix<double> m1(m.rows(), newCols, .0);
-		int k = 0;
 
-		for (size_t i = 0; i < m.cols(); i++)
-		{
-			if (cols.find(i) != cols.end())
-				continue;
-
-			for (size_t j = 0; j < m.rows(); j++)
-				m1(j, k) = m(j, i);
-			k++;
-		}
-		m = m1;
-	}
-
-	void removeRows(Matrix<double>& m, std::set<int> rows)
-	{
-		int newRows = m.rows() - rows.size();
-		Matrix<double> m1(newRows, m.cols(), .0);
-		int k = 0;
-
-		for (size_t i = 0; i < m.rows(); i++)
-		{
-			if (rows.find(i) != rows.end())
-				continue;
-
-			for (size_t j = 0; j < m.cols(); j++)
-				m1(k, j) = m(i, j);
-			k++;
-		}
-		m = m1;
-	}
-
-	void removeElms(Vector<double>& v, std::set<int> elms)
-	{
-		int newSize = v.size() - elms.size();
-		Vector<double> v1(newSize, .0);
-
-		int k = 0;
-		for (size_t i = 0; i < v.size(); i++)
-		{
-			if (elms.find(i) != elms.end())
-				continue;
-			v1(k) = v(i);
-			k++;
-		}
-		v = v1;
-	}
 
 	int KalmanSolver::checkPhase(IRinex& gData)
 	{
 		static const double codeLim(DBL_MAX);
 		static const double phaseLim(0.1);
-		static const TypeIDSet phaseTypes{ TypeID::postfitL1, TypeID::postfitL2, TypeID::postfitLC };
+		
 
 		auto svSet = gData.getBody().getSatID();
 		resid maxPhaseResid;
@@ -229,12 +213,12 @@ namespace pod
 		int i_res = 0;
 		for (const auto& type : equations->residTypes())
 		{
-			if (phaseTypes.find(type) == phaseTypes.end())
+			if (phaseResTypes.find(type) == phaseResTypes.end())
 			{
 				i_res += svSet.size();
 				continue;
 			}
-			for (auto& sv : svSet)
+			for (auto&& sv : svSet)
 			{
 				double vali = ::abs(postfitResiduals(i_res));
 				if (maxPhaseResid.value < vali)
@@ -259,14 +243,14 @@ namespace pod
 				indeces.insert(i*svSet.size() + dist);
 
 			//update H
-			removeRows(hMatrix, indeces);
+			MatrixExtensions::removeRows(hMatrix, indeces);
 
 			//update observations
-			removeElms(measVector, indeces);
+			MatrixExtensions::removeElms(measVector, indeces);
 
 			//update weigths
-			removeRows(weigthMatrix, indeces);
-			removeColumns(weigthMatrix, indeces);
+			MatrixExtensions::removeRows(weigthMatrix, indeces);
+			MatrixExtensions::removeColumns(weigthMatrix, indeces);
 
 			auto ambSet = equations->currentAmb();
 			auto typeSet = FilterParameter::get_all_types(ambSet);
@@ -284,34 +268,25 @@ namespace pod
 			//remove sv 
 			gData.getBody().removeSatID(maxPhaseResid.sv);
 
+			cout << "Epoch: " << StringUtils::formatTime(gData.getHeader().epoch) << " catched " << endl;
+			cout << maxPhaseResid.asString() << endl;
+
 			return 1;
 		}
 	}
 
-	int KalmanSolver::check(IRinex& gData)
+	double KalmanSolver::getSigma(const TypeIDSet& types) const
 	{
-		Matrix<double> res(PostfitResiduals().size(), 1, 0.0);
+		auto phaseRes = equations->getResiduals(PostfitResiduals(), types);
+		Matrix<double> res(phaseRes.size(), 1, 0.0);
 
-		res = res.assignFrom(PostfitResiduals());
+		res = res.assignFrom(phaseRes);
 
-		//compute v'pv
-		auto vpv = transpose(res)*weigthMatrix*res;
+		//compute v'v
+		auto vpv = transpose(res)*res;
+		double sigma = sqrt(vpv(0, 0) / res.size());
 
-		double sigma = sqrt(vpv(0, 0));
-
-		double varX = getVariance(FilterParameter(TypeID::dx));     // Cov dx    - #8
-		double varY = getVariance(FilterParameter(TypeID::dy));     // Cov dy    - #9
-		double varZ = getVariance(FilterParameter(TypeID::dz));     // Cov dz    - #10
-		double stDev3D = sqrt(varX + varY + varZ);
-
-		if (sigma / stDev3D > 3)
-		{
-			cout << "Epoch: " << CivilTime(gData.getHeader().epoch) << " catched " << endl;
-			cout << "sigma: " << sigma << " sigma: " << stDev3D << endl;
-			return 1;
-		}
-		else
-			return 0;
+		return sigma;
 	}
 
 	void  KalmanSolver::fixAmbiguities(IRinex& gData)

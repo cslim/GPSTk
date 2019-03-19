@@ -21,7 +21,6 @@
 
 #include<memory>
 
-using namespace std;
 using namespace gpstk;
 
 namespace pod
@@ -41,7 +40,7 @@ namespace pod
             PRFilter.addFilteredType(TypeID::P2);
 
         SimpleFilter SNRFilter(TypeID::S1, 30, DBL_MAX);
-        list<Position> nomPos;
+		std::list<Position> nomPos;
         //nominalPos.asECEF();
         //int i = 0;
         //for (auto& it : confReader().getListValueAsDouble("nominalPosition"))
@@ -60,7 +59,7 @@ namespace pod
         model.setMinElev(confReader().getValueAsInt("ElMask"));
 
         //troposhere modeling object
-        unique_ptr<NeillTropModel> uptrTropModel = make_unique<NeillTropModel>();
+		std::unique_ptr<NeillTropModel> uptrTropModel = std::make_unique<NeillTropModel>();
         ComputeTropModel computeTropo(*uptrTropModel);
 
         //
@@ -81,7 +80,7 @@ namespace pod
 
         for (auto &obsFile : data->getObsFiles(opts().SiteRover))
         {
-            cout << obsFile << endl;
+			std::cout << obsFile << std::endl;
 
             //Input observation file stream
             Rinex3ObsStream rin;
@@ -89,7 +88,7 @@ namespace pod
             //Open Rinex observations file in read-only mode
             rin.open(obsFile, std::ios::in);
 
-            rin.exceptions(ios::failbit);
+            rin.exceptions(std::ios::failbit);
             Rinex3ObsHeader roh;
 
             //read the header
@@ -123,7 +122,7 @@ namespace pod
 					continue;
 				if (firstTime)
 				{
-					cout << setprecision(10) << nominalPos << endl;
+					std::cout << std::setprecision(10) << nominalPos << std::endl;
 					firstTime = false;
 				}
 
@@ -176,10 +175,10 @@ namespace pod
 
         if (forwardBackwardCycles > 0)
         {
-            cout << "Fw-Bw part started" << endl;
+			std::cout << "Fw-Bw part started" << std::endl;
             solverFb.reProcess();
             RinexEpoch gRin;
-            cout << "Last process part started" << endl;
+			std::cout << "Last process part started" << std::endl;
             while (solverFb.lastProcess(gRin))
             {
                 auto ep = opts().fullOutput ? GnssEpoch(gRin.getBody()) : GnssEpoch();
@@ -187,7 +186,7 @@ namespace pod
                 printSolution( solverFb, gRin.getHeader().epoch, ep);
                 gMap.data.insert(std::make_pair(gRin.getHeader().epoch, ep));
             }
-            cout << "measurments rejected: " << solverFb.rejectedMeasurements << endl;
+			std::cout << "measurments rejected: " << solverFb.rejectedMeasurements << std::endl;
         }
     }
 
@@ -214,30 +213,30 @@ namespace pod
     {
         Equations->clearEquations();
         // White noise stochastic models
-        auto  coord = make_unique<PositionEquations>();
+        auto  coord = std::make_unique<PositionEquations>();
 
         double sigma = confReader().getValueAsDouble("posSigma");
         if (opts().dynamics == GnssDataStore::Dynamics::Static)
         {
-            coord->setStochasicModel(make_shared<ConstantModel>());
+            coord->setStochasicModel(std::make_shared<ConstantModel>());
         }
         else  if (opts().dynamics == GnssDataStore::Dynamics::Kinematic)
         {
-            coord->setStochasicModel(make_shared<WhiteNoiseModel>(sigma));
+            coord->setStochasicModel(std::make_shared<WhiteNoiseModel>(sigma));
         }
         else if (opts().dynamics == GnssDataStore::Dynamics::RandomWalk)
         {
             
             for (const auto& it : coord->getParameters())
             {
-                coord->setStochasicModel(it, make_shared<RandomWalkModel>(sigma));
+                coord->setStochasicModel(it, std::make_shared<RandomWalkModel>(sigma));
             }
         }
 
         //add position equations
         Equations->addEquation(std::move(coord));
 
-        Equations->addEquation(make_unique<ClockBiasEquations>());
+        Equations->addEquation(std::make_unique<ClockBiasEquations>());
 
         if (opts().systems.size() > 1)
             Equations->addEquation(/*std::move(bias)*/std::make_unique<InterSystemBias>());
@@ -257,14 +256,14 @@ namespace pod
         if (useC1)
         {
             codeL1 = TypeID::C1;
-            oMinusC.add(make_unique<PrefitC1>(false));
+            oMinusC.add(std::make_unique<PrefitC1>(false));
             Equations->measTypes() = TypeIDSet{ TypeID::prefitC };
         }
         else
         {
             codeL1 = TypeID::P1;
             Equations->measTypes() = TypeIDSet{ TypeID::prefitP1 };
-            oMinusC.add(make_unique<PrefitP1>(false));
+            oMinusC.add(std::make_unique<PrefitP1>(false));
         }
 
         requireObs.addRequiredType(codeL1);

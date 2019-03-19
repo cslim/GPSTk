@@ -48,7 +48,6 @@
 
 #include<memory>
 
-using namespace std;
 using namespace gpstk;
 
 namespace pod
@@ -65,7 +64,7 @@ namespace pod
 
     void  PdFloatSolution::process()
     {
-        list<ProcessingClass*> reProcList;
+        std::list<ProcessingClass*> reProcList;
         updateRequaredObs();
 
         SimpleFilter CodePhaseFilterBase(TypeIDSet{ codeL1,TypeID::P2,TypeID::L1,TypeID::L2 });
@@ -145,7 +144,7 @@ namespace pod
 
 #pragma region prepare ANTEX reader
 
-        string antxfile = opts().genericFilesDirectory;
+        std::string antxfile = opts().genericFilesDirectory;
         antxfile += confReader().getValue("antexFile");
 
         AntexReader antexReader;
@@ -203,8 +202,8 @@ namespace pod
         svPcenterRover.setAntexReader(antexReader);
 
         ProcessLinear linearIonoFree;
-        linearIonoFree.add(make_unique<PCCombimnation>());
-        linearIonoFree.add(make_unique<LCCombimnation>());
+        linearIonoFree.add(std::make_unique<PCCombimnation>());
+        linearIonoFree.add(std::make_unique<LCCombimnation>());
 
         //Compute single differences opreator
         DeltaOp delta;
@@ -230,14 +229,14 @@ namespace pod
         //
         for (auto &obsFile : data->getObsFiles(opts().SiteRover))
         {
-            cout << obsFile << endl;
+			std::cout << obsFile << std::endl;
             //Input observation file stream
             Rinex3ObsStream rin;
 
             //Open Rinex observations file in read-only mode
             rin.open(obsFile, std::ios::in);
 
-            rin.exceptions(ios::failbit);
+            rin.exceptions(std::ios::failbit);
             Rinex3ObsHeader roh;
 
             //read the header
@@ -280,7 +279,7 @@ namespace pod
                         pos[i++] = it;
                     nominalPos = Position(pos);
 
-                    cout << "Baseline: " << setprecision(4) << (nominalPos - refPos).mag() / 1000 << " km" << endl;
+					std::cout << "Baseline: " << std::setprecision(4) << (nominalPos - refPos).mag() / 1000 << " km" << std::endl;
                     firstTime = false;
                 }
 
@@ -408,10 +407,10 @@ namespace pod
         }
         if (forwardBackwardCycles > 0)
         {
-            cout << "Fw-Bw part started" << endl;
+            std::cout << "Fw-Bw part started" << std::endl;
             solverFb.reProcess();
             RinexEpoch gRin;
-            cout << "Last process part started" << endl;
+			std::cout << "Last process part started" << std::endl;
             while (solverFb.lastProcess(gRin))
             {
                 auto ep = opts().fullOutput ? GnssEpoch(gRin.getBody()) : GnssEpoch();
@@ -419,7 +418,7 @@ namespace pod
                 printSolution( solverFb, gRin.getHeader().epoch, ep);
                 gMap.data.insert(std::make_pair(gRin.getHeader().epoch, ep));
             }
-            cout << "Measurments rejected: " << solverFb.rejectedMeasurements << endl;
+			std::cout << "Measurments rejected: " << solverFb.rejectedMeasurements << std::endl;
         }
 
         //CatcherStatistic statB(opts().workingDir+"\\"+opts().SiteBase+".cst");
@@ -436,11 +435,11 @@ namespace pod
 
         codeL1 = useC1 ? TypeID::C1 : TypeID::P1;
         computeLinear.setUseC1(useC1);
-        computeLinear.add(make_unique<PDelta>());
-        computeLinear.add(make_unique<MWoubenna>());
+        computeLinear.add(std::make_unique<PDelta>());
+        computeLinear.add(std::make_unique<MWoubenna>());
 
-        computeLinear.add(make_unique<LDelta>());
-        computeLinear.add(make_unique<LICombimnation>());
+        computeLinear.add(std::make_unique<LDelta>());
+        computeLinear.add(std::make_unique<LICombimnation>());
 
         configureSolver();
 
@@ -456,11 +455,11 @@ namespace pod
         if (opts().carrierBands.find(CarrierBand::L1) != opts().carrierBands.end())
         {
             if (useC1)
-                oMinusC.add(make_unique<PrefitC1>(true));
+                oMinusC.add(std::make_unique<PrefitC1>(true));
             else
-                oMinusC.add(make_unique<PrefitP1>(true));
+                oMinusC.add(std::make_unique<PrefitP1>(true));
 
-            oMinusC.add(make_unique<PrefitL1>());
+            oMinusC.add(std::make_unique<PrefitL1>());
             
             Equations->measTypes().insert(TypeID::prefitC);
             Equations->measTypes().insert(TypeID::prefitL1);
@@ -471,8 +470,8 @@ namespace pod
         }
         if (opts().carrierBands.find(CarrierBand::L2) != opts().carrierBands.end())
         {
-            oMinusC.add(make_unique<PrefitP2>(true));
-            oMinusC.add(make_unique<PrefitL2>());
+            oMinusC.add(std::make_unique<PrefitP2>(true));
+            oMinusC.add(std::make_unique<PrefitL2>());
 
             Equations->measTypes().insert(TypeID::prefitP2);
             Equations->measTypes().insert(TypeID::prefitL2);
@@ -489,26 +488,26 @@ namespace pod
         if (opts().computeTropo)
         {
             double qPrimeVert = confReader().getValueAsDouble("tropoQVertical");
-            Equations->addEquation(make_unique<TropoEquations>(qPrimeVert));
+            Equations->addEquation(std::make_unique<TropoEquations>(qPrimeVert));
         }
 
         //  Equations->addEquation(std::make_unique<IonoEquations>(confReader().getValueAsDouble("ionoQ")));
         // White noise stochastic models
-        auto  coord = make_unique<PositionEquations>();
+        auto  coord = std::make_unique<PositionEquations>();
 
         double posSigma = confReader().getValueAsDouble("posSigma");
         if (opts().dynamics == GnssDataStore::Dynamics::Static)
         {
-            coord->setStochasicModel(make_shared<ConstantModel>());
+            coord->setStochasicModel(std::make_shared<ConstantModel>());
         }
         else  if (opts().dynamics == GnssDataStore::Dynamics::Kinematic)
         {
-            coord->setStochasicModel(make_shared<WhiteNoiseModel>(posSigma));
+            coord->setStochasicModel(std::make_shared<WhiteNoiseModel>(posSigma));
         }
         else if (opts().dynamics == GnssDataStore::Dynamics::RandomWalk)
         {
             for (const auto& it : coord->getParameters())
-                coord->setStochasicModel(it, make_shared<RandomWalkModel>(posSigma));
+                coord->setStochasicModel(it, std::make_shared<RandomWalkModel>(posSigma));
         }
 
         //add position equations
@@ -524,7 +523,7 @@ namespace pod
 
         if (confReader().getValueAsBoolean("computeIono"))
         {
-            auto  ionoEq = make_unique<IonoEquations>();
+            auto  ionoEq = std::make_unique<IonoEquations>();
 
             int ionoModelType= confReader().getValueAsInt("ionoModelType");
 

@@ -1,6 +1,5 @@
 #include "CodeSmoother2.h"
 
-using namespace std;
 using namespace gpstk;
 
 namespace pod

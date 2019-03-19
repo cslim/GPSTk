@@ -9,7 +9,7 @@
 #include"CodeSmoother.hpp"
 #include"OneFreqCSDetector.hpp"
 #include"LICSDetector2.hpp"
-using namespace std;
+
 namespace fs = std::experimental::filesystem;
 
 typedef std::map<TypeID, int> band_stat ;
@@ -44,24 +44,24 @@ namespace pod
         fs::path sPath = iPath;
         sPath.replace_extension("out");
 
-        cout << "Rinex file whith raw PR: " << iPath << endl;
+        std::cout << "Rinex file whith raw PR: " << iPath << std::endl;
 
         std::list<CodeSmoother> smList;
         // We MUST mark cycle slips
         std::list<OneFreqCSDetector> csList;
 
-        cout << "Obs. currParameters for smoothing: " << endl;
+		std::cout << "Obs. currParameters for smoothing: " << std::endl;
         for (auto &it : codes)
         {
-            cout << TypeID::tStrings[it.type] << endl;
+			std::cout << TypeID::tStrings[it.type] << std::endl;
             smList.push_back(CodeSmoother(it, window));
             csList.push_back(OneFreqCSDetector(it));
         }
 
 
         RinexObsStream rin(iPath.string());
-        RinexObsStream rout(oPath.string(), ios::out);
-        ofstream fStat(sPath, ios::out);
+        RinexObsStream rout(oPath.string(), std::ios::out);
+		std::ofstream fStat(sPath, std::ios::out);
 
         RinexObsHeader head;
         RinexEpoch gRin;
@@ -87,7 +87,7 @@ namespace pod
                     {
                         if (isEpochFirstTime)
                         {
-                            fStat << CivilTime(gRin.getHeader().epoch) << " " << endl;
+                            fStat << CivilTime(gRin.getHeader().epoch) << " " << std::endl;
                             isEpochFirstTime = false;
                         }
 
@@ -112,10 +112,10 @@ namespace pod
                     }
                 }
                 if (!isSVFirstTime)
-                    fStat << endl;
+                    fStat << std::endl;
             }
             if (!isEpochFirstTime)
-                fStat << endl;
+                fStat << std::endl;
             for (auto &it : smList)
                 gRin >> it;
 
@@ -123,8 +123,8 @@ namespace pod
         }
 
 
-        cout << "Rinex file whith smoothed PR: " << oPath << endl;
-        cout << "File for CS statistic PR: " << sPath << endl;
+		std::cout << "Rinex file whith smoothed PR: " << oPath << std::endl;
+		std::cout << "File for CS statistic PR: " << sPath << std::endl;
 
 
         for (auto &it : stat)
@@ -134,7 +134,7 @@ namespace pod
             {
                 fStat << it1.first << " " << it1.second << " ";
             }
-            fStat << endl;
+            fStat << std::endl;
         }
 
         rin.close();

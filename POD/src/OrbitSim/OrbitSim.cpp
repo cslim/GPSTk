@@ -1,7 +1,7 @@
 #include"OrbitSim.h"
 
 #include"KeplerOrbit.hpp"
-//using namespace gpstk;
+using namespace gpstk;
 
 namespace pod
 {

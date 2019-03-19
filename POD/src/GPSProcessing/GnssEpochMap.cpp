@@ -1,6 +1,5 @@
 #include"GnssEpochMap.h"
 
-using namespace std;
 using namespace gpstk;
 
 namespace pod
@@ -27,8 +26,8 @@ namespace pod
     /// Method to print data values
     std::ostream& GnssEpoch::dump(std::ostream& s, int precision )
     {
-        s << fixed << setprecision(precision);
-        s << "Satellite Data" << endl;
+        s << std::fixed << std::setprecision(precision);
+        s << "Satellite Data" << std::endl;
         for (auto &it : this->satData)
         {
             //print satellite
@@ -40,16 +39,16 @@ namespace pod
                 s << (itObs).second << " ";
 
             }  
-            s << endl;
+            s << std::endl;
         }
-        s << "Solution Data" << endl;
+        s << "Solution Data" << std::endl;
         for (auto &itObs : this->slnData)
         {
                 // Print type names and values
                 s << (itObs).first << " ";
                 s << (itObs).second << " ";
         }
-        s << endl;     
+        s << std::endl;
         return s;
     }
 
@@ -106,11 +105,11 @@ namespace pod
     std::ostream& GnssEpochMap::dump(std::ostream& s, int precision)
     {
         // Prepare for printing
-        s << fixed << setprecision(precision);
+        s << std::fixed << std::setprecision(precision);
         //for (auto it = data->begin(); it != this->end(); ++it)
         for (auto &it :data)
         {
-            s << CivilTime(it.first) << endl;
+            s << CivilTime(it.first) << std::endl;
             it.second.dump(s, precision);
         }
         return s;

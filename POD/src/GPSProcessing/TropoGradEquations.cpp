@@ -1,7 +1,5 @@
 #include "TropoGradEquations.h"
 using namespace gpstk;
-using namespace std;
-
 namespace pod
 {
     TropoGradEquations::TropoGradEquations(double qPrimeZ, double qPrimeN, double qPrimeE)

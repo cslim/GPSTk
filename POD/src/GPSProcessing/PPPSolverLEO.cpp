@@ -42,6 +42,7 @@
 */
 
 #include "PPPSolverLEO.h"
+using namespace gpstk;
 
 namespace pod
 {
@@ -106,9 +107,9 @@ namespace pod
        *  0 if OK
        *  -1 if problems arose
        */
-    int PPPSolverLEO::Compute(const Vector<double>& prefitResiduals,
-                              const Matrix<double>& designMatrix,
-                              const Vector<double>& weightVector)
+    int PPPSolverLEO::Compute(const gpstk::Vector<double>& prefitResiduals,
+                              const gpstk::Matrix<double>& designMatrix,
+                              const gpstk::Vector<double>& weightVector)
         throw(InvalidSolver)
     {
 
@@ -125,7 +126,7 @@ of weightVector");
             GPSTK_THROW(e);
         }
 
-        Matrix<double> wMatrix(wSize, wSize, 0.0);  // Declare a weight matrix
+       gpstk:: Matrix<double> wMatrix(wSize, wSize, 0.0);  // Declare a weight matrix
 
                                                     // Fill the weight matrix diagonal with the content of
                                                     // the weights vector
@@ -157,9 +158,9 @@ of weightVector");
        //  0 if OK
        //  -1 if problems arose
        //
-    int PPPSolverLEO::Compute(const Vector<double>& prefitResiduals,
-                              const Matrix<double>& designMatrix,
-                              const Matrix<double>& weightMatrix)
+    int PPPSolverLEO::Compute(const gpstk:: Vector<double>& prefitResiduals,
+                              const gpstk:: Matrix<double>& designMatrix,
+                              const gpstk:: Matrix<double>& weightMatrix)
         throw(InvalidSolver)
     {
 
@@ -220,7 +221,7 @@ of qMatrix");
         // After checking sizes, let's invert the matrix of weights in order
         // to get the measurements noise covariance matrix, which is what we
         // use in the "SimpleKalmanFilter" class
-        Matrix<double> measNoiseMatrix;
+       gpstk:: Matrix<double> measNoiseMatrix;
 
         try
         {
@@ -319,8 +320,8 @@ covariance matrix.");
             // Build the vector of measurements (Prefit-residuals): Code + phase
             measVector.resize(numMeas, 0.0);
 
-            Vector<double> prefitC(gData.getBody().getVectorOfTypeID(defaultEqDef.header));
-            Vector<double> prefitL(gData.getBody().getVectorOfTypeID(TypeID::prefitL));
+           gpstk:: Vector<double> prefitC(gData.getBody().getVectorOfTypeID(defaultEqDef.header));
+           gpstk:: Vector<double> prefitL(gData.getBody().getVectorOfTypeID(TypeID::prefitL));
             for (size_t i = 0; i < numCurrentSV; i++)
             {
                 measVector(i) = prefitC(i);
@@ -340,7 +341,7 @@ covariance matrix.");
             {
 
                 // If we have weights information, let's load it
-                Vector<double>
+               gpstk:: Vector<double>
                     weightsVector(gData.getBody().getVectorOfTypeID(TypeID::weight));
 
                 for (size_t i = 0; i < numCurrentSV; i++)
@@ -375,7 +376,7 @@ covariance matrix.");
             hMatrix.resize(numMeas, numUnknowns, 0.0);
 
             // Get the values corresponding to 'core' variables
-            Matrix<double> dMatrix(gData.getBody().getMatrixOfTypes(defaultEqDef.body));
+           gpstk:: Matrix<double> dMatrix(gData.getBody().getMatrixOfTypes(defaultEqDef.body));
 
             // Let's fill 'hMatrix'
             for (size_t i = 0; i < numCurrentSV; i++)
@@ -470,8 +471,8 @@ covariance matrix.");
             if (firstTime)
             {
 
-                Vector<double> initialState(numUnknowns, 0.0);
-                Matrix<double> initialErrorCovariance(numUnknowns,
+               gpstk:: Vector<double> initialState(numUnknowns, 0.0);
+               gpstk:: Matrix<double> initialErrorCovariance(numUnknowns,
                                                       numUnknowns,
                                                       0.0);
 
@@ -508,8 +509,8 @@ covariance matrix.");
             {
 
                 // Adapt the size to the current number of unknowns
-                Vector<double> currentState(numUnknowns, 0.0);
-                Matrix<double> currentErrorCov(numUnknowns, numUnknowns, 0.0);
+               gpstk:: Vector<double> currentState(numUnknowns, 0.0);
+               gpstk:: Matrix<double> currentErrorCov(numUnknowns, numUnknowns, 0.0);
 
 
                 // Set first part of current state vector and covariance matrix
@@ -627,8 +628,8 @@ covariance matrix.");
 
 
                // Now we have to add the new values to the data structure
-            Vector<double> postfitCode(numCurrentSV, 0.0);
-            Vector<double> postfitPhase(numCurrentSV, 0.0);
+           gpstk:: Vector<double> postfitCode(numCurrentSV, 0.0);
+           gpstk:: Vector<double> postfitPhase(numCurrentSV, 0.0);
             for (size_t i = 0; i < numCurrentSV; i++)
             {
                 postfitCode(i) = postfitResiduals(i);
@@ -744,33 +745,33 @@ covariance matrix.");
         return (*this);
 
     } // End of method 'PPPSolverLEO::setKinematic()'
-    void  PPPSolverLEO::printSolution(ofstream& outfile,
+    void  PPPSolverLEO::printSolution(std::ofstream& outfile,
                                       const CommonTime& time0,
                                       const CommonTime& time,
                                       const ComputeDOP& cDOP,
                                             GnssEpoch &  gEpoch,
                                        double PCO,
-                                      vector<PowerSum> &stats,
+                                      std::vector<PowerSum> &stats,
                                       const Position &nomXYZ)
     {
-        outfile << fixed << setprecision(4);
+        outfile << std::fixed << std::setprecision(4);
         // Print results
         outfile << static_cast<YDSTime>(time).year << "-";   // Year           - #1
         outfile << static_cast<YDSTime>(time).doy << "-";    // DayOfYear      - #2
         outfile << static_cast<YDSTime>(time).sod << "  ";   // SecondsOfDay   - #3
-        outfile << setprecision(6) << (static_cast<YDSTime>(time).doy + static_cast<YDSTime>(time).sod / 86400.0) << "  " << setprecision(4);
+        outfile << std::setprecision(6) << (static_cast<YDSTime>(time).doy + static_cast<YDSTime>(time).sod / 86400.0) << "  " << std::setprecision(4);
 
 
         double x = nomXYZ.X() + getSolution(TypeID::dx);    // dx    - #4
         double y = nomXYZ.Y() + getSolution(TypeID::dy);    // dy    - #5
         double z = nomXYZ.Z() + getSolution(TypeID::dz);    // dz    - #6
 
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recX, x));
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recY, y));
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recZ, z));
+        gEpoch.slnData.insert(std::pair<TypeID, double>(TypeID::recX, x));
+        gEpoch.slnData.insert(std::pair<TypeID, double>(TypeID::recY, y));
+        gEpoch.slnData.insert(std::pair<TypeID, double>(TypeID::recZ, z));
 
         double cdt = getSolution(TypeID::cdt);
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdt, cdt));
+        gEpoch.slnData.insert(std::pair<TypeID, double>(TypeID::recCdt, cdt));
 
         double varX = getVariance(TypeID::dx);     // Cov dx    - #8
         double varY = getVariance(TypeID::dy);     // Cov dy    - #9
@@ -778,12 +779,12 @@ covariance matrix.");
 
        
         double sigma = sqrt(varX + varY + varZ);
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::sigma, sigma));
+        gEpoch.slnData.insert(std::pair<TypeID, double>(TypeID::sigma, sigma));
         outfile << x << "  " << y << "  " << z << "  " << "  " << sigma << "  ";
 
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recSlnType, 16));
+        gEpoch.slnData.insert(std::pair<TypeID, double>(TypeID::recSlnType, 16));
 
-        outfile << gEpoch.satData.size() << endl;    
+        outfile << gEpoch.satData.size() << std::endl;
         //time of convergence,  seconds;
         double tConv(5400.0);
 

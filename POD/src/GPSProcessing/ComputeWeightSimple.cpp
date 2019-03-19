@@ -1,6 +1,6 @@
 #include "ComputeWeightSimple.h"
 #include<math.h>
-using namespace std;
+
 using namespace gpstk;
 
 namespace pod

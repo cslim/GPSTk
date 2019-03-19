@@ -1,22 +1,24 @@
-#include "SQLiteAdapter.h"
-#include<boost\format.hpp>
+#include"SQLiteAdapter.h"
+#include"boost\format.hpp"
+
 #include<regex>
 #include"WinUtils.h"
 #include"StringUtils.h"
 
-using namespace std;
 using namespace gpstk;
 using boost::format;
 
 namespace pod
 {
+
+
     void SQLiteAdapter::testSQLite(const char* path2obs, const char* path2GlnNav)
     {
         SatID::loadGloFcn(path2GlnNav);
 
         namespace fs = std::experimental::filesystem;
         Rinex3ObsStream rin(path2obs);
-        gnssRinex  gRin;
+        gnssRinex gRin;
 
         std::ostringstream ss;
         auto t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
@@ -26,21 +28,23 @@ namespace pod
         eMap.title = ss.str();
 
         Rinex3ObsHeader header;
-        // Read the RINEX header
+        
+		// Read the RINEX header
         rin >> header;
-        // Read the RINEX data epoch by epoch
+        
+		// Read the RINEX data epoch by epoch
         while (rin >> gRin)
         {
             auto ge = GnssEpoch(gRin);
             ge.slnData[TypeID::recSlnType] =0;
-            eMap.data.insert(make_pair(gRin.header.epoch, ge));
+            eMap.data.insert(std::make_pair(gRin.header.epoch, ge));
         }
 
         eMap.updateMetadata();
         fs::path dbPath(path2obs);
         dbPath.replace_extension("db");
 
-        string  str = dbPath.string();
+		std::string  str = dbPath.string();
         char * cstr = new char[str.length() + 1];
 
         std::strcpy(cstr, str.c_str());
@@ -68,7 +72,7 @@ namespace pod
 
     void SQLiteAdapter::setPragmas()
     {
-        list<string> pragmas;
+		std::list<std::string> pragmas;
         pragmas.push_back("PRAGMA temp_store = \"2\";");
 
         pragmas.push_back("PRAGMA journal_mode = \"OFF\";");
@@ -132,7 +136,7 @@ namespace pod
         finalizeTransactionsSequence();
     }
 
-    void SQLiteAdapter::addObsData(const pair<TypeID, double> & typeValuePair)
+    void SQLiteAdapter::addObsData(const std::pair<TypeID, double> & typeValuePair)
     {
         char* sql = "INSERT INTO `RinexTypePairs`(`Type`,`Value`) VALUES (@Type, @Value);";
         sqlite3_stmt *comm;
@@ -189,7 +193,7 @@ namespace pod
         sqlite3_stmt *comm;
         sqlite3_prepare_v2(db, sql, -1, &comm, NULL);
         
-        string occId = StringUtils::formatTime(epoch.first);
+		std::string occId = StringUtils::formatTime(epoch.first);
         sqlite3_bind_text(comm, 1, occId.c_str(), -1, 0);
         sqlite3_bind_int(comm,  2, lastFileID);
         sqlite3_bind_text(comm, 3, "", - 1, 0);
@@ -244,7 +248,7 @@ namespace pod
         return sqlite3_last_insert_rowid(db);
     }
 
-    void SQLiteAdapter::tryExecuteNonQuery(const string & sql)
+    void SQLiteAdapter::tryExecuteNonQuery(const std::string & sql)
     {
         tryExecuteNonQuery(sql.c_str());
     }
@@ -261,7 +265,7 @@ namespace pod
         tryExecuteNonQuery(comm);
     }
 
-    int SQLiteAdapter::tryExecuteNonQueryAndGetRowId(const string & sql)
+    int SQLiteAdapter::tryExecuteNonQueryAndGetRowId(const std::string & sql)
     {
         return tryExecuteNonQueryAndGetRowId(sql.c_str());
     }

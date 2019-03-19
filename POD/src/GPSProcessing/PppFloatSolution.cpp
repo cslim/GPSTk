@@ -45,7 +45,6 @@
 
 #include"WinUtils.h"
 
-using namespace std;
 using namespace gpstk;
 
 namespace pod
@@ -112,7 +111,7 @@ namespace pod
 
 #pragma region prepare ANTEX reader
 
-        string antxfile = opts().genericFilesDirectory;
+        std::string antxfile = opts().genericFilesDirectory;
         antxfile += confReader().getValue("antexFile");
 
         AntexReader antexReader;
@@ -152,8 +151,8 @@ namespace pod
         svPcenterRover.setAntexReader(antexReader);
 
         ProcessLinear linearIonoFree;
-        linearIonoFree.add(make_unique<PCCombimnation>());
-        linearIonoFree.add(make_unique<LCCombimnation>());
+        linearIonoFree.add(std::make_unique<PCCombimnation>());
+        linearIonoFree.add(std::make_unique<LCCombimnation>());
 
 		UsedInPvtMarker useMarker;
         KalmanSolver solver(Equations);
@@ -171,14 +170,14 @@ namespace pod
         //
         for (auto &obsFile : data->getObsFiles(opts().SiteRover))
         {
-            cout << obsFile << endl;
+            std::cout << obsFile << std::endl;
             //Input observation file stream
             Rinex3ObsStream rin;
 
             //Open Rinex observations file in read-only mode
             rin.open(obsFile, std::ios::in);
 
-            rin.exceptions(ios::failbit);
+            rin.exceptions(std::ios::failbit);
             Rinex3ObsHeader roh;
 
             //read the header
@@ -215,7 +214,7 @@ namespace pod
                 //get approximate position
 				if (apprPos().getPosition(gRin, nominalPos))
 					continue;
-				//cout << nominalPos << endl;
+				//std::cout << nominalPos << std::endl;
                 grDelayRover.setNominalPosition(nominalPos);
 
                 tropoRovPtr.setAllParameters(t, nominalPos);
@@ -287,10 +286,10 @@ namespace pod
 			markCSLI2Rover.setIsReprocess(true);
 			markCSMW2Rover.setIsReprocess(true);
 
-            cout << "Fw-Bw part started" << endl;
+            std::cout << "Fw-Bw part started" << std::endl;
             solverFb.reProcess();
             RinexEpoch gRin;
-            cout << "Last process part started" << endl;
+            std::cout << "Last process part started" << std::endl;
 
             while (solverFb.lastProcess(gRin))
             {
@@ -306,7 +305,7 @@ namespace pod
 				//add epoch to map
                 gMap.data.insert(std::make_pair(gRin.getHeader().epoch, ep));
             }
-            cout << "Measurments rejected: " << solverFb.rejectedMeasurements << endl;
+            std::cout << "Measurments rejected: " << solverFb.rejectedMeasurements << std::endl;
         }
     }
 
@@ -317,11 +316,11 @@ namespace pod
 
         codeL1 = useC1 ? TypeID::C1 : TypeID::P1;
         computeLinear.setUseC1(useC1);
-        computeLinear.add(make_unique<PDelta>());
-        computeLinear.add(make_unique<MWoubenna>());
+        computeLinear.add(std::make_unique<PDelta>());
+        computeLinear.add(std::make_unique<MWoubenna>());
 
-        computeLinear.add(make_unique<LDelta>());
-        computeLinear.add(make_unique<LICombimnation>());
+        computeLinear.add(std::make_unique<LDelta>());
+        computeLinear.add(std::make_unique<LICombimnation>());
 
         configureSolver();
 
@@ -334,8 +333,8 @@ namespace pod
 
         requireObs.addRequiredType(TypeID::S1);
 
-        oMinusC.add(make_unique<PrefitPC>(true));
-        oMinusC.add(make_unique<PrefitLC>());
+        oMinusC.add(std::make_unique<PrefitPC>(true));
+        oMinusC.add(std::make_unique<PrefitLC>());
 
         Equations->measTypes().insert(TypeID::prefitPC);
         Equations->measTypes().insert(TypeID::prefitLC);
@@ -347,39 +346,39 @@ namespace pod
     {
         Equations->clearEquations();
 
-
         double qPrimeVert = confReader().getValueAsDouble("tropoQ1");
         double qPrimeHor = confReader().getValueAsDouble("tropoQ2");
 
 		if (opts().tropoModelType == TropoModelType::Simple)
-			Equations->addEquation(make_unique<TropoEquations>(qPrimeVert));
+			Equations->addEquation(std::make_unique<TropoEquations>(qPrimeVert));
 
 		else if (opts().tropoModelType == TropoModelType::SimpleWithGradients)
-			Equations->addEquation(make_unique<TropoGradEquations>(qPrimeVert, qPrimeHor, qPrimeHor));
+			Equations->addEquation(std::make_unique<TropoGradEquations>(qPrimeVert, qPrimeHor, qPrimeHor));
 
 		else if (opts().tropoModelType == TropoModelType::Advanced)
-			Equations->addEquation(make_unique<TropoEquationsAdv>(qPrimeVert, qPrimeHor));
+			Equations->addEquation(std::make_unique<TropoEquationsAdv>(qPrimeVert, qPrimeHor));
 
-        // White noise stochastic models
-        auto  coord = make_unique<PositionEquations>();
+		#pragma region Position stochastic model
 
-        double posSigma = confReader().getValueAsDouble("posSigma");
-        if (opts().dynamics == GnssDataStore::Dynamics::Static)
-        {
-            coord->setStochasicModel(make_shared<ConstantModel>());
-        }
-        else  if (opts().dynamics == GnssDataStore::Dynamics::Kinematic)
-        {
-            coord->setStochasicModel(make_shared<WhiteNoiseModel>(posSigma));
-        }
-        else if (opts().dynamics == GnssDataStore::Dynamics::RandomWalk)
-        {
-            for (const auto& it : coord->getParameters())
-                coord->setStochasicModel(it, make_shared<RandomWalkModel>(posSigma));
-        }
+		// White noise stochastic models
+		auto  coord = std::make_unique<PositionEquations>();
 
-        //add position equations
-        Equations->addEquation(std::move(coord));
+		double posSigma = confReader().getValueAsDouble("posSigma");
+		if (opts().dynamics == GnssDataStore::Dynamics::Static)
+			coord->setStochasicModel(std::make_shared<ConstantModel>());
+
+		else  if (opts().dynamics == GnssDataStore::Dynamics::Kinematic)
+			coord->setStochasicModel(std::make_shared<WhiteNoiseModel>(posSigma));
+
+		else if (opts().dynamics == GnssDataStore::Dynamics::RandomWalk)
+			for (const auto& it : coord->getParameters())
+				coord->setStochasicModel(it, std::make_shared<RandomWalkModel>(posSigma));
+
+		//add position equations
+		Equations->addEquation(std::move(coord));
+
+		#pragma endregion
+
 		if (confReader().getValueAsBoolean("useAdvClkModel"))
 			Equations->addEquation(std::make_unique <AdvClockModel>(
 				confReader().getValueAsDouble("q1Clk"),

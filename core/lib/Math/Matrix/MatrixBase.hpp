@@ -326,6 +326,25 @@ namespace gpstk
                me(i,j) = x[i*me.cols()+j];
          return me;
       }
+	  /** performs = on each element of this matrix with each
+ * element of x */
+	  BaseClass& assignFrom(const std::vector<T>& x)
+		  throw(MatrixException)
+	  {
+		  //MatBaseArrayAssignMacroVecSource(=);
+		  BaseClass& me = static_cast<BaseClass&>(*this);
+#ifdef RANGECHECK
+		  if (x.size() != me.rows() * me.cols()) {
+			  MatrixException e("Invalid dimensions for Matrix assignFrom(valarray)");
+			  GPSTK_THROW(e);
+		  }
+#endif
+		  size_t i, j;
+		  for (i = 0; i < me.rows(); i++)
+			  for (j = 0; j < me.cols(); j++)
+				  me(i, j) = x[i*me.cols() + j];
+		  return me;
+	  }
          /** performs = on each element of this matrix with each
           * element of x */
       BaseClass& assignFrom(const T* x)

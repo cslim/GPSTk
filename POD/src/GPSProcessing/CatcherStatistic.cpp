@@ -1,7 +1,6 @@
 #include "CatcherStatistic.h"
 #include<iostream>
 
-using namespace std;
 using namespace gpstk;
 
 namespace pod
@@ -19,7 +18,7 @@ namespace pod
                 table[epoch.first].push_back(dataRecord(cName, epoch.second));
             }
 
-            ofstream f;
+			std::ofstream f;
             f.open(file);
 
             for (auto&& it : table)
@@ -29,7 +28,7 @@ namespace pod
                 {
                     f << it.className << "\t" << it.satRejected.size() << "\t";
                 }
-                f << endl;
+                f << std::endl;
             }
             f.close();
         }

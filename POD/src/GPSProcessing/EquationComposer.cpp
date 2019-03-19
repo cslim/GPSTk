@@ -216,22 +216,40 @@ namespace pod
             eq->defStateAndCovariance(state, cov, i);
     }
 
-    void EquationComposer::saveResiduals(gpstk::IRinex& gData, gpstk::Vector<double>& residuals) const
-    {
-        int resNum = residuals.size();
-        int satNum = gData.getBody().size();
-        int numResTypes = residTypes().size();
+	void EquationComposer::saveResiduals(gpstk::IRinex& gData, const gpstk::Vector<double>& residuals) const
+	{
+		int resNum = residuals.size();
+		int satNum = gData.getBody().size();
+		int numResTypes = residTypes().size();
 
-        assert(satNum * numResTypes == resNum);
+		assert(satNum * numResTypes == resNum);
 
-        int i_res = 0;
-        for (const auto& resType : residTypes())
-            for (auto& itSat : gData.getBody())
-            {
-                itSat.second->get_value()[resType] = residuals(i_res);
-                i_res++;
-            }
-    }
+		int i_res = 0;
+		for (auto&& resType : residTypes())
+			for (auto&& itSat : gData.getBody())
+				itSat.second->get_value()[resType] = residuals(i_res++);
+	}
+
+	std::vector<double> EquationComposer::
+		getResiduals(const gpstk::Vector<double>& residuals, const TypeIDSet& types) const
+	{
+		int nsv = residuals.size() / residTypes().size();
+	
+		std::vector<double> res;
+		res.reserve(types.size()*nsv);
+
+		int iType(0);
+		for (auto&& resType : residTypes())
+		{
+			if (types.find(resType) != types.end())
+				for (size_t j = 0; j < nsv; ++j)
+					res.push_back(residuals(iType*nsv + j));
+			iType++;
+		}
+		return res;
+			
+	}
+
     void EquationComposer::keepOnlySv(const SatIDSet& svs)
     {
         for (auto it = filterData.cbegin(); it != filterData.cend();)

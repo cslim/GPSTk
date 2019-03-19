@@ -2,7 +2,7 @@
 #include<regex>
 
 using namespace gpstk;
-using namespace std;
+
 namespace pod
 {
      std::string StringUtils::formatTime(const CommonTime &t)
@@ -40,7 +40,7 @@ namespace pod
 		 std::string token;
 		 size_t last = 0; 
 		 size_t next = 0; 
-		 while ((next = str.find(delim, last)) != string::npos)
+		 while ((next = str.find(delim, last)) != std::string::npos)
 		 { 
 			 auto word = str.substr(last, next - last);
 			 if (!word.empty())

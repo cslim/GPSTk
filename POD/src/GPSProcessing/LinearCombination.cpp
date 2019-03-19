@@ -13,7 +13,7 @@ namespace pod
         double wlL1 = getWavelength(sv, 1, fcn);
         double wlL2 = getWavelength(sv, 2, fcn);
 
-        return  wlL1*wlL2*(wlL1 + wlL2);
+		return  wlL1 * wlL2*(wlL1 + wlL2);
     }
 
     #pragma region MWoubenna

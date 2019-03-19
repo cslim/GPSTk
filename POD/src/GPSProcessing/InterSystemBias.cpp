@@ -1,6 +1,6 @@
 #include "InterSystemBias.h"
 
-using namespace std;
+
 using namespace gpstk;
 
 namespace pod

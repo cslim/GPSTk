@@ -8,6 +8,14 @@ namespace pod
     class KalmanSolver :
         public gpstk::SolverBase, public gpstk::ProcessingClass
     {
+
+	protected:
+		//set of all possible TypeID for code pseudorange postfit residuals 
+		static const std::set<gpstk::TypeID> codeResTypes;
+
+		//set of all possible TypeID for  carrier phase postfit residuals 
+		static const std::set<gpstk::TypeID> phaseResTypes;
+
     public:
         //maximum time interval without data
         static double maxGap;
@@ -34,6 +42,13 @@ namespace pod
         //return sqrt(vpv/(n-p)) value
         virtual double getSigma() const
         { return sigma; }
+
+
+		virtual double getPhaseSigma() const
+		{ return phaseSigma; }
+
+		virtual double getCodeSigma() const
+		{ return codeSigma; }
 
         //return minimum number of satellites requared for state esimation
         virtual double getMinSatNumber() const
@@ -67,14 +82,14 @@ namespace pod
 
     protected:
 
+		double getSigma( const gpstk::TypeIDSet& types) const;
+
 		int getUnknownIndex(const FilterParameter& parameter) const;
 
         //resolve carrier  phase ambiguities ot integer values
         virtual void fixAmbiguities(gpstk::IRinex& gData);
         
-        //check data integrity 
-        virtual int check(gpstk::IRinex& gData);
-
+        //check phase data integrity 
         int checkPhase(gpstk::IRinex& gData);
 
         //reject bad observation using residuals value
@@ -112,6 +127,10 @@ namespace pod
 
         //Weight unit error (sqrt(vpv/(n-p)))
         double sigma;
+        
+		double phaseSigma;
+
+        double codeSigma;
 
         //object to prepare h, phi, q  matrices for filter
         eqComposer_sptr equations;

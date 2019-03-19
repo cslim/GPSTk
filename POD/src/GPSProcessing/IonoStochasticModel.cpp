@@ -1,7 +1,6 @@
 #include "IonoStochasticModel.h"
 
 using namespace gpstk;
-using namespace std;
 
 namespace pod
 {

@@ -9,13 +9,6 @@ namespace pod
     class KalmanSolverFB :
         public KalmanSolver
     {
-    private:
-        //set of all possible TypeID for code pseudorange postfit residuals 
-        static const std::set<gpstk::TypeID> codeResTypes;
-
-        //set of all possible TypeID for  carrier phase postfit residuals 
-        static const std::set<gpstk::TypeID> phaseResTypes;
-
 
     public:
         KalmanSolverFB();
@@ -68,6 +61,18 @@ namespace pod
         {
             return solver.getSigma();
         }
+
+		//return sqrt(vpv/(n-p)) value
+		virtual double getPhaseSigma() const
+		{
+			return solver.getPhaseSigma();
+		}
+
+		//return sqrt(vpv/(n-p)) value
+		virtual double getCodeSigma() const
+		{
+			return solver.getCodeSigma();
+		}
 
         //return minimum number of satellites requared for state esimation
         virtual double getMinSatNumber() const

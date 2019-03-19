@@ -1,6 +1,5 @@
 #include"CentralMassModel.h"
 
-using namespace std; 
 
 namespace pod
 {

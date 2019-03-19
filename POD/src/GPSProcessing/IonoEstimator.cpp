@@ -1,7 +1,7 @@
 #include "IonoEstimator.h"
 #include"WinUtils.h"
+
 using namespace gpstk;
-using namespace std;
 namespace pod
 {
     Matrix<double> IonoEstimator::H;
@@ -96,7 +96,7 @@ namespace pod
         if (dt > maxGap)
         {
             reset(sv);
-            cout << "reset for " << sv << endl;
+            std::cout << "reset for " << sv << std::endl;
         }
 
         //update stochastic models

@@ -3,8 +3,6 @@
 
 namespace pod
 {
-
-
          /// Default constructor
 	Force:: Force()
       {         

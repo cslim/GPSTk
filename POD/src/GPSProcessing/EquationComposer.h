@@ -53,7 +53,10 @@ namespace pod
         virtual void initKfState(gpstk::Vector<double>& state, gpstk::Matrix<double>& cov) const;
         
         // insert current residuals vector into GNSS data structure
-        virtual void saveResiduals(gpstk::IRinex& gData, gpstk::Vector<double>& postfitResiduals) const;
+		virtual void saveResiduals(gpstk::IRinex& gData, const gpstk::Vector<double>& residuals) const;
+
+		// return postfit residuals as gpstk::satTypeValueMap structure
+		virtual std::vector<double> getResiduals(const gpstk::Vector<double>& residuals, const gpstk::TypeIDSet& types ) const;
 
         // get curent number of unknowns
         virtual int getNumUnknowns() const;

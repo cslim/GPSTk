@@ -1,7 +1,6 @@
 #include "NumSatFilter.h"
 
 using namespace gpstk;
-using namespace std;
 
 namespace pod
 {
@@ -20,7 +19,7 @@ namespace pod
     IRinex & pod::NumSatFilter::Process(IRinex & gData)
     {
         auto svs = gData.getBody().getSatID();
-        map<SatID::SatelliteSystem, int> counter;
+		std::map<SatID::SatelliteSystem, int> counter;
         auto  & rejTableItem = rejectedSatsTable[gData.getHeader().epoch];
         for_each(svs.begin(), svs.end(), [&counter](const SatID& sv) {counter[sv.system]++; });
         SatSystSet ssset;

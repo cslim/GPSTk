@@ -3,7 +3,7 @@
 #include"Rinex3NavStream.hpp"
 
 #include"CodeProcSvData.h"
-using namespace std;
+
 using namespace gpstk;
 
 namespace pod

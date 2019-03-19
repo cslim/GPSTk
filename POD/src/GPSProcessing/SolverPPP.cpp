@@ -45,8 +45,6 @@
 #include"FsUtils.h"
 #include"WinUtils.h"
 
-using namespace std;
-
 namespace pod
 {
 
@@ -522,7 +520,7 @@ namespace pod
             // Feed the filter with the correct state and covariance matrix
             if (firstTime)
             {
-                cout << "first time!" << endl;
+				std::cout << "first time!" << std::endl;
                 currState.resize(numUnknowns, 0.0);
                 currentCovariance.resize(numUnknowns, numUnknowns, 0.0);
 

@@ -6,7 +6,6 @@
 
 #include<filesystem>
 
-using namespace std;
 using namespace gpstk;
 namespace fs = std::experimental::filesystem;
 
@@ -88,11 +87,11 @@ namespace pod
 		pvtStore.clear();
 		try
 		{
-			ifstream file(path);
+			std::ifstream file(path);
 			if (file.is_open())
 			{
-				string line;
-				while (getline(file, line))
+				std::string line;
+				while (std::getline(file, line))
 				{
 					auto  words = StringUtils::split(line,";");
 					if (words.size() > 5)
@@ -104,7 +103,7 @@ namespace pod
      						Xvt xvt;
 							xvt.x = Triple(stod(words[1]), stod(words[2]), stod(words[3]));
 							xvt.clkbias = stod(words[4]);
-							pvtStore.insert(make_pair(ct, xvt));
+							pvtStore.insert(std::make_pair(ct, xvt));
 						}
 					}
 				}
@@ -118,7 +117,7 @@ namespace pod
 		}
 		catch (const std::exception& e)
 		{
-			cout << e.what() << endl;
+			std::cout << e.what() << std::endl;
 			throw e;
 		}
 		return true;

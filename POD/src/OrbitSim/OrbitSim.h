@@ -7,10 +7,9 @@
 #include"EarthRotation.h"
 #include"OrbitModel.h"
 
-using namespace gpstk;
-using namespace std;
-typedef unique_ptr<Integrator> IntegratorUniquePtr;
-typedef unique_ptr<pod::OrbitModel> OrbitModelUniquePtr;
+
+typedef std::unique_ptr<gpstk::Integrator> IntegratorUniquePtr;
+typedef std::unique_ptr<pod::OrbitModel> OrbitModelUniquePtr;
 namespace pod
 {
     class OrbitSim
@@ -26,7 +25,7 @@ namespace pod
 
 
         /// set integrator, default is Rungge-Kutta 78
-        OrbitSim& setIntegrator(Integrator* pIntg)
+        OrbitSim& setIntegrator(gpstk::Integrator* pIntg)
         {
             pIntegrator.reset(pIntg);
             return (*this);
@@ -67,7 +66,7 @@ namespace pod
         * @param rv0    init state
         * @return
         */
-        OrbitSim& setInitState(CommonTime utc0, Vector<double> rv0);
+        OrbitSim& setInitState(gpstk::CommonTime utc0, gpstk::Vector<double> rv0);
 
 
         /** Take a single integration step.
@@ -78,7 +77,7 @@ namespace pod
 
 
         /// return the position and velocity , the dimension is 6
-        Vector<double> rvState(bool bJ2k = true);
+        gpstk::Vector<double> rvState(bool bJ2k = true);
 
         /// return the rv state transition matrix 6*6
         Matrix<double> transitionMatrix()
@@ -93,15 +92,15 @@ namespace pod
         }
 
         /// return the current epoch
-        CommonTime getCurTime()
+        gpstk::CommonTime getCurTime()
         {
-            CommonTime utc = pOrbit->getRefEpoch();
+            gpstk::CommonTime utc = pOrbit->getRefEpoch();
             utc += curT; 
             return utc;
         }
 
         /// return the current state
-        Vector<double> getCurState()
+        gpstk::Vector<double> getCurState()
         {
             return curState;
         }
@@ -136,7 +135,7 @@ namespace pod
         * @param tf    next time
         * @return      containing the new state
         */
-        virtual Vector<double> integrateTo(double t, Vector<double> y, double tf);
+        virtual gpstk::Vector<double> integrateTo(double t, gpstk::Vector<double> y, double tf);
 
         /* set initial state of the the integrator
         *
@@ -148,10 +147,10 @@ namespace pod
         * dv_dv0   3*3
         * dv_dp0   3*np
         */
-        void setState(Vector<double> state);
+        void setState(gpstk::Vector<double> state);
 
         /// set reference epoch
-        void setRefEpoch(CommonTime utc)
+        void setRefEpoch(gpstk::CommonTime utc)
         {
             pOrbit->setRefEpoch(utc);
         }
@@ -189,10 +188,10 @@ namespace pod
         // dv_dr0   3*3
         // dv_dv0   3*3
         // dv_dp0   3*np
-        Vector<double> curState;         // 42+6*np
+        gpstk::Vector<double> curState;         // 42+6*np
 
         /// the position and velocity
-        Vector<double>   rvVector;      // 6
+        gpstk::Vector<double>   rvVector;      // 6
 
         /// state transition matrix
         Matrix<double> phiMatrix;      // 6*6

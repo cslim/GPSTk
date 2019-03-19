@@ -1,6 +1,5 @@
 #include "TropoEquations.h"
 using namespace gpstk;
-using namespace std;
 
 namespace pod
 {

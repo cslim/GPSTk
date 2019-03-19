@@ -5,7 +5,6 @@
 
 #include"FsUtils.h"
 #include"ComputeStatistic.h"
-using namespace std;
 using namespace gpstk;
 namespace pod
 {
@@ -35,9 +34,9 @@ namespace pod
         }
         catch (gpstk::Exception & e)
         {
-            cerr << "An exception has occured. Processing stopped." << endl;
-            cerr << e.getLocation() << endl;
-            cerr << e.getText() << endl;
+			std::cerr << "An exception has occured. Processing stopped." << std::endl;
+			std::cerr << e.getLocation() << std::endl;
+			std::cerr << e.getText() << std::endl;
 
             GPSTK_RETHROW(e);
         }
@@ -76,11 +75,11 @@ namespace pod
         //calculate 3D RMS
         double rms3d = sqrt(covar(0, 0) + covar(1, 1) + covar(2, 2));
 
-        ofstream wrt(dbPath.string(), ostream::out | ostream::app);
-        string sep = ",";
+        std::ofstream wrt(dbPath.string(), std::ostream::out | std::ostream::app);
+		std::string sep = ",";
 
         //print time interval 
-        string fmt = "%04Y-%02m-%02d %02H:%02M:%02S";
+		std::string fmt = "%04Y-%02m-%02d %02H:%02M:%02S";
         wrt << CivilTime(gMap.getInitialTime()).printf(fmt) << sep << CivilTime(gMap.getFinalTime()).printf(fmt) << sep;
         
         //XYZ coordinates
@@ -105,7 +104,7 @@ namespace pod
             for (size_t j = 0; j < i; j++)
                 wrt << std::fixed << std::scientific << std::setprecision(4) << std::setfill(' ') << corr(i, j) << sep;
 
-        wrt << endl;
+        wrt << std::endl;
     }
 
     void Solution::saveToDb()

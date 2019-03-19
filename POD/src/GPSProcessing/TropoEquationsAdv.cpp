@@ -1,7 +1,7 @@
 #include "TropoEquationsAdv.hpp"
 #include "WinUtils.h"
+
 using namespace gpstk;
-using namespace std;
 
 namespace pod
 {
