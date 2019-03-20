@@ -157,12 +157,12 @@ namespace gpstk
                                          lli2);
 			 if (isReprocess)
 			 {
-				 
 				 auto csst = it->second->get_value().find(TypeID::satStatus);
 				 if (csst != it->second->get_value().end()
 					 && csst->second != SatUsedStatus::RejectedByCsCatcher)
 					 continue;
 			 }
+
              it->second->get_value()[resultType1] += res;
 
 			 if (res > 0)

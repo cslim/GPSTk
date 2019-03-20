@@ -44,7 +44,7 @@
 #define GPSTK_VARIABLE_HPP
 
 #include "DataStructures.hpp"
-#include "StochasticModel.hpp"
+#include "PhaseAmbiguityModel.hpp"
 
 
 

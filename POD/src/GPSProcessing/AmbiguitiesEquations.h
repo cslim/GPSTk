@@ -1,6 +1,6 @@
 #pragma once
 #include "EquationBase.h"
-#include"StochasticModel.hpp"
+#include"PhaseAmbiguityModel.hpp"
 
 namespace pod
 {

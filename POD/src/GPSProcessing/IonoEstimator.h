@@ -1,7 +1,7 @@
 #pragma once
 #include "ProcessingClass.hpp"
 #include"LinearCombination.h"
-#include"StochasticModel.hpp"
+#include"PhaseAmbiguityModel.hpp"
 
 namespace pod
 {
@@ -68,7 +68,7 @@ namespace pod
         public:
             Initializer();
             ~Initializer() {};
-        };
+		};
 
         static Initializer initializer;
         static Matrix<double> W;

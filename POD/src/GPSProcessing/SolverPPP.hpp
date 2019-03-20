@@ -45,6 +45,7 @@
 
 #include "CodeKalmanSolver.hpp"
 #include"AdvClockModel.h"
+#include"PhaseAmbiguityModel.hpp"
 
 using namespace gpstk;
 

@@ -4,6 +4,7 @@
 #include<iostream>
 
 #include "CodeKalmanSolver.hpp"
+#include "PhaseAmbiguityModel.hpp"
 #include"ComputeDOP.hpp"
 #include"PowerSum.hpp"
 #include"Position.hpp"
@@ -398,10 +399,8 @@ namespace pod
         /// Map holding the information regarding every satellite
         std::map<gpstk::SatID, coreFilterData> KalmanData;
 
-
         /// General Kalman filter object
 		gpstk::SimpleKalmanFilter kFilter;
-
 
         /// Initializing method.
         void Init(void);
@@ -414,19 +413,14 @@ namespace pod
 		gpstk::WhiteNoiseModel whitenoiseModelY;
 		gpstk::WhiteNoiseModel whitenoiseModelZ;
 
-
         /// Random Walk stochastic model
 		gpstk::RandomWalkModel rwalkModel;
-
 
         /// White noise stochastic model
 		gpstk::WhiteNoiseModel whitenoiseModel;
 
-
         /// Phase biases stochastic model (constant + white noise)
 		gpstk::PhaseAmbiguityModel biasModel;
-
-
 
 
         virtual int Compute(const gpstk::Vector<double>& prefitResiduals,
