@@ -62,164 +62,13 @@ namespace gpstk
        * @param dtMax         Maximum interval of time allowed between two
        *                      successive epochs, in seconds.
        */
-   MWCSDetector::MWCSDetector( const double& mLambdas,
-                               const double& dtMax,
-                               const bool& use )
-      : obsType(TypeID::MWubbena), lliType1(TypeID::LLI1),
-        lliType2(TypeID::LLI2), resultType1(TypeID::CSL1),
-        resultType2(TypeID::CSL2), useLLI(use),useEpochFlag(false),isReprocess(false)
+   MWCSDetector::MWCSDetector( double mLambdas,
+                               double dtMax,
+                               bool use )
+      : CycleSlipDetector(TypeID::MWubbena, dtMax, use)
    {
-      setDeltaTMax(dtMax);
       setMaxNumLambdas(mLambdas);
    }
-
-
-
-      /* Returns a satTypeValueMap object, adding the new data generated
-       * when calling this object.
-       *
-       * @param epoch     Time of observations.
-       * @param gData     Data object holding the data.
-       * @param epochflag Epoch flag.
-       */
-   SatTypePtrMap& MWCSDetector::Process( const CommonTime& epoch,
-                                           SatTypePtrMap& gData,
-                                           const short& epochflag )
-      throw(ProcessingException)
-   {
-
-      try
-      {
-
-         double value1(0.0);
-         double lli1(0.0);
-         double lli2(0.0);
-
-         SatIDSet satRejectedSet;
-         auto & rejTableItem = rejectedSatsTable[epoch];
-            // Loop through all the satellites
-         for (auto it = gData.begin(); it != gData.end(); ++it)
-         {
-
-            try
-            {
-                  // Try to extract the values
-               value1 = it->second->get_value()(obsType);
-            }
-            catch(...)
-            {
-                  // If some value is missing, then schedule this satellite
-                  // for removal
-               satRejectedSet.insert( it->first );
-               continue;
-            }
-
-            if (useLLI)
-            {
-               try
-               {
-                     // Try to get the LLI1 index
-                  lli1  = it->second->get_value()(lliType1);
-               }
-               catch(...)
-               {
-                     // If LLI #1 is not found, set it to zero
-                     // You REALLY want to have BOTH LLI indexes properly set
-                  lli1 = 0.0;
-               }
-
-               try
-               {
-                     // Try to get the LLI2 index
-                  lli2  = it->second->get_value()(lliType2);
-               }
-               catch(...)
-               {
-                     // If LLI #2 is not found, set it to zero
-                     // You REALLY want to have BOTH LLI indexes properly set
-                  lli2 = 0.0;
-               }
-            }
-
-               // If everything is OK, then get the new values inside the
-               // structure. This way of computing it allows concatenation of
-               // several different cycle slip detectors
-            double res = getDetection(epoch,
-                it->first,
-                it->second->get_value(),
-                epochflag,
-                value1,
-                lli1,
-                lli2);
-
-			if (isReprocess)
-			{
-
-				auto csst = it->second->get_value().find(TypeID::satStatus);
-				if (csst != it->second->get_value().end()
-					&& csst->second != SatUsedStatus::RejectedByCsCatcher)
-					continue;
-			}
-
-            it->second->get_value()[resultType1] += res;
-
-			if (res > 0)
-			{
-				rejTableItem.insert(it->first);
-				it->second->get_value()[TypeID::satStatus] = SatUsedStatus::RejectedByCsCatcher;
-			}
-
-            if (it->second->get_value()[resultType1] > 1.0)
-                it->second->get_value()[resultType1] = 1.0;
-
-
-               // We will mark both cycle slip flags
-            it->second->get_value()[resultType2] = it->second->get_value()[resultType1];
-
-         }
-
-            // Remove satellites with missing data
-         gData.removeSatID(satRejectedSet);
-
-         return gData;
-
-      }
-      catch(Exception& u)
-      {
-            // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + u.what() );
-
-         GPSTK_THROW(e);
-
-      }
-
-   }  // End of method 'MWCSDetector::Process()'
-
-
-
-      /* Method to set the maximum interval of time allowed between two
-       * successive epochs.
-       *
-       * @param maxDelta      Maximum interval of time, in seconds
-       */
-   MWCSDetector& MWCSDetector::setDeltaTMax(const double& maxDelta)
-   {
-
-         // Don't allow delta times less than or equal to 0
-      if (maxDelta > 0.0)
-      {
-         deltaTMax = maxDelta;
-      }
-      else
-      {
-         deltaTMax = 61.0;
-      }
-
-      return (*this);
-
-   }  // End of method 'MWCSDetector::setDeltaTMax()'
-
 
 
       /* Method to set the maximum deviation allowed before declaring
@@ -248,34 +97,7 @@ namespace gpstk
 
 
 
-      /* Returns a gnnsRinex object, adding the new data generated when
-       * calling this object.
-       *
-       * @param gData    Data object holding the data.
-       */
-   IRinex& MWCSDetector::Process(IRinex& gData)
-      throw(ProcessingException)
-   {
-
-      try
-      {
-         auto flag = (useEpochFlag) ? gData.getHeader().epochFlag : 0;
-         Process(gData.getHeader().epoch, gData.getBody(), flag);
-
-         return gData;
-
-      }
-      catch(Exception& u)
-      {
-            // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + u.what() );
-
-         GPSTK_THROW(e);
-
-      }
-
-   }  // End of method 'MWCSDetector::Process()'
+    
 
 
 
@@ -290,7 +112,8 @@ namespace gpstk
        * @param lli1      LLI1 index.
        * @param lli2      LLI2 index.
        */
-   double MWCSDetector::getDetection( const CommonTime& epoch,
+   CycleSlipDetector::DetectionResult MWCSDetector::
+	   getDetection( const CommonTime& epoch,
                                       const SatID& sat,
                                       typeValueMap& tvMap,
                                       const short& epochflag,
@@ -299,7 +122,7 @@ namespace gpstk
                                       const double& lli2 )
    {
 
-      bool reportCS(false);
+	   DetectionResult reportCS = DetectionResult::NotDetected;
 
          // Difference between current and former epochs, in sec
       double currentDeltaT(0.0);
@@ -351,13 +174,13 @@ namespace gpstk
            (epochflag==6)  ||
            (tempLLI1==1.0) ||
            (tempLLI2==1.0) ||
-           (currentDeltaT > deltaTMax) )
+           (currentDeltaT > deltaTMax && isReprocess) )
       {
 
             // We reset the filter with this
          MWData[sat].windowSize = 1;
 
-         reportCS = true;                // Report cycle slip
+         reportCS = DetectionResult::CsDetected;                // Report cycle slip
       }
 
 
@@ -372,7 +195,7 @@ namespace gpstk
                // We reset the filter with this
             MWData[sat].windowSize = 1;
 
-            reportCS = true;                // Report cycle slip
+            reportCS = DetectionResult::CsDetected; // Report cycle slip
 
          }
       }
@@ -390,14 +213,7 @@ namespace gpstk
                                (static_cast<double>(MWData[sat].windowSize));
       }
 
-      if (reportCS)
-      {
-         return 1.0;
-      }
-      else
-      {
-         return 0.0;
-      }
+	  return reportCS;
 
    }  // End of method 'MWCSDetector::getDetection()'
 

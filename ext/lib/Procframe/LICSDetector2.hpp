@@ -45,7 +45,7 @@
 #define GPSTK_LICSDETECTOR2_HPP
 
 #include <deque>
-#include "ProcessingClass.hpp"
+#include "CycleSlipDetector.hpp"
 
 
 
@@ -135,16 +135,13 @@ namespace gpstk
        * streams.
        *
        */
-   class LICSDetector2 : public ProcessingClass
+   class LICSDetector2 : public CycleSlipDetector
    {
    public:
 
          /// Default constructor, setting default parameters.
-      LICSDetector2() : obsType(TypeID::LI), lliType1(TypeID::LLI1),
-                        lliType2(TypeID::LLI2), resultType1(TypeID::CSL1),
-                        resultType2(TypeID::CSL2), deltaTMax(61.0),
-                        satThreshold(0.08), timeConst(60.0), useLLI(true),
-                        useEpochFlag(false), maxBufferSize(12),isReprocess(false)
+      LICSDetector2() : CycleSlipDetector(TypeID::LI), satThreshold(0.08), 
+						timeConst(60.0), maxBufferSize(12)
       { };
 
 
@@ -156,39 +153,11 @@ namespace gpstk
           * @param dtMax   Maximum interval of time allowed between two
           *                successive epochs, in seconds.
           */
-      LICSDetector2( const double& satThr,
-                     const double& tc,
-                     const double& dtMax = 61.0,
-                     const bool& use = true );
+      LICSDetector2( double satThr,
+                     double tc,
+                     double dtMax = 61.0,
+                     bool use = true );
 
-
-         /** Returns a satTypeValueMap object, adding the new data generated
-          *  when calling this object.
-          *
-          * @param epoch     Time of observations.
-          * @param gData     Data object holding the data.
-          * @param epochflag Epoch flag.
-          */
-      virtual SatTypePtrMap& Process( const CommonTime& epoch,
-                                        SatTypePtrMap& gData,
-                                        const short& epochflag = 0 )
-         throw(ProcessingException);
-
-
-
-         /** Method to get the maximum interval of time allowed between two
-          *  successive epochs, in seconds.
-          */
-      virtual double getDeltaTMax() const
-      { return deltaTMax; };
-
-
-         /** Method to set the maximum interval of time allowed between two
-          *  successive epochs.
-          *
-          * @param maxDelta      Maximum interval of time, in seconds
-          */
-      virtual LICSDetector2& setDeltaTMax(const double& maxDelta);
 
 
          /** Method to get the saturation threshold for cycle slip detection,
@@ -223,33 +192,6 @@ namespace gpstk
       virtual LICSDetector2& setTimeConst(const double& tc);
 
 
-         /// Method to know if the LLI check is enabled or disabled.
-      virtual bool getUseLLI() const
-      { return useLLI; };
-
-        /// Method to know if the LLI check is enabled or disabled.
-      virtual bool getEpochFlag() const
-      {
-          return useEpochFlag;
-      };
-         /** Method to set whether the LLI indexes will be used as an aid
-          *  or not.
-          *
-          * @param use   Boolean value enabling/disabling LLI check
-          */
-      virtual LICSDetector2& setUseLLI(bool use)
-      { useLLI = use; return (*this); };
-
-        /** Method to set whether the epoch flag indexes will be used as an aid
-        *  or not.
-        *
-        * @param use   Boolean value enabling/disabling epoch flag check
-        */
-      virtual LICSDetector2& setUseEpochFlag(bool use)
-      {
-          useEpochFlag = use; return (*this);
-      };
-
          /** Method to get the maximum buffer size for data, in samples.
           */
       virtual double getMaxBufferSize() const
@@ -265,25 +207,6 @@ namespace gpstk
           */
       virtual LICSDetector2& setMaxBufferSize( int maxBufSize);
 
-	  virtual LICSDetector2& setIsReprocess(bool isrepro)
-	  {
-		  isReprocess = isrepro;
-		  return *this;
-	  }
-
-	  virtual bool getIsReprocess() const
-	  {
-		  return isReprocess;
-	  }
-
-
-         /** Returns a gnnsRinex object, adding the new data generated when
-          *  calling this object.
-          *
-          * @param gData    Data object holding the data.
-          */
-      virtual IRinex& Process(IRinex& gData)
-         throw(ProcessingException);
 
 
          /// Returns a string identifying this object.
@@ -297,32 +220,6 @@ namespace gpstk
    private:
 
 
-         /// Type of observable.
-      TypeID obsType;
-
-
-         /// Type of LLI1 record.
-      TypeID lliType1;
-
-
-         /// Type of LLI2 record.
-      TypeID lliType2;
-
-
-         /// Type of result #1.
-      TypeID resultType1;
-
-
-         /// Type of result #2.
-      TypeID resultType2;
-
-	   //indicates, if CS marker will has to only reset CS flags for REJECTED satellites(SatStaatus==RelectedByCsCatcher) 
-	   // false by default
-	  bool isReprocess;
-
-         /// Maximum interval of time allowed between two successive epochs,
-         /// in seconds.
-      double deltaTMax;
 
 
          /// Saturation threshold to declare cycle slip, in meters.
@@ -333,13 +230,6 @@ namespace gpstk
       double timeConst;
 
 
-         /// This field tells whether to use or ignore the LLI indexes as
-         /// an aid.
-      bool useLLI;
-
-         /// This field tells whether to use or ignore the Epoch flag value as
-         /// an aid.
-      bool useEpochFlag;
 
 
          /// Maximum buffer size.
@@ -376,7 +266,7 @@ namespace gpstk
           * @param lli1      LLI1 index.
           * @param lli2      LLI2 index.
           */
-      virtual double getDetection( const CommonTime& epoch,
+      virtual DetectionResult getDetection( const CommonTime& epoch,
                                    const SatID& sat,
                                    typeValueMap& tvMap,
                                    const short& epochflag,

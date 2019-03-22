@@ -44,7 +44,7 @@
 #ifndef GPSTK_MWCSDETECTOR_HPP
 #define GPSTK_MWCSDETECTOR_HPP
 
-#include "ProcessingClass.hpp"
+#include "CycleSlipDetector.hpp"
 #include <list>
 
 
@@ -132,15 +132,12 @@ namespace gpstk
        * streams.
        *
        */
-   class MWCSDetector : public ProcessingClass
+   class MWCSDetector : public CycleSlipDetector
    {
    public:
 
          /// Default constructor, setting default parameters.
-      MWCSDetector() : obsType(TypeID::MWubbena), lliType1(TypeID::LLI1),
-                       lliType2(TypeID::LLI2), resultType1(TypeID::CSL1),
-                       resultType2(TypeID::CSL2), deltaTMax(61.0),
-                       maxNumLambdas(10.0), useLLI(true), useEpochFlag(false),isReprocess(false)
+      MWCSDetector() : CycleSlipDetector(TypeID::MWubbena),  maxNumLambdas(10.0)
       { };
 
 
@@ -152,37 +149,9 @@ namespace gpstk
           * @param dtMax         Maximum interval of time allowed between two
           *                      successive epochs, in seconds.
           */
-      MWCSDetector( const double& mLambdas,
-                    const double& dtMax = 61.0,
-                    const bool& use = true );
-
-
-         /** Returns a satTypeValueMap object, adding the new data generated
-          *  when calling this object.
-          *
-          * @param epoch     Time of observations.
-          * @param gData     Data object holding the data.
-          * @param epochflag Epoch flag.
-          */
-      virtual SatTypePtrMap& Process( const CommonTime& epoch,
-                                        SatTypePtrMap& gData,
-                                        const short& epochflag = 0 )
-         throw(ProcessingException);
-
-
-         /** Method to set the maximum interval of time allowed between two
-          *  successive epochs.
-          *
-          * @param maxDelta      Maximum interval of time, in seconds
-          */
-      virtual MWCSDetector& setDeltaTMax(const double& maxDelta);
-
-
-         /** Method to get the maximum interval of time allowed between two
-          *  successive epochs, in seconds.
-          */
-      virtual double getDeltaTMax() const
-      { return deltaTMax; };
+      MWCSDetector( double mLambdas,
+                    double dtMax = 61.0,
+                    bool use = true );
 
 
          /** Method to set the maximum deviation allowed before declaring
@@ -202,48 +171,7 @@ namespace gpstk
       { return maxNumLambdas; };
 
 
-         /** Method to set whether the LLI indexes will be used as
-          *  an aid or not.
-          *
-          * @param use   Boolean value enabling/disabling LLI check.
-          */
-      virtual MWCSDetector& setUseLLI(const bool& use)
-      { useLLI = use; return (*this); };
 
-      virtual MWCSDetector& setUseEpochFlag(const bool& use)
-      {
-          useEpochFlag= use; return (*this);
-      };
-
-         /// Method to know if the LLI check is enabled or disabled.
-      virtual bool getUseLLI() const
-      { return useLLI; };
-
-      /// Method to know if the LLI check is enabled or disabled.
-      virtual bool getUseEpochFlag() const
-      {
-          return useEpochFlag;
-      };
-
-
-	  virtual MWCSDetector& setIsReprocess(bool isrepro)
-	  {
-		  isReprocess = isrepro;
-		  return *this;
-	  }
-
-	  virtual bool getIsReprocess() const
-	  {
-		  return isReprocess;
-	  }
-
-         /** Returns a gnnsRinex object, adding the new data generated when
-          *  calling this object.
-          *
-          * @param gData    Data object holding the data.
-          */
-      virtual IRinex& Process(IRinex& gData)
-         throw(ProcessingException);
 
 
          /// Returns a string identifying this object.
@@ -254,49 +182,12 @@ namespace gpstk
       virtual ~MWCSDetector() {};
 
 
-   private:
-
-
-         /// Type of observation.
-      TypeID obsType;
-
-
-         /// Type of LMW1 record.
-      TypeID lliType1;
-
-
-         /// Type of LMW2 record.
-      TypeID lliType2;
-
-
-         /// Type of result #1.
-      TypeID resultType1;
-
-
-         /// Type of result #2.
-      TypeID resultType2;
-
-	   //indicates, if CS marker will has to only reset CS flags for REJECTED satellites(SatStaatus==RelectedByCsCatcher) 
-       // false by default
-	  bool isReprocess;
-
-         /** Maximum interval of time allowed between two successive
-          *  epochs, in seconds.
-          */
-      double deltaTMax;
-
-
          /** Maximum deviation allowed before declaring cycle slip,
           *  in number of Melbourne-Wubbena wavelenghts.
           */
       double maxNumLambdas;
 
 
-         /// Whether use or ignore the LLI indexes as an aid. 
-      bool useLLI;
-      
-      /// Whether use or ignore the EpochFlag indexes as an aid. 
-      bool useEpochFlag;
 
          /// A structure used to store filter data for a SV.
       struct filterData
@@ -326,7 +217,7 @@ namespace gpstk
           * @param lli1      LLI1 index.
           * @param lli2      LLI2 index.
           */
-      virtual double getDetection( const CommonTime& epoch,
+      virtual DetectionResult getDetection( const CommonTime& epoch,
                                    const SatID& sat,
                                    typeValueMap& tvMap,
                                    const short& epochflag,

@@ -51,113 +51,96 @@
 namespace gpstk
 {
 
-      /// Thrown when there is a problem processing GDS data.
-      /// @ingroup exceptiongroup
-   NEW_EXCEPTION_CLASS(ProcessingException, gpstk::Exception);
+	/// Thrown when there is a problem processing GDS data.
+	/// @ingroup exceptiongroup
+	NEW_EXCEPTION_CLASS(ProcessingException, gpstk::Exception);
 
-    /// @ingroup GPSsolutions 
-    //@{
-
-
-      /** This is an abstract base class for objects processing GNSS Data
-       *  Structures (GDS).
-       *
-       * Children of this class are meant to be used together with GNSS data
-       * structures objects found in "DataStructures" class, processing and
-       * transforming them.
-       *
-       * A typical way to use a derived class follows:
-       *
-       * @code
-       *   RinexObsStream rin("ebre0300.02o");
-       *
-       *   gnssRinex gRin;        // This is a GDS object
-       *   ComputeLC getLC;       // ComputeLC is a child from ProcessingClass
-       *
-       *   while(rin >> gRin)
-       *   {
-       *      gRin >> getLC;      // getLC objects 'process' data inside gRin
-       *   }
-       * @endcode
-       *
-       * All children from ProcessingClass must implement the following methods:
-       *
-       * - Process(): These methods will be in charge of doing the real
-       *   processing on the data.
-       * - getIndex(): This method should return an unique index identifying
-       *   the object.
-       * - getClassName(): This method should return a string identifying the
-       *   class the object belongs to.
-       *
-       */
-   class ProcessingClass
-   {
-   public:
-
-	   enum SatUsedStatus
-	   {
-		   RejectedByCsCatcher = -1,
-		   NotUsedInPVT = 0,
-		   UsedInPVT = 1
-	   };
-
-         /** Abstract method. It returns a gnnsSatTypeValue object.
-          *
-          * @param gData    Data object holding the data.
-          */
-      //virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData) = 0;
+	/// @ingroup GPSsolutions 
+	//@{
 
 
-      /** Abstract method. It returns a RinexEpoch object.
-       *
-       * @param gData    Data object holding the data.
-       */
-      virtual IRinex& Process(IRinex& gData) = 0;
-
-         /** Abstract method. It returns a gnnsRinex object.
-          *
-          * @param gData    Data object holding the data.
-          */
-     // virtual gnssRinex& Process(gnssRinex& gData) = 0;
-
-
-         /// Abstract method. It returns a string identifying the class the
-         /// object belongs to.
-      virtual std::string getClassName(void) const = 0;
-
-      virtual  std::map<CommonTime, SatIDSet>  getRejSats() const
-      {
-          return rejectedSatsTable;
-      };
-
-         /// Destructor
-      virtual ~ProcessingClass() {};
-   
-   protected:
-
-       std::map<CommonTime, SatIDSet> rejectedSatsTable;
-
-
-   }; // End of class 'ProcessingClass'
-
-
-   //   /// Input operator from gnssSatTypeValue to ProcessingClass.
-   //inline gnssSatTypeValue& operator>>( gnssSatTypeValue& gData,
-   //                                     ProcessingClass& procClass )
-   //{ procClass.Process(gData); return gData; }
+	  /** This is an abstract base class for objects processing GNSS Data
+	   *  Structures (GDS).
+	   *
+	   * Children of this class are meant to be used together with GNSS data
+	   * structures objects found in "DataStructures" class, processing and
+	   * transforming them.
+	   *
+	   * A typical way to use a derived class follows:
+	   *
+	   * @code
+	   *   RinexObsStream rin("ebre0300.02o");
+	   *
+	   *   gnssRinex gRin;        // This is a GDS object
+	   *   ComputeLC getLC;       // ComputeLC is a child from ProcessingClass
+	   *
+	   *   while(rin >> gRin)
+	   *   {
+	   *      gRin >> getLC;      // getLC objects 'process' data inside gRin
+	   *   }
+	   * @endcode
+	   *
+	   * All children from ProcessingClass must implement the following methods:
+	   *
+	   * - Process(): These methods will be in charge of doing the real
+	   *   processing on the data.
+	   * - getIndex(): This method should return an unique index identifying
+	   *   the object.
+	   * - getClassName(): This method should return a string identifying the
+	   *   class the object belongs to.
+	   *
+	   */
 
 
- /*     /// Input operator from gnssRinex to ProcessingClass.
-   inline gnssRinex& operator>>( gnssRinex& gData,
-                                 ProcessingClass& procClass )
-   { procClass.Process(gData); return gData; }*/
+	class ProcessingClass
+	{
+	public:
 
-        /// Input operator from gnssRinex to ProcessingClass.
-     inline IRinex& operator>>(IRinex& gData,
-                                   ProcessingClass& procClass )
-     { procClass.Process(gData); return gData; }
+		enum SatUsedStatus
+		{
+			NotEnoughData = -2,
+			RejectedByCsDetector = -1,
+			NotUsedInPVT = 0,
+			UsedInPVT = 1
+		};
 
-   //@}
+	
+		 /** Abstract method. It returns a RinexEpoch object.
+		  *
+		  * @param gData    Data object holding the data.
+		  */
+		virtual IRinex& Process(IRinex& gData) = 0;
+
+
+			 /// Abstract method. It returns a string identifying the class the
+			 /// object belongs to.
+		virtual std::string getClassName(void) const = 0;
+
+		virtual  std::map<CommonTime, SatIDSet>  getRejSats() const
+		{
+			return rejectedSatsTable;
+		};
+
+		/// Destructor
+		virtual ~ProcessingClass() {};
+
+	protected:
+
+		std::map<CommonTime, SatIDSet> rejectedSatsTable;
+
+
+	}; // End of class 'ProcessingClass'
+
+
+	/// Input operator from gnssRinex to ProcessingClass.
+	inline IRinex& operator>>(IRinex& gData,
+		ProcessingClass& procClass)
+	{
+		procClass.Process(gData); return gData;
+	}
+
+	//@}
+
 
 }  // End of namespace gpstk
 
