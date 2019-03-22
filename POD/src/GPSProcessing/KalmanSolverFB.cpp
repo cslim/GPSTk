@@ -23,6 +23,10 @@ namespace pod
     gpstk::IRinex & KalmanSolverFB::Process(gpstk::IRinex & gRin)
     {
         solver.Process(gRin);
+		 
+		FilterData[gRin.getHeader().epoch] = getState();
+		LIDetMap  [gRin.getHeader().epoch] = *LIDet;
+		MWDetMap[gRin.getHeader().epoch] = *MWDet;
 
         // Before returning, store the results for a future iteration
         if (currCycle==0)
@@ -40,16 +44,16 @@ namespace pod
         return gRin;
     }
 
-
     bool KalmanSolverFB::lastProcess(gpstk::IRinex & gRin)
     {
 
         // Keep processing while 'ObsData' is not empty
-        if (!(ObsData.empty()))
+        if (!ObsData.empty())
         {
             // Get the first data epoch in 'ObsData' and process it. 
             // The result will be stored in 'gData'
 			gRin = ReProcessOneEpoch(*ObsData.front());
+
             // gData = ObsData.front();
             // Remove the first data epoch in 'ObsData', freeing some
             // memory and preparing for next epoch
@@ -72,7 +76,6 @@ namespace pod
 		{
 			for (auto &it : ObsData)
 			{
-				
 				ReProcessOneEpoch(*it);
 			}
 
@@ -83,6 +86,12 @@ namespace pod
 
 	gpstk::IRinex & KalmanSolverFB::ReProcessOneEpoch(gpstk::IRinex & gRin)
 	{
+		if (solver.ResetIfRequared(gRin.getHeader().epoch, FilterData))
+		{
+			*LIDet = LIDetMap[gRin.getHeader().epoch];
+			*MWDet = MWDetMap[gRin.getHeader().epoch];
+		}
+
 		gRin.resetCurrData();
 		usedSvMarker.keepOnlyUsed(gRin.getBody());
 		usedSvMarker.CleanSatArcFlags(gRin.getBody());
@@ -92,7 +101,12 @@ namespace pod
 
 		gRin >> reProcList;
 		gRin.getBody().removeTypeID(eqComposer().residTypes());
-		return	solver.Process(gRin);
+
+		solver.Process(gRin);
+		FilterData[gRin.getHeader().epoch] = getState();
+		LIDetMap[gRin.getHeader().epoch] = *LIDet;
+		MWDetMap[gRin.getHeader().epoch] = *MWDet;
+		return gRin;
 	}
 
 	KalmanSolverFB& KalmanSolverFB::setLimits(const std::list<double>& codeLims, const std::list<double>& phaseLims)

@@ -3,13 +3,15 @@
 #include"ProcessingList.hpp"
 #include"RinexEpoch.h"
 #include"UsedInPvtMarker.hpp"
+#include"LICSDetector2.hpp"
+#include"MWCSDetector.hpp"
 
 namespace pod
 {
     class KalmanSolverFB :
         public KalmanSolver
     {
-
+		
     public:
         KalmanSolverFB();
         KalmanSolverFB(eqComposer_sptr eqs);
@@ -132,6 +134,17 @@ namespace pod
             return solver.getVariance(type);
         }
 
+		virtual const EquationComposer::FilterState & getState() const override
+		{
+			return solver.getState();
+		}
+
+		virtual KalmanSolver & setState(const EquationComposer::FilterState & newState) override
+		{
+			solver.setState(newState);
+			return *this;
+		}
+
         KalmanSolverFB& setLimits(const std::list<double>& codeLims, const std::list<double>& phaseLims);
 
         KalmanSolverFB& setCyclesNumber(size_t number)
@@ -148,6 +161,11 @@ namespace pod
         //Reprocess the data stored during a previous 'Process()' call.
         void reProcess(void);
 
+		void setCSDetRef(gpstk::LICSDetector2& li, gpstk::MWCSDetector&  mw)
+		{
+			LIDet = &li;
+			MWDet = &mw;
+		}
         
     private:
 		
@@ -177,8 +195,14 @@ namespace pod
        
     private:
 
-        //Number of measurements rejected because they were off limits.
+        //observations data to be reprocessed
         std::list<gpstk::irinex_uptr> ObsData;
+
+		//filter states, processed so far will be used in case of filer reset
+		std::map<gpstk::CommonTime, EquationComposer::FilterState> FilterData;
+
+		std::map<gpstk::CommonTime, gpstk::LICSDetector2> LIDetMap;
+		std::map<gpstk::CommonTime, gpstk::MWCSDetector>  MWDetMap;
 
         //internal kalman solver object, which do main part of real work
         KalmanSolver solver;
@@ -194,6 +218,9 @@ namespace pod
 
 		//
 		UsedInPvtMarker usedSvMarker;
+
+		gpstk::LICSDetector2* LIDet;
+		gpstk::MWCSDetector*  MWDet;
 
 #pragma endregion
 

@@ -165,6 +165,8 @@ namespace pod
         {
             solverFb.setCyclesNumber(forwardBackwardCycles);
             solverFb.setLimits(confReader().getListValueAsDouble("codeLimList"), confReader().getListValueAsDouble("phaseLimList"));
+			solverFb.setCSDetRef(markCSLI2Rover, markCSMW2Rover);
+
 			solverFb.ReProcList().push_back(markCSLI2Rover);
 			solverFb.ReProcList().push_back(markCSMW2Rover);
 			solverFb.ReProcList().push_back(markArcRover);

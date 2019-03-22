@@ -95,8 +95,6 @@ namespace gpstk
 				}
 
 			}
-
-
 		}
 		catch (Exception& e)
 		{

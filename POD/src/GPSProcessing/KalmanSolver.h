@@ -5,9 +5,11 @@
 
 namespace pod
 {
-    class KalmanSolver :
-        public gpstk::SolverBase, public gpstk::ProcessingClass
-    {
+	class KalmanSolver :
+		public gpstk::SolverBase, public gpstk::ProcessingClass
+	{
+	public:
+		typedef std::map<gpstk::CommonTime, EquationComposer::FilterState> filterHistory;
 
 	protected:
 		//set of all possible TypeID for code pseudorange postfit residuals 
@@ -16,119 +18,140 @@ namespace pod
 		//set of all possible TypeID for  carrier phase postfit residuals 
 		static const std::set<gpstk::TypeID> phaseResTypes;
 
-    public:
-        //maximum time interval without data
-        static double maxGap;
+	public:
+		//maximum time interval without data
+		static double maxGap;
 
-        KalmanSolver();
-        
-        KalmanSolver(eqComposer_sptr eqs);
+		KalmanSolver();
 
-        virtual ~KalmanSolver();
+		KalmanSolver(eqComposer_sptr eqs);
+
+		virtual ~KalmanSolver();
 
 
-        virtual gpstk::IRinex& Process(gpstk::IRinex& gData)
-            throw(gpstk::ProcessingException);
+		virtual gpstk::IRinex& Process(gpstk::IRinex& gData)
+			throw(gpstk::ProcessingException);
 
-        // Returns a string identifying this object.
-        virtual std::string getClassName(void) const
-        { return "KalmanSolver"; }
+		// Returns a string identifying this object.
+		virtual std::string getClassName(void) const
+		{
+			return "KalmanSolver";
+		}
 
-        virtual EquationComposer& eqComposer() 
-        {
-            return *equations;
-        }
+		virtual EquationComposer& eqComposer()
+		{
+			return *equations;
+		}
 
-        //return sqrt(vpv/(n-p)) value
-        virtual double getSigma() const
-        { return sigma; }
+		//return sqrt(vpv/(n-p)) value
+		virtual double getSigma() const
+		{
+			return sigma;
+		}
 
 
 		virtual double getPhaseSigma() const
-		{ return phaseSigma; }
+		{
+			return phaseSigma;
+		}
 
 		virtual double getCodeSigma() const
-		{ return codeSigma; }
+		{
+			return codeSigma;
+		}
 
-        //return minimum number of satellites requared for state esimation
-        virtual double getMinSatNumber() const
-        {
-            return minSatNumber;
-        }
+		//return minimum number of satellites requared for state esimation
+		virtual double getMinSatNumber() const
+		{
+			return minSatNumber;
+		}
 
-        //return isValid
-        virtual bool isValid() const
-        {
-            return isValid_;
-        }
+		//return isValid
+		virtual bool isValid() const
+		{
+			return isValid_;
+		}
 
-        //set minimum number of satellites requared for state esimation
-        virtual KalmanSolver& setMinSatNumber(int value) 
-        {
-             minSatNumber = value;
-             return *this;
-        }
+		//set minimum number of satellites requared for state esimation
+		virtual KalmanSolver& setMinSatNumber(int value)
+		{
+			minSatNumber = value;
+			return *this;
+		}
 
-        // get solution 
-        virtual double getSolution(const FilterParameter& type) const;
+		// get solution 
+		virtual double getSolution(const FilterParameter& type) const;
 
-        // get solution variance
-        virtual double getVariance(const FilterParameter& type) const;
+		// get solution variance
+		virtual double getVariance(const FilterParameter& type) const;
 
-    protected:
+		virtual const EquationComposer::FilterState & getState() const
+		{
+			return equations->getState();
+		}
 
-		double getSigma( const gpstk::TypeIDSet& types) const;
+		virtual KalmanSolver & setState(const EquationComposer::FilterState & newState)
+		{
+			equations->setState(newState);
+			return *this;
+		}
+
+		bool ResetIfRequared(const gpstk::CommonTime& t, const filterHistory& data);
+
+	protected:
+
+		double getSigma(const gpstk::TypeIDSet& types) const;
 
 		int getUnknownIndex(const FilterParameter& parameter) const;
 
-        //resolve carrier  phase ambiguities ot integer values
-        virtual void fixAmbiguities(gpstk::IRinex& gData);
-        
-        //check phase data integrity 
-        int checkPhase(gpstk::IRinex& gData);
+		//resolve carrier  phase ambiguities ot integer values
+		virtual void fixAmbiguities(gpstk::IRinex& gData);
 
-        //reject bad observation using residuals value
-        virtual gpstk::IRinex& reject(gpstk::IRinex& gData, const gpstk::TypeIDSet& typeOfResid);
+		//check phase data integrity 
+		int checkPhase(gpstk::IRinex& gData);
 
-        virtual void reset()
-        {
-            equations->clearData();
-        }
+		//reject bad observation using residuals value
+		virtual gpstk::IRinex& reject(gpstk::IRinex& gData, const gpstk::TypeIDSet& typeOfResid);
 
-        gpstk::CommonTime t_pre = gpstk::CommonTime::BEGINNING_OF_TIME;
+		virtual void reset()
+		{
+			equations->clearData();
+		}
 
-        bool firstTime;
+		gpstk::CommonTime t_pre = gpstk::CommonTime::BEGINNING_OF_TIME;
 
-        // Indicator of current filter state validity
-        bool isValid_;
+		bool firstTime;
 
-        // Minimum satellites number required for state computation
-        size_t minSatNumber;
+		// Indicator of current filter state validity
+		bool isValid_;
 
-        // State transition matrix
-        gpstk::Matrix<double> phiMatrix;
+		// Minimum satellites number required for state computation
+		size_t minSatNumber;
 
-        // Process noise matrix
-        gpstk::Matrix<double> qMatrix;
+		// State transition matrix
+		gpstk::Matrix<double> phiMatrix;
 
-        // Geometry matrix (derivative of observations wrt state)
-        gpstk::Matrix<double> hMatrix;
+		// Process noise matrix
+		gpstk::Matrix<double> qMatrix;
 
-        // weights matrix
-        gpstk::Matrix<double> weigthMatrix;
+		// Geometry matrix (derivative of observations wrt state)
+		gpstk::Matrix<double> hMatrix;
 
-        // Measurements vector (prefit-residuals)
-        gpstk::Vector<double> measVector;
+		// weights matrix
+		gpstk::Matrix<double> weigthMatrix;
 
-        //Weight unit error (sqrt(vpv/(n-p)))
-        double sigma;
-        
+		// Measurements vector (prefit-residuals)
+		gpstk::Vector<double> measVector;
+
+		//Weight unit error (sqrt(vpv/(n-p)))
+		double sigma;
+
 		double phaseSigma;
 
-        double codeSigma;
+		double codeSigma;
 
-        //object to prepare h, phi, q  matrices for filter
-        eqComposer_sptr equations;
+		//object to prepare h, phi, q  matrices for filter
+		eqComposer_sptr equations;
 
-    };
+	};
 }

@@ -37,7 +37,7 @@ namespace pod
 
 
 	//maximum time interval (in seconds) without data
-	double KalmanSolver::maxGap = 500.;
+	double KalmanSolver::maxGap = 500;
 
 	KalmanSolver::KalmanSolver()
 		:firstTime(true), isValid_(false)
@@ -62,7 +62,7 @@ namespace pod
 		{
 			reset();
 			DBOUT_LINE("dt= " << dt << "->RESET")
-			resetEpoches.insert(gData.getHeader().epoch);
+			//resetEpoches.insert(gData.getHeader().epoch);
 		}
 #if _DEBUG
 		bool b;
@@ -169,10 +169,6 @@ namespace pod
 
 			sigma = sqrt(vpv(0) / (numMeas - numPar));
 			phaseSigma = getSigma(phaseResTypes);
-
-			//codeSigma = getSigma(codeResTypes);
-
-			//sigma = vpv(0);
 
 			if (i == 0 && checkPhase(gData) == 0)
 				break;
@@ -369,4 +365,23 @@ namespace pod
 		return covMatrix(i, i);
 
 	}  // End of method 'SolverLMS::getVariance()'
+
+	bool KalmanSolver::ResetIfRequared(const gpstk::CommonTime& t, const KalmanSolver::filterHistory& data)
+	{
+		double dt = t - t_pre;
+
+		if (::abs(dt) > maxGap)
+		{
+			auto it = data.find(t);
+			if (it != data.end())
+			{
+				setState(it->second);
+				t_pre = t;
+				DBOUT_LINE(StringUtils::formatTime(t)<<"reset: "<< dt)
+
+				return true;
+			}
+		}
+		return false;
+	}
 }
