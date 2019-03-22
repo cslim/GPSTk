@@ -273,7 +273,7 @@ namespace gpstk
 
       /// tolerance in considering element to be zero is std::abs(elem) < tolerance
       /// see zeroize(), where this is the default input value
-      static const double zeroTolerance;
+	  static const double zeroTolerance;
 
       /// empty constructor
       SparseVector(void) : len(0) { }
@@ -936,6 +936,7 @@ namespace gpstk
 
       return retSV;
    }
+   template <class T> const double SparseVector<T>::zeroTolerance = 1.0e-14;
 
 }  // namespace
 
