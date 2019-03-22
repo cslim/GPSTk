@@ -156,4 +156,11 @@ namespace gpstk
 
    }  // End of method 'typeValueMap::operator()'
 
+   std::ostream& operator<<(std::ostream& s, const typeValueMap& obj)
+   {
+	   for (auto&& it : obj)
+		   s << it.first << " " << it.second;   
+	   s << std::endl;
+	   return s;
+   }
 }

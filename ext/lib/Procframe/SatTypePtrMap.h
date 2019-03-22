@@ -216,6 +216,7 @@ namespace gpstk
         virtual ~SatTypePtrMap() {};
         
     };
+	std::ostream& operator<<(std::ostream& s, const gpstk::SatTypePtrMap& obj);
 
 
 }

@@ -10,7 +10,6 @@ namespace gpstk
     */
     size_t SatTypePtrMap::numElements() const
     {
-
         size_t numEle(0);
         for (auto &&it : *this)
             numEle += it.second->get_value().size();
@@ -563,7 +562,11 @@ in matrix and number of types do not match"));
         }
 
     }  // End of method 'SatTypePtrMap::operator()'
-
+	std::ostream& operator<<(std::ostream& s, const SatTypePtrMap& obj) 
+	{
+		obj.dump(s, 1);
+		return s;
+	}
 
 	// Convenience output method for structure satTypeValueMap
 	std::ostream& SatTypePtrMap::dump(std::ostream& s,

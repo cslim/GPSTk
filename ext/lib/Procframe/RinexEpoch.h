@@ -33,6 +33,8 @@ namespace gpstk
 
         virtual SatTypePtrMap& getBody() = 0;
 		virtual const SatTypePtrMap& getBody() const = 0;
+
+		virtual  void resetCurrData() = 0;
     };
 
     class RinexEpoch : public IRinex

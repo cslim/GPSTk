@@ -22,7 +22,6 @@ namespace gpstk
 			return (*this).size();
 		}
 
-
 		/// Returns a TypeIDSet with all the data types present in
 		/// this object.
 		TypeIDSet getTypeID() const;
@@ -82,7 +81,11 @@ namespace gpstk
 		/// Destructor.
 		virtual ~typeValueMap() {};
 
+
+
 	};  // End typeValueMap
+	std::ostream& operator<<(std::ostream& s, const typeValueMap& obj);
+
 
 
 }
