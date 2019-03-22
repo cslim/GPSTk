@@ -8,6 +8,7 @@
 #include"ARSimple.hpp"
 #include"ARMLambda.hpp"
 #include"MatrixExtensions.h"
+#include"GnssSolution.h"
 
 #include <algorithm>
 
@@ -63,6 +64,12 @@ namespace pod
 			DBOUT_LINE("dt= " << dt << "->RESET")
 			resetEpoches.insert(gData.getHeader().epoch);
 		}
+#if _DEBUG
+		bool b;
+		CATCH_TIME(gData.getHeader().epoch, 2014, 03, 20, 2, 48, 30, b)
+			if (b)
+				DBOUT_LINE("catched")
+#endif
 		//workaround: reset PPP engine every day 
 		double  sec = gData.getHeader().epoch.getSecondOfDay();
 		if ((int)sec % 86400 == 0 && equations->getSlnType() == SlnType::PPP_Float)
@@ -107,15 +114,15 @@ namespace pod
 
 			//DBOUT_LINE("--" << i << "--");
 
-			for (auto& it : equations->currentUnknowns())
+			/*for (auto& it : equations->currentUnknowns())
 			    DBOUT(it << " ");
-			DBOUT_LINE("")
+			DBOUT_LINE("")*/
 		    // DBOUT_LINE("meas Vector\n" << setprecision(10) << measVector);
 		    // DBOUT_LINE("H\n" << hMatrix);
 		    //DBOUT_LINE("Cov\n" << covMatrix);
 			//DBOUT_LINE("weigthMatrix\n" << weigthMatrix.diagCopy());
-			//DBOUT_LINE("qMatrix\n" << qMatrix.diagCopy());
-			//DBOUT_LINE("phiMatrix\n" << phiMatrix.diagCopy());
+			//DBOUT_LINE("qMatrix: " << qMatrix.diagCopy());
+			//DBOUT_LINE("phiMatrix: " << phiMatrix.diagCopy());
 
 			//prepare
 			Matrix<double> hMatrixTr = transpose(hMatrix);
@@ -144,10 +151,12 @@ namespace pod
 			}
 
 			postfitResiduals = measVector - hMatrix * solution;
-			DBOUT_LINE("solution: " << solution);
-			DBOUT_LINE("postfit Residuals: " << postfitResiduals);
+			
+			 DBOUT_LINE(StringUtils::formatTime(gData.getHeader().epoch) << " sln: " << solution)
+
+		    //DBOUT_LINE("solution: " << solution);
+			//DBOUT_LINE("postfit Residuals: " << postfitResiduals);
 			//DBOUT_LINE("CovPost\n" << covMatrix.diagCopy());
-			//DBOUT_LINE("CorrPost\n" << corrMatrix(covMatrix));
 
 			floatSolution = solution;
 
@@ -199,14 +208,11 @@ namespace pod
 
 	};
 
-
-
 	int KalmanSolver::checkPhase(IRinex& gData)
 	{
 		static const double codeLim(DBL_MAX);
 		static const double phaseLim(10.1);
 		
-
 		auto svSet = gData.getBody().getSatID();
 		resid maxPhaseResid;
 

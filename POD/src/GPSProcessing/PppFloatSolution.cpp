@@ -98,12 +98,12 @@ namespace pod
         // Checks LI cycle slips
         LICSDetector2 markCSLI2Rover;
 		markCSLI2Rover.setSatThreshold(confReader().getValueAsDouble("LISatThreshold"));
-
+		
         // Checks Merbourne-Wubbena cycle slips
         MWCSDetector markCSMW2Rover;
 		markCSMW2Rover.setMaxNumLambdas(confReader().getValueAsDouble("MWNLambdas"));
-
-        // check sharp SNR drops 
+		
+		// check sharp SNR drops 
         SNRCatcher snrCatcherL1Rover;
         PrefitResCatcher resCatcher(Equations->measTypes());
 
@@ -268,7 +268,7 @@ namespace pod
 				//gRin >> snrCatcherL1Rover;
 
 
-                DBOUT_LINE(">>" << CivilTime(gRin.getHeader().epoch).asString());
+                //DBOUT_LINE(">>" << CivilTime(gRin.getHeader().epoch).asString());
 
                 if (forwardBackwardCycles > 0)
                 {

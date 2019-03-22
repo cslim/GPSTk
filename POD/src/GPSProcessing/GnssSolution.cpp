@@ -42,7 +42,12 @@ namespace pod
 					gEpoch.slnData[it.type] = solver.getSolution(it);
 			}
 			else
-				gEpoch.satData[it.sv][it.type] = solver.getSolution(it);
+			{
+				double amb = solver.getSolution(it);
+				if (amb != 0)
+					gEpoch.satData[it.sv][it.type] = amb;
+			}
+				
 		}
 		Position newPos;
 		double stDev3D(NAN);

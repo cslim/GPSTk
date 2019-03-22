@@ -21,6 +21,11 @@ namespace pod
             return "KalmanSolverFB";
         }
 
+		virtual EquationComposer& eqComposer() override
+		{
+			return solver.eqComposer();
+		}
+
         // Solution
         virtual const  gpstk::Vector<double>& Solution() const
         {

@@ -36,7 +36,6 @@ namespace pod
 			// Update the number of processed measurements
 			processedMeasurements += gRin.getBody().numSats();
 		}
-
         return gRin;
     }
 
@@ -52,7 +51,7 @@ namespace pod
 			currList = obsData.begin();
 		}
 
-		// Get the first data epoch in 'ObsData' and process it. 
+		// Get the first data epoch in 'ObsData' and process it.
 		// The result will be stored in 'gData'
 		gRin = ReProcessOneEpoch(*currList->front());
 
@@ -68,6 +67,8 @@ namespace pod
 	{
 		for (auto && oList : obsData)
 		{
+			usedSvMarker.updateLastEpoch(**oList.rbegin());
+
 			// Backwards iteration. We must do this at least once
 			for (auto rpos = oList.rbegin(); rpos != oList.rend(); ++rpos)
 				ReProcessOneEpoch(**rpos);
@@ -86,12 +87,15 @@ namespace pod
 
 	gpstk::IRinex & KalmanSolverFB::ReProcessOneEpoch(gpstk::IRinex & gRin)
 	{
+		gRin.resetCurrData();
 		usedSvMarker.keepOnlyUsed(gRin.getBody());
 		usedSvMarker.CleanSatArcFlags(gRin.getBody());
 		usedSvMarker.CleanScFlags(gRin.getBody());
 		checkLimits(gRin, currCycle);
+		//usedSvMarker.updateLastEpoch(gRin);
 
 		gRin >> reProcList;
+		gRin.getBody().removeTypeID(eqComposer().residTypes());
 		return	solver.Process(gRin);
 	}
 
@@ -156,7 +160,7 @@ namespace pod
 
         // Remove satellites with missing data
         gData.getBody().removeSatID(satRejectedSet);
-		DBOUT_LINE("rej. meas" << rejectedMeasurements)
+		
     }
 
 	void KalmanSolverFB::updateCurrList()

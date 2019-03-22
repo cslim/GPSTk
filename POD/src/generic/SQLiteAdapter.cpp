@@ -336,6 +336,7 @@ namespace pod
          //TypeID::CSL1           ,
          //TypeID::CSL2           ,
          TypeID::satArc           ,
+         TypeID::satStatus        ,
          /* 
          TypeID::prefitC          ,
          TypeID::prefitL          ,
