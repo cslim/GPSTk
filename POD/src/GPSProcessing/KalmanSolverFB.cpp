@@ -25,64 +25,60 @@ namespace pod
         solver.Process(gRin);
 
         // Before returning, store the results for a future iteration
-		if (currCycle == 0)
-		{
-			// Create a new gnssRinex structure with just the data we need
-			//gnssRinex gBak(gData.extractTypeID(keepTypeSet));
+        if (currCycle==0)
+        {
+            // Create a new gnssRinex structure with just the data we need
+            //gnssRinex gBak(gData.extractTypeID(keepTypeSet));
 
-			// Store observation data
-			addData(gRin);
+            // Store observation data
+            ObsData.push_back(gRin.clone());
 
-			// Update the number of processed measurements
-			processedMeasurements += gRin.getBody().numSats();
-		}
+            // Update the number of processed measurements
+            processedMeasurements += gRin.getBody().numSats();
+        }
+
         return gRin;
     }
 
 
-	bool KalmanSolverFB::lastProcess(gpstk::IRinex & gRin)
-	{
-		if (currList->empty())
-		{
-			obsData.pop_front();
-			if (obsData.empty())
-				return false;
+    bool KalmanSolverFB::lastProcess(gpstk::IRinex & gRin)
+    {
 
-			currList = obsData.begin();
-		}
-
-		// Get the first data epoch in 'ObsData' and process it.
-		// The result will be stored in 'gData'
-		gRin = ReProcessOneEpoch(*currList->front());
-
-		// gData = ObsData.front();
-		// Remove the first data epoch in 'ObsData', freeing some
-		// memory and preparing for next epoch
-		currList->pop_front();
-
-		return true;
-	}
+        // Keep processing while 'ObsData' is not empty
+        if (!(ObsData.empty()))
+        {
+            // Get the first data epoch in 'ObsData' and process it. 
+            // The result will be stored in 'gData'
+			gRin = ReProcessOneEpoch(*ObsData.front());
+            // gData = ObsData.front();
+            // Remove the first data epoch in 'ObsData', freeing some
+            // memory and preparing for next epoch
+            ObsData.pop_front();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
 	void KalmanSolverFB::reProcess()
 	{
-		for (auto && oList : obsData)
+		// Backwards iteration. We must do this at least once
+		for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
+			ReProcessOneEpoch(**rpos);
+
+		for ( currCycle = 0; currCycle < cyclesNumber - 1; ++currCycle)
 		{
-			usedSvMarker.updateLastEpoch(**oList.rbegin());
-
-			// Backwards iteration. We must do this at least once
-			for (auto rpos = oList.rbegin(); rpos != oList.rend(); ++rpos)
-				ReProcessOneEpoch(**rpos);
-
-			for (currCycle = 0; currCycle < cyclesNumber - 1; ++currCycle)
+			for (auto &it : ObsData)
 			{
-				for (auto &it : oList)
-					ReProcessOneEpoch(*it);
-
-				for (auto rpos = oList.rbegin(); rpos != oList.rend(); ++rpos)
-					ReProcessOneEpoch(**rpos);
+				
+				ReProcessOneEpoch(*it);
 			}
+
+			for (auto rpos = ObsData.rbegin(); rpos != ObsData.rend(); ++rpos)
+				ReProcessOneEpoch(**rpos);
 		}
-		currList = obsData.begin();
 	}
 
 	gpstk::IRinex & KalmanSolverFB::ReProcessOneEpoch(gpstk::IRinex & gRin)
@@ -116,12 +112,11 @@ namespace pod
 
     double KalmanSolverFB::getLimit(const gpstk::TypeID& type, size_t cycleNumber)
     {
-        if (codeResTypes.find(type) != codeResTypes.end() 
-			&& cycleNumber < tresholds.codeLimits.size())
+        if (codeResTypes.find(type) != codeResTypes.end())
+            if (cycleNumber < tresholds.codeLimits.size())
                 return tresholds.codeLimits[cycleNumber];
-
-        if (phaseResTypes.find(type) != phaseResTypes.end()
-			&& cycleNumber < tresholds.phaseLimits.size())
+        if (phaseResTypes.find(type) != phaseResTypes.end())
+            if (cycleNumber < tresholds.phaseLimits.size())
                 return tresholds.phaseLimits[cycleNumber];
 
 		std::string msg = "Can't get observables treshold for type: '"
@@ -162,18 +157,4 @@ namespace pod
         gData.getBody().removeSatID(satRejectedSet);
 		
     }
-
-	void KalmanSolverFB::updateCurrList()
-	{
-		obsData.push_back(std::list<gpstk::irinex_uptr>());
-		currList = --obsData.end();
-	}
-
-	void KalmanSolverFB::addData(gpstk::IRinex & gRin)
-	{
-		if (solver.isReset(gRin.getHeader().epoch))
-			updateCurrList();
-		
-		currList->push_back(gRin.clone());
-	}
 }
