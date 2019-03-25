@@ -70,7 +70,7 @@ namespace pod
 		int numUsedSats = solver.PostfitResiduals().size() / Equations->measTypes().size();
 		gEpoch.slnData.insert(std::make_pair(TypeID::recUsedSV, numUsedSats));
 
-		SlnType slnType = solver.isValid() ? desiredSlnType() : SlnType::NONE_SOLUTION;
+		SlnType slnType = solver.getValid() ? desiredSlnType() : SlnType::NONE_SOLUTION;
 
 		gEpoch.slnData.insert(std::make_pair(TypeID::recSlnType, slnType));
 

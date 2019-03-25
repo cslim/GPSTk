@@ -5,6 +5,7 @@
 #include"UsedInPvtMarker.hpp"
 #include"LICSDetector2.hpp"
 #include"MWCSDetector.hpp"
+#include"SatArcMarker.hpp"
 
 namespace pod
 {
@@ -52,7 +53,7 @@ namespace pod
         }
 
         //return current varince - covarince matrix
-        virtual const gpstk::Matrix<double>& CovMatrix()const
+        virtual const gpstk::Matrix<double>& CovMatrix() const
         {
             return solver.CovMatrix();
         }
@@ -90,9 +91,9 @@ namespace pod
         //return current solver  status 
         // true - solution valid
         // false - invalid
-        virtual bool isValid() const
+        virtual bool getValid() const
         {
-            return solver.isValid();
+            return solver.getValid();
         }
 
 		virtual gpstk::ProcessingList& ReProcList()
@@ -133,18 +134,7 @@ namespace pod
         {
             return solver.getVariance(type);
         }
-
-		virtual const EquationComposer::FilterState & getState() const override
-		{
-			return solver.getState();
-		}
-
-		virtual KalmanSolver & setState(const EquationComposer::FilterState & newState) override
-		{
-			solver.setState(newState);
-			return *this;
-		}
-
+		
         KalmanSolverFB& setLimits(const std::list<double>& codeLims, const std::list<double>& phaseLims);
 
         KalmanSolverFB& setCyclesNumber(size_t number)
@@ -161,7 +151,7 @@ namespace pod
         //Reprocess the data stored during a previous 'Process()' call.
         void reProcess(void);
 
-		void setCSDetRef(gpstk::LICSDetector2& li, gpstk::MWCSDetector&  mw)
+		void setCSDetRef(gpstk::LICSDetector2& li, gpstk::MWCSDetector&  mw )
 		{
 			LIDet = &li;
 			MWDet = &mw;
@@ -192,14 +182,10 @@ namespace pod
         //Number of measurements rejected because they were off limits.
         int rejectedMeasurements;
 
-       
     private:
 
         //observations data to be reprocessed
         std::list<gpstk::irinex_uptr> ObsData;
-
-		//filter states, processed so far will be used in case of filer reset
-		std::map<gpstk::CommonTime, EquationComposer::FilterState> FilterData;
 
 		std::map<gpstk::CommonTime, gpstk::LICSDetector2> LIDetMap;
 		std::map<gpstk::CommonTime, gpstk::MWCSDetector>  MWDetMap;
@@ -223,7 +209,6 @@ namespace pod
 		gpstk::MWCSDetector*  MWDet;
 
 #pragma endregion
-
 
     };
 }

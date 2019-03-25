@@ -1,7 +1,8 @@
 #include "KalmanSolverFB.h"
 #include"PowerSum.hpp"
 #include"WinUtils.h"
-
+#include"StringUtils.h"
+#include"GnssSolution.h"
 using namespace gpstk;
 
 namespace pod
@@ -23,17 +24,16 @@ namespace pod
     gpstk::IRinex & KalmanSolverFB::Process(gpstk::IRinex & gRin)
     {
         solver.Process(gRin);
-		 
-		FilterData[gRin.getHeader().epoch] = getState();
-		LIDetMap  [gRin.getHeader().epoch] = *LIDet;
-		MWDetMap[gRin.getHeader().epoch] = *MWDet;
+		if (solver.getResetState())
+		{
+			LIDetMap[gRin.getHeader().epoch] = *LIDet;
+			MWDetMap[gRin.getHeader().epoch] = *MWDet;
+		}
+
 
         // Before returning, store the results for a future iteration
         if (currCycle==0)
         {
-            // Create a new gnssRinex structure with just the data we need
-            //gnssRinex gBak(gData.extractTypeID(keepTypeSet));
-
             // Store observation data
             ObsData.push_back(gRin.clone());
 
@@ -86,26 +86,35 @@ namespace pod
 
 	gpstk::IRinex & KalmanSolverFB::ReProcessOneEpoch(gpstk::IRinex & gRin)
 	{
-		if (solver.ResetIfRequared(gRin.getHeader().epoch, FilterData))
+
+		if (solver.ResetIfRequared(gRin.getHeader().epoch, solver.FilterData))
 		{
 			*LIDet = LIDetMap[gRin.getHeader().epoch];
 			*MWDet = MWDetMap[gRin.getHeader().epoch];
+			DBOUT_LINE("state update")
+			//*satArcMarker = SatArcMap[gRin.getHeader().epoch];
 		}
 
 		gRin.resetCurrData();
+
 		usedSvMarker.keepOnlyUsed(gRin.getBody());
 		usedSvMarker.CleanSatArcFlags(gRin.getBody());
 		usedSvMarker.CleanScFlags(gRin.getBody());
 		checkLimits(gRin, currCycle);
-		//usedSvMarker.updateLastEpoch(gRin);
 
 		gRin >> reProcList;
-		gRin.getBody().removeTypeID(eqComposer().residTypes());
-
+		
 		solver.Process(gRin);
-		FilterData[gRin.getHeader().epoch] = getState();
-		LIDetMap[gRin.getHeader().epoch] = *LIDet;
-		MWDetMap[gRin.getHeader().epoch] = *MWDet;
+
+		if (LIDetMap.find(gRin.getHeader().epoch)!= LIDetMap.end())
+		{
+			solver.FilterData[gRin.getHeader().epoch] = solver.getState();
+			LIDetMap[gRin.getHeader().epoch] = *LIDet;
+			MWDetMap[gRin.getHeader().epoch] = *MWDet;
+			DBOUT_LINE("state stored")
+		}
+		//SatArcMap[gRin.getHeader().epoch] = *satArcMarker;
+
 		return gRin;
 	}
 
@@ -136,7 +145,7 @@ namespace pod
 		std::string msg = "Can't get observables treshold for type: '"
             + TypeID::tStrings[type.type] +
             "' with reprocess cycle number: '"
-            + StringUtils::asString(cycleNumber) + "'.";
+            + gpstk::StringUtils::asString(cycleNumber) + "'.";
 
         InvalidRequest e(msg);
         GPSTK_THROW(e);

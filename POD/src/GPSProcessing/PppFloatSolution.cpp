@@ -45,6 +45,7 @@
 #include"UsedInPvtMarker.hpp"
 
 #include"WinUtils.h"
+#include"StringUtils.h"
 
 using namespace gpstk;
 

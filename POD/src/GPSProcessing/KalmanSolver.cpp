@@ -40,11 +40,11 @@ namespace pod
 	double KalmanSolver::maxGap = 500;
 
 	KalmanSolver::KalmanSolver()
-		:firstTime(true), isValid_(false)
+		:firstTime(true), isValid(false)
 	{}
 
 	KalmanSolver::KalmanSolver(eqComposer_sptr eqs)
-		: firstTime(true), equations(eqs), isValid_(false)
+		: firstTime(true), equations(eqs), isValid(false)
 	{}
 
 	KalmanSolver::~KalmanSolver()
@@ -53,23 +53,21 @@ namespace pod
 	IRinex& KalmanSolver::Process(IRinex& gData)
 	{
 		//invalidate solution
-		isValid_ = false;
-
+		isValid = false;
+		isReset = false;
 		double dt = abs(t_pre - gData.getHeader().epoch);
-		t_pre = gData.getHeader().epoch;
+		
 
 		if (dt > maxGap)
 		{
+
+			isReset = true;
+			FilterData[t_pre] = getState();
 			reset();
 			DBOUT_LINE("dt= " << dt << "->RESET")
 			//resetEpoches.insert(gData.getHeader().epoch);
 		}
-#if _DEBUG
-		bool b;
-		CATCH_TIME(gData.getHeader().epoch, 2014, 03, 20, 2, 48, 30, b)
-			if (b)
-				DBOUT_LINE("catched")
-#endif
+		t_pre = gData.getHeader().epoch;
 		//workaround: reset PPP engine every day 
 		double  sec = gData.getHeader().epoch.getSecondOfDay();
 		if ((int)sec % 86400 == 0 && equations->getSlnType() == SlnType::PPP_Float)
@@ -181,7 +179,7 @@ namespace pod
 		equations->storeKfState(floatSolution, covMatrix);
 
 		//everything is OK => set solutiuon status to VALID
-		isValid_ = true;
+		isValid = true;
 		return gData;
 	}
 
@@ -207,7 +205,7 @@ namespace pod
 	int KalmanSolver::checkPhase(IRinex& gData)
 	{
 		static const double codeLim(DBL_MAX);
-		static const double phaseLim(10.1);
+		static const double phaseLim(0.1);
 		
 		auto svSet = gData.getBody().getSatID();
 		resid maxPhaseResid;

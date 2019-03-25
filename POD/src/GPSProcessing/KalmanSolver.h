@@ -49,7 +49,6 @@ namespace pod
 			return sigma;
 		}
 
-
 		virtual double getPhaseSigma() const
 		{
 			return phaseSigma;
@@ -67,9 +66,9 @@ namespace pod
 		}
 
 		//return isValid
-		virtual bool isValid() const
+		virtual bool getValid() const
 		{
-			return isValid_;
+			return isValid;
 		}
 
 		//set minimum number of satellites requared for state esimation
@@ -95,8 +94,15 @@ namespace pod
 			equations->setState(newState);
 			return *this;
 		}
+		bool getResetState()
+		{
+			return isReset;
+		}
 
 		bool ResetIfRequared(const gpstk::CommonTime& t, const filterHistory& data);
+
+		//filter states, processed so far will be used in case of filer reset
+		std::map<gpstk::CommonTime, EquationComposer::FilterState> FilterData;
 
 	protected:
 
@@ -121,9 +127,6 @@ namespace pod
 		gpstk::CommonTime t_pre = gpstk::CommonTime::BEGINNING_OF_TIME;
 
 		bool firstTime;
-
-		// Indicator of current filter state validity
-		bool isValid_;
 
 		// Minimum satellites number required for state computation
 		size_t minSatNumber;
@@ -153,5 +156,10 @@ namespace pod
 		//object to prepare h, phi, q  matrices for filter
 		eqComposer_sptr equations;
 
+		// Indicator of current filter state validity
+		bool isValid;
+
+		// Indicate, if reset occurred on current filter step
+		bool isReset;
 	};
 }
