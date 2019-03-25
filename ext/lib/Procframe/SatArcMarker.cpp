@@ -163,10 +163,14 @@ namespace gpstk
                   // This is a new satellite
                satIsNewMap[ (*it).first ] = true;
             }
-
+			double dt = epoch - satArcChangeMap[(*it).first];
                // Check if we are inside unstable period
-            bool insideUnstable(std::abs(epoch-satArcChangeMap[(*it).first]) <=
-                                                               unstablePeriod );
+			
+            bool insideUnstable = false;
+			if (std::abs(dt) <= unstablePeriod)
+				insideUnstable = true;
+			else
+				satArcChangeMap[(*it).first] = CommonTime::BEGINNING_OF_TIME;
 
                // Satellites can be new only once, and having at least once a
                // flag > 0.0 outside 'unstablePeriod' will make them old.
@@ -211,7 +215,7 @@ namespace gpstk
             (*it).second->get_value()[TypeID::satArc] = satArcMap[ (*it).first ];
 
          }
-
+		
             // Remove satellites with missing data
          gData.removeSatID(satRejectedSet);
 
