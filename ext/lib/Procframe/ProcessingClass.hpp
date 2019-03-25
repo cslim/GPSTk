@@ -98,6 +98,9 @@ namespace gpstk
 
 		enum SatUsedStatus
 		{
+			Unknown = -128,
+			RejectedByLIDetector = -4,
+			RejectedByMWDetector = -3,
 			NotEnoughData = -2,
 			RejectedByCsDetector = -1,
 			NotUsedInPVT = 0,

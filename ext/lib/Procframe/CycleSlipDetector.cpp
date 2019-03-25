@@ -113,11 +113,30 @@ namespace gpstk
 						continue;
 
 				}
-				
+
+				auto st = SatUsedStatus::Unknown;
+				auto it1 = it.second->get_value().find(TypeID::satStatus);
+				if (it1 != it.second->get_value().end())
+					st = static_cast<SatUsedStatus>((int)it1->second);
+
 				if (res == DetectionResult::NotEnoughData)
 					it.second->get_value()[TypeID::satStatus] = SatUsedStatus::NotEnoughData;
 				else if (res == DetectionResult::CsDetected)
 					it.second->get_value()[TypeID::satStatus] = SatUsedStatus::RejectedByCsDetector;
+				else if (res == DetectionResult::CsDetectedByMW)
+				{
+					if (st == SatUsedStatus::RejectedByLIDetector)
+						it.second->get_value()[TypeID::satStatus] = SatUsedStatus::RejectedByCsDetector;
+					else
+						it.second->get_value()[TypeID::satStatus] = SatUsedStatus::RejectedByMWDetector;
+				}
+				else if (res == DetectionResult::CsDetectedByLI2)
+				{
+					if (st == SatUsedStatus::RejectedByMWDetector)
+						it.second->get_value()[TypeID::satStatus] = SatUsedStatus::RejectedByCsDetector;
+					else
+						it.second->get_value()[TypeID::satStatus] = SatUsedStatus::RejectedByLIDetector;
+				}
 
 				it.second->get_value()[resultType1] += res;
 

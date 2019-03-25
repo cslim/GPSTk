@@ -142,8 +142,9 @@ namespace gpstk
 		{
 			NotDetected = 0,
 			CsDetected = 1,
-			NotEnoughData = 2
-
+			NotEnoughData = 2,
+			CsDetectedByMW = 3,
+			CsDetectedByLI2 = 4,
 		};
 
 		virtual DetectionResult getDetection(const CommonTime& epoch,

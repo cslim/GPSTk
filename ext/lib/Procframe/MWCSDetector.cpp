@@ -174,13 +174,13 @@ namespace gpstk
            (epochflag==6)  ||
            (tempLLI1==1.0) ||
            (tempLLI2==1.0) ||
-           (currentDeltaT > deltaTMax && isReprocess) )
+           (currentDeltaT > deltaTMax /*&& isReprocess*/) )
       {
 
             // We reset the filter with this
          MWData[sat].windowSize = 1;
 
-         reportCS = DetectionResult::CsDetected;                // Report cycle slip
+         reportCS = DetectionResult::NotEnoughData; // Report cycle slip
       }
 
 
@@ -195,7 +195,7 @@ namespace gpstk
                // We reset the filter with this
             MWData[sat].windowSize = 1;
 
-            reportCS = DetectionResult::CsDetected; // Report cycle slip
+            reportCS = DetectionResult::CsDetectedByMW; // Report cycle slip
 
          }
       }

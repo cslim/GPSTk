@@ -213,7 +213,7 @@ namespace gpstk
            (epochflag==6)  ||
            (tempLLI1==1.0) ||
            (tempLLI2==1.0) ||
-           (currentDeltaT > deltaTMax && isReprocess))
+           (currentDeltaT > deltaTMax/* && isReprocess*/))
       {
 
             // We reset buffer with the following lines
@@ -224,7 +224,7 @@ namespace gpstk
          s = LIData[sat].LIEpoch.size();
 
             // Report cycle slip
-         reportCS = DetectionResult::CsDetected;
+         reportCS = DetectionResult::NotEnoughData;
       }
 
          // Check if we have enough data to start processing.
@@ -317,7 +317,7 @@ namespace gpstk
 					 LIData[sat].LIEpoch.clear();
 					 LIData[sat].LIBuffer.clear();
 
-					 reportCS = DetectionResult::CsDetected;
+					 reportCS = DetectionResult::CsDetectedByLI2;
 
 				 }
 			 }
@@ -329,7 +329,7 @@ namespace gpstk
 			 LIData[sat].LIEpoch.clear();
 			 LIData[sat].LIBuffer.clear();
 
-			 reportCS = DetectionResult::CsDetected;
+			 reportCS = DetectionResult::CsDetectedByLI2;
 		 }
       }
       else
