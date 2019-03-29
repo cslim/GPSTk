@@ -1,14 +1,29 @@
 #include "Rinex3EphemerisStore.hpp"
 #include"Solution.h"
 #include"Action.h"
+#include"Rtcm3Decoder.hpp"
+#include"SerialDataSource.hpp"
+#include"BitSetProxy.hpp"
 
 #include <iostream>
 #include<filesystem>
+#include <boost/dynamic_bitset.hpp>
 
 using namespace std;
 using namespace gpstk;
 using namespace pod;
 namespace fs = std::experimental::filesystem;
+typedef unsigned char uchar;
+
+void testRtcm()
+{
+
+	
+	data_source_uptr ser(std::make_unique<SerialDataSource>("COM6",115200));
+	Rtcm3Decoder dec(std::move(ser));
+	dec.getObs();
+	system("pause");
+}
 
 void testRinNav(char* path)
 {
@@ -93,6 +108,7 @@ void testPod(char * path)
 int main(int argc, char* argv[])
 {
 	cout << "Build: " << __DATE__" " << __TIME__ << endl << endl;
+	testRtcm();
     //cout << CivilTime(CommonTime::BEGINNING_OF_TIME) << endl;
     //Solution sol(argv[1]);
     //sol.chekObs();
@@ -104,7 +120,7 @@ int main(int argc, char* argv[])
     //testRinParse(argv[1]);
     cout << argv[1] << endl;
 
-    testPod(argv[1]);
+    //testPod(argv[1]);
     //system("pause");
     return 0;
 }
