@@ -26,7 +26,7 @@ namespace pod
 		TypeID::postfitPC,
 	};
 
-	//set of all possible TypeID for  carrier phase postfit residuals 
+	//set of all possible TypeID for  carrier phase postfit residuals
 	const std::set<gpstk::TypeID> KalmanSolver::phaseResTypes
 	{
 		TypeID::postfitL,
@@ -37,7 +37,7 @@ namespace pod
 
 
 	//maximum time interval (in seconds) without data
-	double KalmanSolver::maxGap = 500;
+	double KalmanSolver::maxGap = 61;
 
 	KalmanSolver::KalmanSolver()
 		:firstTime(true), isValid(false)
@@ -56,11 +56,9 @@ namespace pod
 		isValid = false;
 		isReset = false;
 		double dt = abs(t_pre - gData.getHeader().epoch);
-		
 
 		if (dt > maxGap)
 		{
-
 			isReset = true;
 			FilterData[t_pre] = getState();
 			reset();
