@@ -44,6 +44,11 @@ namespace gpstk
 
 		return	*this;
 	}
+	void RinexEpoch:: 
+		addSv(const SatID& sv, const typeValueMap& data)
+	{
+		rinex.body.emplace(sv, data);
+	}
 
     void RinexEpoch::
         resetCurrData()

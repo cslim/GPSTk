@@ -33,7 +33,7 @@ namespace gpstk
 
         virtual SatTypePtrMap& getBody() = 0;
 		virtual const SatTypePtrMap& getBody() const = 0;
-
+		virtual void addSv(const SatID& sv, const typeValueMap& data) = 0;
 		virtual  void resetCurrData() = 0;
     };
 
@@ -86,6 +86,7 @@ namespace gpstk
 		{
 			return i << rinex;
 		}
+		void addSv(const SatID& sv, const typeValueMap& data) override;
 
         RinexEpoch extractSatID(const SatID& satellite) const;
 
