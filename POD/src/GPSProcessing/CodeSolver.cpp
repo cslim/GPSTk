@@ -1,5 +1,7 @@
 #include"CodeSolver.h"
 
+using namespace gpstk;
+
 namespace pod
 {
   

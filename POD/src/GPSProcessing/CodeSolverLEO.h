@@ -15,9 +15,9 @@ namespace pod
     public:
         CodeSolverLEO(GnssDataStore_sptr data) : CodeSolverBase(data)
         {};
-        virtual ~CodeSolverLEO()
-        {};
-        string virtual getName() override
+        virtual ~CodeSolverLEO() {};
+
+        std::string virtual getName() override
         {
             return "CodeSolverLEO";
         };

@@ -38,11 +38,11 @@ namespace pod
         }
         catch (...)
         {
-            cerr << "Problem opening file "
+            std::cerr << "Problem opening file "
                 << path
-                << endl;
-            cerr << "Maybe it doesn't exist or you don't have proper "
-                << "read permissions." << endl;
+                << std::endl;
+            std::cerr << "Maybe it doesn't exist or you don't have proper "
+                << "read permissions." << std::endl;
 
             exit(-1);
 
@@ -86,28 +86,28 @@ namespace pod
             opts.fullOutput = confReader->getValueAsBoolean("fullOutput");
 
             opts.slnType = (SlnType)confReader->getValueAsInt("slnType");
-            cout << "Solution Type: " << slnType2Str[opts.slnType] << endl;
+            std::cout << "Solution Type: " << slnType2Str[opts.slnType] << std::endl;
 
             //set generic files direcory 
-            string subdir = confReader->getValue("GenericFilesDir");
+            std::string subdir = confReader->getValue("GenericFilesDir");
             opts.genericFilesDirectory = opts.workingDir + "\\" + subdir + "\\";
 
             for (auto it : confReader->getListValueAsInt("carrierBands"))
                 opts.carrierBands.insert(static_cast<CarrierBand>(it));
 
-            cout << "Used Carrier bands: ";
-            for_each(opts.carrierBands.begin(), opts.carrierBands.end(), [](auto && it) { cout << carrierBand2Str[it] << " "; });
-            cout << endl;
+            std::cout << "Used Carrier bands: ";
+            for_each(opts.carrierBands.begin(), opts.carrierBands.end(), [](auto && it) { std::cout << carrierBand2Str[it] << " "; });
+            std::cout << std::endl;
 
             for (auto it : confReader->getListValueAsInt("satSystems"))
                 opts.systems.insert(static_cast<SatID::SatelliteSystem>(it));
 
-            cout << "Used Sat. Systems: ";
-            for_each(opts.systems.begin(), opts.systems.end(), [](auto && ss) { cout << SatID::convertSatelliteSystemToString(ss) << " "; });
-            cout << endl;
+            std::cout << "Used Sat. Systems: ";
+            for_each(opts.systems.begin(), opts.systems.end(), [](auto && ss) { std::cout << SatID::convertSatelliteSystemToString(ss) << " "; });
+            std::cout << std::endl;
 
-            cout << "Ephemeris Loading... ";
-            cout << loadEphemeris() << endl;
+            std::cout << "Ephemeris Loading... ";
+            std::cout << loadEphemeris() << std::endl;
 
             //opts.isComputeApprPos = confReader->getValueAsBoolean("calcApprPos");
             //if (opts.isComputeApprPos)
@@ -117,32 +117,32 @@ namespace pod
             if (confReader->getValueAsBoolean("UseRinexClock"))
             {
 #if !_DEBUG
-                cout << "Load Rinex clock data ... ";
-                cout << loadClocks() << endl;
+                std::cout << "Load Rinex clock data ... ";
+                std::cout << loadClocks() << std::endl;
 #endif
             }
 
-            cout << "Load ionospheric data ... ";
-            cout << loadIono() << endl;
+            std::cout << "Load ionospheric data ... ";
+            std::cout << loadIono() << std::endl;
 
-            cout << "Load Glonass FCN data... ";
-            cout << loadFcn() << endl;
+            std::cout << "Load Glonass FCN data... ";
+            std::cout << loadFcn() << std::endl;
 
-            cout << "Load Earth orientation data... ";
-            cout << loadEOPData() << endl;
+            std::cout << "Load Earth orientation data... ";
+            std::cout << loadEOPData() << std::endl;
 
-			cout << "Appr. position  source: ";
+			std::cout << "Appr. position  source: ";
 			if (createPosProvider())
-				cout << IApprPosProvider::posSource2Str[apprPos->getSource()] << endl;
+				std::cout << IApprPosProvider::posSource2Str[apprPos->getSource()] << std::endl;
         }
         catch (const Exception& e)
         {
-            cout << "Failed to load input data. An error has occured: " << e.what() << endl;
+            std::cout << "Failed to load input data. An error has occured: " << e.what() << std::endl;
             exit(-1);
         }
         catch (const std::exception& e)
         {
-            cout << "Failed to load input data: An error has occured: " << e.what() << endl;
+            std::cout << "Failed to load input data: An error has occured: " << e.what() << std::endl;
             exit(-1);
         }
     }
@@ -162,8 +162,8 @@ namespace pod
         SP3EphList.setPosMaxInterval(10000);
         SP3EphList.setClockMaxInterval(10000);
 
-        list<string> files;
-        string subdir = confReader->getValue("EphemerisDir");
+        std::list<std::string> files;
+        std::string subdir = confReader->getValue("EphemerisDir");
         FsUtils::getAllFilesInDir(opts.workingDir + "\\" + subdir, files);
 
         for (auto file : files)
@@ -176,8 +176,8 @@ namespace pod
             catch (FileMissingException& e)
             {
                 // If file doesn't exist, issue a warning
-                cerr << "SP3 file '" << file << "' doesn't exist or you don't "
-                    << "have permission to read it. Skipping it." << endl;
+                std::cerr << "SP3 file '" << file << "' doesn't exist or you don't "
+                    << "have permission to read it. Skipping it." << std::endl;
                 exit(-1);
             }
         }
@@ -187,8 +187,8 @@ namespace pod
     //reading clock data
     bool GnssDataStore::loadClocks()
     {
-        list<string> files;
-        string subdir = confReader->getValue("RinexClockDir");
+        std::list<std::string> files;
+        std::string subdir = confReader->getValue("RinexClockDir");
         FsUtils::getAllFilesInDir(opts.workingDir + "\\" + subdir, files);
 
         for (auto file : files)
@@ -201,8 +201,8 @@ namespace pod
             catch (FileMissingException& e)
             {
                 // If file doesn't exist, issue a warning
-                cerr << "Rinex clock file '" << file << "' doesn't exist or you don't "
-                    << "have permission to read it. Skipping it." << endl;
+                std::cerr << "Rinex clock file '" << file << "' doesn't exist or you don't "
+                    << "have permission to read it. Skipping it." << std::endl;
                 exit(-1);
             }
         }
@@ -240,8 +240,8 @@ namespace pod
 
     bool GnssDataStore::loadIonoMap()
     {
-        list<string> files;
-        string subdir = confReader->getValue("IonexDir");
+        std::list<std::string> files;
+        std::string subdir = confReader->getValue("IonexDir");
         FsUtils::getAllFilesInDir(opts.workingDir + "\\" + subdir, files);
         ionexStore.clear();
         for (auto& file : files)
@@ -254,8 +254,8 @@ namespace pod
 
     bool  GnssDataStore::loadBceIonoModel()
     {
-        const string gpsObsExt = ".[\\d]{2}[nN]";
-        list<string> files;
+        const std::string gpsObsExt = ".[\\d]{2}[nN]";
+        std::list<std::string> files;
 
         FsUtils::getAllFilesInDir(opts.workingDir + "\\" + opts.bceDir, gpsObsExt, files);
         int i = 0;
@@ -284,13 +284,13 @@ namespace pod
                         bool b = std::regex_search(it.c_str(), res, rxDoY);
                         if (b)
                         {
-                            string sDay = res[0];
+                            std::string sDay = res[0];
                             sDay = sDay.substr(sDay.size() - 4, 4);
                             doy = stoi(sDay);
                         }
                         if (std::regex_search(it.c_str(), res, rxY))
                         {
-                            string sDay = res[0];
+                            std::string sDay = res[0];
                             sDay = sDay.substr(sDay.size() - 5, 5);
                             yr = stoi(sDay);
                         }
@@ -324,8 +324,8 @@ namespace pod
                 }
                 else
                 {
-                    cerr << "WARNING: Navigation file " << file
-                        << " doesn't have valid ionospheric correction parameters." << endl;
+                    std::cerr << "WARNING: Navigation file " << file
+                        << " doesn't have valid ionospheric correction parameters." << std::endl;
                     exit(-1);
                 }
 
@@ -333,9 +333,9 @@ namespace pod
             }
             catch (...)
             {
-                cerr << "Problem opening file " << file << endl;
-                cerr << "Maybe it doesn't exist or you don't have proper read "
-                    << "permissions." << endl;
+                std::cerr << "Problem opening file " << file << std::endl;
+                std::cerr << "Maybe it doesn't exist or you don't have proper read "
+                    << "permissions." << std::endl;
                 exit(-1);
             }
         }
@@ -348,8 +348,8 @@ namespace pod
 
     bool GnssDataStore::loadFcn()
     {
-        const string glnObsExt = ".[\\d]{2}[gG]";
-        list<string> files;
+        const std::string glnObsExt = ".[\\d]{2}[gG]";
+        std::list<std::string> files;
         FsUtils::getAllFilesInDir(opts.workingDir + "\\" + opts.bceDir, glnObsExt, files);
 
         for (auto file : files)
@@ -360,9 +360,9 @@ namespace pod
             }
             catch (...)
             {
-                cerr << "Problem opening file " << file << endl;
-                cerr << "Maybe it doesn't exist or you don't have proper read "
-                    << "permissions." << endl;
+                std::cerr << "Problem opening file " << file << std::endl;
+                std::cerr << "Maybe it doesn't exist or you don't have proper read "
+                    << "permissions." << std::endl;
                 exit(-1);
             }
         }
@@ -372,14 +372,14 @@ namespace pod
     bool GnssDataStore::loadEOPData()
     {
 
-        string iersEopFile = opts.genericFilesDirectory;
+        std::string iersEopFile = opts.genericFilesDirectory;
         try
         {
             iersEopFile += confReader->getValue("IersEopFile");
         }
         catch (...)
         {
-            cerr << "Problem get value from config: file \"IersEopFile\" " << endl;
+            std::cerr << "Problem get value from config: file \"IersEopFile\" " << std::endl;
             exit(-1);
         }
 
@@ -389,9 +389,9 @@ namespace pod
         }
         catch (...)
         {
-            cerr << "Problem opening file " << iersEopFile << endl;
-            cerr << "Maybe it doesn't exist or you don't have proper read "
-                << "permissions." << endl;
+            std::cerr << "Problem opening file " << iersEopFile << std::endl;
+            std::cerr << "Maybe it doesn't exist or you don't have proper read "
+                << "permissions." << std::endl;
             exit(-1);
         }
         return eopStore.size() > 0;
@@ -399,14 +399,14 @@ namespace pod
 
     bool GnssDataStore::loadCodeBiades()
     {
-        string biasesFile = opts.genericFilesDirectory;
+        std::string biasesFile = opts.genericFilesDirectory;
         try
         {
             biasesFile += confReader->getValue("IersEopFile");
         }
         catch (...)
         {
-            cerr << "Problem get value from config: file \"IersEopFile\" " << endl;
+            std::cerr << "Problem get value from config: file \"IersEopFile\" " << std::endl;
             exit(-1);
         }
 
@@ -416,9 +416,9 @@ namespace pod
         }
         catch (...)
         {
-            cerr << "Problem opening file " << biasesFile << endl;
-            cerr << "Maybe it doesn't exist or you don't have proper read "
-                << "permissions." << endl;
+            std::cerr << "Problem opening file " << biasesFile << std::endl;
+            std::cerr << "Maybe it doesn't exist or you don't have proper read "
+                << "permissions." << std::endl;
             exit(-1);
         }
         return eopStore.size() > 0;
@@ -426,7 +426,7 @@ namespace pod
 
     void GnssDataStore::checkObservable()
     {
-        ofstream os(opts.workingDir + "\\ObsStatisic.out");
+		std::ofstream os(opts.workingDir + "\\ObsStatisic.out");
 
         for (auto obsFile : getObsFiles(opts.SiteRover))
         {
@@ -436,7 +436,7 @@ namespace pod
             // Open Rinex observations file in read-only mode
             rin.open(obsFile, std::ios::in);
 
-            rin.exceptions(ios::failbit);
+            rin.exceptions(std::ios::failbit);
             Rinex3ObsHeader roh;
             Rinex3ObsData rod;
 
@@ -448,7 +448,7 @@ namespace pod
                 if (rod.epochFlag == 0 || rod.epochFlag == 1)  // Begin usable data
                 {
                     int NumC1(0), NumP1(0), NumP2(0), NumBadCNo1(0);
-                    os << setprecision(12) << (CivilTime)rod.time << " ";
+                    os << std::setprecision(12) << (CivilTime)rod.time << " ";
                     int nGPS = 0, nGLN = 0;
                     for (auto &it : rod.obs)
                     {
@@ -472,7 +472,7 @@ namespace pod
                         if (P2 > 0.0)  NumP2++;
                     }
 
-                    os << nGPS << " " << nGLN << " " << NumBadCNo1 << " " << NumP1 << " " << NumP2 << endl;
+                    os << nGPS << " " << nGLN << " " << NumBadCNo1 << " " << NumP1 << " " << NumP2 << std::endl;
                 }
             }
         }
@@ -484,16 +484,16 @@ namespace pod
 		switch (apprPosProvider)
 		{
 		case IApprPosProvider::FromConfig:
-			apprPos = make_unique<ApprPosSimple>(getPosition(opts.SiteRover));
+			apprPos = std::make_unique<ApprPosSimple>(getPosition(opts.SiteRover));
 			return true;
 		case IApprPosProvider::ComputeForEachEpoch:
-			apprPos = make_unique<ComputeOnePos>(SP3EphList);
+			apprPos = std::make_unique<ComputeOnePos>(SP3EphList);
 			return true;
 		case IApprPosProvider::ComputeForFirstEpoch:
-			apprPos = make_unique<ComputeOnePos>(SP3EphList);
+			apprPos = std::make_unique<ComputeOnePos>(SP3EphList);
 			return true;
 		case IApprPosProvider::LoadFromFile:
-			apprPos = make_unique<PositionFromFile>(opts.workingDir + "\\" + confReader->getValue("ApprPosFile"));
+			apprPos = std::make_unique<PositionFromFile>(opts.workingDir + "\\" + confReader->getValue("ApprPosFile"));
 			return true;
 		default:
 			return false;
@@ -509,13 +509,11 @@ namespace pod
 		return pos;
 	}
 
-    list<string> GnssDataStore::getObsFiles(const string & siteID)const
+    std::list<std::string> GnssDataStore::getObsFiles(const std::string & siteID) const
     {
-        list<string> ObsFiles;
-        string  subdir = confReader->getValue("RinesObsDir");
+        std::list<std::string> ObsFiles;
+        std::string  subdir = confReader->getValue("RinesObsDir");
         FsUtils::getAllFilesInDir(opts.workingDir + "\\" + subdir + "\\" + siteID, ObsFiles);
         return ObsFiles;
     }
-
-
 }

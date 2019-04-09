@@ -24,11 +24,11 @@ namespace pod
             return "CodeSolver";
         };
         virtual double getTropoCorrection(
-            const Position &rxPos,
-            const Position &svPos,
-            const CommonTime &t) const override;
+            const gpstk::Position &rxPos,
+            const gpstk::Position &svPos,
+            const gpstk::CommonTime &t) const override;
 
-        virtual NeillTropModel initTropoModel(const Position &nominalPos, int DoY) override;
+        virtual gpstk::NeillTropModel initTropoModel(const gpstk::Position &nominalPos, int DoY) override;
     protected:
 
 

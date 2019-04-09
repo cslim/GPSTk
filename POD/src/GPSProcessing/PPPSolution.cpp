@@ -69,11 +69,11 @@ namespace pod
         SimpleFilter SNRFilter(TypeID::S1, confReader().getValueAsInt("SNRmask"), DBL_MAX);
 
         ProcessLinear linear1;
-        linear1.add(make_unique<PDelta>());
-        linear1.add(make_unique<MWoubenna>());
+        linear1.add(std::make_unique<PDelta>());
+        linear1.add(std::make_unique<MWoubenna>());
 
-        linear1.add(make_unique<LDelta>());
-        linear1.add(make_unique<LICombimnation>());
+        linear1.add(std::make_unique<LDelta>());
+        linear1.add(std::make_unique<LICombimnation>());
         
         // Objects to mark cycle slips
         LICSDetector2 markCSLI2;         // Checks LI cycle slips
@@ -116,7 +116,7 @@ namespace pod
         Antenna receiverAntenna;
 
         // Feed Antex reader object with Antex file
-        string afile = opts().genericFilesDirectory;
+        std::string afile = opts().genericFilesDirectory;
         afile += confReader().getValue("antexFile");
 
         antexReader.open(afile);
@@ -153,8 +153,8 @@ namespace pod
         // Object to compute ionosphere-free combinations to be used
         // as observables in the PPP processing
         ProcessLinear linear2;
-        linear2.add(make_unique<PCCombimnation>());
-        linear2.add(make_unique<LCCombimnation>());
+        linear2.add(std::make_unique<PCCombimnation>());
+        linear2.add(std::make_unique<LCCombimnation>());
 
         // Add to processing list
         // Declare a simple filter object to screen PC
@@ -193,12 +193,12 @@ namespace pod
         SolverPPP   pppSolver (useAdvClkModel,tropoQ, posSigma, clkSigma, weightFactor);
         SolverPPPFB fbpppSolver(useAdvClkModel, tropoQ, posSigma, clkSigma, weightFactor);
        
-        list<double> phaselims = confReader().getListValueAsDouble("phaseLimlist");
+        std::list<double> phaselims = confReader().getListValueAsDouble("phaseLimlist");
         fbpppSolver.setPhaseList(phaselims);
-        list<double> codelims = confReader().getListValueAsDouble("codeLimList");
+		std::list<double> codelims = confReader().getListValueAsDouble("codeLimList");
         fbpppSolver.setCodeList(codelims);
         int cycles(std::max<int>(phaselims.size(), codelims.size()));
-        cout <<"cycles "<< cycles << endl;
+        std::cout <<"cycles "<< cycles << std::endl;
 
         if (useAdvClkModel)
         {
@@ -234,23 +234,23 @@ namespace pod
         // Prepare for printing
         int prec(4);
 
-        ofstream outfile;
-        outfile.open(opts().workingDir + "\\" + fileName(), ios::out);
+        std::ofstream outfile;
+        outfile.open(opts().workingDir + "\\" + fileName(), std::ios::out);
 
         #pragma endregion
 
         i = 1;
-        cout << "First forward processing part started." << endl;
+        std::cout << "First forward processing part started." << std::endl;
         for (auto& obsFile : data->getObsFiles(opts().SiteRover))
         {
-            cout << obsFile << endl;
+            std::cout << obsFile << std::endl;
             //Input observation file stream
             Rinex3ObsStream rin;
 
             //Open Rinex observations file in read-only mode
             rin.open(obsFile, std::ios::in);
 
-            rin.exceptions(ios::failbit);
+            rin.exceptions(std::ios::failbit);
             Rinex3ObsHeader roh;
 
             //read the header
@@ -336,13 +336,13 @@ namespace pod
                     printSolution(outfile, pppSolver, time,  ep);
 
                     //add epoch to results
-                    gMap.data.insert(pair<CommonTime, GnssEpoch>(time, ep));
+                    gMap.data.insert(std::pair<CommonTime, GnssEpoch>(time, ep));
                 } 
             } 
 
             rin.close();
         }
-        cout << "First forward processing part finished." << endl;
+        std::cout << "First forward processing part finished." << std::endl;
 
         // Now decide what to do: If solver was a 'forwards-only' version,
         // then we are done and should continue with next station.
@@ -350,7 +350,7 @@ namespace pod
         {
             outfile.close();
             // We are done with this station. Let's show a message
-            cout << "Processing finished for station: '" << opts().SiteRover <<"'." << endl;
+            std::cout << "Processing finished for station: '" << opts().SiteRover <<"'." << std::endl;
 
             return true;
         }
@@ -358,14 +358,14 @@ namespace pod
         // Now, let's do 'forwards-backwards' cycles
         try
         {
-            cout << "fw-bw bart begin..." << endl;
+            std::cout << "fw-bw bart begin..." << std::endl;
             fbpppSolver.ReProcess();
         }
         catch (Exception& e)
         {
             // If problems arose, issue an message and skip receiver
-            cerr << "Exception at reprocessing phase: " << e << endl;
-            cerr << "Station '" << opts().SiteRover << "'." << endl;
+			std::cerr << "Exception at reprocessing phase: " << e << std::endl;
+			std::cerr << "Station '" << opts().SiteRover << "'." << std::endl;
 
             // Close output file for this station
             outfile.close();
@@ -382,12 +382,12 @@ namespace pod
             GnssEpoch ep(gRin.getBody());
 			apprPos().getPosition(gRin, nominalPos);
             printSolution(outfile, fbpppSolver, gRin.getHeader().epoch, ep);
-            gMap.data.insert(pair<CommonTime, GnssEpoch>(gRin.getHeader().epoch, ep));
+            gMap.data.insert(std::pair<CommonTime, GnssEpoch>(gRin.getHeader().epoch, ep));
 
         }  // End of 'while( fbpppSolver.LastProcess(gRin) )'
 
-        cout << "Processing finished for station: '" << opts().SiteRover << "'." << endl;
-        cout << "Num. of rejected meas. " << fbpppSolver.getRejectedMeasurements() << endl;
+        std::cout << "Processing finished for station: '" << opts().SiteRover << "'." << std::endl;
+        std::cout << "Num. of rejected meas. " << fbpppSolver.getRejectedMeasurements() << std::endl;
        
         outfile.close();
 
@@ -405,16 +405,16 @@ namespace pod
         requireObs.addRequiredType(TypeID::S1);
     }
 
-    void PPPSolution::printSolution(ofstream& outfile, const SolverLMS& solver, const CommonTime& time, GnssEpoch& gEpoch)
+    void PPPSolution::printSolution(std::ofstream& outfile, const SolverLMS& solver, const CommonTime& time, GnssEpoch& gEpoch)
     {
         // Prepare for printing
-        outfile << fixed << setprecision(outputPrec);
+        outfile << std::fixed << std::setprecision(outputPrec);
 
         // Print results
         outfile << static_cast<YDSTime>(time).year << "-";   // Year           - #1
         outfile << static_cast<YDSTime>(time).doy << "-";    // DayOfYear      - #2
         outfile << static_cast<YDSTime>(time).sod << "  ";   // SecondsOfDay   - #3
-        outfile << setprecision(6) << (static_cast<YDSTime>(time).doy + static_cast<YDSTime>(time).sod / 86400.0) << "  " << setprecision(outputPrec);
+        outfile << std::setprecision(6) << (static_cast<YDSTime>(time).doy + static_cast<YDSTime>(time).sod / 86400.0) << "  " << std::setprecision(outputPrec);
 
         // We add 0.1 meters to 'wetMap' because 'NeillTropModel' sets a
         // nominal value of 0.1 m. Also to get the total we have to add the
@@ -422,15 +422,15 @@ namespace pod
         // ztd - #7
         double wetMap = solver.getSolution(TypeID::wetMap) + 0.1 + this->tropModel.dry_zenith_delay();
 
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recZTropo, wetMap));
+        gEpoch.slnData.insert(std::pair<TypeID, double>(TypeID::recZTropo, wetMap));
 
         double x = nominalPos.X() + solver.getSolution(TypeID::dx);    // dx    - #4
         double y = nominalPos.Y() + solver.getSolution(TypeID::dy);    // dy    - #5
         double z = nominalPos.Z() + solver.getSolution(TypeID::dz);    // dz    - #6
 
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recX, x));
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recY, y));
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recZ, z));
+        gEpoch.slnData.insert(std::pair<TypeID, double>(TypeID::recX, x));
+        gEpoch.slnData.insert(std::pair<TypeID, double>(TypeID::recY, y));
+        gEpoch.slnData.insert(std::pair<TypeID, double>(TypeID::recZ, z));
 
         double varX = solver.getVariance(TypeID::dx);     // Cov dx    - #8
         double varY = solver.getVariance(TypeID::dy);     // Cov dy    - #9
@@ -438,7 +438,7 @@ namespace pod
         double sigma = sqrt(varX + varY + varZ);
 
         double cdt = solver.getSolution(TypeID::cdt);
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdt, cdt));
+        gEpoch.slnData.insert(std::pair<TypeID, double>(TypeID::recCdt, cdt));
 
         //
         outfile << x << "  " << y << "  " << z << "  " << cdt << " ";
@@ -449,7 +449,7 @@ namespace pod
         if (defeq.body.find(TypeID::recISB_GLN) != defeq.body.end())
         {
             double cdtGLO = solver.getSolution(TypeID::recISB_GLN);
-            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recISB_GLN, cdtGLO));
+            gEpoch.slnData.insert(std::pair<TypeID, double>(TypeID::recISB_GLN, cdtGLO));
 
             outfile << cdtGLO << " ";
         }
@@ -457,17 +457,17 @@ namespace pod
         if (defeq.body.find(TypeID::recCdtdot) != defeq.body.end())
         {
             double recCdtdot = solver.getSolution(TypeID::recCdtdot);
-            gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recCdtdot, recCdtdot));
+            gEpoch.slnData.insert(std::pair<TypeID, double>(TypeID::recCdtdot, recCdtdot));
 
-            outfile << setprecision(12) << recCdtdot << " ";
+            outfile << std::setprecision(12) << recCdtdot << " ";
         }
 
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::sigma, sigma));
-        outfile << setprecision(6) << wetMap << "  " << sigma << "  ";
+        gEpoch.slnData.insert(std::pair<TypeID, double>(TypeID::sigma, sigma));
+        outfile << std::setprecision(6) << wetMap << "  " << sigma << "  ";
 
-        gEpoch.slnData.insert(pair<TypeID, double>(TypeID::recSlnType, desiredSlnType()));
+        gEpoch.slnData.insert(std::pair<TypeID, double>(TypeID::recSlnType, desiredSlnType()));
 
-        outfile << gEpoch.satData.size() << endl;
+        outfile << gEpoch.satData.size() << std::endl;
     }
 
     void PPPSolution::process()
@@ -479,7 +479,7 @@ namespace pod
         }
         catch (ConfigurationException &conf_exp)
         {
-            cerr << conf_exp.what() << endl;
+			std::cerr << conf_exp.what() << std::endl;
             throw;
         }
         catch (Exception &gpstk_e)
@@ -488,7 +488,7 @@ namespace pod
         }
         catch (std::exception &std_e)
         {
-            cerr << std_e.what() << endl;
+			std::cerr << std_e.what() << std::endl;
             throw;
         }
     }

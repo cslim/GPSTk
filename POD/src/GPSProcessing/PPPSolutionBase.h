@@ -24,12 +24,13 @@ namespace pod
 
     public: virtual ~PPPSolutionBase();
 
-#pragma region Methods
+#pragma region methods
+
     public: virtual SlnType desiredSlnType() const override
     {
         return SlnType::PPP_Float;
     }
-    public: virtual std::string  fileName() const override
+	public: virtual std::string  fileName() const override
     {
         return opts().SiteRover + "_ppp_float.txt";
     }
@@ -47,7 +48,7 @@ namespace pod
 #pragma region Fields
 
                //pointer to object for code solution 
-    protected: unique_ptr<CodeSolverBase> solverPR;
+	protected: std::unique_ptr<CodeSolverBase> solverPR;
 
 #pragma endregion
 

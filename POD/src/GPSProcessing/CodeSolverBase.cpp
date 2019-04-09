@@ -4,6 +4,7 @@
 #include"FsUtils.h"
 #include"WinUtils.h"
 
+using namespace gpstk;
 namespace pod
 {
     double CodeSolverBase::eps = 1e-3;
@@ -39,7 +40,7 @@ namespace pod
     void  CodeSolverBase::selectObservables(
         const Rinex3ObsData &rod,
         const Rinex3ObsHeader& roh,
-        const set<SatID::SatelliteSystem> &systems,
+        const std::set<SatID::SatelliteSystem> &systems,
         const ObsTypes & typeMap,
         CodeProcSvData & svData,
         bool isApplyRCO 
@@ -224,10 +225,10 @@ namespace pod
             Matrix<double> AT = transpose(A);
             Cov = AT *W* A;
             
-            DBOUT("\nW\n" <<W << endl;);
-            DBOUT("\nA\n" << A << endl;);
-            DBOUT("\nb\n"<<b << endl;);
-            DBOUT(" " << Sol << endl<<endl;);
+            DBOUT("\nW\n" <<W << std::endl;);
+            DBOUT("\nA\n" << A << std::endl;);
+            DBOUT("\nb\n"<<b << std::endl;);
+            DBOUT(" " << Sol << std::endl<< std::endl;);
 
             try
             {
@@ -338,11 +339,11 @@ namespace pod
     std::ostream& operator<<(std::ostream& os, 
         const CodeSolverBase& solver)
     {
-        os << setprecision(10) << " ";
+        os << std::setprecision(10) << " ";
         for (size_t i = 0; i < solver.Sol.size(); i++)
             os << solver.Sol(i) << " ";
 
-        os << solver.iter << " "  << setprecision(3) << solver.sigma << " " << solver.RMS3D << " " << solver.PDOP;
+        os << solver.iter << " "  << std::setprecision(3) << solver.sigma << " " << solver.RMS3D << " " << solver.PDOP;
         return os;
     }
 }

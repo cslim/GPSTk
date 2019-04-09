@@ -20,7 +20,7 @@ namespace pod
 
     protected: virtual void updateRequaredObs() override;
 
-    protected:  void printSolution(ofstream& of, const SolverLMS& solver, const CommonTime& time, GnssEpoch& gEpoch) ;
+	protected:  void printSolution(std::ofstream& of, const SolverLMS& solver, const CommonTime& time, GnssEpoch& gEpoch) ;
 
     };
 }

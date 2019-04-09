@@ -2,8 +2,6 @@
 
 #include<list>
 #include<set>
-#include <direct.h>
-#include<windows.h>
 #include<regex>
 
 #include"GnssEpochMap.h"
@@ -12,9 +10,9 @@
 #include"FsUtils.h"
 
 
-#include "Rinex3NavHeader.hpp"
-#include "Rinex3NavData.hpp"
-#include "Rinex3NavStream.hpp"
+#include"Rinex3NavHeader.hpp"
+#include"Rinex3NavData.hpp"
+#include"Rinex3NavStream.hpp"
 #include"GnssDataStore.hpp"
 
 #include"GnssSolution.h"
@@ -53,13 +51,13 @@ namespace pod
     {
         NeillTropModel NeillModel = solverPR->initTropoModel(nominalPos, opts().DoY);
 
-        cout << "solverType " << solverPR->getName() << endl;
+        std::cout << "solverType " << solverPR->getName() << std::endl;
 
         solverPR->maskEl = 5;
         solverPR->ionoType = data->ionoCorrector.getType();
 
-        ofstream os;
-        string outPath = opts().workingDir + "\\" + data->apprPosFile;
+        std::ofstream os;
+        std::string outPath = opts().workingDir + "\\" + data->apprPosFile;
         os.open(outPath);
        
         //decimation
@@ -69,7 +67,7 @@ namespace pod
         for (auto obsFile : data->getObsFiles(opts().SiteRover))
         {
             int badSol(0);
-            cout << obsFile << endl;
+            std::cout << obsFile << std::endl;
             try 
             {
                 //Input observation file stream
@@ -77,7 +75,7 @@ namespace pod
                 // Open Rinex observations file in read-only mode
                 rin.open(obsFile, std::ios::in);
 
-                rin.exceptions(ios::failbit);
+                rin.exceptions(std::ios::failbit);
                 Rinex3ObsHeader roh;
                 Rinex3ObsData rod;
 
@@ -109,7 +107,7 @@ namespace pod
                     svData.applyCNoMask(solverPR->maskSNR);
                     GoodSats = svData.getNumUsedSv();
 
-                    os  << setprecision(6);
+                    os  << std::setprecision(6);
                     os  << CivilTime(gpst).printf("%02Y %02m %02d %02H %02M %02S %P") << " "<<dt<< " ";
 
                     if (GoodSats >= 4)
@@ -128,7 +126,7 @@ namespace pod
                     else
                         res = -1;
 
-                    os << *solverPR<<" "<<svData << endl;
+                    os << *solverPR<<" "<<svData << std::endl;
 
                     if (res == 0)
                     {
@@ -147,14 +145,14 @@ namespace pod
             }
             catch (Exception& e)
             {
-                cerr << e << endl;
+                std::cerr << e << std::endl;
                 GPSTK_RETHROW(e);
             }
             catch (...)
             {
-                cerr << "Caught an unexpected exception." << endl;
+               std:: cerr << "Caught an unexpected exception." << std::endl;
             }
-            cout << "Number of bad solutions for file " << badSol << endl;
+            std::cout << "Number of bad solutions for file " << badSol << std::endl;
         }
     }
    

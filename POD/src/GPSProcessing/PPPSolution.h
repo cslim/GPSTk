@@ -21,10 +21,7 @@ namespace pod
         gpstk::NeillTropModel tropModel;
         virtual void updateRequaredObs() override;
 
-    protected:  void printSolution(ofstream& of, const gpstk::SolverLMS& solver, const gpstk::CommonTime& time, GnssEpoch& gEpoch) ;
-
-
-
+    protected:  void printSolution(std::ofstream& of, const gpstk::SolverLMS& solver, const gpstk::CommonTime& time, GnssEpoch& gEpoch) ;
 
     };
 }
