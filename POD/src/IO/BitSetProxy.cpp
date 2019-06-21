@@ -8,9 +8,15 @@ namespace pod
 	{
 		initialize(inp, offset, len);
 	}
-	
 
-
+	BitSetProxy::BitSetProxy(boost::dynamic_bitset<uchar>& bits, int offset, int len)
+	{
+		this->bits().resize(len);
+		for (size_t i = 0; i < len; i++)
+			this->bits()[i] = bits[offset + i];
+		
+	}
+ 
 	void BitSetProxy::initialize(uchar * inp, int offset, int len)
 	{
 		m_bits.resize(CHAR_BIT*len);
@@ -28,7 +34,7 @@ namespace pod
 		}
 	}
 
-	boost::dynamic_bitset<uchar>& BitSetProxy::
+	boost::dynamic_bitset<uchar> BitSetProxy::
 		reverseSelection(int i0, int len)
 	{
 		auto sel = m_bits >> i0;
@@ -63,7 +69,6 @@ namespace pod
 
 	int BitSetProxy::getInt32(int i0, int len)
 	{
-
 		auto sel = reverseSelection(i0, len);
 		uint mask = 1u;
 		uint res = 0u;
@@ -92,16 +97,39 @@ namespace pod
 		return res;
 	}
 
-	//std::string getString(int i0, int len)
-	//{
+	std::string BitSetProxy::getString(int i0, int len)
+	{
+		std::string s;
+		s.resize(len / 8);
+		int j = 0;
+		for (int i = i0; i < i0 + len; i += 8)
+		{
+			s[j++] = getChar(i);
+		}
+		return s;
+	}
 
-	//}
+	char BitSetProxy::getChar(int i0)
+	{
+		auto sel = reverseSelection(i0, 8);
+		uchar mask = 1ul;
+		char res = 0ul;
+
+		for (int i = 0; i < sel.size(); i++)
+		{
+			if (sel[i])
+				res |= mask;
+
+			mask <<= 1;
+		}
+		return res;
+	}
 
 	std::ostream& operator<<(std::ostream& o, const BitSetProxy& bitSet)
 	{
 		for (int i = 0; i < bitSet.bits().size(); i++)
 		{
-			if (i % 8 == 0)std::cout << ' ';
+			if (i % 8 == 0) std::cout << ' ';
 			o << bitSet.bits()[i];
 		}
 		return o;
