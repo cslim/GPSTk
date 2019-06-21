@@ -7,10 +7,13 @@ using namespace gpstk;
 namespace pod
 {
 
-	gpstk::irinex_uptr Rtcm3Decoder::getObs()
+	void Rtcm3Decoder::run()
 	{
-		irinex_uptr res(std::make_unique<RinexEpoch>());
 		uchar buff[MAX_MSG_LEN];
+
+		std::map<int, rtcm3_msg_uptr> parsers;
+		for (auto&& it : msgsToParse)
+			parsers[it->getID()] = it->clone();
 
 		while (true)
 		{
@@ -18,15 +21,15 @@ namespace pod
 			if (c == PREAMBLE)
 			{
 				std::cout << c <<  std::endl;
-				uchar  lenchars[2]  ;
+				uchar  lenchars[2];
 				source->readBytes(lenchars, 2);
-				BitSetProxy bsp(lenchars, 0, 2);
-				std::cout << bsp << std::endl;
-				ushort len = bsp.getUint32(6, 10);
+				BitSetProxy len_bsp(lenchars, 0, 2);
+				std::cout << len_bsp << std::endl;
+				ushort len = len_bsp.getUint32(6, 10);
 				//std::memcpy(&len, lenchars, 2);
 				
-				std::cout << (int)(lenchars[0]) <<' '<< (int)lenchars[1] << std::endl;
-				std::cout << (len) << std::endl;
+				//std::cout << (int)(lenchars[0]) <<' '<< (int)lenchars[1] << std::endl;
+				//std::cout << (len) << std::endl;
 				if (len < MAX_MSG_LEN)
 				{
 					source->readBytes(buff, 3, len + 3);
@@ -34,14 +37,19 @@ namespace pod
 					buff[1] = lenchars[0];
 					buff[2] = lenchars[1];
 
+
 					bool check = RtcmUtils::crc24q_check(buff, len + 6);
-					std::cout << check << ": " << len << std::endl;
-
+					//std::cout << check << ": " << len << std::endl;
+					if (check)
+					{
+						BitSetProxy msg_bsp(buff, 3, len);
+						int msgId = msg_bsp.getUint32(0, 12);
+						auto msg = parsers.find(msgId);
+						if (msg != parsers.end())
+							msg->second->parse(msg_bsp, *this);
+					}
 				}
-
 			}
 		}
-
-		return res;
 	}
 }

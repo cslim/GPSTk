@@ -107,7 +107,15 @@ namespace gpstk
           */
       virtual IRinex& Process(IRinex& gData);
 
+	  auto begin(void)
+	  {
+		  return proclist.begin();
+	  }
 
+	  auto end(void)
+	  {
+		  return proclist.end();
+	  }
          /// Returns a pointer to the first element.
       virtual ProcessingClass* front(void)
       { return (proclist.front()); };

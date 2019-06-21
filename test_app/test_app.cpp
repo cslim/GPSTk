@@ -19,9 +19,11 @@ void testRtcm()
 {
 
 	
-	data_source_uptr ser(std::make_unique<SerialDataSource>("COM6",115200));
+	data_source_uptr ser(std::make_unique<SerialDataSource>("COM9",115200));
 	Rtcm3Decoder dec(std::move(ser));
-	dec.getObs();
+	dec.addMessage<Rtcm3_1008>();
+	dec.addMessage<Rtcm3_1004>();
+	dec.run();
 	system("pause");
 }
 
@@ -73,6 +75,7 @@ void testRinParse(char* path1)
             }
         }
         rout << endl;
+
         /*for (auto &it : gRin.getTypeID())
         {
         cout << it << " ";

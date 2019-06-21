@@ -65,6 +65,8 @@ namespace gpstk
    const double REL_CONST = -4.442807633e-10;
       /// m/s, speed of light; this value defined by GPS but applies to GAL and GLO.
    const double C_MPS = 2.99792458e8;
+     /// ligth millisecond, m
+   const double LIGTH_MS = C_MPS/1000;
       /// Conversion Factor from degrees to radians (units: degrees^-1)
    static const double DEG_TO_RAD = 1.7453292519943e-2;
       /// Conversion Factor from radians to degrees (units: degrees)
